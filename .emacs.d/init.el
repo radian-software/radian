@@ -82,7 +82,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(projectile)
+  '(helm helm-projectile projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -120,3 +120,11 @@
 
 ;;; Enable Projectile everywhere.
 (projectile-global-mode 1)
+
+;;;; Package: Helm
+;; Shows completions for switching to files and buffers in a separate,
+;; easy-to-navigate buffer.
+;;;;
+
+;;; Use Helm mode for Projectile commands.
+(helm-projectile-on)
