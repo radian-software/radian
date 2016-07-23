@@ -126,3 +126,6 @@
 
 ;;; Use Helm mode for Projectile commands.
 (helm-projectile-on)
+
+;;; Use Helm mode for M-x.
+(global-set-key  (kbd "M-x") 'helm-M-x)
