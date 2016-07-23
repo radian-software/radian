@@ -141,7 +141,13 @@
 ;;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
 ;;; instead of helm-projectile-on means we don't get a useless "Turn on
 ;;; helm-projectile key bindings" message in the minibuffer during startup.
-(helm-projectile-toggle 1)
+
+;; The local binding of ad-redefinition works around a warning message
+;; "ad-handle-definition: `tramp-read-passwd' got redefined, as described at:
+;; https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
+
+(let ((ad-redefinition-action 'accept))
+  (helm-projectile-toggle 1))
 
 ;;; Use Helm mode for M-x.
 (global-set-key  (kbd "M-x") 'helm-M-x)
