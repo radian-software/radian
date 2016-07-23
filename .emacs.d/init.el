@@ -97,6 +97,12 @@
 ;;; Make the installed packages available.
 (provide 'my-packages)
 
+;;;; Package: Windmove
+;; Allows switching to adjacent windows using shift + arrow keys.
+;;;;
+
+(windmove-default-keybindings)
+
 ;;;; Package: IDO
 ;; Makes completion more intelligent (for instance, when running C-x b
 ;; or C-x C-f) by using fuzzy matching and better keybindings.
