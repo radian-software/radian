@@ -5,3 +5,5 @@
 /.emacs.d/projectile-bookmarks.eld
 /.emacs-backups/
 /.gnupg/
+/.lein/repl-history
+/.lein/self-installs
