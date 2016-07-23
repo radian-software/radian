@@ -95,7 +95,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(clojure-mode helm helm-projectile projectile)
+  '(clojure-mode helm helm-projectile paredit projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -186,6 +186,17 @@
 (define-clojure-indent
   (-> 1)
   (->> 1))
+
+;;;; Package: Paredit
+;; Automatically balances parentheses and provides keybindings for structural
+;; editing of s-expressions.
+;;;;
+
+;;; Enable Paredit when editing Lisps.
+(dolist (hook '(emacs-lisp-mode-hook
+		lisp-interaction-mode-hook
+		clojure-mode-hook))
+  (add-hook hook 'enable-paredit-mode))
 
 ;;;; Appearance - continued
 
