@@ -181,3 +181,33 @@ name, in a specific color.")
 
 ;;; Use Helm mode for M-x.
 (global-set-key  (kbd "M-x") 'helm-M-x)
+
+;;;; Package: Clojure mode
+;; Provides indentation and syntax highlighting for Clojure and
+;; ClojureScript files.
+;;;;
+
+;;; Customize indentation like this:
+;;;
+;;; (some-function
+;;;   argument
+;;;   argument)
+;;;
+;;; (some-function argument
+;;;                argument)
+;;;
+;;; (-> foo
+;;;   thread
+;;;   thread)
+;;;
+;;; (->> foo
+;;;   thread
+;;;   thread)
+
+(require 'clojure-mode)
+
+(setq clojure-indent-style ':align-arguments)
+
+(define-clojure-indent
+  (-> 1)
+  (->> 1))
