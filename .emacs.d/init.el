@@ -1,5 +1,9 @@
 ;;;; Appearance
 
+;;; Disable the "For information about GNU Emacs..." message at startup,
+;;; for *all* users.
+(defun display-startup-echo-area-message ())
+
 ;;; Disable the menu bar, as it doesn't seem very useful...
 (menu-bar-mode -1)
 
