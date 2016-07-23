@@ -4,6 +4,11 @@
 ;;; for *all* users.
 (defun display-startup-echo-area-message ())
 
+;;; Disable the *About GNU Emacs* buffer at startup, and go straight for
+;;; the scratch buffer. This is especially useful because Projectile won't
+;;; work in the startup buffer, which is annoying.
+(setq inhibit-startup-screen t)
+
 ;;; Disable the menu bar, as it doesn't seem very useful...
 (menu-bar-mode -1)
 
