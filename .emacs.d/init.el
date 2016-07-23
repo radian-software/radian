@@ -3,6 +3,10 @@
 (require 'cl-lib)
 
 ;;;; Packages
+;; Downloads any packages that are not included with Emacs 24 by default.
+;; This allows radon-emacs to run on other systems without any additional
+;; setup (other than Emacs 24 being installed).
+;;;;
 
 ;;; Based on http://batsov.com/articles/2012/02/19/package-management-in-emacs-the-good-the-bad-and-the-ugly/
 
@@ -19,12 +23,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(
-    ;; Enables quickly jumping to any file in a project by filename, or
-    ;; jumping to files in previously visited projects.
-    ;;
-    ;; http://projectile.readthedocs.io/en/latest/
-    projectile)
+  '(projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -41,7 +40,24 @@
 ;;; Make the installed packages available.
 (provide 'my-packages)
 
-;;;; Projectile
+;;;; Package: IDO
+;; Makes completion more intelligent (for instance, when running C-x b
+;; or C-x C-f) by using fuzzy matching and better keybindings.
+;;;;
+
+;;; Turn on IDO mode everywhere.
+(ido-mode 1)
+(ido-everywhere 1)
+
+;;; Use fuzzy matching.
+(setq ido-enable-flex-matching 1)
+
+;;;; Package: Projectile
+;; Enables quickly jumping to any file in a project by filename, or
+;; jumping to files in previously visited projects.
+;;
+;; http://projectile.readthedocs.io/en/latest/
+;;;;
 
 ;;; Enable Projectile everywhere.
 (projectile-global-mode 1)
