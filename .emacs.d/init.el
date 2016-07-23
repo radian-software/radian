@@ -2,6 +2,39 @@
 ;;; functions, like cl-every. Why aren't these available by default?
 (require 'cl-lib)
 
+;;;; OSX interop
+;; Enables mouse and clipboard support when Emacs is run in terminal mode.
+;;;;
+
+;;; Add mouse support
+;;; Based on http://stackoverflow.com/a/8859057/3538165
+(unless (display-graphic-p)
+  (xterm-mouse-mode t)
+  ;; Enable scrolling.
+  (global-set-key [mouse-4]
+		  (lambda ()
+		    (interactive)
+		    (scroll-down 1)))
+  (global-set-key [mouse-5]
+		  (lambda ()
+		    (interactive)
+		    (scroll-up 1))))
+
+;;; Add clipboard support
+;;; Based on https://gist.github.com/the-kenny/267162
+
+(defun copy-from-osx ()
+  (shell-command-to-string "pbpaste"))
+
+(defun paste-to-osx (text &optional push)
+  (let ((process-connection-type nil))
+    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (process-send-string proc text)
+      (process-send-eof proc))))
+
+(setq interprogram-cut-function 'paste-to-osx)
+(setq interprogram-paste-function 'copy-from-osx)
+
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows radon-emacs to run on other systems without any additional
