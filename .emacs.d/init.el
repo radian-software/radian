@@ -40,6 +40,23 @@
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
 
+;;;; Automatic backup customization
+
+;;; Put backup files in $HOME/.emacs-backups, rather than in the current
+;;; directory.
+(setq backup-directory-alist '(("." . "~/.emacs-backups")))
+
+;;; Always use copying to make backup files. This prevents links from
+;;; being made to point at the backup file rather than the original.
+(setq backup-by-copying t)
+
+;;; Keep multiple numbered backup files, rather than a single unnumbered
+;;; backup file.
+(setq version-control t)
+
+;;; Delete old backups silently, instead of asking for confirmation.
+(setq delete-old-versions t)
+
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows radon-emacs to run on other systems without any additional
