@@ -44,7 +44,7 @@
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
 
-;;;; Automatic backup customization
+;;;; Backup and autosave configuration
 
 ;;; Put backup files in $HOME/.emacs-backups, rather than in the current
 ;;; directory.
@@ -60,6 +60,9 @@
 
 ;;; Delete old backups silently, instead of asking for confirmation.
 (setq delete-old-versions t)
+
+;;; Don't make autosave files.
+(setq auto-save-default nil)
 
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
