@@ -1,3 +1,8 @@
+;;;; Appearance
+
+;;; Disable the menu bar, as it doesn't seem very useful...
+(menu-bar-mode -1)
+
 ;;;; Elisp customization
 
 ;;; This is required to have access to some basic data manipulation
