@@ -95,7 +95,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(clojure-mode helm helm-projectile paredit projectile)
+  '(aggressive-indent clojure-mode helm helm-projectile paredit projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -197,6 +197,14 @@
 		lisp-interaction-mode-hook
 		clojure-mode-hook))
   (add-hook hook 'enable-paredit-mode))
+
+;;;; Package: Aggressive Indent
+;; Automatically, and aggressively, indents your code. Especially useful when
+;; combined with Paredit, as you can read code structure off the indentation
+;; without checking the parentheses.
+;;;;
+
+(global-aggressive-indent-mode 1)
 
 ;;;; Appearance - continued
 
