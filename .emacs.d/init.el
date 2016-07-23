@@ -99,7 +99,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(aggressive-indent cider clojure-mode helm helm-projectile paredit projectile)
+  '(aggressive-indent cider clojure-mode company helm helm-projectile paredit projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -160,6 +160,14 @@
 
 ;;; Use Helm mode for M-x.
 (global-set-key  (kbd "M-x") 'helm-M-x)
+
+;;;; Package: Company
+;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
+;; interop with CIDER.
+;;;;
+
+;;; Turn on Company mode everywhere.
+(global-company-mode 1)
 
 ;;;; Package: Clojure mode
 ;; Provides indentation and syntax highlighting for Clojure and
