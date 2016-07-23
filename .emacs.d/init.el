@@ -49,7 +49,7 @@
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
 
-;;;; Backup and autosave configuration
+;;;; File saving
 
 ;;; Put backup files in $HOME/.emacs-backups, rather than in the current
 ;;; directory.
@@ -68,6 +68,11 @@
 
 ;;; Don't make autosave files.
 (setq auto-save-default nil)
+
+;;; Trim trailing whitespace on save. This will get rid of end-of-line
+;;; whitespace, reduce the number of blank lines at the end of the file
+;;; to one, and add a trailing newline to the file if one is missing.
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
