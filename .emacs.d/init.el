@@ -7,6 +7,33 @@
 ;;; Disable the menu bar, as it doesn't seem very useful...
 (menu-bar-mode -1)
 
+;;; Customize the mode bar to something like:
+;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
+
+(defvar mode-line-modified-radon
+  '(:eval (if (buffer-modified-p)
+	      "[*]" "   "))
+  "Construct for the mode line that shows [*] if the buffer
+has been modified, and whitespace otherwise.")
+
+(setq-default mode-line-format
+	      (list
+	       ;; Show a warning if Emacs is low on memory.
+	       "%e"
+	       ;; Show [*] if the buffer is modified.
+	       mode-line-modified-radon
+	       " "
+	       ;; Show the name of the current buffer.
+	       mode-line-buffer-identification
+	       "   "
+	       ;; Show the row and column of point.
+	       mode-line-position
+	       "  "
+	       ;; Show the active major and minor modes.
+	       mode-line-modes))
+
+(column-number-mode 1) ; makes mode-line-position show the column
+
 ;;;; Elisp customization
 
 ;;; This is required to have access to some basic data manipulation
