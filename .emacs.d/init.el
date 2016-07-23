@@ -88,9 +88,7 @@
 ;;; Install required packages, if necessary.
 (unless (cl-every 'package-installed-p my-packages)
   ;; Make sure to get the latest version of each package.
-  (message "%s" "radon-emacs is refreshing its package database...")
   (package-refresh-contents)
-  (message "%s" " done.")
   ;; Install the missing packages.
   (dolist (p my-packages)
     (when (not (package-installed-p p))
