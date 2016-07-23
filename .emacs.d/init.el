@@ -128,7 +128,7 @@ name, in a specific color.")
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(helm helm-projectile projectile)
+  '(clojure-mode helm helm-projectile projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
