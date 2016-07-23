@@ -138,8 +138,10 @@
 ;; easy-to-navigate buffer.
 ;;;;
 
-;;; Use Helm mode for Projectile commands.
-(helm-projectile-on)
+;;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
+;;; instead of helm-projectile-on means we don't get a useless "Turn on
+;;; helm-projectile key bindings" message in the minibuffer during startup.
+(helm-projectile-toggle 1)
 
 ;;; Use Helm mode for M-x.
 (global-set-key  (kbd "M-x") 'helm-M-x)
