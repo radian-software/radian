@@ -189,18 +189,24 @@
 (set-face-foreground 'mode-line-inactive "#EEEEEE")
 (set-face-background 'mode-line-inactive "#9E9E9E")
 
+(defvar buffer-name-color
+  "#FDF6E3"
+  "The color used to display the buffer name and the 'buffer modified'
+indicator in the mode line.")
+
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
 
 (defvar mode-line-modified-radon
-  '(:eval (if (buffer-modified-p)
-	      "[*]" "   "))
+  '(:eval (propertize (if (buffer-modified-p)
+			  "[*]" "   ")
+		      'face `(:foreground ,buffer-name-color)))
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
 (defvar mode-line-buffer-identification-radon
   '(:eval (propertize "%12b"
-		      'face '(:foreground "#FDF6E3")))
+		      'face `(:foreground ,buffer-name-color)))
   "Construct for the mode line that shows the current buffer
 name, in a specific color.")
 
