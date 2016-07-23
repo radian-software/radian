@@ -95,7 +95,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(aggressive-indent clojure-mode helm helm-projectile paredit projectile)
+  '(aggressive-indent cider clojure-mode helm helm-projectile paredit projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
