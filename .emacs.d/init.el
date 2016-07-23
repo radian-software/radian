@@ -1,10 +1,10 @@
+;;;; Elisp customization
+
 ;;; This is required to have access to some basic data manipulation
 ;;; functions, like cl-every. Why aren't these available by default?
 (require 'cl-lib)
 
 ;;;; OSX interop
-;; Enables mouse and clipboard support when Emacs is run in terminal mode.
-;;;;
 
 ;;; Add mouse support
 ;;; Based on http://stackoverflow.com/a/8859057/3538165
