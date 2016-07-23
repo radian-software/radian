@@ -1,54 +1,11 @@
 ;;;; Appearance
 
-;;; Make the mode line more visible with multiple windows open.
-;;; At some point, this should be redone in a more elegant and
-;;; customizable fashion.
-
-(set-face-foreground 'mode-line "#87D7D7")
-(set-face-background 'mode-line "#5F5FAF")
-
-(set-face-foreground 'mode-line-inactive "#EEEEEE")
-(set-face-background 'mode-line-inactive "#9E9E9E")
-
 ;;; Disable the "For information about GNU Emacs..." message at startup,
 ;;; for *all* users.
 (defun display-startup-echo-area-message ())
 
 ;;; Disable the menu bar, as it doesn't seem very useful...
 (menu-bar-mode -1)
-
-;;; Customize the mode bar to something like:
-;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
-
-(defvar mode-line-modified-radon
-  '(:eval (if (buffer-modified-p)
-	      "[*]" "   "))
-  "Construct for the mode line that shows [*] if the buffer
-has been modified, and whitespace otherwise.")
-
-(defvar mode-line-buffer-identification-radon
-  '(:eval (propertize "%12b"
-		      'face '(:foreground "#FDF6E3")))
-  "Construct for the mode line that shows the current buffer
-name, in a specific color.")
-
-(setq-default mode-line-format
-	      (list
-	       ;; Show a warning if Emacs is low on memory.
-	       "%e"
-	       ;; Show [*] if the buffer is modified.
-	       mode-line-modified-radon
-	       " "
-	       ;; Show the name of the current buffer.
-	       mode-line-buffer-identification-radon
-	       "   "
-	       ;; Show the row and column of point.
-	       mode-line-position
-	       "  "
-	       ;; Show the active major and minor modes.
-	       mode-line-modes))
-
-(column-number-mode 1) ; makes mode-line-position show the column
 
 ;;;; Elisp customization
 
@@ -211,3 +168,51 @@ name, in a specific color.")
 (define-clojure-indent
   (-> 1)
   (->> 1))
+
+;;;; Appearance - continued
+
+;;; Adding these tweaks at the end prevents them from making Emacs look
+;;; weird while it's starting up.
+
+;;; Make the mode line more visible with multiple windows open.
+;;; At some point, this should be redone in a more elegant and
+;;; customizable fashion.
+
+(set-face-foreground 'mode-line "#87D7D7")
+(set-face-background 'mode-line "#5F5FAF")
+
+(set-face-foreground 'mode-line-inactive "#EEEEEE")
+(set-face-background 'mode-line-inactive "#9E9E9E")
+
+;;; Customize the mode bar to something like:
+;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
+
+(defvar mode-line-modified-radon
+  '(:eval (if (buffer-modified-p)
+	      "[*]" "   "))
+  "Construct for the mode line that shows [*] if the buffer
+has been modified, and whitespace otherwise.")
+
+(defvar mode-line-buffer-identification-radon
+  '(:eval (propertize "%12b"
+		      'face '(:foreground "#FDF6E3")))
+  "Construct for the mode line that shows the current buffer
+name, in a specific color.")
+
+(setq-default mode-line-format
+	      (list
+	       ;; Show a warning if Emacs is low on memory.
+	       "%e"
+	       ;; Show [*] if the buffer is modified.
+	       mode-line-modified-radon
+	       " "
+	       ;; Show the name of the current buffer.
+	       mode-line-buffer-identification-radon
+	       "   "
+	       ;; Show the row and column of point.
+	       mode-line-position
+	       "  "
+	       ;; Show the active major and minor modes.
+	       mode-line-modes))
+
+(column-number-mode 1) ; makes mode-line-position show the column
