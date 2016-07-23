@@ -211,36 +211,18 @@
 ;;; Adding these tweaks at the end prevents them from making Emacs look
 ;;; weird while it's starting up.
 
-;;; Make the mode line more visible with multiple windows open.
-;;; At some point, this should be redone in a more elegant and
-;;; customizable fashion.
-
-(set-face-foreground 'mode-line "#87D7D7")
-(set-face-background 'mode-line "#5F5FAF")
-
-(set-face-foreground 'mode-line-inactive "#EEEEEE")
-(set-face-background 'mode-line-inactive "#9E9E9E")
-
-(defvar buffer-name-color
-  "#FDF6E3"
-  "The color used to display the buffer name and the 'buffer modified'
-indicator in the mode line.")
+;;; Load a color theme that looks good with Solarized Light.
+(load-theme 'leuven t) ; the last argument suppresses a confirmation message
 
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
 
 (defvar mode-line-modified-radon
   '(:eval (propertize (if (buffer-modified-p)
-			  "[*]" "   ")
-		      'face `(:foreground ,buffer-name-color)))
+                          "[*]" "   ")
+                      'face '(:foreground "#FDF6E3")))
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
-
-(defvar mode-line-buffer-identification-radon
-  '(:eval (propertize "%12b"
-		      'face `(:foreground ,buffer-name-color)))
-  "Construct for the mode line that shows the current buffer
-name, in a specific color.")
 
 (setq-default mode-line-format
 	      (list
@@ -250,7 +232,7 @@ name, in a specific color.")
 	       mode-line-modified-radon
 	       " "
 	       ;; Show the name of the current buffer.
-	       mode-line-buffer-identification-radon
+	       mode-line-buffer-identification
 	       "   "
 	       ;; Show the row and column of point.
 	       mode-line-position
