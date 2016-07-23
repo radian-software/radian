@@ -1,5 +1,15 @@
 ;;;; Appearance
 
+;;; Make the mode line more visible with multiple windows open.
+;;; At some point, this should be redone in a more elegant and
+;;; customizable fashion.
+
+(set-face-foreground 'mode-line "#87D7D7")
+(set-face-background 'mode-line "#5F5FAF")
+
+(set-face-foreground 'mode-line-inactive "#EEEEEE")
+(set-face-background 'mode-line-inactive "#9E9E9E")
+
 ;;; Disable the "For information about GNU Emacs..." message at startup,
 ;;; for *all* users.
 (defun display-startup-echo-area-message ())
@@ -16,6 +26,12 @@
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
+(defvar mode-line-buffer-identification-radon
+  '(:eval (propertize "%12b"
+		      'face '(:foreground "#FDF6E3")))
+  "Construct for the mode line that shows the current buffer
+name, in a specific color.")
+
 (setq-default mode-line-format
 	      (list
 	       ;; Show a warning if Emacs is low on memory.
@@ -24,7 +40,7 @@ has been modified, and whitespace otherwise.")
 	       mode-line-modified-radon
 	       " "
 	       ;; Show the name of the current buffer.
-	       mode-line-buffer-identification
+	       mode-line-buffer-identification-radon
 	       "   "
 	       ;; Show the row and column of point.
 	       mode-line-position
