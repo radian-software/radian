@@ -224,6 +224,21 @@ explicitly with Company."
 
 (company-statistics-mode 1)
 
+;;;; Package: ElDoc
+;; Automatically shows the signature of the function at point in the echo
+;; area. Also works with variables, for which the first line of the docstring
+;; is shown.
+;;;;
+
+;;; Enable ElDoc when editing Lisps.
+(dolist (hook '(emacs-lisp-mode-hook
+		lisp-interaction-mode-hook
+		clojure-mode-hook))
+  (add-hook hook (lambda () (eldoc-mode 1))))
+
+;;; Turn off the delay before ElDoc messages are shown in the echo area.
+(setq eldoc-idle-delay 0)
+
 ;;;; Package: Clojure mode
 ;; Provides indentation and syntax highlighting for Clojure and
 ;; ClojureScript files.
