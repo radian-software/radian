@@ -317,7 +317,8 @@ explicitly with Company."
 ;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
 
 (defvar mode-line-modified-radon
-  '(:eval (propertize (if (buffer-modified-p)
+  '(:eval (propertize (if (and (buffer-modified-p)
+			       (buffer-file-name))
                           "[*]" "   ")
                       'face '(:foreground "#FDF6E3")))
   "Construct for the mode line that shows [*] if the buffer
