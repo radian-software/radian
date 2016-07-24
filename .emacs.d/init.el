@@ -22,14 +22,19 @@
 ;;; functions, like cl-every. Why aren't these available by default?
 (require 'cl-lib)
 
-;;; Define a keybinding for instantly reloading the configuration in this
-;;; file.
+;;; Define keybindings for opening and reloading init.el.
+
+(defun open-initfile ()
+  (interactive)
+  (find-file "~/.emacs.d/init.el")
+  "Opens init.el in the current buffer.")
 
 (defun reload-initfile ()
   (interactive)
   (load-file "~/.emacs.d/init.el")
   "Reloads init.el.")
 
+(global-set-key (kbd "<f9>") 'open-initfile)
 (global-set-key (kbd "<f12>") 'reload-initfile)
 
 ;;;; OSX interop
