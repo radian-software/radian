@@ -93,6 +93,10 @@
 ;;; to one, and add a trailing newline to the file if one is missing.
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+;;; Don't use tabs for indentation, even in deeply indented lines. (Why
+;;; would anyone want their editor to *sometimes* use tabs?)
+(setq-default indent-tabs-mode nil)
+
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows radon-emacs to run on other systems without any additional
