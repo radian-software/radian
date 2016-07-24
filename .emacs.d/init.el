@@ -22,6 +22,16 @@
 ;;; functions, like cl-every. Why aren't these available by default?
 (require 'cl-lib)
 
+;;; Define a keybinding for instantly reloading the configuration in this
+;;; file.
+
+(defun reload-initfile ()
+  (interactive)
+  (load-file "~/.emacs.d/init.el")
+  "Reloads init.el.")
+
+(global-set-key (kbd "<f12>") 'reload-initfile)
+
 ;;;; OSX interop
 
 ;;; Add mouse support
