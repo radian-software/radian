@@ -190,6 +190,34 @@
 ;;; menu), even if the user interacts explicitly with Company.
 (setq company-require-match nil)
 
+;;; Prevent suggestions from being triggered automatically. In particular,
+;;; this makes it so that:
+;;; - TAB will always complete the current selection.
+;;; - RET will only complete the current selection if the user has explicitly
+;;;   interacted with Company.
+;;; - SPC will never complete the current selection.
+;;;
+;;; Based on https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
+
+(defun company-complete-if-explicit ()
+  "Complete the current selection, but only if the user has interacted
+explicitly with Company."
+  (interactive)
+  (if (company-explicit-action-p)
+      (company-complete)
+    (call-interactively
+     (key-binding (this-command-keys)))))
+
+;; <return> is for windowed Emacs; RET is for terminal Emacs
+(define-key company-active-map (kbd "<return>") #'company-complete-if-explicit)
+(define-key company-active-map (kbd "RET") #'company-complete-if-explicit)
+(define-key company-active-map (kbd "TAB") #'company-complete-selection)
+(define-key company-active-map (kbd "SPC") nil)
+
+;; Company appears to override the above keymap based on company-auto-complete-chars.
+;; Turning it off ensures we have full control.
+(setq company-auto-complete-chars nil)
+
 ;;;; Package: Clojure mode
 ;; Provides indentation and syntax highlighting for Clojure and
 ;; ClojureScript files.
