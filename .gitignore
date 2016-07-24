@@ -5,6 +5,7 @@
 /.emacs.d/projectile.cache
 /.emacs.d/projectile-bookmarks.eld
 /.emacs-backups/
+/.emacs-undos/
 /.gnupg/
 /.lein/repl-history
 /.lein/self-installs

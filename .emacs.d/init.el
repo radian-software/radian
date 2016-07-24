@@ -118,7 +118,7 @@
              t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(ace-jump-mode aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile)
+  '(ace-jump-mode aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile undo-tree)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -147,6 +147,23 @@
 ;;;;
 
 (windmove-default-keybindings)
+
+;;;; Package: Undo Tree
+;; Replaces Emacs' default redo-as-undo behavior with a more sensible undo/redo
+;; tree, which can be visualized in complex situations.
+;;;;
+
+;;; Turn on Undo Tree everywhere.
+(global-undo-tree-mode 1)
+
+;;; Override the default binding of M-/ to dabbrev-expand.
+(global-set-key (kbd "M-/") 'undo-tree-redo)
+
+;;; Make undo history persistent between Emacs sessions.
+(setq undo-tree-auto-save-history t)
+
+;;; Put all the undo information in a single directory.
+(setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos")))
 
 ;;;; Package: IDO
 ;; Makes completion more intelligent (for instance, when running C-x b
