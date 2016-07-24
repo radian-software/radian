@@ -184,7 +184,7 @@
 (setq company-tooltip-minimum 21)
 
 ;;; Always display suggestions in the tooltip, even if there is only one.
-(setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend))
+(setq company-frontends '(company-pseudo-tooltip-frontend))
 
 ;;; Don't prevent non-matching input (which will dismiss the completions
 ;;; menu), even if the user interacts explicitly with Company.
