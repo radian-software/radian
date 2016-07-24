@@ -169,6 +169,27 @@
 ;;; Turn on Company mode everywhere.
 (global-company-mode 1)
 
+;;; Show completions instantly, rather than after half a second.
+(setq company-idle-delay 0)
+
+;;; Show completions after typing a single character, rather than after
+;;; typing three characters.
+(setq company-minimum-prefix-length 1)
+
+;;; Show a maximum of 20 suggestions, rather than 10.
+(setq company-tooltip-limit 20)
+
+;;; Always display the entire suggestion list onscreen, placing it above
+;;; the cursor if necessary.
+(setq company-tooltip-minimum 21)
+
+;;; Always display suggestions in the tooltip, even if there is only one.
+(setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend))
+
+;;; Don't prevent non-matching input (which will dismiss the completions
+;;; menu), even if the user interacts explicitly with Company.
+(setq company-require-match nil)
+
 ;;;; Package: Clojure mode
 ;; Provides indentation and syntax highlighting for Clojure and
 ;; ClojureScript files.
