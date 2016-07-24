@@ -174,7 +174,7 @@
   (helm-projectile-toggle 1))
 
 ;;; Use Helm mode for M-x.
-(global-set-key  (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "M-x") 'helm-M-x)
 
 ;;;; Package: Company
 ;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
