@@ -240,10 +240,11 @@ explicitly with Company."
 ;; is shown.
 ;;;;
 
-;;; Enable ElDoc when editing Lisps.
+;;; Enable ElDoc when editing Lisps and using Lisp REPLs.
 (dolist (hook '(emacs-lisp-mode-hook
 		lisp-interaction-mode-hook
-		clojure-mode-hook))
+		clojure-mode-hook
+		cider-repl-mode-hook))
   (add-hook hook (lambda () (eldoc-mode 1))))
 
 ;;; Turn off the delay before ElDoc messages are shown in the echo area.
@@ -284,10 +285,11 @@ explicitly with Company."
 ;; editing of s-expressions.
 ;;;;
 
-;;; Enable Paredit when editing Lisps.
+;;; Enable Paredit when editing Lisps and using Lisp REPLs.
 (dolist (hook '(emacs-lisp-mode-hook
 		lisp-interaction-mode-hook
-		clojure-mode-hook))
+		clojure-mode-hook
+		cider-repl-mode-hook))
   (add-hook hook 'enable-paredit-mode))
 
 ;;;; Package: Aggressive Indent
