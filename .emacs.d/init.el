@@ -45,13 +45,13 @@
   (xterm-mouse-mode t)
   ;; Enable scrolling.
   (global-set-key [mouse-4]
-		  (lambda ()
-		    (interactive)
-		    (scroll-down 1)))
+                  (lambda ()
+                    (interactive)
+                    (scroll-down 1)))
   (global-set-key [mouse-5]
-		  (lambda ()
-		    (interactive)
-		    (scroll-up 1))))
+                  (lambda ()
+                    (interactive)
+                    (scroll-up 1))))
 
 ;;; Add clipboard support
 ;;; Based on https://gist.github.com/the-kenny/267162
@@ -114,8 +114,8 @@
 ;;; packages we need, such as Projectile. Therefore, add the MELPA Stable
 ;;; repository.
 (add-to-list 'package-archives
-	     '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
-	     t) ; this appends to the end of the list
+             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
+             t) ; this appends to the end of the list
 
 (defvar my-packages
   '(aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile)
@@ -251,9 +251,9 @@ explicitly with Company."
 
 ;;; Enable ElDoc when editing Lisps and using Lisp REPLs.
 (dolist (hook '(emacs-lisp-mode-hook
-		lisp-interaction-mode-hook
-		clojure-mode-hook
-		cider-repl-mode-hook))
+                lisp-interaction-mode-hook
+                clojure-mode-hook
+                cider-repl-mode-hook))
   (add-hook hook (lambda () (eldoc-mode 1))))
 
 ;;; Turn off the delay before ElDoc messages are shown in the echo area.
@@ -296,9 +296,9 @@ explicitly with Company."
 
 ;;; Enable Paredit when editing Lisps and using Lisp REPLs.
 (dolist (hook '(emacs-lisp-mode-hook
-		lisp-interaction-mode-hook
-		clojure-mode-hook
-		cider-repl-mode-hook))
+                lisp-interaction-mode-hook
+                clojure-mode-hook
+                cider-repl-mode-hook))
   (add-hook hook 'enable-paredit-mode))
 
 ;;;; Package: Aggressive Indent
@@ -322,26 +322,26 @@ explicitly with Company."
 
 (defvar mode-line-modified-radon
   '(:eval (propertize (if (and (buffer-modified-p)
-			       (buffer-file-name))
+                               (buffer-file-name))
                           "[*]" "   ")
                       'face '(:foreground "#FDF6E3")))
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
 (setq-default mode-line-format
-	      (list
-	       ;; Show a warning if Emacs is low on memory.
-	       "%e"
-	       ;; Show [*] if the buffer is modified.
-	       mode-line-modified-radon
-	       " "
-	       ;; Show the name of the current buffer.
-	       mode-line-buffer-identification
-	       "   "
-	       ;; Show the row and column of point.
-	       mode-line-position
-	       "  "
-	       ;; Show the active major and minor modes.
-	       mode-line-modes))
+              (list
+               ;; Show a warning if Emacs is low on memory.
+               "%e"
+               ;; Show [*] if the buffer is modified.
+               mode-line-modified-radon
+               " "
+               ;; Show the name of the current buffer.
+               mode-line-buffer-identification
+               "   "
+               ;; Show the row and column of point.
+               mode-line-position
+               "  "
+               ;; Show the active major and minor modes.
+               mode-line-modes))
 
 (column-number-mode 1) ; makes mode-line-position show the column
