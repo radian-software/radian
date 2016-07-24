@@ -1,4 +1,5 @@
 /.emacs.d/auto-save-list/
+/.emacs.d/company-statistics-cache.el
 /.emacs.d/elpa/
 /.emacs.d/ido.last
 /.emacs.d/projectile.cache

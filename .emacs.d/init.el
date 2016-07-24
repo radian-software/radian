@@ -99,7 +99,7 @@
 	     t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(aggressive-indent cider clojure-mode company helm helm-projectile paredit projectile)
+  '(aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -217,6 +217,12 @@ explicitly with Company."
 ;; Company appears to override the above keymap based on company-auto-complete-chars.
 ;; Turning it off ensures we have full control.
 (setq company-auto-complete-chars nil)
+
+;;;; Package: Company Statistics
+;; Sorts Company completions by usage. Persistent between Emacs sessions.
+;;;;
+
+(company-statistics-mode 1)
 
 ;;;; Package: Clojure mode
 ;; Provides indentation and syntax highlighting for Clojure and
