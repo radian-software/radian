@@ -118,7 +118,7 @@
              t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile)
+  '(ace-jump-mode aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile)
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
@@ -132,6 +132,15 @@
 
 ;;; Make the installed packages available.
 (provide 'my-packages)
+
+;;;; Package: Ace Jump Mode
+;; Allows quickly jumping to an arbitrary word, character, or line.
+;;;;
+
+;; Clojure mode already binds C-c SPC to clojure-align, so use C-c C-SPC
+;; instead.
+
+(global-set-key (kbd "C-c C-SPC") 'ace-jump-mode)
 
 ;;;; Package: Windmove
 ;; Allows switching to adjacent windows using shift + arrow keys.
