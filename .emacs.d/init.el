@@ -192,6 +192,9 @@
 ;; easy-to-navigate buffer.
 ;;;;
 
+;;; Use Helm mode for many standard Emacs commands.
+(helm-mode 1)
+
 ;;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
 ;;; instead of helm-projectile-on means we don't get a useless "Turn on
 ;;; helm-projectile key bindings" message in the minibuffer during startup.
@@ -203,8 +206,9 @@
 (let ((ad-redefinition-action 'accept))
   (helm-projectile-toggle 1))
 
-;;; Use Helm mode for M-x.
+;;; Use Helm mode for other common commands.
 (global-set-key (kbd "M-x") 'helm-M-x)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 ;;;; Package: Company
 ;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
