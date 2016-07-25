@@ -325,6 +325,10 @@ explicitly with Company."
 ;;; (->> foo
 ;;;   thread
 ;;;   thread)
+;;;
+;;; (ns my-ns
+;;;   (:require
+;;;     [sample-dependency :as alias]))
 
 (require 'clojure-mode)
 
@@ -332,7 +336,8 @@ explicitly with Company."
 
 (define-clojure-indent
   (-> 1)
-  (->> 1))
+  (->> 1)
+  (:require 0))
 
 ;;;; Package: Paredit
 ;; Automatically balances parentheses and provides keybindings for structural
