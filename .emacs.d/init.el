@@ -118,7 +118,19 @@
              t) ; this appends to the end of the list
 
 (defvar my-packages
-  '(ace-jump-mode aggressive-indent cider clojure-mode company company-statistics helm helm-projectile paredit projectile undo-tree)
+  '(
+    ace-jump-mode ; quickly jump to words, characters, or lines onscreen
+    aggressive-indent ; keep code correctly indented at all times
+    cider ; Clojure REPL integration
+    clojure-mode ; Clojure indentation and syntax highlighting
+    company ; autocompletion with pop-up menu
+    company-statistics ; sort company completions by usage
+    helm ; better interface for selecting files, buffers, or commands
+    helm-projectile ; use helm for projectile
+    paredit ; keep parentheses correctly balanced at all times
+    projectile ; quickly jump to files organized by project
+    undo-tree ; more intuitive undo/redo
+    )
   "The packages required by radon-emacs.")
 
 ;;; Install required packages, if necessary.
