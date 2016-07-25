@@ -210,6 +210,9 @@
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 
+;;; Use fuzzy matching.
+(setq helm-mode-fuzzy-match t)
+
 ;;;; Package: Company
 ;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
 ;; interop with CIDER.
