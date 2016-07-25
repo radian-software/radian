@@ -177,18 +177,6 @@
 ;;; Put all the undo information in a single directory.
 (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos")))
 
-;;;; Package: IDO
-;; Makes completion more intelligent (for instance, when running C-x b
-;; or C-x C-f) by using fuzzy matching and better keybindings.
-;;;;
-
-;;; Turn on IDO mode everywhere.
-(ido-mode 1)
-(ido-everywhere 1)
-
-;;; Use fuzzy matching.
-(setq ido-enable-flex-matching 1)
-
 ;;;; Package: Projectile
 ;; Enables quickly jumping to any file in a project by filename, or
 ;; jumping to files in previously visited projects.
