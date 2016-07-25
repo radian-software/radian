@@ -200,7 +200,7 @@
 ;;; helm-projectile key bindings" message in the minibuffer during startup.
 
 ;; The local binding of ad-redefinition works around a warning message
-;; "ad-handle-definition: `tramp-read-passwd' got redefined, as described at:
+;; "ad-handle-definition: `tramp-read-passwd' got redefined", as described at:
 ;; https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
 
 (let ((ad-redefinition-action 'accept))
