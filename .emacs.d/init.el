@@ -366,6 +366,14 @@ explicitly with Company."
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
+(defvar mode-line-projectile-project
+  '("["
+    (:eval (projectile-project-name))
+    "]")
+  "Construct for the mode line that shows the current Projectile
+project (or a hyphen if there is no current project) between
+brackets.")
+
 (setq-default mode-line-format
               (list
                ;; Show a warning if Emacs is low on memory.
@@ -378,8 +386,27 @@ has been modified, and whitespace otherwise.")
                "   "
                ;; Show the row and column of point.
                mode-line-position
+               " "
+               ;; Show the current Projectile project.
+               mode-line-projectile-project
                "  "
                ;; Show the active major and minor modes.
                mode-line-modes))
 
 (column-number-mode 1) ; makes mode-line-position show the column
+
+;;; Customize minor mode indicators
+
+;;; Modes that provide a customizable variable.
+(setq eldoc-minor-mode-string nil)
+(setq projectile-mode-line nil)
+(setq undo-tree-mode-lighter nil)
+
+;;; Modes that do not provide a customizable variable.
+;;; Note that Helm has helm-mode-line-string, but this only affects what is
+;;; shown in the mode line for a Helm buffer.
+
+(setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent"))
+(setq minor-mode-alist (assq-delete-all 'cider-mode minor-mode-alist))
+(setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist))
+(setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist))
