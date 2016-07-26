@@ -386,7 +386,7 @@ explicitly with Company."
 (load-theme 'leuven t) ; the last argument suppresses a confirmation message
 
 ;;; Customize the mode bar to something like:
-;;; [*] init.el        38% (149,30)   (Emacs-Lisp Projectile[dotfiles])
+;;; [*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
 
 (defvar mode-line-modified-radon
   '(:eval (propertize (if (and (buffer-modified-p)
