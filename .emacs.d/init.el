@@ -118,6 +118,9 @@
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
              t) ; this appends to the end of the list
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/")
+             t) ; this appends to the end of the list
 
 (defvar my-packages
   '(
@@ -129,6 +132,7 @@
     company-statistics ; sort company completions by usage
     helm ; better interface for selecting files, buffers, or commands
     helm-projectile ; use helm for projectile
+    helm-smex ; sort M-x suggestions by usage
     paredit ; keep parentheses correctly balanced at all times
     projectile ; quickly jump to files organized by project
     undo-tree ; more intuitive undo/redo
@@ -220,8 +224,8 @@
 (let ((ad-redefinition-action 'accept))
   (helm-projectile-toggle 1))
 
-;;; Use Helm mode for M-x.
-(global-set-key (kbd "M-x") 'helm-M-x)
+;;; Use Helm mode for M-x, using helm-smex to get sorting by usage.
+(global-set-key (kbd "M-x") 'helm-smex)
 
 ;;; Use fuzzy matching.
 (setq helm-mode-fuzzy-match t)
