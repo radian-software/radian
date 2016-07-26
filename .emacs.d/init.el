@@ -441,6 +441,7 @@ brackets.")
             (setq mode-name "Lisp-Interaction")))
 
 ;;; Minor modes that provide a customizable variable.
+(setq cider-mode-line nil)
 (setq eldoc-minor-mode-string nil)
 (setq projectile-mode-line nil)
 (setq undo-tree-mode-lighter nil)
@@ -449,6 +450,5 @@ brackets.")
 ;;; Note that Helm has helm-mode-line-string, but this only affects what is
 ;;; shown in the mode line for a Helm buffer.
 (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent"))
-(setq minor-mode-alist (assq-delete-all 'cider-mode minor-mode-alist))
 (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist))
 (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist))
