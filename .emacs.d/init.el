@@ -342,16 +342,21 @@ explicitly with Company."
 ;;;   thread
 ;;;   thread)
 ;;;
-;;; (ns my-ns
-;;;   (:require
-;;;     [sample-dependency :as alias]))
+;;; (:keyword
+;;;   map)
 
 (setq clojure-indent-style ':align-arguments)
 
 (define-clojure-indent
   (-> 1)
   (->> 1)
-  (:require 0))
+  ;; Ideally, we would be able to set the identation rules for *all*
+  ;; keywords at the same time. But until we figure out how to do
+  ;; that, we just have to deal with every keyword individually.
+  (:import 0)
+  (:overall-average 0)
+  (:require 0)
+  (:use 0))
 
 ;;; Make sure electric indentation *always* works. For some reason, if
 ;;; this is omitted, electric indentation works most of the time, but it
