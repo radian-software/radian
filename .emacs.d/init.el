@@ -404,17 +404,21 @@ brackets.")
 
 (column-number-mode 1) ; makes mode-line-position show the column
 
-;;; Customize minor mode indicators
+;;; Customize mode indicators
 
-;;; Modes that provide a customizable variable.
+;;; Major modes.
+(add-hook 'lisp-interaction-mode-hook
+          (lambda ()
+            (setq mode-name "Lisp-Interaction")))
+
+;;; Minor modes that provide a customizable variable.
 (setq eldoc-minor-mode-string nil)
 (setq projectile-mode-line nil)
 (setq undo-tree-mode-lighter nil)
 
-;;; Modes that do not provide a customizable variable.
+;;; Minor modes that do not provide a customizable variable.
 ;;; Note that Helm has helm-mode-line-string, but this only affects what is
 ;;; shown in the mode line for a Helm buffer.
-
 (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent"))
 (setq minor-mode-alist (assq-delete-all 'cider-mode minor-mode-alist))
 (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist))
