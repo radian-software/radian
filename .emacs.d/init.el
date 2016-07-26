@@ -329,6 +329,13 @@ explicitly with Company."
   (->> 1)
   (:require 0))
 
+;;; Make sure electric indentation *always* works. For some reason, if
+;;; this is omitted, electric indentation works most of the time, but it
+;;; fails inside Clojure docstrings. (TAB will add the requisite two
+;;; spaces, but you shouldn't have to do this manually after pressing RET.)
+;;; I'd like to find a more elegant solution to this problem.
+(define-key clojure-mode-map (kbd "RET") 'newline-and-indent)
+
 ;;;; Package: Paredit
 ;; Automatically balances parentheses and provides keybindings for structural
 ;; editing of s-expressions.
