@@ -93,6 +93,8 @@
 ;;; to one, and add a trailing newline to the file if one is missing.
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
+;;;; Text format
+
 ;;; Don't use tabs for indentation, even in deeply indented lines. (Why
 ;;; would anyone want their editor to *sometimes* use tabs?)
 (setq-default indent-tabs-mode nil)
