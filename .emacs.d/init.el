@@ -114,7 +114,8 @@
 
 ;;; The default package repository in Emacs doesn't have a lot of the
 ;;; packages we need, such as Projectile. Therefore, add the MELPA Stable
-;;; repository.
+;;; repository. We need MELPA (not-stable) for helm-smex, but the first
+;;; two should take priority since we are adding to the end of the list.
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
              t) ; this appends to the end of the list
@@ -259,6 +260,8 @@
 (setq company-tooltip-minimum 21)
 
 ;;; Always display suggestions in the tooltip, even if there is only one.
+;;; Also, don't display metadata in the echo area. (This conflicts with
+;;; ElDoc mode.)
 (setq company-frontends '(company-pseudo-tooltip-frontend))
 
 ;;; Don't prevent non-matching input (which will dismiss the completions
