@@ -299,6 +299,8 @@ explicitly with Company."
 ;; ClojureScript files.
 ;;;;
 
+(require 'clojure-mode) ; required for variables to be available
+
 ;;; Customize indentation like this:
 ;;;
 ;;; (some-function
@@ -319,8 +321,6 @@ explicitly with Company."
 ;;; (ns my-ns
 ;;;   (:require
 ;;;     [sample-dependency :as alias]))
-
-(require 'clojure-mode)
 
 (setq clojure-indent-style ':align-arguments)
 
