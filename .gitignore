@@ -9,4 +9,5 @@
 /.emacs-undos/
 /.gnupg/
 /.lein/repl-history
+/.lein/repl-port
 /.lein/self-installs
