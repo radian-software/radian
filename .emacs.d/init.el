@@ -166,6 +166,12 @@
 
 (windmove-default-keybindings)
 
+;;;; Package: Winner Mode
+;; Allows navigating through window layout history using C-c <left> and C-c <right>.
+;;;;
+
+(winner-mode 1)
+
 ;;;; Package: Undo Tree
 ;; Replaces Emacs' default redo-as-undo behavior with a more sensible undo/redo
 ;; tree, which can be visualized in complex situations.
