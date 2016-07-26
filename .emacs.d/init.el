@@ -179,6 +179,18 @@
 ;;; Put all the undo information in a single directory.
 (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos")))
 
+;;;; Package: IDO
+;; Makes completion more intelligent by using fuzzy matching and better
+;; keybindings.
+;;;;
+
+;;; Use IDO mode for C-x C-f and friends. (Most other things should be
+;;; using Helm mode.)
+(ido-mode 'files)
+
+;;; Use fuzzy matching.
+(setq ido-enable-flex-matching 1)
+
 ;;;; Package: Projectile
 ;; Enables quickly jumping to any file in a project by filename, or
 ;; jumping to files in previously visited projects.
@@ -208,9 +220,8 @@
 (let ((ad-redefinition-action 'accept))
   (helm-projectile-toggle 1))
 
-;;; Use Helm mode for other common commands.
+;;; Use Helm mode for M-x.
 (global-set-key (kbd "M-x") 'helm-M-x)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
 
 ;;; Use fuzzy matching.
 (setq helm-mode-fuzzy-match t)
