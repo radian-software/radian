@@ -317,6 +317,10 @@ explicitly with Company."
 ;; Turning it off ensures we have full control.
 (setq company-auto-complete-chars nil)
 
+;;; Prevent Company completions from being lowercased in the completion menu.
+;;; This appears to only be an issue in comments and strings in Clojure.
+(setq company-dabbrev-downcase nil)
+
 ;;;; Package: Company Statistics
 ;; Sorts Company completions by usage. Persistent between Emacs sessions.
 ;;;;
