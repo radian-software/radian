@@ -100,9 +100,14 @@
 (setq auto-save-default nil)
 
 ;;; Trim trailing whitespace on save. This will get rid of end-of-line
-;;; whitespace, reduce the number of blank lines at the end of the file
-;;; to one, and add a trailing newline to the file if one is missing.
+;;; whitespace, and reduce the number of blank lines at the end of the
+;;; file to one.
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;; Add a trailing newline if there is not one already, when
+;;; saving. This is enabled for default for certain modes, but we want
+;;; it everywhere (e.g. when editing .gitignore files).
+(setq require-final-newline t)
 
 ;;;; Text format
 
