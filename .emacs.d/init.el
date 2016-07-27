@@ -4,12 +4,9 @@
 ;; for their Emacs do some basic customization without messing with the
 ;; file proper.
 
-;;; Control color customizations.
-;;; - nil: disable all color customizations
-;;; - subtle: don't set a color theme, but fix a few blatantly unreadable
-;;;           color faces
-;;; - t: enable all color customizations (for best results use the
-;;;      Solarized light theme in your terminal emulator)
+;;; Control color customizations. Nil for no color customizations and
+;;; non-nil for all color customizations (for best results use the
+;;; Solarized Light theme in your terminal emulator.
 (setq radon-emacs-tweak-colors t)
 
 ;;;; Appearance
@@ -410,7 +407,7 @@ explicitly with Company."
 ;;; weird while it's starting up.
 
 ;;; Load a color theme that looks good with Solarized Light.
-(when (equal radon-emacs-tweak-colors t)
+(when radon-emacs-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
 ;;; Customize the mode bar to something like:
