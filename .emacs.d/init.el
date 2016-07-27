@@ -395,6 +395,18 @@ explicitly with Company."
 ;;; I'd like to find a more elegant solution to this problem.
 (define-key clojure-mode-map (kbd "RET") 'newline-and-indent)
 
+;;;; Package: CIDER
+;; Provides nREPL integration for Clojure and ClojureScript, documentation
+;; and source lookups, and more.
+;;;;
+
+;;; Sometimes in the CIDER REPL, when Emacs is running slowly, you can
+;;; manage to press TAB before the Company completions menu pops
+;;; up. This makes a Helm completions buffer appear, which is
+;;; disorienting. So we reset TAB to its default functionality
+;;; (i.e. indent only) in the CIDER REPL.
+(setq cider-repl-tab-command 'indent-for-tab-command)
+
 ;;;; Package: Paredit
 ;; Automatically balances parentheses and provides keybindings for structural
 ;; editing of s-expressions.
