@@ -237,6 +237,10 @@
 ;;; Use fuzzy matching.
 (setq helm-mode-fuzzy-match t)
 
+;;; Get rid of the awful background color for buffers corresponding to files
+;;; modified outside of Emacs.
+(set-face-background 'helm-buffer-saved-out nil)
+
 ;;;; Package: Company
 ;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
 ;; interop with CIDER.
