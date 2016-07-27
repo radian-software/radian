@@ -400,6 +400,30 @@ explicitly with Company."
 ;; and source lookups, and more.
 ;;;;
 
+;;; By default, any error messages that occur when CIDER is starting up
+;;; are placed in the *nrepl-server* buffer and not in the *cider-repl*
+;;; buffer. This is silly, since no-one wants to check *nrepl-server*
+;;; every time they start a REPL, and if you don't then startup errors
+;;; (including errors in anything loaded by the :main namespace) are
+;;; effectively silenced. So we copy everything from the *nrepl-server*
+;;; buffer to the *cider-repl* buffer, as soon as the latter is available.
+
+;;; Note that this does *not* help in the case of things going so horribly
+;;; wrong that the REPL can't even start. In this case you will have to
+;;; check the *nrepl-server* buffer manually. Perhaps an error message
+;;; that is visible from any buffer could be added in future.
+
+;;; Thanks to malabarba on Clojurians Slack for providing the following
+;;; code:
+
+(add-hook 'cider-connected-hook
+          (lambda ()
+            (save-excursion
+              (goto-char (point-min))
+              (insert
+               (with-current-buffer nrepl-server-buffer
+                 (buffer-string))))))
+
 ;;; Sometimes in the CIDER REPL, when Emacs is running slowly, you can
 ;;; manage to press TAB before the Company completions menu pops
 ;;; up. This makes a Helm completions buffer appear, which is
