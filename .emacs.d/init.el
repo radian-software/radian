@@ -1,3 +1,17 @@
+;;;; Tweakable parameters
+
+;; These parameters let people using this init-file as a starting point
+;; for their Emacs do some basic customization without messing with the
+;; file proper.
+
+;;; Control color customizations.
+;;; - nil: disable all color customizations
+;;; - subtle: don't set a color theme, but fix a few blatantly unreadable
+;;;           color faces
+;;; - t: enable all color customizations (for best results use the
+;;;      Solarized light theme in your terminal emulator)
+(setq radon-emacs-tweak-colors t)
+
 ;;;; Appearance
 
 ;;; Disable the "For information about GNU Emacs..." message at startup,
@@ -239,7 +253,8 @@
 
 ;;; Get rid of the awful background color for buffers corresponding to files
 ;;; modified outside of Emacs.
-(set-face-background 'helm-buffer-saved-out nil)
+(when radon-emacs-tweak-colors
+  (set-face-background 'helm-buffer-saved-out nil))
 
 ;;;; Package: Company
 ;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
@@ -395,7 +410,8 @@ explicitly with Company."
 ;;; weird while it's starting up.
 
 ;;; Load a color theme that looks good with Solarized Light.
-(load-theme 'leuven t) ; the last argument suppresses a confirmation message
+(when (equal radon-emacs-tweak-colors t)
+  (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
