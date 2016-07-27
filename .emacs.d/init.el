@@ -404,7 +404,7 @@ explicitly with Company."
   '(:eval (propertize (if (and (buffer-modified-p)
                                (buffer-file-name))
                           "[*]" "   ")
-                      'face '(:foreground "#FDF6E3")))
+                      'face 'mode-line-buffer-id))
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
