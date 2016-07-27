@@ -339,6 +339,11 @@ explicitly with Company."
 ;;; Turn off the delay before ElDoc messages are shown in the echo area.
 (setq eldoc-idle-delay 0)
 
+;;; Always truncate ElDoc messages to one line. This prevents the echo area from
+;;; resizing itself unexpectedly when point is on a Clojure variable with a
+;;; multiline docstring.
+(setq eldoc-echo-area-use-multiline-p nil)
+
 ;;;; Package: Clojure mode
 ;; Provides indentation and syntax highlighting for Clojure and
 ;; ClojureScript files.
