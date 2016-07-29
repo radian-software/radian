@@ -12,4 +12,5 @@
 /.lein/repl-history
 /.lein/repl-port
 /.lein/self-installs
+/scripts/original_dotfiles/
 .esup-results.el
