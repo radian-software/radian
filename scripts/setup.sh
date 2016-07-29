@@ -21,7 +21,7 @@ echo '[setup] Installing software.'
 # we need to install the Xcode Command Line Tools in order to have
 # access to git.
 echo '[setup] Making sure we are running inside a git repository.'
-if [[ git rev-parse --is-inside-work-tree ]]; then
+if git rev-parse --is-inside-work-tree; then
     echo '[setup] Looks good!'
 else
     echo "[setup] We don't seem to be inside a git repository."
