@@ -1,6 +1,4 @@
-{:user {:plugins [[cider/cider-nrepl "0.13.0"]
-
-                  ;; Linters
+{:user {:plugins [;; Linters
                   [jonase/eastwood "0.2.3"]
                   [lein-ancient "0.6.10"]
                   [lein-bikeshed "0.3.0"]
