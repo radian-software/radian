@@ -52,6 +52,7 @@ mkdir original_dotfiles 2>/dev/null || true
 mkdir original_dotfiles/$UUID
 echo "[setup] The UUID for this session is $UUID."
 ./create_emacs_symlinks.sh
+./create_lein_symlinks.sh
 rmdir original_dotfiles/$UUID 2>/dev/null || true
 rmdir original_dotfiles 2>/dev/null || true
 
