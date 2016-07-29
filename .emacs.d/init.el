@@ -129,9 +129,8 @@
 (package-initialize)
 
 ;;; The default package repository in Emacs doesn't have a lot of the
-;;; packages we need, such as Projectile. Therefore, add the MELPA Stable
-;;; repository. We need MELPA (not-stable) for helm-smex, but the first
-;;; two should take priority since we are adding to the end of the list.
+;;; packages we need, such as Projectile. Therefore, add the melpa-stable
+;;; repository. We need melpa (non-stable) for helm-smex.
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
              t) ; this appends to the end of the list
@@ -156,6 +155,10 @@
     )
   "The packages required by radon-emacs.")
 
+;;; Ensure that we get a stable version of CIDER, and not a snapshot version.
+;;; This resolved an issue with the 0.13.0 update to CIDER trying to inject
+;;; a nonexistent snapshot version of cider-nrepl, if you used the snapshot
+;;; version of CIDER.
 (setq package-pinned-packages
       '((cider . "melpa-stable")))
 
