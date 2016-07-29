@@ -424,6 +424,11 @@ explicitly with Company."
                (with-current-buffer nrepl-server-buffer
                  (buffer-string))))))
 
+;;; The CIDER welcome message often obscures any error messages that the
+;;; above code is supposed to be making visible. So, we need to turn off
+;;; the welcome message.
+(setq cider-repl-display-help-banner nil)
+
 ;;; Sometimes in the CIDER REPL, when Emacs is running slowly, you can
 ;;; manage to press TAB before the Company completions menu pops
 ;;; up. This makes a Helm completions buffer appear, which is
