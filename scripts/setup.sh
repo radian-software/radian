@@ -19,17 +19,18 @@ echo '[setup] Installing software.'
 # This code is in a rather awkward place. Since it can cause the
 # setup to restart, it should be placed as early as possible, but
 # we need to install the Xcode Command Line Tools in order to have
-# access to git.
+# access to git. Also, we need to turn off 'trap', so it's hard
+# to have it in a subsidiary script.
 echo '[setup] Making sure we are running inside a git repository.'
 if git rev-parse --is-inside-work-tree; then
     echo '[setup] Looks good!'
 else
     echo "[setup] We don't seem to be inside a git repository."
     echo '[setup] Cloning raxod502/dotfiles.'
-    git clone https://github.com/raxod502/dotfiles.git ../dotfiles
+    git clone https://github.com/raxod502/dotfiles.git
     echo '[setup] Starting again using the cloned script.'
     trap EXIT
-    ../dotfiles/scripts/setup.sh
+    dotfiles/scripts/setup.sh
     exit 0
 fi
 
