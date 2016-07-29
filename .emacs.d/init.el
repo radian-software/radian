@@ -156,6 +156,9 @@
     )
   "The packages required by radon-emacs.")
 
+(setq package-pinned-packages
+      '((cider . "melpa-stable")))
+
 ;;; Install required packages, if necessary.
 (unless (cl-every 'package-installed-p my-packages)
   ;; Make sure to get the latest version of each package.
