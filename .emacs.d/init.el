@@ -109,6 +109,13 @@
 ;;; it everywhere (e.g. when editing .gitignore files).
 (setq require-final-newline t)
 
+;;; Automatically reload files that were changed on disk, if they have
+;;; not been modified in Emacs since the last time they were saved.
+(global-auto-revert-mode 1)
+
+;;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
+(setq auto-revert-interval 1)
+
 ;;;; Text format
 
 ;;; Don't use tabs for indentation, even in deeply indented lines. (Why
