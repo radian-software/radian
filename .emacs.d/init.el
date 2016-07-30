@@ -442,6 +442,20 @@ explicitly with Company."
 ;;; (i.e. indent only) in the CIDER REPL.
 (setq cider-repl-tab-command 'indent-for-tab-command)
 
+;;; Don't focus the cursor in the CIDER REPL once it starts. Since the
+;;; REPL takes so long to start up, especially for large projects, you
+;;; either have to wait for a minute without doing anything or be
+;;; prepared for your cursur to suddenly shift buffers without warning
+;;; sometime in the near future. This is annoying, so turn off the
+;;; behavior.
+(setq cider-repl-pop-to-buffer-on-connect nil)
+
+;;; However, turning off the pop-to-buffer setting also prevents the
+;;; REPL buffer from *opening*. To fix this problem, we add an advice
+;;; to open the REPL buffer after the REPL has started.
+(defadvice cider-repl-init (after display-repl-buffer)
+  (display-buffer buffer))
+
 ;;;; Package: Paredit
 ;; Automatically balances parentheses and provides keybindings for structural
 ;; editing of s-expressions.
