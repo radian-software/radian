@@ -156,6 +156,7 @@
     helm ; better interface for selecting files, buffers, or commands
     helm-projectile ; use helm for projectile
     helm-smex ; sort M-x suggestions by usage
+    magit ; a git porcelain inside Emacs
     paredit ; keep parentheses correctly balanced at all times
     projectile ; quickly jump to files organized by project
     undo-tree ; more intuitive undo/redo
@@ -218,6 +219,14 @@
 
 ;;; Put all the undo information in a single directory.
 (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos")))
+
+;;;; Package: Magit
+;; A git porcelain inside Emacs.
+;;;;
+
+;;; Create a keybinding for magit-status, as suggested in:
+;;; https://magit.vc/manual/magit/Getting-started.html#Getting-started
+(global-set-key (kbd "C-x g") 'magit-status)
 
 ;;;; Package: IDO
 ;; Makes completion more intelligent by using fuzzy matching and better
