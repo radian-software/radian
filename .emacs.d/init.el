@@ -446,6 +446,15 @@ explicitly with Company."
                (with-current-buffer nrepl-server-buffer
                  (buffer-string))))))
 
+;;; Turn off dependency injection. It's simpler to put dependencies in
+;;; profiles.clj, to head off potentially confusing version conflicts.
+(setq cider-inject-dependencies-at-jack-in nil)
+
+;;; Make the REPL a lot more awesome. This injects a bunch of extra
+;;; features specified by the :awesome vector in profiles.clj. Note that
+;;; refactor-nrepl is *not* enabled by default.
+(setq cider-lein-parameters "with-profile +awesome repl :headless")
+
 ;;; The CIDER welcome message often obscures any error messages that the
 ;;; above code is supposed to be making visible. So, we need to turn off
 ;;; the welcome message.
