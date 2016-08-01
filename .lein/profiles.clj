@@ -34,7 +34,7 @@
                           ;; and invoke Leiningen tasks from the REPL
                           [alembic "0.3.2"]]
 
-           :injections [;; Modify the alembic.still function to work without needing a
+           :injections [;; Modify the alembic/distill function to work without needing a
                         ;; project.clj file. This is a hack! It works simply by
                         ;; telling alembic not to look for repositories in the project.clj.
                         ;; However, this is a global override, so if you need to use one
