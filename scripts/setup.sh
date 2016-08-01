@@ -64,5 +64,6 @@ echo '[setup] Testing software.'
 ### Cleanup ###
 
 echo "[setup] We're all done. Enjoy!"
+echo '[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically.'
 
 trap EXIT
