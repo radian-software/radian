@@ -3,7 +3,7 @@
 set -e
 
 echo '[setup] Checking for a ~/.lein.'
-if [[ -e ~/.lein ]]; then
+if [[ -e ~/.lein || -L ~/.lein ]]; then
     echo "[setup] Found one, moving it to originals/$UUID."
     mv ~/.lein originals/$UUID/.lein
 else

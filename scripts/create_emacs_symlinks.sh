@@ -3,7 +3,7 @@
 set -e
 
 echo '[setup] Checking for a ~/.emacs.'
-if [[ -e ~/.emacs ]]; then
+if [[ -e ~/.emacs || -L ~/.emacs ]]; then
     echo "[setup] Found one, moving it to originals/$UUID."
     mv ~/.emacs originals/$UUID/.emacs
 else
@@ -11,7 +11,7 @@ else
 fi
 
 echo '[setup] Checking for a ~/.emacs.el.'
-if [[ -e ~/.emacs.el ]]; then
+if [[ -e ~/.emacs.el || -L ~/.emacs.el ]]; then
     echo "[setup] Found one, moving it to originals/$UUID."
     mv ~/.emacs.el originals/$UUID/.emacs.el
 else
@@ -19,7 +19,7 @@ else
 fi
 
 echo '[setup] Checking for a ~/.emacs.d.'
-if [[ -e ~/.emacs.d ]]; then
+if [[ -e ~/.emacs.d || -L ~/.emacs.d ]]; then
     echo "[setup] Found one, moving it to originals/$UUID."
     mv ~/.emacs.d originals/$UUID/.emacs.d
 else
