@@ -520,6 +520,14 @@ explicitly with Company."
 (when radon-emacs-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
+;;; The default highlight color for I-searches is quite dark and makes it hard
+;;; to read the highlighted text. Change it to a nice light blue, and get rid of
+;;; the distracting underline. (I mean really, how is an *underline* supposed to
+;;; help you see something that's highlighted in *bright blue*?)
+(when radon-emacs-tweak-colors
+  (set-face-background 'lazy-highlight "#B1EAFC")
+  (set-face-underline 'lazy-highlight nil))
+
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
 
