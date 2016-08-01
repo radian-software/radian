@@ -4,8 +4,8 @@ set -e
 
 echo '[setup] Checking for a ~/.lein.'
 if [[ -e ~/.lein ]]; then
-    echo "[setup] Found one, moving it to original_dotfiles/$UUID."
-    mv ~/.lein original_dotfiles/$UUID/.lein
+    echo "[setup] Found one, moving it to originals/$UUID."
+    mv ~/.lein originals/$UUID/.lein
 else
     echo "[setup] Looks like you don't have one."
 fi

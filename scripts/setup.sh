@@ -10,6 +10,11 @@ trap 'echo "[setup] It looks like an error occurred. Please try to fix it, and t
 
 cd "$(dirname "$0")"
 
+export UUID=$(uuidgen)
+mkdir originals 2>/dev/null || true
+mkdir originals/$UUID
+echo "[setup] The UUID for this session is $UUID."
+
 ### Installing software ###
 
 echo '[setup] Installing software.'
@@ -47,14 +52,8 @@ echo '[setup] Configuring software.'
 ### Creating dotfile symlinks ###
 
 echo '[setup] Creating dotfile symlinks.'
-export UUID=$(uuidgen)
-mkdir original_dotfiles 2>/dev/null || true
-mkdir original_dotfiles/$UUID
-echo "[setup] The UUID for this session is $UUID."
 ./create_emacs_symlinks.sh
 ./create_lein_symlinks.sh
-rmdir original_dotfiles/$UUID 2>/dev/null || true
-rmdir original_dotfiles 2>/dev/null || true
 
 ### Testing software ###
 
@@ -62,6 +61,9 @@ echo '[setup] Testing software.'
 ./test_emacs.sh
 
 ### Cleanup ###
+
+rmdir originals/$UUID 2>/dev/null && echo "[setup] No backups were made, deleting originals/$UUID." || true
+rmdir originals 2>/dev/null && echo "[setup] No backup folders remaining, deleting originals." || true
 
 echo "[setup] We're all done. Enjoy!"
 echo '[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically.'
