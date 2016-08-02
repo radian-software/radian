@@ -5,7 +5,7 @@ set -e
 echo '[setup] Checking to see if GNU Emacs 24.5.1 or newer is installed.'
 
 if /Applications/Emacs.app/Contents/MacOS/Emacs --version \
-        | egrep 'GNU Emacs (24\.(5\.[1-9]|[6-9])|2[5-9]|[3-9][0-9])'; then
+        | egrep 'GNU Emacs (24\.(5\.[1-9][0-9]*|[6-9]|[1-9][0-9]+)|2[5-9]|[3-9][0-9]+)'; then
     echo '[setup] It looks like an appropriate version of Emacs is already installed.'
 else
     echo '[setup] It looks like an appropriate version of Emacs is not installed.'
