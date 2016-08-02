@@ -40,7 +40,7 @@ else
 fi
 
 ./install_homebrew.sh
-./install_homebrew_packages.sh
+./install_wget.sh
 ./install_emacs.sh
 
 ### Configuring software ###
