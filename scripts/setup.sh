@@ -38,6 +38,7 @@ else
 fi
 
 ./install_homebrew.sh
+./install_wget.sh
 
 ### Zsh ###
 
@@ -46,11 +47,12 @@ fi
 
 ### Leiningen ###
 
+./install_jdk.sh
+./install_leiningen.sh
 ./create_leiningen_symlinks.sh
 
 ### Emacs ###
 
-./install_wget.sh
 ./install_emacs.sh
 ./create_emacs_symlinks.sh
 ./test_emacs.sh
