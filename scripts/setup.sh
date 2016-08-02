@@ -54,6 +54,10 @@ fi
 ./create_emacs_symlinks.sh
 ./test_emacs.sh
 
+### Utilities ###
+
+./install_tree.sh
+
 ### Cleanup ###
 
 rmdir originals/$UUID 2>/dev/null && echo "[setup] No backups were made, deleting originals/$UUID." || true
