@@ -15,9 +15,7 @@ mkdir originals 2>/dev/null || true
 mkdir originals/$UUID
 echo "[setup] The UUID for this session is $UUID."
 
-### Installing software ###
-
-echo '[setup] Installing software.'
+### Bootstrapping ###
 
 ./install_xcode_cl_tools.sh
 
@@ -40,24 +38,20 @@ else
 fi
 
 ./install_homebrew.sh
-./install_wget.sh
-./install_emacs.sh
 
-### Configuring software ###
-
-echo '[setup] Configuring software.'
+### Zsh ###
 
 ./change_login_shell.sh
 
-### Creating dotfile symlinks ###
+### Leiningen ###
 
-echo '[setup] Creating dotfile symlinks.'
-./create_emacs_symlinks.sh
 ./create_lein_symlinks.sh
 
-### Testing software ###
+### Emacs ###
 
-echo '[setup] Testing software.'
+./install_wget.sh
+./install_emacs.sh
+./create_emacs_symlinks.sh
 ./test_emacs.sh
 
 ### Cleanup ###
