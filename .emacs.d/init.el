@@ -6,7 +6,7 @@
 
 ;;; Control color customizations. Nil for no color customizations and
 ;;; non-nil for all color customizations (for best results use the
-;;; Solarized Light theme in your terminal emulator.
+;;; Solarized Light theme in your terminal emulator).
 (setq radon-emacs-tweak-colors t)
 
 ;;;; Appearance
