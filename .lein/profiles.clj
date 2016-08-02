@@ -88,7 +88,7 @@
                         (when (resolve 'vinyasa.inject/in)
                           (eval
                             `(~(symbol "vinyasa.inject/in")
-                              ~'[clojure.tools.namespace.repl refresh])))]}
+                              ~'[clojure.tools.namespace.repl refresh refresh-all])))]}
 
  ;; END profiles with optional injections
 
