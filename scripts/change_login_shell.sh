@@ -3,7 +3,7 @@
 set -e
 
 echo "[setup] Checking the login shell."
-if finger "$USER" | grep -q 'Shell: /.*/zsh'; then
+if finger "$USER" | grep 'Shell: /.*/zsh'; then
     echo "[setup] The login shell appears to already be zsh."
 else
     if ! hash finger 2>/dev/null; then
