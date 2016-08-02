@@ -90,7 +90,7 @@
                             `(~(symbol "vinyasa.inject/in")
                               ~'[clojure.tools.namespace.repl refresh])))]}
 
- ;;; END profiles with optional injections
+ ;; END profiles with optional injections
 
  :lint {:plugins [;; Miscellaneous linting
                   [jonase/eastwood "0.2.3"]
