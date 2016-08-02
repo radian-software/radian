@@ -16,7 +16,7 @@ else
         sudo -s 'echo "$(which zsh)" >> /etc/shells'
     fi
     echo '[setup] Changing the login shell to zsh.'
-    until chsh -s $(which zsh); do
+    until chsh -s "$(which zsh)"; do
         echo "[setup] Encountered an error. Trying again in two seconds."
         sleep 2
     done
