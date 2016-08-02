@@ -15,6 +15,7 @@ else
         read ANSWER
         if ! (echo "$ANSWER" | grep -qi "^y"); then
             echo '[setup] Aborting.'
+            exit 1
         fi
         brew uninstall zsh
     fi
