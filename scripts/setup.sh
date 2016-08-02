@@ -46,7 +46,7 @@ fi
 
 ### Leiningen ###
 
-./create_lein_symlinks.sh
+./create_leiningen_symlinks.sh
 
 ### Emacs ###
 
