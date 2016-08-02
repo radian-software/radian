@@ -120,11 +120,10 @@
                        (require 'clojure.repl 'io.aviso.repl)
                        (alter-var-root
                          #'clojure.repl/pst
-                         (constantly (fn [& args]
-                                       ;; This prevents a NPE when no exception has yet
-                                       ;; occurred.
-                                       (when *e
-                                         (apply io.aviso.repl/pretty-pst args)))))]}
+                         (constantly (fn [& [e & _]]
+                                       (if (instance? Throwable e)
+                                         (io.aviso.repl/pretty-pst e)
+                                         (io.aviso.repl/pretty-pst)))))]}
 
  :refactor {:plugins [;; REPL-side support for clj-refactor
                       [refactor-nrepl "2.2.0"]]}
