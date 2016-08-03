@@ -50,13 +50,13 @@ fi
 
 ./install_jdk.sh
 ./install_leiningen.sh
-./create_leiningen_symlinks.sh
+./symlink_leiningen_dotfiles.sh
 ./install_leiningen_dependencies.sh
 
 ### Emacs ###
 
 ./install_emacs.sh
-./create_emacs_symlinks.sh
+./symlink_emacs_dotfiles.sh
 ./install_emacs_packages.sh
 
 ### Utilities ###
