@@ -160,4 +160,18 @@
         {:jvm-opts ["-Dapple.awt.UIElement=true"]}]
 
  ;; Use humane test output when running 'lein test'.
- :test [:humane]}
+ :test [:humane]
+
+ ;; Profile that includes everything from this file. This allows for downloading all
+ ;; possible dependencies with 'lein with-profile +all --version'.
+ :all [:cider
+       :humane
+       :inject
+       :alembic
+       :pull
+       :reflection
+       :refresh
+       :lint
+       :pretty
+       :refactor
+       :spyscope]}
