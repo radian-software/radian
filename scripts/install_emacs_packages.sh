@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo '[setup] Testing Emacs.'
+echo '[setup] Installing Emacs packages.'
 /Applications/Emacs.app/Contents/MacOS/Emacs -nw

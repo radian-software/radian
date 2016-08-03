@@ -55,7 +55,7 @@ fi
 
 ./install_emacs.sh
 ./create_emacs_symlinks.sh
-./test_emacs.sh
+./install_emacs_packages.sh
 
 ### Utilities ###
 
