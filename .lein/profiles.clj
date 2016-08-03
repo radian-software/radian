@@ -1,6 +1,9 @@
 {;;; Modular profiles
 
- :cider {:plugins [;; REPL-side support for CIDER and other editor tools
+ :cider {:dependencies [;; CIDER requires Clojure 1.7.0+ to work
+                        [org.clojure/clojure "1.8.0"]]
+
+         :plugins [;; REPL-side support for CIDER and other editor tools
                    [cider/cider-nrepl "0.13.0"]]}
 
  :humane {:dependencies [;; Better-formatted clojure.test output
@@ -125,7 +128,10 @@
                                          (io.aviso.repl/pretty-pst e)
                                          (io.aviso.repl/pretty-pst)))))]}
 
- :refactor {:plugins [;; REPL-side support for clj-refactor
+ :refactor {:dependencies [;; refactor-nrepl requires Clojure 1.7.0+ to work
+                           [org.clojure/clojure "1.8.0"]]
+
+            :plugins [;; REPL-side support for clj-refactor
                       [refactor-nrepl "2.2.0"]]}
 
  :spyscope {:dependencies [;; Quick-and-dirty debugging tools
