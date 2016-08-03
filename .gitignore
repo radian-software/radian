@@ -1,14 +1,3 @@
-/.emacs.d/auto-save-list/
-/.emacs.d/company-statistics-cache.el
-/.emacs.d/.#company-statistics-cache.el
-/.emacs.d/elpa/
-/.emacs.d/ido.last
-/.emacs.d/.#ido.last
-/.emacs.d/places
-/.emacs.d/projectile.cache
-/.emacs.d/projectile-bookmarks.eld
-/.emacs.d/recentf
-/.emacs.d/smex-items
 /.emacs-backups/
 /.emacs-undos/
 /.gnupg/
