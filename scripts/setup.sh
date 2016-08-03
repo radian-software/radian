@@ -51,6 +51,7 @@ fi
 ./install_jdk.sh
 ./install_leiningen.sh
 ./create_leiningen_symlinks.sh
+./install_leiningen_dependencies.sh
 
 ### Emacs ###
 
