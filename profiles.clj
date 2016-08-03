@@ -6,6 +6,10 @@
          :plugins [;; REPL-side support for CIDER and other editor tools
                    [cider/cider-nrepl "0.13.0"]]}
 
+ :hide-app {;; Prevent the Clojure REPL from showing in the Mac app switcher.
+            ;; See http://stackoverflow.com/questions/24619300/hide-clojure-repl-from-command-tab-application-switcher-via-lein-command-line
+            :jvm-opts ["-Dapple.awt.UIElement=true"]}
+
  :humane {:dependencies [;; Better-formatted clojure.test output
                          [pjstadig/humane-test-output "0.8.0"]]
 
@@ -142,26 +146,6 @@
 
  ;;; Composite profiles
 
- ;; This is an easy way to have a custom subset of the above modular profiles enabled in your
- ;; REPL. To start an awesome REPL use 'lein with-profiles +awesome repl'.
- :awesome [:cider
-           :humane
-           :inject
-           :alembic
-           :refresh
-           :pretty]
-
-
- :user [;; Linters need to be available everywhere.
-        :lint
-
-        ;; Prevent the Clojure REPL from showing in the Mac app switcher.
-        ;; See http://stackoverflow.com/questions/24619300/hide-clojure-repl-from-command-tab-application-switcher-via-lein-command-line
-        {:jvm-opts ["-Dapple.awt.UIElement=true"]}]
-
- ;; Use humane test output when running 'lein test'.
- :test [:humane]
-
  ;; Profile that includes everything from this file. This allows for downloading all
  ;; possible dependencies with 'lein with-profile +all --version'.
  :all [:cider
@@ -174,4 +158,19 @@
        :lint
        :pretty
        :refactor
-       :spyscope]}
+       :spyscope]
+
+ ;; This is an easy way to have a custom subset of the above modular profiles enabled in your
+ ;; REPL. To start an awesome REPL use 'lein with-profiles +awesome repl'.
+ :awesome [:cider
+           :humane
+           :inject
+           :alembic
+           :refresh
+           :pretty]
+
+ ;; When running tests.
+ :test [:humane]
+
+ ;; Always, except when building uberjar.
+ :user [:hide-app :lint]}
