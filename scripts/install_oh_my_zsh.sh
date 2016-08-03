@@ -29,5 +29,7 @@ else
     echo "[setup] Exporting \$SHELL=$(which zsh). This prevents Oh My Zsh from trying to change the login shell again."
     export SHELL="$(which zsh)"
     echo '[setup] Running the Oh My Zsh setup script.'
+    echo '[setup] Please press Control+D after installation is complete.'
+    read -p '[setup] Press RET to continue.'
     sh -c "$(wget https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
 fi

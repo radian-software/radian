@@ -1,0 +1,4 @@
+
+Please press C-x C-c to exit Emacs.
+
+This means you should hold the Control key, type the 'x' key, type the 'c' key, and then let go of the Control key.
