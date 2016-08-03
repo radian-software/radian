@@ -12,8 +12,5 @@
 /.emacs-backups/
 /.emacs-undos/
 /.gnupg/
-/.lein/repl-history
-/.lein/repl-port
-/.lein/self-installs
 /scripts/originals/
 .esup-results.el
