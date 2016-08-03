@@ -19,12 +19,15 @@ else
 fi
 
 echo '[setup] Checking for a ~/.emacs.d.'
-if [[ -e ~/.emacs.d || -L ~/.emacs.d ]]; then
-    echo "[setup] Found one, moving it to originals/$UUID."
-    mv ~/.emacs.d originals/$UUID/.emacs.d
+if [[ ~/.emacs.d -ef ../.emacs.d ]]; then
+    echo '[setup] It appears that ~/.emacs.d is already correctly symlinked.'
 else
-    echo "[setup] Looks like you don't have one."
+    if [[ -e ~/.emacs.d || -L ~/.emacs.d ]]; then
+        echo "[setup] Found one, moving it to originals/$UUID."
+        mv ~/.emacs.d originals/$UUID/.emacs.d
+    else
+        echo "[setup] Looks like you don't have one."
+    fi
+    echo '[setup] Creating symlink for .emacs.d.'
+    ln -s "$(cd .. && pwd)/.emacs.d" ~/.emacs.d
 fi
-
-echo '[setup] Creating symlink for .emacs.d.'
-ln -s "$(cd .. && pwd)/.emacs.d" ~/.emacs.d
