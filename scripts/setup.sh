@@ -44,6 +44,7 @@ fi
 
 ./install_zsh.sh
 ./change_login_shell.sh
+./install_oh_my_zsh.sh
 
 ### Leiningen ###
 
