@@ -4,11 +4,7 @@ set -e
 
 echo '[setup] Checking if Oh My Zsh is installed.'
 
-if [[ ! -n "$ZSH" ]]; then
-    ZSH=~/.oh-my-zsh
-fi
-
-if [[ -d "$ZSH" ]]; then
+if [[ -d ~/.oh-my-zsh ]]; then
     echo '[setup] It looks like Oh My Zsh is already installed.'
 else
     echo '[setup] It looks like Oh My Zsh is not yet installed.'
@@ -28,6 +24,8 @@ else
     fi
     echo "[setup] Exporting \$SHELL=$(which zsh). This prevents Oh My Zsh from trying to change the login shell again."
     export SHELL="$(which zsh)"
+    echo '[setup] Exporting $ZSH=~/.oh-my-zsh. This setup requires you to use ~/.oh-my-zsh as your Oh My Zsh directory.'
+    export ZSH=~/.oh-my-zsh
     echo '[setup] Running the Oh My Zsh setup script.'
     echo '[setup] Please press Control+D after installation is complete.'
     read -p '[setup] Press RET to continue.'
