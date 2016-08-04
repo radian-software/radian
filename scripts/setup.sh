@@ -40,7 +40,6 @@ source symlink_zsh_dotfiles.sh
 source install_jdk.sh
 source install_leiningen.sh
 source symlink_leiningen_dotfiles.sh
-source retrieve_leiningen_dependencies.sh
 
 ### Emacs ###
 

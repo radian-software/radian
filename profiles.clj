@@ -152,20 +152,6 @@
 
  ;;; Composite profiles
 
- ;; Profile that includes everything from this file. This allows for downloading all
- ;; possible dependencies with 'lein with-profile +all --version'.
- :all [:cider
-       :humane
-       :inject
-       :alembic
-       :pull
-       :reflection
-       :refresh
-       :lint
-       :pretty
-       :refactor
-       :spyscope]
-
  ;; This is an easy way to have a custom subset of the above modular profiles enabled in your
  ;; REPL. To start an awesome REPL use 'lein with-profiles +awesome repl'.
  :awesome [:cider
