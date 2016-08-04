@@ -56,7 +56,13 @@
                             (fn [dependencies & args]
                               (if (= (first args) :project)
                                 (apply distill dependencies (rest args))
-                                (apply distill dependencies :repositories [] args)))))
+                                (apply distill dependencies :repositories
+                                       [["central"
+                                         {:snapshots false
+                                          :url "https://repo1.maven.org/maven2/"}]
+                                        ["clojars"
+                                         {:url "https://clojars.org/repo/"}]]
+                                       args)))))
 
                         ;; For some reason, Leiningen tries to resolve every unquoted
                         ;; symbol in the :injections code, even the ones that wouldn't
