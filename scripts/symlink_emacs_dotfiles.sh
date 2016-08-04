@@ -29,6 +29,13 @@ else
         echo "[setup] Looks like you don't have one."
     fi
     echo '[setup] Creating symlink for init.el.'
-    mkdir ~/.emacs.d 2>/dev/null || true
+    if ! [[ -d ~/.emacs.d ]]; then
+        if [[ -f ~/.emacs.d || -L ~/.emacs.d ]]; then
+            echo '[setup] Your ~/.emacs.d appears to be either a file or an invalid symlink.'
+            echo "[setup] Moving it to originals/$UUID."
+            mv ~/.emacs.d originals/$UUID/.emacs.d
+        fi
+        mkdir ~/.emacs.d
+    fi
     ln -s "$(cd .. && pwd)/init.el" ~/.emacs.d/init.el
 fi

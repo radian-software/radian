@@ -14,6 +14,13 @@ else
     fi
 
     echo '[setup] Creating symlink for profiles.clj.'
-    mkdir ~/.lein 2>/dev/null || true
+    if ! [[ -d ~/.lein ]]; then
+        if [[ -f ~/.lein || -L ~/.lein ]]; then
+            echo '[setup] Your ~/.lein appears to be either a file or an invalid symlink.'
+            echo "[setup] Moving it to originals/$UUID."
+            mv ~/.lein originals/$UUID/.lein
+        fi
+        mkdir ~/.lein
+    fi
     ln -s "$(cd .. && pwd)/profiles.clj" ~/.lein/profiles.clj
 fi
