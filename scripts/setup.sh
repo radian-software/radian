@@ -45,7 +45,6 @@ source symlink_leiningen_dotfiles.sh
 
 source install_emacs.sh
 source symlink_emacs_dotfiles.sh
-source install_emacs_packages.sh
 
 ### Utilities ###
 
