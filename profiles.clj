@@ -67,7 +67,7 @@
                         (when (resolve 'vinyasa.inject/in)
                           (eval
                             `(~(symbol "vinyasa.inject/in")
-                              ~'[alembic.still distill lein])))]}
+                              ~'[alembic.still distill lein load-project])))]}
 
  :pull {:dependencies [;; Pull dependencies from Clojars in the REPL
                        [im.chit/vinyasa.maven "0.4.7"]]
