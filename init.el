@@ -1,3 +1,9 @@
+;;;; Ensure at least Emacs 24.5.1
+
+(when (version< emacs-version "24.5.1")
+  (error "This setup requires at least Emacs 24.5.1 (running Emacs %s)"
+         emacs-version))
+
 ;;;; Tweakable parameters
 
 ;; These parameters let people using this init-file as a starting point
