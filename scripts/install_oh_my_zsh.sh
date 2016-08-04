@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking if Oh My Zsh is installed.'
 
 if [[ -d ~/.oh-my-zsh ]]; then

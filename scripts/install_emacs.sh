@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking to see if GNU Emacs 24.5.1 or newer is installed.'
 
 EMACS_VERSION_REGEX='GNU Emacs (24\.(5\.[1-9][0-9]*|[6-9]|[1-9][0-9]+)|2[5-9]|[3-9][0-9]+)'

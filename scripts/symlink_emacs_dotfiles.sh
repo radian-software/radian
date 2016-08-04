@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking for a ~/.emacs.'
 if [[ -e ~/.emacs || -L ~/.emacs ]]; then
     echo "[setup] Found one, moving it to originals/$UUID."

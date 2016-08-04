@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking to see if version 1.6 or newer of the JDK is installed.'
 
 if javac -version 2>&1 \

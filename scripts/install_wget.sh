@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo "[setup] Checking to see if the 'wget' command is available."
 if hash wget 2>/dev/null; then
     echo "[setup] It appears that 'wget' is already installed."

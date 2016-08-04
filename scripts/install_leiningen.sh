@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking to see if Leiningen 2.6.1 or newer is installed.'
 
 if lein --version \

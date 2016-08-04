@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking to see if Zsh 5.2 or newer is installed.'
 
 if zsh --version \
