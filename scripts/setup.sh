@@ -9,17 +9,17 @@ echo '[setup] Setting up raxod502/dotfiles.'
 
 trap 'echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."' EXIT
 
-ORIGINAL_DIRECTORY="$(pwd)"
+original_directory="$(pwd)"
 cd "$(dirname "$0")"
 
-export UUID=$(uuidgen)
+export uuid=$(uuidgen)
 mkdir originals 2>/dev/null || true
-mkdir originals/$UUID
-echo "[setup] The UUID for this session is $UUID."
+mkdir originals/$uuid
+echo "[setup] The UUID for this session is $uuid."
 
 if [[ -e .zshrc.aliases || -L .zshrc.aliases ]]; then
-    echo "[setup] Found an old .zshrc.aliases, moving to originals/$UUID as .zshrc.aliases.tmp"
-    mv .zshrc.aliases originals/$UUID/.zshrc.aliases.tmp
+    echo "[setup] Found an old .zshrc.aliases, moving to originals/$uuid as .zshrc.aliases.tmp"
+    mv .zshrc.aliases originals/$uuid/.zshrc.aliases.tmp
 fi
 touch .zshrc.aliases
 
@@ -74,7 +74,7 @@ source install_tree.sh
 
 ### Cleanup ###
 
-rmdir originals/$UUID 2>/dev/null && echo "[setup] No backups were made, deleting originals/$UUID." || true
+rmdir originals/$uuid 2>/dev/null && echo "[setup] No backups were made, deleting originals/$uuid." || true
 rmdir originals 2>/dev/null && echo "[setup] No backup folders remaining, deleting originals." || true
 
 trap EXIT
@@ -83,5 +83,5 @@ echo
 echo "[setup] We're all done. Enjoy!"
 echo '[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically.'
 echo '[setup] Starting a new shell session.'
-cd "$ORIGINAL_DIRECTORY"
+cd "$original_directory"
 zsh

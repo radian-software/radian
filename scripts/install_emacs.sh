@@ -2,14 +2,14 @@
 
 echo '[setup] Checking to see if GNU Emacs 24.5.1 or newer is installed.'
 
-EMACS_VERSION_REGEX='GNU Emacs (24\.(5\.[1-9][0-9]*|[6-9]|[1-9][0-9]+)|2[5-9]|[3-9][0-9]+)'
+emacs_version_regex='GNU Emacs (24\.(5\.[1-9][0-9]*|[6-9]|[1-9][0-9]+)|2[5-9]|[3-9][0-9]+)'
 
 if emacs --version \
-        | egrep "$EMACS_VERSION_REGEX"; then
+        | egrep "$emacs_version_regex"; then
     echo '[setup] It looks like an appropriate version of Emacs is already installed.'
 else
     if /Applications/Emacs.app/Contents/MacOS/Emacs --version \
-            | egrep "$EMACS_VERSION_REGEX"; then
+            | egrep "$emacs_version_regex"; then
         echo '[setup] It looks like an appropriate version of Emacs is already installed, but it is not symlinked correctly.'
     else
         echo '[setup] It looks like an appropriate version of Emacs is not installed.'
@@ -24,8 +24,8 @@ else
             brew uninstall emacs
         fi
         if [[ -d "/Applications/Emacs.app" ]]; then
-            echo "[setup] Moving the existing version to originals/$UUID."
-            mv /Applications/Emacs.app originals/$UUID/Emacs.app
+            echo "[setup] Moving the existing version to originals/$uuid."
+            mv /Applications/Emacs.app originals/$uuid/Emacs.app
         fi
         echo '[setup] Downloading Emacs from emacsformacosx.com.'
         # Specifying the filename makes wget override any existing file by that name
@@ -44,8 +44,8 @@ else
         echo '[setup] It appears that /usr/local/bin/emacs is already correctly symlinked.'
     else
         if [[ -e /usr/local/bin/emacs || -L /usr/local/bin/emacs ]]; then
-            echo "[setup] Found one, moving it to originals/$UUID."
-            mv /usr/local/bin/emacs originals/$UUID/emacs
+            echo "[setup] Found one, moving it to originals/$uuid."
+            mv /usr/local/bin/emacs originals/$uuid/emacs
         else
             echo "[setup] Looks like you don't have one."
         fi
@@ -67,8 +67,8 @@ if [[ /usr/local/bin/emacs -ef emacs ]]; then
         echo '[setup] It appears that /usr/local/bin/emacsw is already correctly symlinked.'
     else
         if [[ -e /usr/local/bin/emacsw || -L /usr/local/bin/emacsw ]]; then
-            echo "[setup] Found one, moving it to originals/$UUID."
-            mv /usr/local/bin/emacsw originals/$UUID/emacsw
+            echo "[setup] Found one, moving it to originals/$uuid."
+            mv /usr/local/bin/emacsw originals/$uuid/emacsw
         else
             echo "[setup] Looks like you don't have one."
         fi
@@ -80,8 +80,8 @@ else
         echo '[setup] It appears that /usr/local/bin/emacsw is already correctly symlinked.'
     else
         if [[ -e /usr/local/bin/emacsw || -L /usr/local/bin/emacsw ]]; then
-            echo "[setup] Found one, moving it to originals/$UUID."
-            mv /usr/local/bin/emacsw originals/$UUID/emacsw
+            echo "[setup] Found one, moving it to originals/$uuid."
+            mv /usr/local/bin/emacsw originals/$uuid/emacsw
         else
             echo "[setup] Looks like you don't have one."
         fi

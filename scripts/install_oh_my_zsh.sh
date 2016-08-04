@@ -8,15 +8,15 @@ else
     echo '[setup] It looks like Oh My Zsh is not yet installed.'
     echo '[setup] Checking for a ~/.zshrc.pre-oh-my-zsh.'
     if [[ -e ~/.zshrc.pre-oh-my-zsh || -L ~/.zshrc.pre-oh-my-zsh ]]; then
-        echo "[setup] Found one, moving it to originals/$UUID as .zshrc.pre-oh-my-zsh.preexisting."
-        mv ~/.zshrc.pre-oh-my-zsh originals/$UUID/.zshrc.pre-oh-my-zsh.preexisting
+        echo "[setup] Found one, moving it to originals/$uuid as .zshrc.pre-oh-my-zsh.preexisting."
+        mv ~/.zshrc.pre-oh-my-zsh originals/$uuid/.zshrc.pre-oh-my-zsh.preexisting
     else
         echo "[setup] Looks like you don't have one."
     fi
     echo '[setup] Checking for a ~/.zshrc.'
     if [[ -e ~/.zshrc || -L ~/.zshrc ]]; then
-        echo "[setup] Found one, moving it to originals/$UUID as .zshrc.pre-oh-my-zsh."
-        mv ~/.zshrc originals/$UUID/.zshrc.pre-oh-my-zsh
+        echo "[setup] Found one, moving it to originals/$uuid as .zshrc.pre-oh-my-zsh."
+        mv ~/.zshrc originals/$uuid/.zshrc.pre-oh-my-zsh
     else
         echo "[setup] Looks like you don't have one."
     fi
