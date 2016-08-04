@@ -9,7 +9,6 @@ echo '[setup] Setting up raxod502/dotfiles.'
 
 trap 'echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."' EXIT
 
-original_directory="$(pwd)"
 cd "$(dirname "$0")"
 
 export uuid=$(uuidgen)
@@ -82,6 +81,5 @@ trap EXIT
 echo
 echo "[setup] We're all done. Enjoy!"
 echo '[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically.'
-echo '[setup] Starting a new shell session.'
-cd "$original_directory"
+echo "[setup] Starting a new shell session in $(pwd)."
 zsh
