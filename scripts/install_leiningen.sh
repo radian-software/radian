@@ -21,4 +21,11 @@ else
     fi
     echo '[setup] Installing Leiningen using Homebrew.'
     brew install leiningen
+    if [[ $(which lein) != /usr/local/bin/lein ]]; then
+        echo "[setup] It looks like $(which lein) is earlier on your \$PATH than /usr/local/bin/lein."
+        echo '[setup] Creating an alias to override this behavior.'
+        alias lein=/usr/local/bin/lein
+        echo 'alias lein=/usr/local/bin/lein' >> .zshrc.aliases
+        echo '[setup] Executed and added to .zshrc.aliases.'
+    fi
 fi

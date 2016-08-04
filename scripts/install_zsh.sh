@@ -21,4 +21,11 @@ else
     fi
     echo '[setup] Installing Zsh using Homebrew.'
     brew install zsh
+    if [[ $(which zsh) != /usr/local/bin/zsh ]]; then
+        echo "[setup] It looks like $(which zsh) is earlier on your \$PATH than /usr/local/bin/zsh."
+        echo '[setup] Creating an alias to override this behavior.'
+        alias zsh=/usr/local/bin/zsh
+        echo 'alias zsh=/usr/local/bin/zsh' >> .zshrc.aliases
+        echo '[setup] Executed and added to .zshrc.aliases.'
+    fi
 fi

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+shopt -s expand_aliases
 
 ### Setup ###
 
@@ -14,6 +15,11 @@ export UUID=$(uuidgen)
 mkdir originals 2>/dev/null || true
 mkdir originals/$UUID
 echo "[setup] The UUID for this session is $UUID."
+
+if [[ -e .zshrc.aliases || -L .zshrc.aliases ]]; then
+    echo "[setup] Found an old .zshrc.aliases, moving to originals/$UUID as .zshrc.aliases.tmp"
+    mv .zshrc.aliases originals/$UUID/.zshrc.aliases.tmp
+fi
 
 ### Bootstrapping ###
 
