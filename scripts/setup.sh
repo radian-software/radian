@@ -17,7 +17,7 @@ echo "[setup] The UUID for this session is $UUID."
 
 ### Bootstrapping ###
 
-./install_xcode_cl_tools.sh
+source install_xcode_cl_tools.sh
 
 # This code is in a rather awkward place. Since it can cause the
 # setup to restart, it should be placed as early as possible, but
@@ -37,31 +37,31 @@ else
     exit 0
 fi
 
-./install_homebrew.sh
-./install_wget.sh
+source install_homebrew.sh
+source install_wget.sh
 
 ### Zsh ###
 
-./install_zsh.sh
-./change_login_shell.sh
-./install_oh_my_zsh.sh
+source install_zsh.sh
+source change_login_shell.sh
+source install_oh_my_zsh.sh
 
 ### Leiningen ###
 
-./install_jdk.sh
-./install_leiningen.sh
-./symlink_leiningen_dotfiles.sh
-./install_leiningen_dependencies.sh
+source install_jdk.sh
+source install_leiningen.sh
+source symlink_leiningen_dotfiles.sh
+source install_leiningen_dependencies.sh
 
 ### Emacs ###
 
-./install_emacs.sh
-./symlink_emacs_dotfiles.sh
-./install_emacs_packages.sh
+source install_emacs.sh
+source symlink_emacs_dotfiles.sh
+source install_emacs_packages.sh
 
 ### Utilities ###
 
-./install_tree.sh
+source install_tree.sh
 
 ### Cleanup ###
 
