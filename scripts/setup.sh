@@ -57,7 +57,7 @@ source install_oh_my_zsh.sh
 source install_jdk.sh
 source install_leiningen.sh
 source symlink_leiningen_dotfiles.sh
-source install_leiningen_dependencies.sh
+source retrieve_leiningen_dependencies.sh
 
 ### Emacs ###
 
