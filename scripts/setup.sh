@@ -20,6 +20,7 @@ if [[ -e .zshrc.aliases || -L .zshrc.aliases ]]; then
     echo "[setup] Found an old .zshrc.aliases, moving to originals/$UUID as .zshrc.aliases.tmp"
     mv .zshrc.aliases originals/$UUID/.zshrc.aliases.tmp
 fi
+touch .zshrc.aliases
 
 ### Bootstrapping ###
 
@@ -51,6 +52,7 @@ source install_wget.sh
 source install_zsh.sh
 source change_login_shell.sh
 source install_oh_my_zsh.sh
+source symlink_zsh_dotfiles.sh
 
 ### Leiningen ###
 

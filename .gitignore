@@ -1,5 +1,6 @@
 /.emacs-backups/
 /.emacs-undos/
 /.gnupg/
+/scripts/.zshrc.aliases
 /scripts/originals/
 .esup-results.el
