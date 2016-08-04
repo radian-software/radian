@@ -30,7 +30,8 @@ else
             mv /Applications/Emacs.app originals/$UUID/Emacs.app
         fi
         echo '[setup] Downloading Emacs from emacsformacosx.com.'
-        wget "https://emacsformacosx.com/emacs-builds/Emacs-24.5-1-universal.dmg"
+        # Specifying the filename makes wget override any existing file by that name
+        wget -O Emacs-24.5-1-universal.dmg "https://emacsformacosx.com/emacs-builds/Emacs-24.5-1-universal.dmg"
         echo '[setup] Mounting the Emacs disk image.'
         hdiutil mount Emacs-24.5-1-universal.dmg
         echo '[setup] Copying Emacs.app from the disk image to the Applications folder.'

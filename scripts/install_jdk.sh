@@ -12,7 +12,8 @@ else
     echo '[setup] Please ignore the dialog box.'
     read -p '[setup] Press RET to continue.'
     echo '[setup] Downloading version 1.8u102 of the JDK from download.oracle.com.'
-    wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u102-b14/jdk-8u102-macosx-x64.dmg
+    # Specifying the filename makes wget override any existing file by that name
+    wget -O jdk-8u102-macosx-x64.dmg --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/8u102-b14/jdk-8u102-macosx-x64.dmg
     echo '[setup] Mounting the JDK disk image.'
     hdiutil mount jdk-8u102-macosx-x64.dmg
     echo '[setup] Running the JDK installer.'
