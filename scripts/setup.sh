@@ -33,6 +33,7 @@ source install_wget.sh
 source install_zsh.sh
 source change_login_shell.sh
 source install_oh_my_zsh.sh
+source install_zsh_autosuggestions.sh
 source symlink_zsh_dotfiles.sh
 
 ### Leiningen ###

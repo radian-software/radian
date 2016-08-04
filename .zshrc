@@ -6,6 +6,10 @@ export ZSH=~/.oh-my-zsh
 # dotfiles[master*] %
 ZSH_THEME="mgutz"
 
+plugins=(
+    zsh-autosuggestions # displays completion suggestions based on past commands
+)
+
 source "$ZSH/oh-my-zsh.sh"
 
 ### Zsh ###
