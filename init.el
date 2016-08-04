@@ -307,6 +307,10 @@
 ;;; ElDoc mode.)
 (setq company-frontends '(company-pseudo-tooltip-frontend))
 
+;;; Show quick-reference numbers in the tooltip. (Select a completion with
+;;; M-1 through M-0.)
+(setq company-show-numbers t)
+
 ;;; Don't prevent non-matching input (which will dismiss the completions
 ;;; menu), even if the user interacts explicitly with Company.
 (setq company-require-match nil)
