@@ -62,4 +62,4 @@ echo
 echo "[setup] We're all done. Enjoy!"
 echo '[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically.'
 echo "[setup] Starting a new shell session in $(pwd)."
-zsh
+exec zsh -l
