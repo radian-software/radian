@@ -4,7 +4,7 @@
 HISTSIZE=1000000 # session history
 SAVEHIST=1000000 # saved history
 
-# Better help command (like man, but finds more and better results)
+# Better help command (like man, but finds more and better results).
 unalias run-help &>/dev/null
 autoload run-help
 
@@ -20,10 +20,35 @@ antigen use oh-my-zsh
 # dotfiles[master*] %
 antigen theme mgutz
 
-# Display completion suggestions based on past commands
+# Efficient filesystem navigation (passive), jump with 'j'.
+antigen bundle autojump
+
+# Completion for 'brew' command.
+antigen bundle brew
+
+# Highlight important things on man pages.
+antigen bundle colored-man-pages
+
+# Completion for 'lein' command.
+antigen bundle lein
+
+# Aliases for interop with OSX and iTunes.
+antigen bundle osx
+
+# Efficient filesystem navigation (active), mark with 'wd add'
+# and jump with 'wd'.
+antigen bundle wd
+
+# Search the web from the command line!
+antigen bundle web-search
+
+# Display completion suggestions based on past commands.
 antigen bundle zsh-users/zsh-autosuggestions
 
-# Apply changes to theme and bundles
+# Syntax highlighting for entered commands.
+antigen bundle zsh-users/zsh-syntax-highlighting
+
+# Apply changes to theme and bundles.
 antigen apply
 
 ### Additional rc-files ###
