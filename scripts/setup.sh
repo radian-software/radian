@@ -16,11 +16,7 @@ mkdir originals 2>/dev/null || true
 mkdir originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
-if [[ -e .zshrc.aliases || -L .zshrc.aliases ]]; then
-    echo "[setup] Found an old .zshrc.aliases, moving to originals/$uuid as .zshrc.aliases.tmp"
-    mv .zshrc.aliases originals/$uuid/.zshrc.aliases.tmp
-fi
-touch .zshrc.aliases
+source create_local_files.sh
 
 ### Bootstrapping ###
 
@@ -40,6 +36,8 @@ source symlink_zsh_dotfiles.sh
 
 source install_tmux.sh
 source install_python.sh
+source install_powerline.sh
+source symlink_tmux_dotfiles.sh
 
 ### Leiningen ###
 
