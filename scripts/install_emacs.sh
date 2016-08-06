@@ -4,8 +4,7 @@ echo '[setup] Checking to see if GNU Emacs 24.5.1 or newer is installed.'
 
 emacs_version_regex='GNU Emacs (24\.(5\.[1-9][0-9]*|[6-9]|[1-9][0-9]+)|2[5-9]|[3-9][0-9]+)'
 
-if emacs --version \
-        | egrep "$emacs_version_regex"; then
+if emacs --version | egrep "$emacs_version_regex"; then
     echo '[setup] It looks like an appropriate version of Emacs is already installed.'
 else
     if /Applications/Emacs.app/Contents/MacOS/Emacs --version \
@@ -52,12 +51,9 @@ else
         echo '[setup] Creating symlink for emacs.'
         ln -s "$(pwd)/emacs" /usr/local/bin/emacs
     fi
-    if [[ $(which emacs) != /usr/local/bin/emacs ]]; then
-        echo "[setup] It looks like $(which emacs) is earlier on your \$PATH than /usr/local/bin/emacs."
-        echo '[setup] Creating an alias to override this behavior.'
-        alias emacs=/usr/local/bin/emacs
-        echo 'alias emacs=/usr/local/bin/emacs' >> .zshrc.aliases
-        echo '[setup] Executed and added to .zshrc.aliases.'
+    if ! (emacs --version | egrep "$emacs_version_regex"); then
+        echo '[setup] Fatal error: an appropriate version of Emacs should be installed by this point.'
+        exit 1
     fi
 fi
 
@@ -74,6 +70,10 @@ if [[ /usr/local/bin/emacs -ef emacs ]]; then
         fi
         echo '[setup] Creating symlink for emacsw.'
         ln -s "$(pwd)/emacsw" /usr/local/bin/emacsw
+        if ! (emacsw --version | egrep "$emacs_version_regex"); then
+            echo '[setup] Fatal error: emacsw should be symlinked by this point.'
+            exit 1
+        fi
     fi
 else
     if [[ /usr/local/bin/emacsw -ef "$(which emacs)" ]]; then
@@ -87,13 +87,9 @@ else
         fi
         echo '[setup] Creating symlink for emacsw.'
         ln -s "$(which emacs)" /usr/local/bin/emacsw
+        if ! (emacsw --version | egrep "$emacs_version_regex"); then
+            echo '[setup] Fatal error: emacsw should be symlinked by this point.'
+            exit 1
+        fi
     fi
-fi
-
-if [[ $(which emacsw) != /usr/local/bin/emacsw ]]; then
-    echo "[setup] It looks like $(which emacsw) is earlier on your \$PATH than /usr/local/bin/emacsw."
-    echo '[setup] Creating an alias to override this behavior.'
-    alias emacsw=/usr/local/bin/emacsw
-    echo 'alias emacsw=/usr/local/bin/emacsw' >> .zshrc.aliases
-    echo '[setup] Executed and added to .zshrc.aliases'
 fi
