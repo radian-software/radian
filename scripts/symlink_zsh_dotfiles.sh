@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '[setup] Checking for a ~/.zshrc.'
 if [[ ~/.zshrc -ef ../.zshrc ]]; then
     echo '[setup] It appears that ~/.zshrc is already correctly symlinked.'
