@@ -13,17 +13,3 @@ else
     echo '[setup] Creating symlink for .tmux.conf.'
     ln -s "$(cd .. && pwd)/.tmux.conf" ~/.tmux.conf
 fi
-
-echo '[setup] Checking for a ~/.tmux.powerline.conf.'
-if [[ ~/.tmux.powerline.conf -ef .tmux.powerline.conf ]]; then
-    echo '[setup] It appears that ~/.tmux.powerline.conf is already correctly symlinked.'
-else
-    if [[ -e ~/.tmux.powerline.conf || -L ~/.tmux.powerline.conf ]]; then
-        echo "[setup] Found one, moving it to originals/$uuid."
-        mv ~/.tmux.powerline.conf originals/$uuid/.tmux.powerline.conf
-    else
-        echo "[setup] Looks like you don't have one."
-    fi
-    echo '[setup] Creating symlink for .tmux.powerline.conf.'
-    ln -s "$PWD/.tmux.powerline.conf" ~/.tmux.powerline.conf
-fi
