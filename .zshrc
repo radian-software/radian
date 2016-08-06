@@ -12,13 +12,9 @@ autoload run-help
 
 source ~/.antigen-repo/antigen.zsh
 
-# The core oh-my-zsh library is necessary for a number of oh-my-zsh
-# plugins and themes.
+# Just to be safe: The core oh-my-zsh library is necessary for a
+# number of oh-my-zsh plugins and themes to work correctly.
 antigen use oh-my-zsh
-
-# Theme with reasonable colors and a prompt like:
-# dotfiles[master*] %
-antigen theme mgutz
 
 # Efficient filesystem navigation (passive), jump with 'j'.
 antigen bundle autojump
@@ -48,8 +44,14 @@ antigen bundle zsh-users/zsh-autosuggestions
 # Syntax highlighting for entered commands.
 antigen bundle zsh-users/zsh-syntax-highlighting
 
-# Apply changes to theme and bundles.
+# Actually load selected bundles.
 antigen apply
+
+PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(git_prompt_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
+ZSH_THEME_GIT_PROMPT_PREFIX="["
+ZSH_THEME_GIT_PROMPT_SUFFIX=
+ZSH_THEME_GIT_PROMPT_DIRTY="*]"
+ZSH_THEME_GIT_PROMPT_CLEAN="]"
 
 ### Additional rc-files ###
 
