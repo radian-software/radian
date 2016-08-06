@@ -56,3 +56,7 @@ ZSH_THEME_GIT_PROMPT_CLEAN="]"
 if [[ -f ~/.zshrc.aliases ]]; then
     source ~/.zshrc.aliases
 fi
+
+if [[ -f ~/.zshrc.local ]]; then
+    source ~/.zshrc.local
+fi
