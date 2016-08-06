@@ -38,6 +38,7 @@ source symlink_zsh_dotfiles.sh
 
 ### Tmux ###
 
+source install_tmux.sh
 source install_python.sh
 
 ### Leiningen ###
