@@ -41,9 +41,6 @@ antigen bundle web-search
 # Display completion suggestions based on past commands.
 antigen bundle zsh-users/zsh-autosuggestions
 
-# Syntax highlighting for entered commands.
-antigen bundle zsh-users/zsh-syntax-highlighting
-
 # Actually load selected bundles.
 antigen apply
 
