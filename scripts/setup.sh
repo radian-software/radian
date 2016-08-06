@@ -36,6 +36,10 @@ source install_antigen.sh
 source install_autojump.sh
 source symlink_zsh_dotfiles.sh
 
+### Tmux ###
+
+source install_python.sh
+
 ### Leiningen ###
 
 source install_jdk.sh
