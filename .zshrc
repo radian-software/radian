@@ -1,13 +1,3 @@
-### Zsh ###
-
-# No (practical) limit to many commands are kept in history.
-HISTSIZE=1000000 # session history
-SAVEHIST=1000000 # saved history
-
-# Better help command (like man, but finds more and better results).
-unalias run-help &>/dev/null
-autoload run-help
-
 ### Antigen ###
 
 source ~/.antigen-repo/antigen.zsh
@@ -44,6 +34,17 @@ antigen bundle zsh-users/zsh-autosuggestions
 # Actually load selected bundles.
 antigen apply
 
+### Zsh ###
+
+# No (practical) limit to many commands are kept in history.
+HISTSIZE=1000000 # session history
+SAVEHIST=1000000 # saved history
+
+# Better help command (like man, but finds more and better results).
+unalias run-help &>/dev/null
+autoload run-help
+
+# Better prompt (like oh-my-zsh/mgutz, but turns red on nonzero exit code).
 PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(git_prompt_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
 ZSH_THEME_GIT_PROMPT_PREFIX="["
 ZSH_THEME_GIT_PROMPT_SUFFIX=
