@@ -85,7 +85,7 @@
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
 
-;;;; File saving
+;;;; File saving and loading
 
 ;;; Put backup files in $HOME/.emacs-backups, rather than in the current
 ;;; directory.
@@ -121,6 +121,12 @@
 
 ;;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
 (setq auto-revert-interval 1)
+
+;;; Follow symlinks without prompting. If this isn't done, then you will
+;;; get a prompt every time you edit init.el with F9. (This is assuming
+;;; that ~/.emacs.d/init.el is a symlink, which is how the setup script
+;;; sets it up.)
+(setq vc-follow-symlinks t)
 
 ;;;; Text format
 
