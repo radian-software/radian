@@ -433,6 +433,41 @@ explicitly with Company."
 ;;; I'd like to find a more elegant solution to this problem.
 (define-key clojure-mode-map (kbd "RET") 'newline-and-indent)
 
+;;; Clojure mode does not correctly identify the docstrings of protocol
+;;; methods as docstrings, and as such electric indentation does not work
+;;; for them. Additionally, when you hack a clojure.core function, such as
+;;; defonce or defrecord, to provide docstring functionality, those
+;;; docstrings are (perhaps rightly, but annoyingly) not recognized as
+;;; docstrings either. However, there is an easy way to get electric
+;;; indentation working for all potential docstrings: simply tell
+;;; clojure-mode that *all* strings are docstrings. This will not change
+;;; the font locking, because for some weird reason clojure-mode determines
+;;; whether you're in a docstring by the font color instead of the other
+;;; way around. Note that this will cause electric indentation by two spaces
+;;; in *all* multiline strings, but since there are not very many
+;;; non-docstring multiline strings in Clojure this is not too inconvenient.
+;;; (And, after all, it's only electric, not aggressive, indentation.)
+
+;;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
+;;; so we can't override it. Instead, we replace clojure-indent-line.
+
+(defun radon-clojure-in-docstring-p ()
+  "Check whether point is in a docstring."
+  (or
+   (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+   (eq (get-text-property (point) 'face) 'font-lock-string-face)))
+
+(defun clojure-indent-line ()
+  "Indent current line as Clojure code."
+  (if (radon-clojure-in-docstring-p)
+      (save-excursion
+        (beginning-of-line)
+        (when (and (looking-at "^\\s-*")
+                   (<= (string-width (match-string-no-properties 0))
+                       (string-width (clojure-docstring-fill-prefix))))
+          (replace-match (clojure-docstring-fill-prefix))))
+    (lisp-indent-line)))
+
 ;;;; Package: CIDER
 ;; Provides nREPL integration for Clojure and ClojureScript, documentation
 ;; and source lookups, and more.
