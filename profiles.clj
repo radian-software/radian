@@ -9,7 +9,20 @@
                         [org.clojure/tools.nrepl "0.2.12"]]
 
          :plugins [;; REPL-side support for CIDER and other editor tools
-                   [cider/cider-nrepl "0.13.0"]]}
+                   [cider/cider-nrepl "0.13.0"]]
+
+         :injections [;; Make a tweak to the internal code used by compliment, the
+                      ;; completion library used by cider-nrepl, to recognize which
+                      ;; symbols could be vars. In particular, change the function
+                      ;; to (constantly true) -- that is, *all* symbols could be
+                      ;; vars. I haven't found any downsides to this (yet), and it
+                      ;; fixes a problem with the regex used by default not
+                      ;; recognizing vars in the '.' namespace.
+                      ;;
+                      ;; Needless to say, this is a hack.
+                      (alter-var-root
+                        #'cider.inlined-deps.compliment.v0v3v0.compliment.sources.ns-mappings/var-symbol?
+                        (constantly (constantly true)))]}
 
  :hide-app {;; Prevent the Clojure REPL from showing in the Mac app switcher.
             ;; See http://stackoverflow.com/questions/24619300/hide-clojure-repl-from-command-tab-application-switcher-via-lein-command-line
