@@ -128,6 +128,13 @@
 ;;; sets it up.)
 (setq vc-follow-symlinks t)
 
+;;; Suppress the 'ls does not support --dired' warning. Doing this instead
+;;; of installing a dired-compatibile ls is much easier, although it may
+;;; cause problems with e.g. filenames that have leading spaces. If you
+;;; have a lot of filenames with leading spaces, though, you probably have
+;;; bigger problems ;)
+(setq dired-use-ls-dired nil)
+
 ;;;; Text format
 
 ;;; Don't use tabs for indentation, even in deeply indented lines. (Why
