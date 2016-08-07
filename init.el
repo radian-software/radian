@@ -473,6 +473,9 @@ explicitly with Company."
 ;; and source lookups, and more.
 ;;;;
 
+;;; Allow usage of the C-c M-j shortcut everywhere.
+(global-set-key (kbd "C-c M-j") 'cider-jack-in)
+
 ;;; By default, any error messages that occur when CIDER is starting up
 ;;; are placed in the *nrepl-server* buffer and not in the *cider-repl*
 ;;; buffer. This is silly, since no-one wants to check *nrepl-server*
