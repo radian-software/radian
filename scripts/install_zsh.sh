@@ -19,8 +19,8 @@ else
         if [[ $(brew list --versions zsh) ]]; then
             echo '[setup] Uninstalling the old version of Zsh using Homebrew.'
             echo -n '[setup] Is this OK? (y/n) '
-            read ANSWER
-            if ! (echo "$ANSWER" | grep -qi "^y"); then
+            read answer
+            if ! (echo "$answer" | grep -qi "^y"); then
                 echo '[setup] Aborting.'
                 exit 1
             fi
