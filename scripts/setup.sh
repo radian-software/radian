@@ -16,8 +16,6 @@ mkdir originals 2>/dev/null || true
 mkdir originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
-source create_local_files.sh
-
 ### Bootstrapping ###
 
 source install_xcode_cl_tools.sh
