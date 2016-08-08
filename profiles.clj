@@ -47,6 +47,7 @@
                        ;; into different profiles.
                        (require 'vinyasa.inject)
                        (vinyasa.inject/in
+                         [clojure.core [refer-clojure rc]]
                          [clojure.java.shell sh]
                          [clojure.pprint pp pprint]
                          [clojure.repl doc pst source]
