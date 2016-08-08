@@ -15,8 +15,8 @@ else
         if [[ $(brew list --versions emacs) ]]; then
             echo '[setup] Uninstalling the old version of Emacs using Homebrew.'
             echo -n '[setup] Is this OK? (y/n) '
-            read ANSWER
-            if ! (echo "$ANSWER" | grep -qi "^y"); then
+            read answer
+            if ! (echo "$answer" | grep -qi "^y"); then
                 echo '[setup] Aborting.'
                 exit 1
             fi
