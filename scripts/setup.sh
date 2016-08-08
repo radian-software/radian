@@ -24,6 +24,10 @@ source install_xcode_cl_tools.sh
 source install_homebrew.sh
 source install_wget.sh
 
+### Git ###
+
+source symlink_git_dotfiles.sh
+
 ### Zsh ###
 
 source install_zsh.sh
