@@ -18,41 +18,41 @@ echo "[setup] The UUID for this session is $uuid."
 
 ### Bootstrapping ###
 
-source install_xcode_cl_tools.sh
-source install_homebrew.sh
-source install_wget.sh
+source install-xcode-cl-tools.sh
+source install-homebrew.sh
+source install-wget.sh
 
 ### Git ###
 
-source symlink_git_dotfiles.sh
+source symlink-git-dotfiles.sh
 
 ### Zsh ###
 
-source install_zsh.sh
-source change_login_shell.sh
-source install_antigen.sh
-source install_autojump.sh
-source symlink_zsh_dotfiles.sh
+source install-zsh.sh
+source change-login-shell.sh
+source install-antigen.sh
+source install-autojump.sh
+source symlink-zsh-dotfiles.sh
 
 ### Tmux ###
 
-source install_tmux.sh
-source symlink_tmux_dotfiles.sh
+source install-tmux.sh
+source symlink-tmux-dotfiles.sh
 
 ### Leiningen ###
 
-source install_jdk.sh
-source install_leiningen.sh
-source symlink_leiningen_dotfiles.sh
+source install-jdk.sh
+source install-leiningen.sh
+source symlink-leiningen-dotfiles.sh
 
 ### Emacs ###
 
-source install_emacs.sh
-source symlink_emacs_dotfiles.sh
+source install-emacs.sh
+source symlink-emacs-dotfiles.sh
 
 ### Utilities ###
 
-source install_tree.sh
+source install-tree.sh
 
 ### Cleanup ###
 
