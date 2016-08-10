@@ -40,6 +40,8 @@
         amend = commit --amend
         # git rebase
         rework = "!_() { if [[ -n \"$1\" ]]; then git rebase -i HEAD~$1; else git rebase -i \"origin/$(git rev-parse --abbrev-ref HEAD)\"; fi; }; _"
+        # git remote
+        prb = "!_() { git remote prune \"${1:-origin}\"; }; _"
         # git push
         pushb = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
         drb = push -d origin
