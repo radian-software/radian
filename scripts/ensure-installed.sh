@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Description:
+# Ensure that an executable is installed, optionally requiring a minimum
+# version. If the executable is not installed, use a package manager to
+# install it. Try to avoid re-installing the executable if the only
+# problem is broken symlinks.
+
 # Arguments:
 # $1 = name of executable that should be installed
 # $2 = subcommand to get version (defaults to --version)
