@@ -3,20 +3,6 @@
 set -e
 set -o pipefail
 
-echo '[setup] Checking for a ~/.gitconfig.'
-if [[ ~/.gitconfig -ef ../.gitconfig ]]; then
-    echo '[setup] It appears that ~/.gitconfig is already correctly symlinked.'
-else
-    if [[ -e ~/.gitconfig || -L ~/.gitconfig ]]; then
-        echo "[setup] Found one, moving it to originals/$uuid."
-        mv ~/.gitconfig originals/$uuid/.gitconfig
-    else
-        echo "[setup] Looks like you don't have one."
-    fi
-    echo '[setup] Creating symlink for .gitconfig.'
-    ln -s "$(cd .. && pwd)/.gitconfig" ~/.gitconfig
-fi
-
 echo '[setup] Checking for a ~/.gitconfig.local.'
 if [[ -d ~/.gitconfig.local || -L ~/.gitconfig.local && ! -e ~/.gitconfig.local ]]; then
     echo '[setup] Your ~/.gitconfig.local appears to be either a directory or an invalid symlink.'

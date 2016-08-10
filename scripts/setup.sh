@@ -24,6 +24,7 @@ echo "[setup] The UUID for this session is $uuid."
 
 ### Git ###
 
+./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
 ./symlink-git-dotfiles.sh
 
 ### Zsh ###
@@ -32,23 +33,25 @@ echo "[setup] The UUID for this session is $uuid."
 ./change-login-shell.sh
 ./install-antigen.sh
 ./ensure-installed.sh autojump
-./symlink-zsh-dotfiles.sh
+./ensure-symlinked.sh ~/.zshrc ../.zshrc
 
 ### Tmux ###
 
 ./ensure-installed.sh tmux -V tmux 2.2
-./symlink-tmux-dotfiles.sh
+./ensure-symlinked.sh ~/.tmux.conf ../.tmux.conf
 
 ### Leiningen ###
 
 ./install-jdk.sh
 ./ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
-./symlink-leiningen-dotfiles.sh
+./ensure-symlinked.sh ~/.lein/profiles.clj ../profiles.clj
 
 ### Emacs ###
 
 ./install-emacs.sh
-./symlink-emacs-dotfiles.sh
+./ensure-symlinked.sh ~/.emacs
+./ensure-symlinked.sh ~/.emacs.el
+./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el
 
 ### Utilities ###
 
