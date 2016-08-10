@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo "[setup] Checking the login shell."
 if finger "$USER" | grep "Shell: $(which zsh)"; then
     echo "[setup] The login shell appears to already be $(which zsh)."

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking for a ~/.gitconfig.'
 if [[ ~/.gitconfig -ef ../.gitconfig ]]; then
     echo '[setup] It appears that ~/.gitconfig is already correctly symlinked.'

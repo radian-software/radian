@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking if Homebrew is installed.'
 
 if hash brew; then

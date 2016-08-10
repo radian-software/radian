@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking for a ~/.tmux.conf.'
 if [[ ~/.tmux.conf -ef ../.tmux.conf ]]; then
     echo '[setup] It appears that ~/.tmux.conf is already correctly symlinked.'

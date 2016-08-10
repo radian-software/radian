@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking for a ~/.zshrc.'
 if [[ ~/.zshrc -ef ../.zshrc ]]; then
     echo '[setup] It appears that ~/.zshrc is already correctly symlinked.'

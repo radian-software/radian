@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking to see if GNU Emacs 24.5.1 or newer is installed.'
 
 emacs_version_regex='GNU Emacs (24\.(5\.[1-9][0-9]*|[6-9]|[1-9][0-9]+)|2[5-9]|[3-9][0-9]+)'

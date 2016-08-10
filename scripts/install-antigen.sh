@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking if Antigen is installed to ~/.antigen-repo.'
 if [[ -d ~/.antigen-repo ]]; then
     echo '[setup] It appears that Antigen is already installed.'

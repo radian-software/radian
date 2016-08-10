@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking if the Xcode Command Line Tools are installed.'
 
 while xcode-select --install; do

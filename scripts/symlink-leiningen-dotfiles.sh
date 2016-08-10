@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -e
+set -o pipefail
+
 echo '[setup] Checking for a ~/.lein/profiles.clj.'
 if [[ ~/.lein/profiles.clj -ef ../profiles.clj ]]; then
     echo '[setup] It appears that ~/.lein/profiles.clj is already correctly symlinked.'
