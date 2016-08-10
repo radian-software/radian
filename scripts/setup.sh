@@ -20,7 +20,7 @@ echo "[setup] The UUID for this session is $uuid."
 
 source install-xcode-cl-tools.sh
 source install-homebrew.sh
-source install-wget.sh
+source ensure-installed.sh wget
 
 ### Git ###
 
@@ -28,21 +28,21 @@ source symlink-git-dotfiles.sh
 
 ### Zsh ###
 
-source install-zsh.sh
+source ensure-installed.sh zsh --version zsh 5.2
 source change-login-shell.sh
 source install-antigen.sh
-source install-autojump.sh
+source ensure-installed.sh autojump
 source symlink-zsh-dotfiles.sh
 
 ### Tmux ###
 
-source install-tmux.sh
+source ensure-installed.sh tmux -V tmux 2.2
 source symlink-tmux-dotfiles.sh
 
 ### Leiningen ###
 
 source install-jdk.sh
-source install-leiningen.sh
+source ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
 source symlink-leiningen-dotfiles.sh
 
 ### Emacs ###
@@ -52,7 +52,7 @@ source symlink-emacs-dotfiles.sh
 
 ### Utilities ###
 
-source install-tree.sh
+source ensure-installed.sh tree
 
 ### Cleanup ###
 
