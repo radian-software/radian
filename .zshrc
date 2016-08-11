@@ -62,6 +62,9 @@ ZSH_THEME_GIT_PROMPT_SUFFIX=
 ZSH_THEME_GIT_PROMPT_DIRTY="*]"
 ZSH_THEME_GIT_PROMPT_CLEAN="]"
 
+# Alias for reloading .zshrc.
+alias resource="source ~/.zshrc"
+
 ### Additional rc-files ###
 
 if [[ -f ~/.zshrc.local ]]; then
