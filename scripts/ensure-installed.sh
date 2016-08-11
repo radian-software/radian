@@ -158,6 +158,9 @@ install() {
         fi
         echo "[ensure-installed] Installing the most recent version of $executable using 'brew install $package_name'."
         brew install "$package_name"
+    elif [[ $package_manager == gem ]]; then
+        echo "[ensure-installed] Installing the most recent version of $executable using 'gem install $package_name'."
+        gem install "$package_name"
     fi
 }
 

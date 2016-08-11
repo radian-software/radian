@@ -56,6 +56,7 @@ echo "[setup] The UUID for this session is $uuid."
 ### Utilities ###
 
 ./ensure-installed.sh tree
+./ensure-installed.sh tmuxinator version tmuxinator 0.8.1 gem
 
 ### Cleanup ###
 
