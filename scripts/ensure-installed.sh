@@ -15,7 +15,6 @@
 # $6 = name of package for package manager (defaults to executable name)
 
 # Preconditions:
-# - The minimum version string must be well-formed.
 # - The package manager must be available on the $PATH.
 
 # Postconditions:
@@ -30,6 +29,8 @@
 set -e
 set -o pipefail
 
+echo "[ensure-installed] Called with arguments: $@"
+
 ### Parse arguments ###
 
 executable="$1"
@@ -40,6 +41,10 @@ fi
 version_subcommand="${2:---version}"
 version_command_name="${3:-$executable}"
 min_version="${4:-any-version}"
+if [[ $min_version != any-version ]] && ! (echo "$min_version" | egrep -q "^[0-9]+(\.[0-9]+)*$"); then
+    echo "[ensure-installed] Fatal error: the minimum version string is malformed."
+    exit 1
+fi
 package_manager="${5:-brew}"
 package_name="${6:-$executable}"
 
@@ -102,7 +107,11 @@ is_installed_correctly() {
                 version_and_rest="${version_line#$prefix}"
                 version="${version_and_rest%% *}"
                 echo "[ensure-installed] The version appears to be $version."
-                if version_as_recent "$min_version" "$version"; then
+                if ! (echo "$version" | egrep -q "^[0-9]+(\.[0-9]+)*$"); then
+                    echo "[ensure-installed] The version appears to be malformed."
+                    echo "[ensure-installed] Assuming that the version is incorrect."
+                    return 1
+                elif version_as_recent "$min_version" "$version"; then
                     echo "[ensure-installed] This is at least as recent as the minimum version, $min_version."
                     echo "[ensure-installed] The installation appears to be OK, exiting."
                     return 0
@@ -140,7 +149,7 @@ install() {
             echo "[ensure-installed] The available versions appear to be: ${versions[@]}."
             for version in "${versions[@]}"; do
                 if requires_version; then
-                    if version_as_recent "$min_version" "$version"; then
+                    if (echo "$version" | egrep -q "^[0-9]+(\.[0-9]+)*$") && version_as_recent "$min_version" "$version"; then
                         echo "[ensure-installed] The version $version is at least as recent as the minimum version, $min_version."
                         echo "[ensure-installed] Recreating symlinks using 'brew switch $package_name $version'."
                         brew switch "$package_name" "$version"
