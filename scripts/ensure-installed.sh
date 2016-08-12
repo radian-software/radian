@@ -140,9 +140,13 @@ is_installed_correctly() {
 install() {
     if [[ $package_manager == brew ]]; then
         echo "[ensure-installed] Checking if $package_name has been installed via Homebrew using 'brew list --versions $package_name'."
-        version_line="$(brew list --versions "$package_name")"
-        echo "$version_line"
-        if [[ $version_line ]]; then
+        # Usually, if the package is not installed, 'brew list --versions'
+        # will just return without outputting anything. However, if you
+        # haven't yet installed *anything* via Homebrew, it will print
+        # an error message and return with a non-zero exit code. So we need
+        # to check for that case separately.
+        if version_line="$(brew list --versions "$package_name")" && [[ $version_line ]]; then
+            echo "$version_line"
             prefix="$package_name "
             version_list="${version_line#$prefix}"
             IFS=" " read -ra versions <<< "$version_list"
