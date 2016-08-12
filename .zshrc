@@ -24,6 +24,12 @@ antigen bundle osx
 # Press ESC ESC to prefix current or previous command with 'sudo'.
 antigen bundle sudo
 
+# Aliases for common tmux commands, and support for starting tmux on login.
+antigen bundle tmux
+
+# Completion for 'tmuxinator' command.
+antigen bundle tmuxinator
+
 # Efficient filesystem navigation (active), mark with 'wd add'
 # and jump with 'wd'.
 antigen bundle wd
