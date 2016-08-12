@@ -22,6 +22,7 @@
 set -e
 set -o pipefail
 
+# Having $uuid is necessary for backing up existing symlinks.
 if [[ -z $uuid ]]; then
     echo "[ensure-symlinked] Fatal error: \$uuid not set."
     exit 1
@@ -34,37 +35,52 @@ if [[ -z $link ]]; then
     echo "[ensure-symlinked] Fatal error: symlink location not provided."
     exit 1
 fi
-link="$(cd "${link%/*}" && pwd)/${link##*/}"
 
 real="$2"
 if [[ $real ]]; then
     if [[ ! -e $real ]]; then
-        echo "[ensure-symlinked] Fatal error: \$real does not exist."
+        echo "[ensure-symlinked] Fatal error: $real does not exist."
     fi
+
+    # Make $real an absolute path.
     real="$(cd "${real%/*}" && pwd)/${real##*/}"
 fi
 
+### Subroutines ###
+
+move_existing() {
+    echo "[ensure-symlinked] Moving the existing version to originals/$uuid/${link##*/}."
+    mv "$link" "originals/$uuid/${link##*/}"
+}
+
 ### Main logic ###
 
-echo "[ensure-symlinked] Checking $link."
-if [[ $link -ef $real ]]; then
-    echo "[ensure-symlinked] $link is already symlinked correctly to $real."
+if [[ $real ]]; then
+    echo "[ensure-symlinked] Ensuring that intermediate directories exist."
+    mkdir -p "${link%/*}"
+
+    # Make $link an absolute path. We can only do this after ensuring that
+    # intermediate directories exist.
+    link="$(cd "${link%/*}" && pwd)/${link##*/}"
+
+    echo "[ensure-symlinked] Checking $link."
+    if [[ $link -ef $real ]]; then
+        echo "[ensure-symlinked] $link is already symlinked correctly to $real."
+    else
+        if [[ -e $link || -L $link ]]; then
+            echo "[ensure-symlinked] $link already exists, and is not symlinked correctly."
+            move_existing
+        else
+            echo "[ensure-symlinked] $link does not exist, and needs to be created."
+        fi
+        echo "[ensure-symlinked] Creating symlink from $link to $real."
+        ln -s "$real" "$link"
+    fi
 else
     if [[ -e $link || -L $link ]]; then
-        if [[ $real ]]; then
-            echo "[ensure-symlinked] $link already exists, and is not symlinked correctly."
-        else
-            echo "[ensure-symlinked] $link already exists, and needs to be removed."
-        fi
-        echo "[ensure-symlinked] Moving the existing version to originals/$uuid/${link##*/}."
-        mv "$link" "originals/$uuid/${link##*/}"
+        echo "[ensure-symlinked] $link already exists, and needs to be removed."
+        move_existing
     else
-        echo "[ensure-symlinked] $link does not exist, and needs to be created."
-    fi
-    if [[ $real ]]; then
-        echo "[ensure-symlinked] Ensuring that intermediate directories exist."
-        mkdir -p "${link%/*}"
-        echo "[ensure-symlinked] Creating symlink from $real to $link."
-        ln -s "$real" "$link"
+        echo "[ensure-symlinked] $link does not exist."
     fi
 fi
