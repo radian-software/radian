@@ -18,6 +18,9 @@ antigen bundle lein
 # Aliases for interop with OSX and iTunes.
 antigen bundle osx
 
+# Press ESC ESC to prefix current or previous command with 'sudo'.
+antigen bundle sudo
+
 # Efficient filesystem navigation (active), mark with 'wd add'
 # and jump with 'wd'.
 antigen bundle wd
