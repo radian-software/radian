@@ -150,7 +150,7 @@ proj() {
             else
                 echo "Warp point '$1' not found."
                 if type j &>/dev/null; then
-                    guess="$(autojump $1)"
+                    guess="$(cd / && autojump $1)"
                     echo "$guess"
                     echo -n "Is this the correct directory? (y/n) "
                     read answer
