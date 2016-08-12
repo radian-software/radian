@@ -12,6 +12,9 @@ antigen bundle autojump
 # Completion for 'brew' command.
 antigen bundle brew
 
+# Aliases for common git commands.
+antigen bundle git
+
 # Completion for 'lein' command.
 antigen bundle lein
 
