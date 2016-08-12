@@ -158,7 +158,7 @@ proj() {
                         echo -n "Please enter the project name: "
                         read project
                         (cd "$guess" && wd add "$project")
-                        proj "$@"
+                        proj "$project" "$2"
                     else
                         echo "You'll have to navigate to the directory manually."
                         return 1
