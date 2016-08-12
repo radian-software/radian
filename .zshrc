@@ -89,12 +89,12 @@ alias resource="source ~/.zshrc"
 # it as a shell command (provide multiple commands with '&&' or ';')
 # in all four windows before anything else.
 proj() {
-    # Check if the session already exists.
     if echo "$1" | egrep -q "^\s*$"; then
         echo "Please provide a project name."
         return 1
     fi
-    if tmux list-sessions -F "#{session_name}" | egrep -q "^$1$"; then
+    # Check if the session already exists.
+    if tmux list-sessions -F "#{session_name}" 2>/dev/null | egrep -q "^$1$"; then
         if [[ $TMUX ]]; then
             tmux switch-client -t "$1"
         else
@@ -149,7 +149,7 @@ proj() {
                 )
             else
                 echo "Warp point '$1' not found."
-                if type j &>/dev/null; then
+                if which autojump &>/dev/null && type j &>/dev/null; then
                     guess="$(cd / && autojump $1)"
                     echo "$guess"
                     echo -n "Is this the correct directory? (y/n) "
@@ -164,12 +164,12 @@ proj() {
                         return 1
                     fi
                 else
-                    echo "j command not found."
+                    echo "You need autojump installed for this to work."
                     return 1
                 fi
             fi
         else
-            echo "wd command not found."
+            echo "You need wd installed for this to work."
             return 1
         fi
     fi
