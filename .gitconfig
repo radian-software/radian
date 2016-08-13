@@ -29,6 +29,7 @@
         DB = branch -D
         # git checkout
         co = checkout
+        discard = checkout -p
         nb = checkout -b
         back = "!_() { git checkout HEAD~$1; }; _"
         # git stash
