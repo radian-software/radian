@@ -4,7 +4,7 @@
          emacs-version))
 
 ;;; Utility function for user-specific config
-(defun radon-emacs-load-user-config (filename)
+(defun radon-load-user-config (filename)
   "If a file by the specified name exists in the .emacs.d directory,
 loads it."
   (let ((file (concat user-emacs-directory filename)))
@@ -20,10 +20,10 @@ loads it."
 ;;; Control color customizations. Nil for no color customizations and
 ;;; non-nil for all color customizations (for best results use the
 ;;; Solarized Light theme in your terminal emulator).
-(setq radon-emacs-tweak-colors t)
+(setq radon-tweak-colors t)
 
 ;;;; User-specific configuration (1 of 4).
-(radon-emacs-load-user-config "init.local.el")
+(radon-load-user-config "init.local.el")
 
 ;;;; Appearance
 
@@ -163,7 +163,7 @@ loads it."
 
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
-;; This allows radon-emacs to run on other systems without any additional
+;; This allows the setup to run on other systems without any additional
 ;; setup (other than Emacs 24 being installed).
 ;;;;
 
@@ -184,7 +184,7 @@ loads it."
              '("melpa" . "https://melpa.org/packages/")
              t) ; this appends to the end of the list
 
-(defvar my-packages
+(defvar radon-packages
   '(
     ace-jump-mode ; quickly jump to words, characters, or lines onscreen
     aggressive-indent ; keep code correctly indented at all times
@@ -200,7 +200,7 @@ loads it."
     projectile ; quickly jump to files organized by project
     undo-tree ; more intuitive undo/redo
     )
-  "The packages required by radon-emacs.")
+  "The packages required by this Emacs setup.")
 
 ;;; Ensure that we get a stable version of CIDER, and not a snapshot version.
 ;;; This resolved an issue with the 0.13.0 update to CIDER trying to inject
@@ -210,22 +210,22 @@ loads it."
       '((cider . "melpa-stable")))
 
 ;;;; User-specific configuration (2 of 4).
-(radon-emacs-load-user-config "init.local.before.el")
+(radon-load-user-config "init.local.before.el")
 
 ;;; Install required packages, if necessary.
-(unless (cl-every 'package-installed-p my-packages)
+(unless (cl-every 'package-installed-p radon-packages)
   ;; Make sure to get the latest version of each package.
   (package-refresh-contents)
   ;; Install the missing packages.
-  (dolist (p my-packages)
+  (dolist (p radon-packages)
     (when (not (package-installed-p p))
       (package-install p))))
 
 ;;; Make the installed packages available.
-(provide 'my-packages)
+(provide 'radon-packages)
 
 ;;;; User-specific configuration (3 of 4).
-(radon-emacs-load-user-config "init.local.after.el")
+(radon-load-user-config "init.local.after.el")
 
 ;;;; Package: Ace Jump Mode
 ;; Allows quickly jumping to an arbitrary word, character, or line.
@@ -322,7 +322,7 @@ loads it."
 
 ;;; Get rid of the awful background color for buffers corresponding to files
 ;;; modified outside of Emacs.
-(when radon-emacs-tweak-colors
+(when radon-tweak-colors
   (set-face-background 'helm-buffer-saved-out nil))
 
 ;;;; Package: Company
@@ -604,14 +604,14 @@ explicitly with Company."
 ;;; weird while it's starting up.
 
 ;;; Load a color theme that looks good with Solarized Light.
-(when radon-emacs-tweak-colors
+(when radon-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
 ;;; The default highlight color for I-searches is quite dark and makes it hard
 ;;; to read the highlighted text. Change it to a nice light blue, and get rid of
 ;;; the distracting underline. (I mean really, how is an *underline* supposed to
 ;;; help you see something that's highlighted in *bright blue*?)
-(when radon-emacs-tweak-colors
+(when radon-tweak-colors
   (set-face-background 'lazy-highlight "#B1EAFC")
   (set-face-underline 'lazy-highlight nil))
 
@@ -676,4 +676,4 @@ brackets.")
 (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist))
 
 ;;;; User-specific configuration (4 of 4).
-(radon-emacs-load-user-config "init.local.final.el")
+(radon-load-user-config "init.local.final.el")
