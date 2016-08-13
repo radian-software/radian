@@ -120,7 +120,7 @@ version_as_recent() {
 # non-zero otherwise.
 is_installed_correctly() {
     echo "[ensure-installed] Checking if $executable is available on the \$PATH."
-    if hash $executable 2>/dev/null; then
+    if command -v "$executable" &>/dev/null; then
         echo "[ensure-installed] $executable appears to be available on the \$PATH."
         if requires_version; then
             echo "[ensure-installed] Checking the version of $executable using '$executable $version_subcommand'."
@@ -130,8 +130,13 @@ is_installed_correctly() {
             version_line="$(echo "$version_output" | egrep -m 1 "^$prefix")" || true
             if [[ $version_line ]]; then
                 version_and_rest="${version_line#$prefix}"
-                version="${version_and_rest%% *}"
-                echo "[ensure-installed] The version appears to be $version."
+                raw_version="${version_and_rest%% *}"
+                echo "[ensure-installed] The version appears to be $raw_version."
+                version="${raw_version%%-*}"
+                version="${version%%_*}"
+                if [[ $raw_version != $version ]]; then
+                    echo "[ensure-installed] After trimming, this becomes $version."
+                fi
                 if ! (echo "$version" | egrep -q "^[0-9]+(\.[0-9]+)*$"); then
                     echo "[ensure-installed] The version appears to be malformed."
                     echo "[ensure-installed] Assuming that the version is incorrect."

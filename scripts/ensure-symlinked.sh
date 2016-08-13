@@ -22,7 +22,9 @@
 set -e
 set -o pipefail
 
-# Having $uuid is necessary for backing up existing symlinks.
+source ensure-uuid-set.sh
+
+# Having $uuid is necessary for backing up existing files.
 if [[ -z $uuid ]]; then
     echo "[ensure-symlinked] Fatal error: \$uuid not set."
     exit 1

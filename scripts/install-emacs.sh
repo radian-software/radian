@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-if ensure-installed.sh /Applications/Emacs.app/Contents/MacOS/Emacs --version "GNU Emacs" 24.5.1 assert; then
+if ./ensure-installed.sh /Applications/Emacs.app/Contents/MacOS/Emacs --version "GNU Emacs" 24.5.1 assert; then
     echo "[install-emacs] It looks like an appropriate version of Emacs is already installed, but it is not symlinked correctly."
 else
     echo "[install-emacs] It looks like an appropriate version of Emacs is not installed."

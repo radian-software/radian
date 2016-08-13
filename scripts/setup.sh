@@ -7,7 +7,7 @@ set -o pipefail
 
 echo '[setup] Setting up raxod502/dotfiles.'
 
-trap 'echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."' EXIT
+trap 'echo && echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."' EXIT
 
 cd "$(dirname "$0")"
 
@@ -18,20 +18,20 @@ echo "[setup] The UUID for this session is $uuid."
 
 ### Bootstrapping ###
 
-./install-xcode-cl-tools.sh
-./install-homebrew.sh
+./ensure-xcode-cl-tools-installed.sh
+./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
 ./ensure-installed.sh wget
 
 ### Git ###
 
 ./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
-./symlink-git-dotfiles.sh
+./ensure-gitconfig-local-exists.sh
 
 ### Zsh ###
 
 ./ensure-installed.sh zsh --version zsh 5.2
-./change-login-shell.sh
-./install-antigen.sh
+./ensure-login-shell-set.sh
+./ensure-antigen-installed.sh
 ./ensure-installed.sh autojump
 ./ensure-symlinked.sh ~/.zshrc ../.zshrc
 
@@ -42,7 +42,7 @@ echo "[setup] The UUID for this session is $uuid."
 
 ### Leiningen ###
 
-./install-jdk.sh
+./ensure-installed.sh javac -version javac 1.6 ./install-jdk.sh
 ./ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
 ./ensure-symlinked.sh ~/.lein/profiles.clj ../profiles.clj
 
@@ -72,6 +72,9 @@ trap EXIT
 
 echo
 echo "[setup] We're all done. Enjoy!"
-echo '[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically.'
+echo "[setup] Note that programs such as Zsh, Leiningen, and Emacs may still have to download dependencies."
+echo "[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically."
 echo "[setup] Starting a new shell session in $(pwd)."
+read -p "[setup] Press RET to continue."
+
 exec zsh -l
