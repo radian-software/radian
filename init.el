@@ -1,5 +1,4 @@
-;;;; Ensure at least Emacs 24.5.1
-
+;;; Ensure at least Emacs 24.5.1
 (when (version< emacs-version "24.5.1")
   (error "This setup requires at least Emacs 24.5.1 (running Emacs %s)"
          emacs-version))
