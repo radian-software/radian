@@ -29,8 +29,6 @@
 set -e
 set -o pipefail
 
-echo "[ensure-installed] Called with arguments: $@"
-
 ### Parse arguments ###
 
 executable="$1"
@@ -47,6 +45,19 @@ if [[ $min_version != any-version ]] && ! (echo "$min_version" | egrep -q "^[0-9
 fi
 package_manager="${5:-brew}"
 package_name="${6:-$executable}"
+
+### Report task ###
+
+echo -n "[ensure-installed] Ensuring that "
+if [[ $min_version != any-version ]]; then
+    echo -n "version $min_version or more recent of "
+fi
+echo "$executable is installed."
+if [[ $min_version != any-version ]]; then
+    echo "[ensure-installed] Will check the version using $executable $version_subcommand."
+    echo "[ensure-installed] Expecting the output to look something like: $version_command_name $min_version."
+fi
+echo "[ensure-installed] If necessary, will install via the '$package_name' $package_manager package."
 
 ### Version checking functions ###
 

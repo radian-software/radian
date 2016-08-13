@@ -46,6 +46,14 @@ if [[ $real ]]; then
     real="$(cd "${real%/*}" && pwd)/${real##*/}"
 fi
 
+### Report task ###
+
+if [[ $real ]]; then
+    echo "[ensure-symlinked] Ensuring that $link is symlinked to $real."
+else
+    echo "[ensure-symlinked] Ensuring that $link does not exist."
+fi
+
 ### Subroutines ###
 
 move_existing() {
