@@ -119,15 +119,8 @@ proj() {
                     tmux new-window -t "$1:3" -n zsh
                     tmux new-window -t "$1:4" -n zsh
 
-                    # Select the 'git' window initially. This can't be
-                    # done with directly because -- for whatever
-                    # reason -- 'tmux select-window' will act on the
-                    # *current* tmux session, rather than the one we
-                    # are switching to. Yes, even if we do it at the
-                    # very end. Instead, we create a throwaway window
-                    # for the command, which will be closed automatically
-                    # once the command completes.
-                    tmux new-window -t "$1:5" -n select-initial-window "tmux select-window -t 2"
+                    # Select the 'git' window initially.
+                    tmux select-window -t "$1:2"
 
                     # Run the $2 command in all windows, if necessary.
                     if [[ $2 ]]; then
