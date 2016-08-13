@@ -158,10 +158,10 @@
 ;;; packages we need, such as Projectile. Therefore, add the melpa-stable
 ;;; repository. We need melpa (non-stable) for helm-smex.
 (add-to-list 'package-archives
-             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
+             '("melpa-stable" . "https://stable.melpa.org/packages/")
              t) ; this appends to the end of the list
 (add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/")
+             '("melpa" . "https://melpa.org/packages/")
              t) ; this appends to the end of the list
 
 (defvar my-packages
