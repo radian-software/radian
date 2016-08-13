@@ -4,14 +4,17 @@
 # Ensure that an executable is installed, optionally requiring a minimum
 # version. If the executable is not installed, use a package manager to
 # install it. Try to avoid re-installing the executable if the only
-# problem is broken symlinks.
+# problem is broken symlinks. Allowable package managers are brew, gem,
+# assert (which will cause the script to exit non-zero if the executable
+# is not installed), or any other command (which will be called with no
+# arguments).
 
 # Arguments:
 # $1 = name of executable that should be installed
 # $2 = subcommand to get version (defaults to --version)
 # $3 = command name in version command output (defaults to executable name)
 # $4 = minimum version (defaults to any-version)
-# $5 = package manager (defautls to brew, currently only brew is allowed)
+# $5 = package manager (brew, gem, assert, or other script; defaults to brew)
 # $6 = name of package for package manager (defaults to executable name)
 
 # Preconditions:
@@ -49,6 +52,8 @@ if [[ $package_manager == brew ]]; then
     install_command="brew install $package_name"
 elif [[ $package_manager == gem ]]; then
     install_command="sudo gem install $package_name"
+elif [[ $package_manager == assert ]]; then
+    install_command="exit 1"
 else
     install_command="$package_manager"
 fi
@@ -61,10 +66,12 @@ if [[ $min_version != any-version ]]; then
 fi
 echo "$executable is installed."
 if [[ $min_version != any-version ]]; then
-    echo "[ensure-installed] Will check the version using $executable $version_subcommand."
-    echo "[ensure-installed] Expecting the output to look something like: $version_command_name $min_version."
+    echo "[ensure-installed] Will check the version using '$executable $version_subcommand'."
+    echo "[ensure-installed] Expecting the output to look something like '$version_command_name $min_version'."
 fi
-echo "[ensure-installed] If necessary, will install via '$install_command'."
+if [[ $package_manager != assert ]]; then
+    echo "[ensure-installed] If necessary, will install via '$install_command'."
+fi
 
 ### Version checking functions ###
 
@@ -188,7 +195,9 @@ install() {
             echo "[ensure-installed] No versions appear to be installed via Homebrew."
         fi
     fi
-    echo "[ensure-installed] Installing the most recent version of $executable using '$install_command'."
+    if [[ $package_manager != assert ]]; then
+        echo "[ensure-installed] Installing the most recent version of $executable using '$install_command'."
+    fi
     $install_command
 }
 

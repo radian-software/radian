@@ -48,7 +48,12 @@ echo "[setup] The UUID for this session is $uuid."
 
 ### Emacs ###
 
-./install-emacs.sh
+./ensure-installed.sh emacs --version "GNU Emacs" 24.5.1 ./install-emacs.sh
+if [[ /usr/local/bin/emacs -ef emacs ]]; then
+    ./ensure-symlinked.sh /usr/local/bin/emacsw emacsw
+else
+    ./ensure-symlinked.sh /usr/local/bin/emacsw "$(which emacs)"
+fi
 ./ensure-symlinked.sh ~/.emacs
 ./ensure-symlinked.sh ~/.emacs.el
 ./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el

@@ -42,6 +42,11 @@ if [[ $real ]]; then
         echo "[ensure-symlinked] Fatal error: $real does not exist."
     fi
 
+    # Account for relative paths to files in the current directory.
+    if [[ $real != /* ]]; then
+        real="./$real"
+    fi
+
     # Make $real an absolute path.
     real="$(cd "${real%/*}" && pwd)/${real##*/}"
 fi
@@ -66,6 +71,11 @@ move_existing() {
 if [[ $real ]]; then
     echo "[ensure-symlinked] Ensuring that intermediate directories exist."
     mkdir -p "${link%/*}"
+
+    # Account for relative paths to files in the current directory.
+    if [[ $link != /* ]]; then
+        link="./$link"
+    fi
 
     # Make $link an absolute path. We can only do this after ensuring that
     # intermediate directories exist.
