@@ -83,44 +83,35 @@
                                          {:url "https://clojars.org/repo/"}]]
                                        args)))))
 
-                        ;; For some reason, Leiningen tries to resolve every unquoted
-                        ;; symbol in the :injections code, even the ones that wouldn't
-                        ;; be resolved normally (e.g. the vinyasa.inject/in symbol
-                        ;; inside the when form). So to prevent it from choking on the
-                        ;; potentially nonexistent symbol inside the when block we have
-                        ;; to use this hilariously ridiculous eval hack.
-                        (when (resolve 'vinyasa.inject/in)
-                          (eval
-                            `(~(symbol "vinyasa.inject/in")
-                              ~'[alembic.still distill lein load-project])))]}
+                        (when-let [inject (resolve 'vinyasa.inject/inject)]
+                          ;; We have to use extra brackets because of a bug
+                          ;; in vinyasa. See https://github.com/zcaudate/vinyasa/pull/31
+                          (inject '[[alembic.still distill lein load-project]]))]}
 
  :pull {:dependencies [;; Pull dependencies from Clojars in the REPL
                        [im.chit/vinyasa.maven "0.4.7"]]
 
-        :injections [;; See :alembic profile for an explanation of this hack.
-                     (when (resolve 'vinyasa.inject/in)
-                       (eval
-                         `(~(symbol "vinyasa.inject/in")
-                           ~'[vinyasa.maven pull])))]}
+        :injections [(when-let [inject (resolve 'vinyasa.inject/inject)]
+                       ;; We have to use extra brackets because of a bug
+                       ;; in vinyasa. See https://github.com/zcaudate/vinyasa/pull/31
+                       (inject '[[vinyasa.maven pull]]))]}
 
  :reflection {:dependencies [;; Convenient reflection functions
                              [im.chit/vinyasa.reflection "0.4.7"]]
 
-              :injections [;; See :alembic profile for an explanation of this hack.
-                           (when (resolve 'vinyasa.inject/in)
-                             (eval
-                               `(~(symbol "vinyasa.inject/in")
-                                 ~'clojure.core
-                                 ~'[vinyasa.reflection .& .> .? .* .% .%>])))]}
+              :injections [(when-let [inject (resolve 'vinyasa.inject/inject)]
+                             ;; We have to use extra brackets because of a bug
+                             ;; in vinyasa. See https://github.com/zcaudate/vinyasa/pull/31
+                             (inject '[clojure.core
+                                       [vinyasa.reflection .& .> .? .* .% .%>]]))]}
 
  :refresh {:dependencies [;; Properly refresh a dirty namespace
                           [org.clojure/tools.namespace "0.2.11"]]
 
-           :injections [;; See :alembic profile for an explanation of this hack.
-                        (when (resolve 'vinyasa.inject/in)
-                          (eval
-                            `(~(symbol "vinyasa.inject/in")
-                              ~'[clojure.tools.namespace.repl refresh refresh-all])))]}
+           :injections [(when-let [inject (resolve 'vinyasa.inject/inject)]
+                          ;; We have to use extra brackets because of a bug
+                          ;; in vinyasa. See https://github.com/zcaudate/vinyasa/pull/31
+                          (inject '[[clojure.tools.namespace.repl refresh refresh-all]]))]}
 
  ;; END profiles with optional injections
 
