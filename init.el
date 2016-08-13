@@ -141,6 +141,16 @@
 ;;; would anyone want their editor to *sometimes* use tabs?)
 (setq-default indent-tabs-mode nil)
 
+;;; Sentences end with one space, not two. If you end sentences with
+;;; one space, this has two concrete effects on filling with M-q.
+;;; Firstly, it allows Emacs to break directly after a sentence.
+;;; Secondly, consider the case when the end of a line has an
+;;; end-of-sentence period followed by trailing whitespace and when at
+;;; least the last word of the sentence is too long for the line. In
+;;; that case, this option prevents filling from inserting two spaces
+;;; after the period when it is wrapped to the next line.
+(setq sentence-end-double-space nil)
+
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows radon-emacs to run on other systems without any additional
