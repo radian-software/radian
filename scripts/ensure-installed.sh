@@ -45,6 +45,13 @@ if [[ $min_version != any-version ]] && ! (echo "$min_version" | egrep -q "^[0-9
 fi
 package_manager="${5:-brew}"
 package_name="${6:-$executable}"
+if [[ $package_manager == brew ]]; then
+    install_command="brew install $package_name"
+elif [[ $package_manager == gem ]]; then
+    install_command="sudo gem install $package_name"
+else
+    install_command="$package_manager"
+fi
 
 ### Report task ###
 
@@ -57,7 +64,7 @@ if [[ $min_version != any-version ]]; then
     echo "[ensure-installed] Will check the version using $executable $version_subcommand."
     echo "[ensure-installed] Expecting the output to look something like: $version_command_name $min_version."
 fi
-echo "[ensure-installed] If necessary, will install via the '$package_name' $package_manager package."
+echo "[ensure-installed] If necessary, will install via '$install_command'."
 
 ### Version checking functions ###
 
@@ -180,12 +187,9 @@ install() {
         else
             echo "[ensure-installed] No versions appear to be installed via Homebrew."
         fi
-        echo "[ensure-installed] Installing the most recent version of $executable using 'brew install $package_name'."
-        brew install "$package_name"
-    elif [[ $package_manager == gem ]]; then
-        echo "[ensure-installed] Installing the most recent version of $executable using 'sudo gem install $package_name'."
-        sudo gem install "$package_name"
     fi
+    echo "[ensure-installed] Installing the most recent version of $executable using '$install_command'."
+    $install_command
 }
 
 ### Main logic ###
