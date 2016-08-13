@@ -3,6 +3,14 @@
   (error "This setup requires at least Emacs 24.5.1 (running Emacs %s)"
          emacs-version))
 
+;;; Utility function for user-specific config
+(defun radon-emacs-load-user-config (filename)
+  "If a file by the specified name exists in the .emacs.d directory,
+loads it."
+  (let ((file (concat user-emacs-directory filename)))
+    (when (file-exists-p file)
+      (load-file file))))
+
 ;;;; Tweakable parameters
 
 ;; These parameters let people using this init-file as a starting point
@@ -13,6 +21,9 @@
 ;;; non-nil for all color customizations (for best results use the
 ;;; Solarized Light theme in your terminal emulator).
 (setq radon-emacs-tweak-colors t)
+
+;;;; User-specific configuration (1 of 4).
+(radon-emacs-load-user-config "init.local.el")
 
 ;;;; Appearance
 
@@ -198,6 +209,9 @@
 (setq package-pinned-packages
       '((cider . "melpa-stable")))
 
+;;;; User-specific configuration (2 of 4).
+(radon-emacs-load-user-config "init.local.before.el")
+
 ;;; Install required packages, if necessary.
 (unless (cl-every 'package-installed-p my-packages)
   ;; Make sure to get the latest version of each package.
@@ -209,6 +223,9 @@
 
 ;;; Make the installed packages available.
 (provide 'my-packages)
+
+;;;; User-specific configuration (3 of 4).
+(radon-emacs-load-user-config "init.local.after.el")
 
 ;;;; Package: Ace Jump Mode
 ;; Allows quickly jumping to an arbitrary word, character, or line.
@@ -657,3 +674,6 @@ brackets.")
 (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent"))
 (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist))
 (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist))
+
+;;;; User-specific configuration (4 of 4).
+(radon-emacs-load-user-config "init.local.final.el")
