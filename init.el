@@ -43,6 +43,20 @@ loads it."
     )
   "The packages required by this Emacs setup.")
 
+;;; Convenience functions for adding and removing packages; for use in
+;;; init.local.el.
+
+(defun radon-add-package (package)
+  "Adds the provided package from radon-packages, if it is not already
+present."
+  (add-to-list 'radon-packages
+               package
+               t)) ; this adds to the end of the list
+
+(defun radon-remove-package (package)
+  "Removes the provided package from radon-packages, if it is present."
+  (setq radon-packages (delete package radon-packages)))
+
 ;;;; User-specific configuration (1 of 4).
 (radon-load-user-config "init.local.el")
 
