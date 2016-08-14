@@ -96,11 +96,11 @@ version_as_recent() {
     for i in "${!old_components[@]}"; do
         # The first check makes version_as_recent 2.7.3 2.7 return false.
         # The second check makes version_as_recent 2.7.3 2.6.5 return false.
-        if [[ $i -ge ${#new_components[@]} || ${new_components[$i]} < ${old_components[$i]} ]]; then
+        if [[ (( $i -ge ${#new_components[@]} )) || (( ${new_components[$i]} < ${old_components[$i]} )) ]]; then
             return 1
         fi
         # This check makes version_as_recent 2.7.3 2.8.1 return true.
-        if [[ ${new_components[$i]} > ${old_components[$i]} ]]; then
+        if (( ${new_components[$i]} > ${old_components[$i]} )); then
             return 0;
         fi
     done
