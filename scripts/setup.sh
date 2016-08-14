@@ -3,6 +3,19 @@
 set -e
 set -o pipefail
 
+### Prevent sourcing ###
+
+interpreter_name="$(basename "$SHELL")"
+if [[ $0 != $BASH_SOURCE ]]; then
+    echo "[setup] Something is wrong with the way this script is being run."
+    echo "[setup] Perhaps you sourced it instead of running it as an executable."
+    echo "[setup] Or your system's version of bash could be too old."
+    bash --version
+    set +e
+    set +o pipefail
+    return 1 2>/dev/null || exit 1
+fi
+
 ### Setup ###
 
 echo '[setup] Setting up raxod502/dotfiles.'
