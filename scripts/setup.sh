@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -e
-set -o pipefail
-
 ### Prevent sourcing ###
 
 interpreter_name="$(basename "$SHELL")"
@@ -11,10 +8,14 @@ if [[ $0 != $BASH_SOURCE ]]; then
     echo "[setup] Perhaps you sourced it instead of running it as an executable."
     echo "[setup] Or your system's version of bash could be too old."
     bash --version
-    set +e
-    set +o pipefail
     return 1 2>/dev/null || exit 1
 fi
+
+### Script environment ###
+
+set -e
+set -o pipefail
+cd "$(dirname "$0")"
 
 ### Compute features ###
 
@@ -25,8 +26,6 @@ source compute-features.sh
 echo "[setup] Setting up raxod502/dotfiles. Prepare to be amazed."
 
 trap 'echo && echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."' EXIT
-
-cd "$(dirname "$0")"
 
 export uuid=$(uuidgen)
 mkdir originals 2>/dev/null || true
