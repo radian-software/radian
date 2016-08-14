@@ -75,6 +75,8 @@ echo "[setup] We're all done. Enjoy!"
 echo "[setup] Note that programs such as Zsh, Leiningen, and Emacs may still have to download dependencies."
 echo "[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically."
 echo "[setup] Starting a new shell session in $(pwd)."
+echo "[setup] Please be aware that the new shell session will be nested inside your original shell session."
+echo "[setup] Any aliases or environment variables will not be cleared."
 read -p "[setup] Press RET to continue."
 
 exec zsh -l
