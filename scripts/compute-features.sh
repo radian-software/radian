@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-### Utility functions ###
+### Utility function ###
 
 # Usage: contains <element> <array> <var>
 # Returns zero iff <element> is in <array>. Sets $<var> to the index of
@@ -23,7 +23,7 @@ index_of() {
     return 1
 }
 
-### Parse arguments ###
+### Parse quantifier ###
 
 case $1 in
     include | only ) default=false ;;
@@ -38,6 +38,8 @@ else
     nondefault=true
 fi
 
+### Declare dependencies ###
+
 specs=(
     "brew"
     "wget -> brew"
@@ -50,10 +52,15 @@ specs=(
     "tmuxinator -> tmux"
 )
 
+### Declare variables ###
+
+# This isn't actually necessary, but is nice to have as a reference.
 declare -a names
 declare -a states
 declare -a desc_lists
 declare -a anc_lists
+
+### Initialize names, states, and anc_lists ###
 
 for i in "${!specs[@]}"; do
     spec=${specs[$i]}
@@ -66,6 +73,8 @@ for i in "${!specs[@]}"; do
         anc_lists[$i]=
     fi
 done
+
+### Propagate dependencies through desc_lists and anc_lists ###
 
 changed=true
 while [[ $changed == true ]]; do
@@ -98,6 +107,8 @@ while [[ $changed == true ]]; do
         done
     done
 done
+
+### Parse arguments ###
 
 if (( $# >= 2 )); then
     for feature in "${@:2}"; do
@@ -134,6 +145,8 @@ if (( $# >= 2 )); then
     done
 fi
 
+### Utility function ###
+
 # Returns zero iff the feature $1 is enabled.
 feature() {
     index_of "$1" names[@] i
@@ -146,6 +159,8 @@ feature() {
         exit 1
     fi
 }
+
+### Check for all features being disabled or enabled ###
 
 no_features=true
 all_features=true
