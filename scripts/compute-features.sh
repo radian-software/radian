@@ -26,9 +26,9 @@ index_of() {
 ### Parse arguments ###
 
 case $1 in
-    include ) default=false ;;
-    exclude | "" ) default=true ;;
-    * ) echo "[compute-features] Invalid qualifier '$1'. Must be one of [include exclude]."
+    include | only ) default=false ;;
+    exclude | except | but | "" ) default=true ;;
+    * ) echo "[compute-features] Invalid qualifier '$1'. Must be one of [include only exclude except but]."
         exit 1 ;;
 esac
 
