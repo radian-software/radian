@@ -144,18 +144,22 @@ proj() {
                 echo "Warp point '$1' not found."
                 if which autojump &>/dev/null && type j &>/dev/null; then
                     guess="$(cd / && autojump $1)"
-                    echo "$guess"
-                    echo -n "Is this the correct directory? (y/n) "
-                    read answer
-                    if echo "$answer" | egrep -qi "^y"; then
-                        echo -n "Please enter the project name: "
-                        read project
-                        (cd "$guess" && wd add "$project")
-                        proj "$project" "$2"
+                    if [[ $guess != . ]]; then
+                        echo "$guess"
+                        echo -n "Is this the correct directory? (y/n) "
+                        read answer
+                        if echo "$answer" | egrep -qi "^y"; then
+                            echo -n "Please enter the project name: "
+                            read project
+                            (cd "$guess" && wd add "$project")
+                            proj "$project" "$2"
+                            return 0
+                        fi
                     else
-                        echo "You'll have to navigate to the directory manually."
-                        return 1
+                        echo "Can't find any directory by that name."
                     fi
+                    echo "You'll have to navigate to the directory manually before running proj."
+                    return 1
                 else
                     echo "You need autojump installed for this to work."
                     return 1
