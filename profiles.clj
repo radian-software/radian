@@ -160,6 +160,10 @@
             :injections [;; Make the spyscope reader macros available.
                          (require 'spyscope.core)]}
 
+ ;;; Temporary hacks
+
+ :hacks {}
+
  ;;; Composite profiles
 
  ;; This is an easy way to have a custom subset of the above modular profiles enabled in your
@@ -175,4 +179,4 @@
  :test [:humane]
 
  ;; Always, except when building uberjar.
- :user [:hide-app :lint]}
+ :user [:hide-app :lint :hacks]}
