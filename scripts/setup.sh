@@ -19,6 +19,18 @@ cd "$(dirname "$0")"
 
 ### Compute features ###
 
+specs=(
+    "brew"
+    "wget -> brew"
+    "git"
+    "zsh -> brew"
+    "tmux -> brew"
+    "leiningen -> brew"
+    "emacs -> wget"
+    "tree -> brew"
+    "tmuxinator -> tmux"
+)
+
 source compute-features.sh
 
 ### Setup ###

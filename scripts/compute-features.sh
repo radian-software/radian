@@ -38,20 +38,6 @@ else
     nondefault=true
 fi
 
-### Declare dependencies ###
-
-specs=(
-    "brew"
-    "wget -> brew"
-    "git"
-    "zsh -> brew"
-    "tmux -> brew"
-    "leiningen -> brew"
-    "emacs -> wget"
-    "tree -> brew"
-    "tmuxinator -> tmux"
-)
-
 ### Declare variables ###
 
 # This isn't actually necessary, but is nice to have as a reference.
