@@ -37,6 +37,7 @@ loads it."
     helm-projectile ; use helm for projectile
     helm-smex ; sort M-x suggestions by usage
     magit ; a git porcelain inside Emacs
+    markdown-toc ; generate tables of contents for Markdown files
     paredit ; keep parentheses correctly balanced at all times
     projectile ; quickly jump to files organized by project
     undo-tree ; more intuitive undo/redo
