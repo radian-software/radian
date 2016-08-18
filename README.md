@@ -1,15 +1,12 @@
 # dotfiles
 
-This repository contains my personal configurations for Zsh, tmux, Leiningen, and Emacs. I generally try to follow certain guidelines when managing these dotfiles:
+This repository contains my personal configurations for Zsh, tmux, Leiningen, and Emacs.
 
-- All code should be as maintainable as possible. This means it is well-documented, organized, and (if appropriate) modular.
-- Default keybindings should not be changed except in the case of conflicts or egregious unusability. Similarly, new keybindings should not be added unless absolutely necessary.
-- Any potentially objectionable settings should be toggleable.
-- All dotfiles should have hooks to provide user- or machine-specific overrides.
+# Getting started
 
-These guidelines make it convenient for other people to use and customize my dotfiles without having to fork the entire repository.
+If you're on a Mac, simply download or clone this repository and run `scripts/setup.sh` as an executable. Running with no arguments will enable all features (try this for a list—nothing will be installed until you confirm your selection). Alternatively, you can use `include` or `exclude` to enable or disable particular features, e.g. `setup.sh include emacs` or `setup.sh exclude tree tmuxinator`.
 
-A highly WIP Emacs reference follows.
+If you're on Linux, you will have to move the dotfiles you want into your home directory manually. You can check [`setup.sh`](https://github.com/raxod502/dotfiles/blob/master/scripts/setup.sh) to see what programs are expected to be installed, and what the minimum versions are.
 
 # Emacs
 
