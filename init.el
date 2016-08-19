@@ -641,7 +641,17 @@ explicitly with Company."
   ;;; REPL buffer from *opening*. To fix this problem, we add an advice
   ;;; to open the REPL buffer after the REPL has started.
   (defadvice cider-repl-init (after display-repl-buffer)
-    (display-buffer buffer)))
+    (display-buffer buffer))
+
+  ;;; Use figwheel-sidecar for launching ClojureScript REPLs. This supports
+  ;;; a fully integrated ClojureScript development experience in Emacs. For
+  ;;; more information about how to use such a setup, see:
+  ;;; https://github.com/raxod502/minimal-webapp
+  (setq cider-cljs-lein-repl
+        "(do
+  (require 'figwheel-sidecar.repl-api)
+  (figwheel-sidecar.repl-api/start-figwheel!)
+  (figwheel-sidecar.repl-api/cljs-repl))"))
 
 ;;;; Package: Paredit
 ;; Automatically balances parentheses and provides keybindings for structural
