@@ -434,6 +434,17 @@ explicitly with Company."
   ;;; Turn on company-statistics.
   (company-statistics-mode 1))
 
+;;;; Package: Markdown TOC
+;; Generates tables of contents for Markdown files.
+;;;;
+
+(when (member 'markdown-toc radon-packages)
+
+  ;; Remove the header inserted before the table of contents. If you want a
+  ;; header, just add one before the "markdown-toc start" comment -- this way,
+  ;; you can have different header styles in different documents.
+  (setq markdown-toc-header-toc-title ""))
+
 ;;;; Package: ElDoc
 ;; Automatically shows the signature of the function at point in the echo
 ;; area. Also works with variables, for which the first line of the docstring

@@ -8,11 +8,13 @@ If you're on a Mac, simply download or clone this repository and run `scripts/se
 
 If you're on Linux, you will have to move the dotfiles you want into your home directory manually. You can check [`setup.sh`](https://github.com/raxod502/dotfiles/blob/master/scripts/setup.sh) to see what programs are expected to be installed, and what the minimum versions are.
 
+## Table of contents
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-generate-toc again -->
-**Table of Contents**
+
 
 - [Overview](#overview)
 - [Getting started](#getting-started)
+    - [Table of contents](#table-of-contents)
 - [Emacs](#emacs)
     - [Keyboard shortcut notation](#keyboard-shortcut-notation)
     - [Panic](#panic)
