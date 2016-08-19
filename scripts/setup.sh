@@ -97,6 +97,8 @@ if feature emacs; then
     else
         ./ensure-symlinked.sh /usr/local/bin/emacsw "$(which emacs)"
     fi
+    # If the .emacs or .emacs.el files are present, then Emacs will not load init.el.
+    # Therefore, we need to ensure that these files do not exist.
     ./ensure-symlinked.sh ~/.emacs
     ./ensure-symlinked.sh ~/.emacs.el
     ./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el
