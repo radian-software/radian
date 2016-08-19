@@ -568,8 +568,9 @@ explicitly with Company."
 
 (when (member 'cider radon-packages)
 
-  ;;; Allow usage of the C-c M-j shortcut everywhere.
+  ;;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
   (global-set-key (kbd "C-c M-j") 'cider-jack-in)
+  (global-set-key (kbd "C-c M-J") 'cider-jack-in-clojurescript)
 
   ;;; By default, any error messages that occur when CIDER is starting up
   ;;; are placed in the *nrepl-server* buffer and not in the *cider-repl*
