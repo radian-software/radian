@@ -24,7 +24,9 @@ loads it."
 
 ;;; Define package list. These can be overridden in init.local.el, and
 ;;; whichever ones are in the list after that will be installed and
-;;; provided.
+;;; provided. Please note that the formatting of this definition
+;;; *must* be preserved, as it is read programmatically by
+;;; create-init-before-local-el.sh.
 (defvar radon-packages
   '(
     ace-jump-mode ; quickly jump to words, characters, or lines onscreen

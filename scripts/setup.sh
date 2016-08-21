@@ -131,6 +131,7 @@ if feature emacs; then
     ./ensure-symlinked.sh ~/.emacs
     ./ensure-symlinked.sh ~/.emacs.el
     ./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el
+    ./ensure-symlinked.sh ~/.emacs.d/init.before.local.el ../../dotfiles-local/init.before.local.el ./create-init-before-local-el.sh
 fi
 
 ### Utilities ###
