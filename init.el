@@ -59,7 +59,7 @@ present."
   (setq radon-packages (delete package radon-packages)))
 
 ;;;; User-specific configuration (1 of 4).
-(radon-load-user-config "init.local.el")
+(radon-load-user-config "init.before.local.el")
 
 ;;;; Appearance
 
@@ -228,7 +228,7 @@ present."
       '((cider . "melpa-stable")))
 
 ;;;; User-specific configuration (2 of 4).
-(radon-load-user-config "init.local.before.el")
+(radon-load-user-config "init.pre.local.el")
 
 ;;; Install required packages, if necessary.
 (unless (cl-every 'package-installed-p radon-packages)
@@ -243,7 +243,7 @@ present."
 (provide 'radon-packages)
 
 ;;;; User-specific configuration (3 of 4).
-(radon-load-user-config "init.local.after.el")
+(radon-load-user-config "init.post.local.el")
 
 ;;;; Package: Ace Jump Mode
 ;; Allows quickly jumping to an arbitrary word, character, or line.
@@ -781,4 +781,4 @@ brackets."))
   (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist)))
 
 ;;;; User-specific configuration (4 of 4).
-(radon-load-user-config "init.local.final.el")
+(radon-load-user-config "init.local.el")
