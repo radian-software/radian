@@ -103,6 +103,7 @@ fi
 if feature tmux; then
     ./ensure-installed.sh tmux -V tmux 2.2
     ./ensure-symlinked.sh ~/.tmux.conf ../.tmux.conf
+    ./ensure-symlinked.sh ~/.tmux.local.conf ../../dotfiles-local/.tmux.local.conf ./create-tmux-local-conf.sh
 fi
 
 ### Leiningen ###
