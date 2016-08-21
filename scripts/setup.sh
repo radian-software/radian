@@ -51,7 +51,17 @@ export uuid="$(date +"%F=%T")=$(uuidgen)"
 mkdir -p originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
-mkdir ../local 2>/dev/null || true
+repo_name="$(basename "$PWD")"
+if [[ $repo_name == dotfiles-local ]]; then
+    echo "[setup] Fatal error: this repository cannot be called 'dotfiles-local'. Please rename it."
+    exit 1
+fi
+if [[ -f ../../dotfiles-local || -L ../../dotfiles-local && ! -e ../../dotfiles-local ]]; then
+    echo "[setup] You appear to have something called 'dotfiles-local' next to '$repo_name' that is either a file or an invalid symlink."
+    echo "[setup] Moving it to originals/$uuid."
+    mv ../../dotfiles-local originals/$uuid/dotfiles-local
+fi
+mkdir ../../dotfiles-local 2>/dev/null || true
 
 ### Warn the user of upcoming awesomeness ###
 
@@ -74,7 +84,7 @@ fi
 if feature git; then
     # We want to do the local setup first, so that it can read any preexisting
     # config to copy over from the original ~/.gitconfig.
-    ./ensure-symlinked.sh ~/.gitconfig.local ../local/.gitconfig.local ./setup-gitconfig-local.sh
+    ./ensure-symlinked.sh ~/.gitconfig.local ../../dotfiles-local/.gitconfig.local ./setup-gitconfig-local.sh
     ./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
 fi
 

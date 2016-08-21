@@ -65,6 +65,6 @@ EOF
     contents="$contents$(printf "$format" "$editor")"$'\n'
 fi
 
-echo -n "$contents" > ../local/.gitconfig.local
-echo "[setup-gitconfig-local] Wrote the following to local/.gitconfig.local:"
-cat ../local/.gitconfig.local
+echo -n "$contents" > ../../dotfiles-local/.gitconfig.local
+echo "[setup-gitconfig-local] Wrote the following to dotfiles-local/.gitconfig.local:"
+cat ../../dotfiles-local/.gitconfig.local

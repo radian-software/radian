@@ -42,19 +42,19 @@ setup="$3"
 ### Create symlink target, if necessary ###
 
 if [[ $setup ]]; then
-    echo "[ensure-symlinked] Ensuring that ${real#../} exists."
+    echo "[ensure-symlinked] Ensuring that $real exists."
     if [[ -d $real || -L $real && ! -e $real ]]; then
-        echo "[ensure-symlinked] Your ${real#../} appears to be either a directory or an invalid symlink."
+        echo "[ensure-symlinked] Your $real appears to be either a directory or an invalid symlink."
         echo "[ensure-symlinked] Moving it to originals/$uuid as $real.real."
         mv "$real" "originals/$uuid/$real.real"
     fi
     if [[ -e $real ]]; then
-        echo "[ensure-symlinked] ${real#../} already exists. If you would like to set it up again, please remove it and re-run setup.sh."
+        echo "[ensure-symlinked] $real already exists. If you would like to set it up again, please remove it and re-run setup.sh."
     else
-        echo "[ensure-symlinked] ${real#../} does not exist. Setting it up with '$setup'."
+        echo "[ensure-symlinked] $real does not exist. Setting it up with '$setup'."
         $setup
         if [[ ! -e $real ]]; then
-            echo "[ensure-symlinked] Fatal error: ${real#../} should exist by now."
+            echo "[ensure-symlinked] Fatal error: $real should exist by now."
             exit 1
         fi
     fi
