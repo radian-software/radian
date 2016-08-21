@@ -700,6 +700,9 @@ explicitly with Company."
   (set-face-background 'lazy-highlight "#B1EAFC")
   (set-face-underline 'lazy-highlight nil))
 
+;;; Eliminate the underline on mismatched parens.
+(set-face-underline 'show-paren-mismatch nil)
+
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
 
