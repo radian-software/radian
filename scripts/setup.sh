@@ -96,6 +96,7 @@ if feature zsh; then
     ./ensure-antigen-installed.sh
     ./ensure-installed.sh autojump
     ./ensure-symlinked.sh ~/.zshrc ../.zshrc
+    ./ensure-symlinked.sh ~/.zshrc.before.local ../../dotfiles-local/.zshrc.before.local ./create-zshrc-before-local.sh
 fi
 
 ### Tmux ###
