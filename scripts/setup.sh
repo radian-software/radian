@@ -129,6 +129,10 @@ if feature tmuxinator; then
     ./ensure-installed.sh tmuxinator version tmuxinator 0.8.1 gem
 fi
 
+### Make sure we're in a git repository ###
+
+./ensure-running-in-repo.sh
+
 ### Cleanup ###
 
 trap EXIT
