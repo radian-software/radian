@@ -98,6 +98,7 @@ if feature zsh; then
     ./ensure-symlinked.sh ~/.zshrc ../.zshrc
     ./ensure-symlinked.sh ~/.zshrc.before.local ../../dotfiles-local/.zshrc.before.local ./create-zshrc-before-local.sh
     ./ensure-symlinked.sh ~/.zshrc.antigen.local ../../dotfiles-local/.zshrc.antigen.local ./create-zshrc-antigen-local.sh
+    ./ensure-symlinked.sh ~/.zshrc.local ../../dotfiles-local/.zshrc.local ./create-zshrc-local.sh
 fi
 
 ### Tmux ###
