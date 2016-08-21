@@ -17,6 +17,18 @@ set -e
 set -o pipefail
 cd "$(dirname "$0")"
 
+### Error handling ###
+
+handle_error() {
+    set +e
+    set +o pipefail
+    find originals -type d -empty -delete 2>/dev/null || true
+    echo
+    echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."
+}
+
+trap handle_error EXIT
+
 ### Compute features ###
 
 specs=(
@@ -33,18 +45,17 @@ specs=(
 
 source compute-features.sh
 
-### Setup ###
+### Create necessary directories ###
 
-echo "[setup] Setting up raxod502/dotfiles. Prepare to be amazed."
-
-trap 'echo && echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."' EXIT
-
-export uuid=$(uuidgen)
-mkdir originals 2>/dev/null || true
-mkdir originals/$uuid
+export uuid="$(date +"%F=%T")=$(uuidgen)"
+mkdir -p originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
 mkdir ../local 2>/dev/null || true
+
+### Warn the user of upcoming awesomeness ###
+
+echo "[setup] Setting up raxod502/dotfiles. Prepare to be amazed."
 
 ### Bootstrapping ###
 
@@ -120,10 +131,11 @@ fi
 
 ### Cleanup ###
 
-rmdir originals/$uuid 2>/dev/null && echo "[setup] No backups were made, deleting originals/$uuid." || true
-rmdir originals 2>/dev/null && echo "[setup] No backup folders remaining, deleting originals." || true
-
 trap EXIT
+set +e
+set +o pipefail
+
+### Finished! ###
 
 echo
 echo "[setup] We're all done. Enjoy!"
