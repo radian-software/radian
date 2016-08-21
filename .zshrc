@@ -1,10 +1,3 @@
-# Tweakable parameters
-export radon_colored_man_pages=true
-export radon_customize_prompt=true
-export radon_resource_alias=true
-export radon_mux_alias=true
-export radon_proj_alias=true
-
 # Local overrides (1 of 3)
 if [[ -f ~/.zshrc.before.local ]]; then
     source ~/.zshrc.before.local
@@ -78,7 +71,7 @@ autoload run-help
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/colored-man-pages/colored-man-pages.plugin.zsh
 # However, this version eliminates the horrid grey-on-blue highlighting
 # for search matches.
-if [[ $radon_colored_man_pages == true ]]; then
+if [[ $radon_colored_man_pages != false ]]; then
     man() {
         env \
 	    LESS_TERMCAP_mb=$(printf "\e[1;31m") \
@@ -91,7 +84,7 @@ if [[ $radon_colored_man_pages == true ]]; then
 fi
 
 # Better prompt (like oh-my-zsh/mgutz, but turns red on nonzero exit code).
-if [[ $radon_customize_prompt == true ]]; then
+if [[ $radon_customize_prompt != false ]]; then
     PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(git_prompt_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
     ZSH_THEME_GIT_PROMPT_PREFIX="["
     ZSH_THEME_GIT_PROMPT_SUFFIX=
@@ -100,12 +93,12 @@ if [[ $radon_customize_prompt == true ]]; then
 fi
 
 # Alias for reloading .zshrc.
-if [[ $radon_resource_alias == true ]]; then
+if [[ $radon_resource_alias != false ]]; then
     alias resource="source ~/.zshrc"
 fi
 
 # Alias for tmuxinator.
-if [[ $radon_mux_alias == true ]]; then
+if [[ $radon_mux_alias != false ]]; then
     alias mux=tmuxinator
 fi
 
@@ -120,7 +113,7 @@ fi
 # 'git checkup' in the second. If you provide a second argument, runs
 # it as a shell command (provide multiple commands with '&&' or ';')
 # in all four windows before anything else.
-if [[ $radon_proj_alias == true ]]; then
+if [[ $radon_proj_alias != false ]]; then
     proj() {
         if echo "$1" | egrep -q "^\s*$"; then
             echo "Please provide a project name."
