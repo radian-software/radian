@@ -2,6 +2,7 @@
 export radon_colored_man_pages=true
 export radon_customize_prompt=true
 export radon_resource_alias=true
+export radon_mux_alias=true
 export radon_proj_alias=true
 
 # Local overrides (1 of 3)
@@ -101,6 +102,11 @@ fi
 # Alias for reloading .zshrc.
 if [[ $radon_resource_alias == true ]]; then
     alias resource="source ~/.zshrc"
+fi
+
+# Alias for tmuxinator.
+if [[ $radon_mux_alias == true ]]; then
+    alias mux=tmuxinator
 fi
 
 # Alias for setting up a tmux session suitable for standard development.
