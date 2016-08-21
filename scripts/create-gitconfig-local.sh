@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-echo "[create-gitconfig-local] Setting up local Git config."
+echo "[create-gitconfig-local] Setting up .gitconfig.local."
 name="$(git config --global --includes user.name)" || true
 if [[ $name ]]; then
     echo "[create-gitconfig-local] Full name: $name"
