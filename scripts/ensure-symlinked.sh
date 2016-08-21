@@ -24,12 +24,6 @@ set -o pipefail
 
 source ensure-uuid-set.sh
 
-# Having $uuid is necessary for backing up existing files.
-if [[ -z $uuid ]]; then
-    echo "[ensure-symlinked] Fatal error: \$uuid not set."
-    exit 1
-fi
-
 ### Parse arguments ###
 
 link="$1"
