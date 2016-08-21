@@ -15,6 +15,7 @@
         all = log --color --graph --decorate --all
         tree = log --color --graph --pretty=format:'%C(bold cyan)%h%Creset -%C(bold green)%d%Creset %s %C(bold green)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
         graph = log --color --graph --pretty=format:'%C(bold cyan)%h%Creset -%C(bold green)%d%Creset %s %C(bold green)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all
+        root = rev-list --max-parents=0 HEAD
         # git add
         review = add -p
         # git reset
