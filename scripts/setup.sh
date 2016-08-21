@@ -44,6 +44,8 @@ mkdir originals 2>/dev/null || true
 mkdir originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
+mkdir ../local 2>/dev/null || true
+
 ### Bootstrapping ###
 
 ./ensure-xcode-cl-tools-installed.sh
@@ -59,8 +61,10 @@ fi
 ### Git ###
 
 if feature git; then
+    # We want to do the local setup first, so that it can read any preexisting
+    # config to copy over from the original ~/.gitconfig.
+    ./ensure-symlinked.sh ~/.gitconfig.local ../local/.gitconfig.local ./setup-gitconfig-local.sh
     ./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
-    ./ensure-gitconfig-local-exists.sh
 fi
 
 ### Zsh ###
