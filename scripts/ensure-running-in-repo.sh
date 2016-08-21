@@ -5,7 +5,7 @@ set -o pipefail
 
 cd ..
 repo_name="$(basename "$PWD")"
-echo "[ensure-running-in-repo] Checking if '$repo_name' is a Git repository."
+echo "[ensure-running-in-repo] Ensuring that '$repo_name' is a Git repository."
 if git rev-parse --is-inside-work-tree; then
     echo "[ensure-running-in-repo] It looks like '$repo_name' is a Git repository."
 else
