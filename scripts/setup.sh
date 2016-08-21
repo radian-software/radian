@@ -84,7 +84,7 @@ fi
 if feature git; then
     # We want to do the local setup first, so that it can read any preexisting
     # config to copy over from the original ~/.gitconfig.
-    ./ensure-symlinked.sh ~/.gitconfig.local ../../dotfiles-local/.gitconfig.local ./setup-gitconfig-local.sh
+    ./ensure-symlinked.sh ~/.gitconfig.local ../../dotfiles-local/.gitconfig.local ./create-gitconfig-local.sh
     ./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
 fi
 
