@@ -12,7 +12,9 @@ source ~/.antigen-repo/antigen.zsh
 # number of oh-my-zsh plugins and themes to work correctly.
 antigen use oh-my-zsh
 
-# Define default bundle list.
+# Define default bundle list. Please note that the formatting of this
+# definition *must* be preserved, as it is read programmatically by
+# create-zshrc-antigen-local.sh.
 bundles=(
     autojump # Use 'j' to jump to frequent directories with fuzzy-matching
     brew # Completion for brew
