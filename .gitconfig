@@ -31,7 +31,7 @@
         # git checkout
         co = checkout
         discard = checkout -p
-        nb = checkout -b
+        nb = "!_() { git checkout -b \"$1\" || (printf \"Force? (y/n) \" && read answer && (echo \"$answer\" | egrep -qi \"^y\") && git checkout -B \"$1\"); }; _"
         back = "!_() { git checkout HEAD~$1; }; _"
         # git stash
         stash-rename = "!_() { newmsg=\"$1\" && stash=${2:-\"stash@{0}\"} && newbranch=\"$3\" && sha=$(git rev-parse \"$stash\") && olddesc=\"$(git stash list --format=%gs -1 \"$stash\")\" && newdesc=\"$(if [[ \"$newbranch\" = \".\" ]]; then echo \"$newmsg\"; else if [[ -n \"$newbranch\" ]]; then echo \"On $newbranch: $newmsg\"; else if [[ \"$olddesc\" =~ \":\" ]]; then echo \"$(echo \"$olddesc\" | cut -f1 -d\":\"): $newmsg\"; else echo \"$newmsg\"; fi; fi; fi)\" && git stash drop \"$stash\" > /dev/null || exit 1; git stash store -m \"$newdesc\" \"$sha\" && git stash list; }; _"
