@@ -199,6 +199,13 @@ present."
 ;;; after the period when it is wrapped to the next line.
 (setq sentence-end-double-space nil)
 
+;;;; Copying and pasting
+
+;;; Eliminate duplicates in the kill ring. That is, if you kill the same
+;;; thing twice, you won't have to use M-y twice to get past it to older
+;;; entries in the kill ring.
+(setq kill-do-not-save-duplicates t)
+
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows the setup to run on other systems without any additional
