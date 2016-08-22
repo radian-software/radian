@@ -139,6 +139,14 @@ present."
 (setq interprogram-cut-function 'paste-to-osx)
 (setq interprogram-paste-function 'copy-from-osx)
 
+;;; If you have something on the system clipboard, and then kill something in
+;;; Emacs, then by default whatever you had on the system clipboard is gone
+;;; and there is no way to get it back. Setting the following option makes it
+;;; so that when you kill something in Emacs, whatever was previously on the
+;;; system clipboard is pushed into the kill ring. This way, you can paste it
+;;; by doing C-y M-y.
+(setq save-interprogram-paste-before-kill t)
+
 ;;;; File saving and loading
 
 ;;; Put backup files in $HOME/.emacs-backups, rather than in the current
