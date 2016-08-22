@@ -7,7 +7,7 @@ cd ..
 repo_name="$(basename "$PWD")"
 echo "[ensure-running-in-repo] Ensuring that '$repo_name' is a Git repository."
 if git rev-parse --is-inside-work-tree; then
-    echo "[ensure-running-in-repo] It looks like '$repo_name' is a Git repository."
+    echo "[ensure-running-in-repo] It looks like '$repo_name' is already a Git repository."
 else
     echo "[ensure-running-in-repo] It looks like '$repo_name' is not a Git repository."
     echo -n "[ensure-running-in-repo] Would you like to make it one? (y/n) "
