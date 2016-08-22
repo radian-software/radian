@@ -93,6 +93,14 @@ fi
 if feature zsh; then
     ./ensure-installed.sh zsh --version zsh 5.2
     ./ensure-login-shell-set.sh
+    # $SHELL should be set by zsh in a new shell session, but some
+    # programs don't bother to check the login shell and instead just
+    # use the value of $SHELL, which is not set by 'exec -l zsh',
+    # unfortunately. One of these programs is tmux, with the result
+    # that if you run setup.sh from bash and immediately start tmux,
+    # newly created windows will still be using bash. Exporting $SHELL
+    # should fix the problem, though.
+    export SHELL="$(which zsh)"
     ./ensure-antigen-installed.sh
     ./ensure-installed.sh autojump
     ./ensure-symlinked.sh ~/.zshrc ../.zshrc
