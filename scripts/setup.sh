@@ -51,7 +51,7 @@ source compute-features.sh
 
 ### Create necessary directories ###
 
-export uuid="$(date +"%F=%T")=$(uuidgen)"
+source generate-uuid.sh
 mkdir -p originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
