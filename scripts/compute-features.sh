@@ -1,8 +1,5 @@
 #!/bin/bash
 
-set -e
-set -o pipefail
-
 ### Utility function ###
 
 # Usage: contains <element> <array> <var>
