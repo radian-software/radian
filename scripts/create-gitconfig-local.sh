@@ -42,7 +42,7 @@ if [[ $editor ]]; then
     fi
 fi
 if [[ -z $editor ]]; then
-    echo -n "[create-gitconfig-local] Editor (leave blank to use ${EDITOR:-vim}): "
+    echo -n "[create-gitconfig-local] Editor (leave blank to use \$EDITOR or, as a fallback, vim): "
     read editor
 fi
 
