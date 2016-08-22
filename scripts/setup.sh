@@ -19,10 +19,14 @@ cd "$(dirname "$0")"
 
 ### Error handling ###
 
+prune_originals() {
+    find originals -type d -empty -delete 2>/dev/null || true
+}
+
 handle_error() {
     set +e
     set +o pipefail
-    find originals -type d -empty -delete 2>/dev/null || true
+    prune_originals
     echo
     echo "[setup] It looks like an error occurred. Please try to fix it, and then run this script again."
 }
@@ -164,6 +168,7 @@ fi
 trap EXIT
 set +e
 set +o pipefail
+prune_originals
 
 ### Finished! ###
 
