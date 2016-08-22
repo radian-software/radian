@@ -66,6 +66,7 @@ if [[ -f ../../dotfiles-local || -L ../../dotfiles-local && ! -e ../../dotfiles-
     mv ../../dotfiles-local originals/$uuid/dotfiles-local
 fi
 mkdir ../../dotfiles-local 2>/dev/null || true
+touch ../../dotfiles-local/.projectile
 
 ### Warn the user of upcoming awesomeness ###
 
