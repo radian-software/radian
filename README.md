@@ -814,6 +814,7 @@ Command | Action
 --- | ---
 `C-x C-e` | Evaluate the form before the cursor in the REPL
 `C-M-x` | Evaluate the top-level form surrounding or before the cursor in the REPL
+`C-c C-v C-r` | Evaluate the currently selected forms in the REPL
 `C-c C-k` | Evaluate all forms from the current file in the REPL
 `C-c M-n` | Switch the REPL to the namespace defined by the current file
 `C-c M-z` | Move the cursor to the REPL buffer and then run `C-c C-k` asynchronously
