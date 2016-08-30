@@ -220,6 +220,12 @@ present."
 ;;; entries in the kill ring.
 (setq kill-do-not-save-duplicates t)
 
+;;;; I-search
+
+;;; Eliminate the quarter-second delay before I-search matches are
+;;; highlighted, because delays suck.
+(setq lazy-highlight-initial-delay 0)
+
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows the setup to run on other systems without any additional
