@@ -377,6 +377,11 @@ present."
     ;;; Use Helm mode for M-x, using helm-smex to get sorting by usage.
     (global-set-key (kbd "M-x") 'helm-smex))
 
+  ;;; Fix the unreadable color used to show the prefix argument in the Helm
+  ;;; M-x buffer.
+  (when radon-tweak-colors
+    (set-face-foreground 'helm-prefarg "#FFFF66"))
+
   ;;; Use fuzzy matching.
   (setq helm-mode-fuzzy-match t)
 
