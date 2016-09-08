@@ -138,6 +138,8 @@ is_installed_correctly() {
                 echo "[ensure-installed] The version appears to be $raw_version."
                 version="${raw_version%%-*}"
                 version="${version%%_*}"
+                version="${version%%.}"
+                version="${version%%,}"
                 if [[ $raw_version != $version ]]; then
                     echo "[ensure-installed] After trimming, this becomes $version."
                 fi
