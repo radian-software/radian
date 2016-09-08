@@ -42,6 +42,7 @@ specs=(
     "zsh -> brew"
     "tmux -> brew"
     "leiningen -> brew"
+    "racket -> wget"
     "emacs -> wget"
     "tree -> brew"
     "tmuxinator -> tmux"
@@ -128,6 +129,12 @@ if feature leiningen; then
     ./ensure-installed.sh javac -version javac 1.6 ./install-jdk.sh
     ./ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
     ./ensure-symlinked.sh ~/.lein/profiles.clj ../profiles.clj
+fi
+
+### Racket ###
+
+if feature racket; then
+    ./ensure-installed.sh racket --version "Welcome to Racket v" 6.6 ./install-racket.sh
 fi
 
 ### Emacs ###

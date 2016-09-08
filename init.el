@@ -35,6 +35,7 @@ loads it."
     clojure-mode ; Clojure indentation and syntax highlighting
     company ; autocompletion with pop-up menu
     company-statistics ; sort company completions by usage
+    geiser ; support for Racket
     helm ; better interface for selecting files, buffers, or commands
     helm-projectile ; use helm for projectile
     helm-smex ; sort M-x suggestions by usage
