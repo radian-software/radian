@@ -60,7 +60,11 @@ fi
 
 ### Report task ###
 
-echo -n "[ensure-installed] Ensuring that "
+if [[ $package_manager != assert ]]; then
+    echo -n "[ensure-installed] Ensuring that "
+else
+    echo -n "[ensure-installed] Checking if "
+fi
 if [[ $min_version != any-version ]]; then
     echo -n "version $min_version or more recent of "
 fi
