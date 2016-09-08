@@ -137,7 +137,7 @@ is_installed_correctly() {
                 if [[ $raw_version != $version ]]; then
                     echo "[ensure-installed] After trimming, this becomes $version."
                 fi
-                if ! (echo "$version" | egrep -q "^[0-9]+(\.[0-9]+)*$"); then
+                if ! (echo "$version" | egrep -q '^[0-9]+(\.[0-9]+)*$'); then
                     echo "[ensure-installed] The version appears to be malformed."
                     echo "[ensure-installed] Assuming that the version is incorrect."
                     return 1
