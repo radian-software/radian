@@ -126,10 +126,10 @@ is_installed_correctly() {
             echo "[ensure-installed] Checking the version of $executable using '$executable $version_subcommand'."
             version_output="$($executable $version_subcommand 2>&1)"
             echo "$version_output"
-            prefix="$version_command_name "
-            version_line="$(echo "$version_output" | egrep -m 1 "^$prefix")" || true
+            version_line="$(echo "$version_output" | egrep -m 1 "^$version_command_name")" || true
             if [[ $version_line ]]; then
-                version_and_rest="${version_line#$prefix}"
+                version_and_rest="${version_line#$version_command_name}"
+                version_and_rest="${version_and_rest# }"
                 raw_version="${version_and_rest%% *}"
                 echo "[ensure-installed] The version appears to be $raw_version."
                 version="${raw_version%%-*}"
@@ -151,7 +151,7 @@ is_installed_correctly() {
                 fi
             else
                 echo "[ensure-installed] The version string appears to be malformed or empty."
-                echo "[ensure-installed] It should have contained a line starting with '$prefix'."
+                echo "[ensure-installed] It should have contained a line starting with '$version_command_name'."
                 echo "[ensure-installed] Assuming that the version is incorrect."
                 return 1
             fi
