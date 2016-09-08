@@ -128,7 +128,7 @@ is_installed_correctly() {
         echo "[ensure-installed] $executable appears to be available on the \$PATH."
         if requires_version; then
             echo "[ensure-installed] Checking the version of $executable using '$executable $version_subcommand'."
-            version_output="$($executable $version_subcommand 2>&1)"
+            version_output="$("$executable" $version_subcommand 2>&1)"
             echo "$version_output"
             version_line="$(echo "$version_output" | egrep -m 1 "^$version_command_name")" || true
             if [[ $version_line ]]; then
