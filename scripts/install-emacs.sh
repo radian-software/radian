@@ -31,4 +31,7 @@ if [[ $(brew list --versions emacs) ]]; then
     brew unlink emacs
 fi
 
+# This needs to be here instead of the main code path in setup.sh, because
+# we want to allow using a pre-existing installation of Emacs (if it's the
+# correct version).
 ./ensure-symlinked.sh /usr/local/bin/emacs emacs
