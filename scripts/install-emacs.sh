@@ -9,7 +9,7 @@ if ./ensure-installed.sh /Applications/Emacs.app/Contents/MacOS/Emacs --version 
     echo "[install-emacs] It looks like an appropriate version of Emacs is already installed, but it is not symlinked correctly."
 else
     echo "[install-emacs] It looks like an appropriate version of Emacs is not installed."
-    if [[ -d "/Applications/Emacs.app" ]]; then
+    if [[ -e "/Applications/Emacs.app" || -L "/Applications/Emacs.app" ]]; then
         echo "[install-emacs] Moving the existing version to originals/$uuid."
         mv /Applications/Emacs.app originals/$uuid/Emacs.app
     fi
