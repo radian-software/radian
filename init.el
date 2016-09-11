@@ -226,15 +226,6 @@ present."
 ;;; highlighted, because delays suck.
 (setq lazy-highlight-initial-delay 0)
 
-;;;; Shell commands
-
-;;; Allow the use of shell functions and aliases in M-!. This works
-;;; with at least bash and zsh, because the -i flag signifies
-;;; interactive usage (so that your rc-file is read). Warning: may
-;;; cause M-! to run noticeably slower if you do a lot of things in
-;;; your shell's rc-file.
-(setq shell-command-switch "-ic")
-
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
 ;; This allows the setup to run on other systems without any additional
