@@ -867,14 +867,6 @@ Command | Action
 
 See [the CIDER documentation](https://github.com/clojure-emacs/cider/blob/master/doc/miscellaneous_features.md#macroexpansion) for more information on these amazing features.
 
-## Version control
-
-Command | Action
---- | ---
-`C-x g` | Open [`magit`](https://github.com/magit/magit)
-
-Magit is not officially supported yet due to issues with [Keychain integration](https://github.com/raxod502/dotfiles/issues/51) and [commiter information](https://github.com/raxod502/dotfiles/issues/52).
-
 ## Helm
 
 The `helm` package provides an interface for selecting among multiple choices that is much easier to use than Emacs' default. This interface is used for most commands that require selecting something—a buffer, a file, a command, and so on. The `helm-projectile` package extends this interface to `projectile` commands.
