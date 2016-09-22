@@ -632,6 +632,11 @@ Command | Action
 `up`/`down` | Select a completion
 `M-1`-`M-0` | Select one of the first ten completions
 `RET` | Accept the selected completion, if you have explicitly interacted with the completions menu
+`C-s` | Begin a forward search, or jump to the next matching item
+`C-r` | Begin a backward search, or jump to the previous matching item
+`C-g` | Dismiss the completions menu, or cancel a search
+`C-h` | Display the documentation for the selected completion in a transient buffer
+`C-w` | Display the source code for the selected completion in a transient buffer
 
 ## Manipulating Lisp code
 
