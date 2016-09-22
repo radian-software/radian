@@ -89,7 +89,6 @@ If you're on Linux, you will have to move the dotfiles you want into your home d
         - [Using the REPL](#using-the-repl)
         - [Running tests](#running-tests)
         - [Miscellaneous](#miscellaneous)
-    - [Version control](#version-control)
     - [Helm](#helm)
     - [IDO mode](#ido-mode)
 - [Contributing](#contributing)
