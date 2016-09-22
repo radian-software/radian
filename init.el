@@ -103,6 +103,12 @@ present."
 (global-set-key (kbd "<f9>") 'open-initfile)
 (global-set-key (kbd "<f12>") 'reload-initfile)
 
+;;; Keybinding for evaluating a buffer of Elisp. This is consistent
+;;; with the keybindings for evaluating a buffer in CIDER and Geiser.
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-k") 'eval-buffer)))
+
 ;;;; OSX interop
 
 ;;; Add mouse support
