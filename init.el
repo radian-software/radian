@@ -712,7 +712,12 @@ explicitly with Company."
 (when (member 'aggressive-indent radon-packages)
 
   ;;; Enable Aggressive Indent (almost) everywhere.
-  (global-aggressive-indent-mode 1))
+  (global-aggressive-indent-mode 1)
+
+  ;;; Disable Aggressive Indent in Re-Builder mode. I don't think it
+  ;;; does anything in this mode, and it shadows the C-c C-q binding
+  ;;; provided by Re-Builder (so you can't quit!).
+  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode))
 
 ;;;; Appearance - continued
 
