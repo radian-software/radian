@@ -139,6 +139,7 @@ Command | Action
 `C-h v` | Get documentation for a variable (select using [`helm`](#helm))
 `C-h m` | Get documentation about the modes currently active
 `C-h t` | View the Emacs tutorial
+`prefix C-h` | List keybindings beginning with `prefix` (e.g. `C-x C-h`)
 
 ## Frames, buffers, and windows
 
