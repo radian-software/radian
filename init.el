@@ -88,20 +88,45 @@ present."
 ;;; functions, like cl-every. Why aren't these available by default?
 (require 'cl-lib)
 
-;;; Define keybindings for opening and reloading init.el.
+;;; Add keybindings for jumping to various dotfiles. These all begin
+;;; with M-RET and are designed to be mnemonic, as in <M-RET e p r>
+;;; standing for "go to [e]macs init.[pr]e.local.el".
 
-(defun open-initfile ()
-  (interactive)
-  (find-file "~/.emacs.d/init.el")
-  "Opens init.el in the current buffer.")
+(defvar radon-dotfiles
+  '(("e i" ".emacs.d/init.el")
+    ("e b" ".emacs.d/init.before.local.el")
+    ("e p r" ".emacs.d/init.pre.local.el")
+    ("e p o" ".emacs.d/init.post.local.el")
+    ("e l" ".emacs.d/init.local.el")
+    ("g c" ".gitconfig")
+    ("g e" ".gitexclude")
+    ("g l" ".gitconfig.local")
+    ("l p" ".lein/profiles.clj")
+    ("t c" ".tmux.conf")
+    ("t l" ".tmux.local.conf")
+    ("z r" ".zshrc")
+    ("z a" ".zshrc.antigen")
+    ("z b" ".zshrc.before")
+    ("z l" ".zshrc.local"))
+  "Keybinding suffixes used after M-RET to jump to various
+dotfiles. Note that updating this list will *not* change
+the behavior of M-RET.")
 
-(defun reload-initfile ()
-  (interactive)
-  (load-file "~/.emacs.d/init.el")
-  "Reloads init.el.")
+(dolist (item radon-dotfiles)
+  (global-set-key (kbd (concat "M-RET " (car item)))
+                  `(lambda ()
+                     (interactive)
+                     (find-file ,(concat "~/" (cadr item))))))
 
-(global-set-key (kbd "<f9>") 'open-initfile)
-(global-set-key (kbd "<f12>") 'reload-initfile)
+;;; Add a keybinding for reloading this file (init.el). This is useful
+;;; for when you have several instances of Emacs open and you change
+;;; something in your configuration, then later come back to an old
+;;; Emacs that was opened before you made the change. You can then
+;;; just press M-RET r to get the change into that instance.
+(global-set-key (kbd "M-RET r")
+                '(lambda ()
+                   (interactive)
+                   (load-file "~/.emacs.d/init.el")))
 
 ;;; Keybinding for evaluating a buffer of Elisp. This is consistent
 ;;; with the keybindings for evaluating a buffer in CIDER and Geiser.
