@@ -567,6 +567,7 @@ Yank | Paste | Paste
 Command | Action
 --- | ---
 `C-SPC` | Mark the beginning of a selection
+`C-x C-p` | Select the entire buffer
 `C-w` | Kill the selection
 `M-DEL` | Kill the previous word
 `M-d` | Kill the next word
