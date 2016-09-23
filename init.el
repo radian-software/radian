@@ -134,6 +134,25 @@ the behavior of M-RET.")
           (lambda ()
             (local-set-key (kbd "C-c C-k") 'eval-buffer)))
 
+;;; Keybinding for jumping to source of Elisp functions and variables.
+;;; This is consistent with the keybindings for jumping to source in
+;;; CIDER and Geiser, with the exception of those keybindings not
+;;; requiring a prefix argument to look at variables (they "just work"
+;;; on both functions and variables).
+
+(defun find-function-or-variable (&optional prefix)
+  "Acts like `find-function' without a prefix argument, and like
+  `find-variable' with a prefix argument."
+  (interactive "P")
+  (if prefix
+      (call-interactively 'find-variable)
+    (call-interactively 'find-function)))
+
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (local-set-key (kbd "M-.")
+                           'find-function-or-variable)))
+
 ;;;; OSX interop
 
 ;;; Add mouse support
