@@ -92,6 +92,7 @@ if feature git; then
     # config to copy over from the original ~/.gitconfig.
     ./ensure-symlinked.sh ~/.gitconfig.local ../../dotfiles-local/.gitconfig.local ./create-gitconfig-local.sh
     ./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
+    ./ensure-symlinked.sh ~/.gitexclude ../.gitexclude
 fi
 
 ### Zsh ###
