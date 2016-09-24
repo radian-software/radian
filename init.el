@@ -98,26 +98,33 @@ present."
 ;;; Add keybindings for jumping to various dotfiles. These all begin
 ;;; with M-RET and are designed to be mnemonic, as in <M-RET e p r>
 ;;; standing for "go to [e]macs init.[pr]e.local.el".
+;;;
+;;; Note that we are using the defvar-nil-setq pattern described in
+;;; [1], which makes it so that if you make changes to the list and
+;;; then reload this file (M-RET r), your changes will be visible.
+;;;
+;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
-(defvar radon-dotfiles
-  '(("e i" ".emacs.d/init.el")
-    ("e b" ".emacs.d/init.before.local.el")
-    ("e p r" ".emacs.d/init.pre.local.el")
-    ("e p o" ".emacs.d/init.post.local.el")
-    ("e l" ".emacs.d/init.local.el")
-    ("g c" ".gitconfig")
-    ("g e" ".gitexclude")
-    ("g l" ".gitconfig.local")
-    ("l p" ".lein/profiles.clj")
-    ("t c" ".tmux.conf")
-    ("t l" ".tmux.local.conf")
-    ("z r" ".zshrc")
-    ("z a" ".zshrc.antigen.local")
-    ("z b" ".zshrc.before.local")
-    ("z l" ".zshrc.local"))
+(defvar radon-dotfiles nil
   "Keybinding suffixes used after M-RET to jump to various
 dotfiles. Note that updating this list will *not* change
 the behavior of M-RET.")
+(setq radon-dotfiles
+      '(("e i" ".emacs.d/init.el")
+        ("e b" ".emacs.d/init.before.local.el")
+        ("e p r" ".emacs.d/init.pre.local.el")
+        ("e p o" ".emacs.d/init.post.local.el")
+        ("e l" ".emacs.d/init.local.el")
+        ("g c" ".gitconfig")
+        ("g e" ".gitexclude")
+        ("g l" ".gitconfig.local")
+        ("l p" ".lein/profiles.clj")
+        ("t c" ".tmux.conf")
+        ("t l" ".tmux.local.conf")
+        ("z r" ".zshrc")
+        ("z a" ".zshrc.antigen.local")
+        ("z b" ".zshrc.before.local")
+        ("z l" ".zshrc.local")))
 
 (dolist (item radon-dotfiles)
   (global-set-key (kbd (concat "M-RET " (car item)))
