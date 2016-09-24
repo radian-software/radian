@@ -13,9 +13,10 @@ loads it."
 
 ;;;; Tweakable parameters
 
-;; These parameters let people using this init-file as a starting point
-;; for their Emacs do some basic customization without messing with the
-;; file proper.
+;; These parameters let people using this init-file as a starting
+;; point for their Emacs do some basic customization without messing
+;; with the file proper. Note that this section is parsed by
+;; create-init-before-local-el.sh, so its format *must* be preserved!
 
 ;;; Control color customizations. Nil for no color customizations and
 ;;; non-nil for all color customizations (for best results use the
