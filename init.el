@@ -105,8 +105,8 @@ present."
     ("t c" ".tmux.conf")
     ("t l" ".tmux.local.conf")
     ("z r" ".zshrc")
-    ("z a" ".zshrc.antigen")
-    ("z b" ".zshrc.before")
+    ("z a" ".zshrc.antigen.local")
+    ("z b" ".zshrc.before.local")
     ("z l" ".zshrc.local"))
   "Keybinding suffixes used after M-RET to jump to various
 dotfiles. Note that updating this list will *not* change
