@@ -786,6 +786,11 @@ explicitly with Company."
 (when radon-customize-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
+;;; Get rid of the underline for the currently highlighted match in an
+;;; Isearch or query replace.
+(when radian-customize-tweak-colors
+  (set-face-underline 'isearch nil))
+
 ;;; The default highlight color for I-searches is quite dark and makes it hard
 ;;; to read the highlighted text. Change it to a nice light blue, and get rid of
 ;;; the distracting underline. (I mean really, how is an *underline* supposed to
