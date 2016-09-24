@@ -575,6 +575,7 @@ Command | Action
 `M-w` | Copy the selection
 `C-y` | Yank the most recently killed/copied text
 `M-y` | Cycle back through the history of killed/copied text
+`M-SPC` | Replace the whitespace surrounding the cursor with a single space
 
 Note `C-k`, by default, will not kill the newline at the end of the line unless the line is empty. So, to kill a non-empty line you will have to do `C-a C-k C-k`.
 
