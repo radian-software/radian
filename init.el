@@ -21,7 +21,7 @@ loads it."
 ;;; Control color customizations. Nil for no color customizations and
 ;;; non-nil for all color customizations (for best results use the
 ;;; Solarized Light theme in your terminal emulator).
-(setq radon-tweak-colors t)
+(setq radon-customize-tweak-colors t)
 
 ;;; Define package list. These can be overridden in init.local.el, and
 ;;; whichever ones are in the list after that will be installed and
@@ -421,7 +421,7 @@ the behavior of M-RET.")
 
   ;;; Fix the unreadable color used to show the prefix argument in the Helm
   ;;; M-x buffer.
-  (when radon-tweak-colors
+  (when radon-customize-tweak-colors
     (set-face-foreground 'helm-prefarg "#FFFF66"))
 
   ;;; Use fuzzy matching.
@@ -429,7 +429,7 @@ the behavior of M-RET.")
 
   ;;; Get rid of the awful background color for buffers corresponding to files
   ;;; modified outside of Emacs.
-  (when radon-tweak-colors
+  (when radon-customize-tweak-colors
     (set-face-background 'helm-buffer-saved-out nil)))
 
 ;;;; Package: Company
@@ -770,14 +770,14 @@ explicitly with Company."
 ;;; weird while it's starting up.
 
 ;;; Load a color theme that looks good with Solarized Light.
-(when radon-tweak-colors
+(when radon-customize-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
 ;;; The default highlight color for I-searches is quite dark and makes it hard
 ;;; to read the highlighted text. Change it to a nice light blue, and get rid of
 ;;; the distracting underline. (I mean really, how is an *underline* supposed to
 ;;; help you see something that's highlighted in *bright blue*?)
-(when radon-tweak-colors
+(when radon-customize-tweak-colors
   (set-face-background 'lazy-highlight "#B1EAFC")
   (set-face-underline 'lazy-highlight nil))
 

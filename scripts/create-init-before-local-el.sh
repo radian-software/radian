@@ -91,7 +91,7 @@ while read -u 10 line; do
     if [[ $line == \;\;\;* ]]; then
         collected_comments="$collected_comments$line"$'\n'
     else
-        if (echo "$line" | egrep -q "\\(setq radon-[a-z-]+ ") && (echo "$line" | egrep -qv "\\(setq radon-packages "); then
+        if (echo "$line" | egrep -q "\\(setq radon-customize-"); then
             variable=$(echo "$line" | egrep -o "radon-[a-z-]+" | head -n 1)
             value=
             if [[ $configure == true ]]; then
