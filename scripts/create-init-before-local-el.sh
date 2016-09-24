@@ -30,15 +30,17 @@ if (echo "$answer" | egrep -qi "^y"); then
     collected_packages=
     while read line; do
         if [[ $collecting_packages == true ]]; then
-            if [[ $line == ")" ]]; then
+            if [[ $line == "))" ]]; then
                 break
             else
                 collected_packages="$collected_packages$line"$'\n'
             fi
-        elif [[ $collecting_packages == almost ]]; then
+        elif [[ $collecting_packages == setq ]]; then
+            collecting_packages=begin
+        elif [[ $collecting_packages == begin ]]; then
             collecting_packages=true
-        elif [[ $line == "(defvar radon-packages" ]]; then
-            collecting_packages=almost
+        elif [[ $line == "(defvar radon-packages "* ]]; then
+            collecting_packages=setq
         fi
     done <../init.el
 

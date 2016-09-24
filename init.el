@@ -28,24 +28,30 @@ loads it."
 ;;; provided. Please note that the formatting of this definition
 ;;; *must* be preserved, as it is read programmatically by
 ;;; create-init-before-local-el.sh.
-(defvar radon-packages
-  '(
-    ace-jump-mode ; quickly jump to words, characters, or lines onscreen
-    aggressive-indent ; keep code correctly indented at all times
-    cider ; Clojure REPL integration
-    clojure-mode ; Clojure indentation and syntax highlighting
-    company ; autocompletion with pop-up menu
-    company-statistics ; sort company completions by usage
-    geiser ; support for Racket
-    helm ; better interface for selecting files, buffers, or commands
-    helm-projectile ; use helm for projectile
-    helm-smex ; sort M-x suggestions by usage
-    markdown-toc ; generate tables of contents for Markdown files
-    paredit ; keep parentheses correctly balanced at all times
-    projectile ; quickly jump to files organized by project
-    undo-tree ; more intuitive undo/redo
-    )
-  "The packages required by this Emacs setup.")
+;;;
+;;; Note that we are using the defvar-nil-setq pattern described in
+;;; [1], which makes it so that if you make changes to the list and
+;;; then reload this file (M-RET r), your changes will be visible.
+;;;
+;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
+(defvar radon-packages nil "The packages required by this Emacs setup.")
+(setq radon-packages
+      '(
+        ace-jump-mode ; quickly jump to words, characters, or lines onscreen
+        aggressive-indent ; keep code correctly indented at all times
+        cider ; Clojure REPL integration
+        clojure-mode ; Clojure indentation and syntax highlighting
+        company ; autocompletion with pop-up menu
+        company-statistics ; sort company completions by usage
+        geiser ; support for Racket
+        helm ; better interface for selecting files, buffers, or commands
+        helm-projectile ; use helm for projectile
+        helm-smex ; sort M-x suggestions by usage
+        markdown-toc ; generate tables of contents for Markdown files
+        paredit ; keep parentheses correctly balanced at all times
+        projectile ; quickly jump to files organized by project
+        undo-tree ; more intuitive undo/redo
+        ))
 
 ;;; Convenience functions for adding and removing packages; for use in
 ;;; init.local.el.
