@@ -1,10 +1,10 @@
 ;;; Ensure at least Emacs 24.5.1
 (when (version< emacs-version "24.5.1")
-  (error "This setup requires at least Emacs 24.5.1 (running Emacs %s)"
+  (error "Radian requires at least Emacs 24.5.1 (running Emacs %s)"
          emacs-version))
 
 ;;; Utility function for user-specific config
-(defun radon-load-user-config (filename)
+(defun radian-load-user-config (filename)
   "If a file by the specified name exists in the .emacs.d directory,
 loads it."
   (let ((file (concat user-emacs-directory filename)))
@@ -21,7 +21,7 @@ loads it."
 ;;; Control color customizations. Nil for no color customizations and
 ;;; non-nil for all color customizations (for best results use the
 ;;; Solarized Light theme in your terminal emulator).
-(setq radon-customize-tweak-colors t)
+(setq radian-customize-tweak-colors t)
 
 ;;; Define package list. These can be overridden in init.local.el, and
 ;;; whichever ones are in the list after that will be installed and
@@ -34,8 +34,8 @@ loads it."
 ;;; then reload this file (M-RET r), your changes will be visible.
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
-(defvar radon-packages nil "The packages required by this Emacs setup.")
-(setq radon-packages
+(defvar radian-packages nil "The packages required by Radian.")
+(setq radian-packages
       '(
         ace-jump-mode ; quickly jump to words, characters, or lines onscreen
         aggressive-indent ; keep code correctly indented at all times
@@ -56,19 +56,19 @@ loads it."
 ;;; Convenience functions for adding and removing packages; for use in
 ;;; init.local.el.
 
-(defun radon-add-package (package)
-  "Adds the provided package from radon-packages, if it is not already
+(defun radian-add-package (package)
+  "Adds the provided package from radian-packages, if it is not already
 present."
-  (add-to-list 'radon-packages
+  (add-to-list 'radian-packages
                package
                t)) ; this adds to the end of the list
 
-(defun radon-remove-package (package)
-  "Removes the provided package from radon-packages, if it is present."
-  (setq radon-packages (delete package radon-packages)))
+(defun radian-remove-package (package)
+  "Removes the provided package from radian-packages, if it is present."
+  (setq radian-packages (delete package radian-packages)))
 
 ;;;; User-specific configuration (1 of 4).
-(radon-load-user-config "init.before.local.el")
+(radian-load-user-config "init.before.local.el")
 
 ;;;; Appearance
 
@@ -105,11 +105,11 @@ present."
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
-(defvar radon-dotfiles nil
+(defvar radian-dotfiles nil
   "Keybinding suffixes used after M-RET to jump to various
 dotfiles. Note that updating this list will *not* change
 the behavior of M-RET.")
-(setq radon-dotfiles
+(setq radian-dotfiles
       '(("e i" ".emacs.d/init.el")
         ("e b" ".emacs.d/init.before.local.el")
         ("e p r" ".emacs.d/init.pre.local.el")
@@ -126,7 +126,7 @@ the behavior of M-RET.")
         ("z b" ".zshrc.before.local")
         ("z l" ".zshrc.local")))
 
-(dolist (item radon-dotfiles)
+(dolist (item radian-dotfiles)
   (global-set-key (kbd (concat "M-RET " (car item)))
                   `(lambda ()
                      (interactive)
@@ -293,7 +293,7 @@ the behavior of M-RET.")
 
 ;;;; Packages
 ;; Downloads any packages that are not included with Emacs 24 by default.
-;; This allows the setup to run on other systems without any additional
+;; This allows Radian to run on other systems without any additional
 ;; setup (other than Emacs 24 being installed).
 ;;;;
 
@@ -322,28 +322,28 @@ the behavior of M-RET.")
       '((cider . "melpa-stable")))
 
 ;;;; User-specific configuration (2 of 4).
-(radon-load-user-config "init.pre.local.el")
+(radian-load-user-config "init.pre.local.el")
 
 ;;; Install required packages, if necessary.
-(unless (cl-every 'package-installed-p radon-packages)
+(unless (cl-every 'package-installed-p radian-packages)
   ;; Make sure to get the latest version of each package.
   (package-refresh-contents)
   ;; Install the missing packages.
-  (dolist (p radon-packages)
+  (dolist (p radian-packages)
     (when (not (package-installed-p p))
       (package-install p))))
 
 ;;; Make the installed packages available.
-(provide 'radon-packages)
+(provide 'radian-packages)
 
 ;;;; User-specific configuration (3 of 4).
-(radon-load-user-config "init.post.local.el")
+(radian-load-user-config "init.post.local.el")
 
 ;;;; Package: Ace Jump Mode
 ;; Allows quickly jumping to an arbitrary word, character, or line.
 ;;;;
 
-(when (member 'ace-jump-mode radon-packages)
+(when (member 'ace-jump-mode radian-packages)
 
   ;; Clojure mode already binds C-c SPC to clojure-align, so use C-c C-SPC
   ;; instead.
@@ -366,7 +366,7 @@ the behavior of M-RET.")
 ;; tree, which can be visualized in complex situations.
 ;;;;
 
-(when (member 'undo-tree radon-packages)
+(when (member 'undo-tree radian-packages)
 
   ;;; Turn on Undo Tree everywhere.
   (global-undo-tree-mode 1)
@@ -399,7 +399,7 @@ the behavior of M-RET.")
 ;; http://projectile.readthedocs.io/en/latest/
 ;;;;
 
-(when (member 'projectile radon-packages)
+(when (member 'projectile radian-packages)
 
   ;;; Enable Projectile everywhere.
   (projectile-global-mode 1))
@@ -409,12 +409,12 @@ the behavior of M-RET.")
 ;; easy-to-navigate buffer.
 ;;;;
 
-(when (member 'helm radon-packages)
+(when (member 'helm radian-packages)
 
   ;;; Use Helm mode for many standard Emacs commands.
   (helm-mode 1)
 
-  (when (member 'helm-projectile radon-packages)
+  (when (member 'helm-projectile radian-packages)
 
     ;;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
     ;;; instead of helm-projectile-on means we don't get a useless "Turn on
@@ -427,14 +427,14 @@ the behavior of M-RET.")
     (let ((ad-redefinition-action 'accept))
       (helm-projectile-toggle 1)))
 
-  (when (member 'helm-smex radon-packages)
+  (when (member 'helm-smex radian-packages)
 
     ;;; Use Helm mode for M-x, using helm-smex to get sorting by usage.
     (global-set-key (kbd "M-x") 'helm-smex))
 
   ;;; Fix the unreadable color used to show the prefix argument in the Helm
   ;;; M-x buffer.
-  (when radon-customize-tweak-colors
+  (when radian-customize-tweak-colors
     (set-face-foreground 'helm-prefarg "#FFFF66"))
 
   ;;; Use fuzzy matching.
@@ -442,7 +442,7 @@ the behavior of M-RET.")
 
   ;;; Get rid of the awful background color for buffers corresponding to files
   ;;; modified outside of Emacs.
-  (when radon-customize-tweak-colors
+  (when radian-customize-tweak-colors
     (set-face-background 'helm-buffer-saved-out nil)))
 
 ;;;; Package: Company
@@ -450,7 +450,7 @@ the behavior of M-RET.")
 ;; interop with CIDER.
 ;;;;
 
-(when (member 'company radon-packages)
+(when (member 'company radian-packages)
 
   ;;; Turn on Company mode everywhere.
   (global-company-mode 1)
@@ -518,7 +518,7 @@ explicitly with Company."
 ;; Sorts Company completions by usage. Persistent between Emacs sessions.
 ;;;;
 
-(when (member 'company-statistics radon-packages)
+(when (member 'company-statistics radian-packages)
 
   ;;; Turn on company-statistics.
   (company-statistics-mode 1))
@@ -527,7 +527,7 @@ explicitly with Company."
 ;; Generates tables of contents for Markdown files.
 ;;;;
 
-(when (member 'markdown-toc radon-packages)
+(when (member 'markdown-toc radian-packages)
 
   ;; Remove the header inserted before the table of contents. If you want a
   ;; header, just add one before the "markdown-toc start" comment -- this way,
@@ -546,10 +546,10 @@ explicitly with Company."
                 lisp-interaction-mode-hook))
   (add-hook hook (lambda () (eldoc-mode 1))))
 
-(when (member 'clojure-mode radon-packages)
+(when (member 'clojure-mode radian-packages)
   (add-hook 'clojure-mode-hook (lambda () (eldoc-mode 1))))
 
-(when (member 'cider radon-packages)
+(when (member 'cider radian-packages)
   (add-hook 'cider-repl-mode-hook (lambda () (eldoc-mode 1))))
 
 ;;; Turn off the delay before ElDoc messages are shown in the echo area.
@@ -565,7 +565,7 @@ explicitly with Company."
 ;; ClojureScript files.
 ;;;;
 
-(when (member 'clojure-mode radon-packages)
+(when (member 'clojure-mode radian-packages)
 
   (eval-after-load 'clojure-mode
     (lambda ()
@@ -633,7 +633,7 @@ explicitly with Company."
       ;;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
       ;;; so we can't override it. Instead, we replace clojure-indent-line.
 
-      (defun radon-clojure-in-docstring-p ()
+      (defun radian-clojure-in-docstring-p ()
         "Check whether point is in a docstring."
         (or
          (eq (get-text-property (point) 'face) 'font-lock-doc-face)
@@ -641,7 +641,7 @@ explicitly with Company."
 
       (defun clojure-indent-line ()
         "Indent current line as Clojure code."
-        (if (radon-clojure-in-docstring-p)
+        (if (radian-clojure-in-docstring-p)
             (save-excursion
               (beginning-of-line)
               (when (and (looking-at "^\\s-*")
@@ -655,7 +655,7 @@ explicitly with Company."
 ;; and source lookups, and more.
 ;;;;
 
-(when (member 'cider radon-packages)
+(when (member 'cider radian-packages)
 
   ;;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
   (global-set-key (kbd "C-c M-j") 'cider-jack-in)
@@ -706,7 +706,7 @@ explicitly with Company."
   ;;; (i.e. indent only) in the CIDER REPL.
   (setq cider-repl-tab-command 'indent-for-tab-command)
 
-  (when (member 'company radon-packages)
+  (when (member 'company radian-packages)
 
     ;;; Company mode overrides the CIDER REPL's bindings for M-p and M-n when
     ;;; the completions menu is visible. Prevent this, but only in REPL mode.
@@ -747,7 +747,7 @@ explicitly with Company."
 ;; editing of s-expressions.
 ;;;;
 
-(when (member 'paredit radon-packages)
+(when (member 'paredit radian-packages)
 
   ;;; Enable Paredit when editing Lisps and using Lisp REPLs.
 
@@ -755,10 +755,10 @@ explicitly with Company."
                   lisp-interaction-mode-hook))
     (add-hook hook 'enable-paredit-mode))
 
-  (when (member 'clojure-mode radon-packages)
+  (when (member 'clojure-mode radian-packages)
     (add-hook 'clojure-mode-hook 'enable-paredit-mode))
 
-  (when (member 'cider radon-packages)
+  (when (member 'cider radian-packages)
     (add-hook 'cider-repl-mode-hook 'enable-paredit-mode)))
 
 ;;;; Package: Aggressive Indent
@@ -767,7 +767,7 @@ explicitly with Company."
 ;; without checking the parentheses.
 ;;;;
 
-(when (member 'aggressive-indent radon-packages)
+(when (member 'aggressive-indent radian-packages)
 
   ;;; Enable Aggressive Indent (almost) everywhere.
   (global-aggressive-indent-mode 1)
@@ -783,7 +783,7 @@ explicitly with Company."
 ;;; weird while it's starting up.
 
 ;;; Load a color theme that looks good with Solarized Light.
-(when radon-customize-tweak-colors
+(when radian-customize-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
 ;;; Get rid of the underline for the currently highlighted match in an
@@ -795,7 +795,7 @@ explicitly with Company."
 ;;; to read the highlighted text. Change it to a nice light blue, and get rid of
 ;;; the distracting underline. (I mean really, how is an *underline* supposed to
 ;;; help you see something that's highlighted in *bright blue*?)
-(when radon-customize-tweak-colors
+(when radian-customize-tweak-colors
   (set-face-background 'lazy-highlight "#B1EAFC")
   (set-face-underline 'lazy-highlight nil))
 
@@ -805,7 +805,7 @@ explicitly with Company."
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
 
-(defvar mode-line-modified-radon
+(defvar mode-line-modified-radian
   '(:eval (propertize (if (and (buffer-modified-p)
                                (buffer-file-name))
                           "[*]" "   ")
@@ -813,7 +813,7 @@ explicitly with Company."
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
-(when (member 'projectile radon-packages)
+(when (member 'projectile radian-packages)
   (defvar mode-line-projectile-project
     '("["
       (:eval (projectile-project-name))
@@ -827,14 +827,14 @@ brackets."))
                ;; Show a warning if Emacs is low on memory.
                "%e"
                ;; Show [*] if the buffer is modified.
-               mode-line-modified-radon
+               mode-line-modified-radian
                " "
                ;; Show the name of the current buffer.
                mode-line-buffer-identification
                "   "
                ;; Show the row and column of point.
                mode-line-position
-               (when (member 'projectile radon-packages)
+               (when (member 'projectile radian-packages)
                  (list
                   " "
                   ;; Show the current Projectile project.
@@ -855,29 +855,29 @@ brackets."))
 
 ;;; Minor modes that provide a customizable variable.
 
-(when (member 'cider radon-packages)
+(when (member 'cider radian-packages)
   (setq cider-mode-line nil))
 
 (setq eldoc-minor-mode-string nil)
 
-(when (member 'projectile radon-packages)
+(when (member 'projectile radian-packages)
   (setq projectile-mode-line nil))
 
-(when (member 'undo-tree radon-packages)
+(when (member 'undo-tree radian-packages)
   (setq undo-tree-mode-lighter nil))
 
 ;;; Minor modes that do not provide a customizable variable.
 ;;; Note that Helm has helm-mode-line-string, but this only affects what is
 ;;; shown in the mode line for a Helm buffer.
 
-(when (member 'aggressive-indent radon-packages)
+(when (member 'aggressive-indent radian-packages)
   (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent")))
 
-(when (member 'company radon-packages)
+(when (member 'company radian-packages)
   (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist)))
 
-(when (member 'helm radon-packages)
+(when (member 'helm radian-packages)
   (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist)))
 
 ;;;; User-specific configuration (4 of 4).
-(radon-load-user-config "init.local.el")
+(radian-load-user-config "init.local.el")

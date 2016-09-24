@@ -28,8 +28,8 @@ while read -u 10 line; do
     if [[ $line == \#* ]]; then
         collected_comments="$collected_comments$line"$'\n'
     else
-        if (echo "$line" | egrep -q "\\\$radon_[a-z_]+ != false"); then
-            variable=$(echo "$line" | egrep -o "radon_[a-z_]+" | head -n 1)
+        if (echo "$line" | egrep -q "\\\$radian_[a-z_]+ != false"); then
+            variable=$(echo "$line" | egrep -o "radian_[a-z_]+" | head -n 1)
             setting=true
             if [[ $configure == true ]]; then
                 echo -n "$collected_comments"

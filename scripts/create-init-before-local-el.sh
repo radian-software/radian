@@ -8,14 +8,14 @@ echo "[create-init-before-local-el] Setting up init.before.local.el."
 contents=$(cat <<'EOF'
 ;;; This file is run near the beginning of init.el. This is the best place to
 ;;; override the various parameters shown below. Additionally, you can
-;;; customize which packages are loaded, using the radon-add-package and
-;;; radon-remove-package functions. They work like this:
+;;; customize which packages are loaded, using the radian-add-package and
+;;; radian-remove-package functions. They work like this:
 ;;;
-;;; (radon-add-package 'neotree)
-;;; (radon-remove-package 'aggressive-indent)
+;;; (radian-add-package 'neotree)
+;;; (radian-remove-package 'aggressive-indent)
 ;;;
 ;;; Or, you can completely overwrite the package list by setting the
-;;; radon-packages variable to a new value.
+;;; radian-packages variable to a new value.
 EOF
         )
 contents="$contents"$'\n'
@@ -39,7 +39,7 @@ if (echo "$answer" | egrep -qi "^y"); then
             collecting_packages=begin
         elif [[ $collecting_packages == begin ]]; then
             collecting_packages=true
-        elif [[ $line == "(defvar radon-packages "* ]]; then
+        elif [[ $line == "(defvar radian-packages "* ]]; then
             collecting_packages=setq
         fi
     done <../init.el
@@ -53,7 +53,7 @@ if (echo "$answer" | egrep -qi "^y"); then
         echo -n "[create-init-before-local-el] Exclude package: "
         read package
         if [[ $package ]]; then
-            exclude_contents="${exclude_contents}(radon-remove-package '$package)"$'\n'
+            exclude_contents="${exclude_contents}(radian-remove-package '$package)"$'\n'
         else
             break
         fi
@@ -68,7 +68,7 @@ if (echo "$answer" | egrep -qi "^y"); then
         echo -n "[create-init-before-local-el] Include package: "
         read package
         if [[ $package ]]; then
-            include_contents="${include_contents}(radon-add-package '$package)"$'\n'
+            include_contents="${include_contents}(radian-add-package '$package)"$'\n'
         else
             break
         fi
@@ -93,8 +93,8 @@ while read -u 10 line; do
     if [[ $line == \;\;\;* ]]; then
         collected_comments="$collected_comments$line"$'\n'
     else
-        if (echo "$line" | egrep -q "\\(setq radon-customize-"); then
-            variable=$(echo "$line" | egrep -o "radon-[a-z-]+" | head -n 1)
+        if (echo "$line" | egrep -q "\\(setq radian-customize-"); then
+            variable=$(echo "$line" | egrep -o "radian-[a-z-]+" | head -n 1)
             value=
             if [[ $configure == true ]]; then
                 echo -n "$collected_comments"
