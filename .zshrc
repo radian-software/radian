@@ -22,7 +22,6 @@ bundles=(
     lein # Completion for lein
     osx # Interop with OSX and iTunes
     sudo # Use ESC ESC to prefix previous or current command with 'sudo'
-    tmux # Aliases for tmux and support for starting tmux at login
     tmuxinator # Completion for tmuxinator
     wd # Mark directories with 'wd add' and jump to them with 'wd'
     web-search # Search Google, DuckDuckGo, Maps, etc.
