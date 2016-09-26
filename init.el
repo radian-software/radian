@@ -803,7 +803,7 @@ explicitly with Company."
 (set-face-underline 'show-paren-mismatch nil)
 
 ;;; Customize the mode bar to something like:
-;;; [*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
+;;; [*] init.el        72% (389,30)  [radian]  (Emacs-Lisp Paredit AggrIndent)
 
 (defvar mode-line-modified-radian
   '(:eval (propertize (if (and (buffer-modified-p)

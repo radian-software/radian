@@ -156,7 +156,7 @@ Command | Action
 --- | ---
 `C-x b` | Switch the buffer of the current window using [`helm`](#helm)
 
-There is a [known issue](https://github.com/raxod502/dotfiles/issues/41) where sometimes `C-x b` starts using [`ido-mode`](#switch-to-an-arbitrary-file-or-a-new-file) instead of `helm`. If this happens, press `M-x helm-mode` to fix it. If you find out how to reproduce this behavior, [do tell](https://github.com/raxod502/dotfiles/issues/41)!
+There is a [known issue](https://github.com/raxod502/radian/issues/41) where sometimes `C-x b` starts using [`ido-mode`](#switch-to-an-arbitrary-file-or-a-new-file) instead of `helm`. If this happens, press `M-x helm-mode` to fix it. If you find out how to reproduce this behavior, [do tell](https://github.com/raxod502/radian/issues/41)!
 
 ### Buffer history
 
@@ -181,10 +181,10 @@ The `projectile` package provides some functionality for grouping files into "pr
 
 Any non-file buffers you open while in a Projectile project will be marked as associated with that project, and will show up under `C-c p b` along with any buffers for files in the project.
 
-You can view the project for the current buffer in the mode line at the bottom of Emacs. If you are in the `dotfiles` project, for instance, then your mode line might look something like this:
+You can view the project for the current buffer in the mode line at the bottom of Emacs. If you are in the `radian` project, for instance, then your mode line might look something like this:
 
 ```
-[*] init.el        72% (389,30)  [dotfiles]  (Emacs-Lisp Paredit AggrIndent)
+[*] init.el        72% (389,30)  [radian]  (Emacs-Lisp Paredit AggrIndent)
 ```
 
 ### Switch to an arbitrary file, or a new file

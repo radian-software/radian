@@ -2,11 +2,11 @@
 
 ([back to README](../README.md))
 
-If you find any problems or have any ideas for improvements, please do not hesitate to [open an issue](https://github.com/raxod502/dotfiles/issues/new), or—even better—[a pull request](https://github.com/raxod502/dotfiles/compare).
+If you find any problems or have any ideas for improvements, please do not hesitate to [open an issue](https://github.com/raxod502/radian/issues/new), or—even better—[a pull request](https://github.com/raxod502/radian/compare).
 
 However, without attention to quality, all code becomes unmaintainable. This is especially true for dotfiles, so please try to follow the guidelines in this section when contributing code to this repository. I won't reject contributions just because of a missing period, but it is polite to put in some effort to make it easier for future contributors to maintain your code.
 
-If don't have any problems, but still want to help out, check out [the currently open issues](https://github.com/raxod502/dotfiles/issues)—I can use all the help I can get!
+If don't have any problems, but still want to help out, check out [the currently open issues](https://github.com/raxod502/radian/issues)—I can use all the help I can get!
 
 ## Documentation
 
@@ -60,7 +60,7 @@ If it is not immediately obvious why a piece of code is necessary, you **must** 
 
 In general, try to find elegant solutions instead of hacks. ("Temporary" hacks have a nasty habit of becoming permanent.) Sometimes, though, there is no alternative. If this is the case, please explain as thoroughly as possible how the hack works and why it is necessary.
 
-I have [an issue tag](https://github.com/raxod502/dotfiles/issues?q=is%3Aissue%20label%3Ahack%20) for hacks, so that they can hopefully be replaced with better solutions someday.
+I have [an issue tag](https://github.com/raxod502/radian/issues?q=is%3Aissue%20label%3Ahack%20) for hacks, so that they can hopefully be replaced with better solutions someday.
 
 ```
            :injections [;; Modify the alembic/distill function to work without needing a

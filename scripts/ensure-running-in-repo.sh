@@ -15,14 +15,14 @@ else
     if (echo "$answer" | egrep -qi "^y"); then
         echo "[ensure-running-in-repo] Initializing Git repository."
         git init
-        echo "[ensure-running-in-repo] You can synchronize your local repository with the official raxod502/dotfiles repository, or specify your own repository."
+        echo "[ensure-running-in-repo] You can synchronize your local repository with the official Radian repository, or specify your own repository."
         echo -n "[ensure-running-in-repo] Specify your own repository instead of using the default? (y/n) "
         read answer
         if (echo "$answer" | egrep -qi "^y"); then
             echo -n "[ensure-running-in-repo] Repository clone URL: "
             read repo
         else
-            repo=https://github.com/raxod502/dotfiles.git
+            repo=https://github.com/raxod502/radian.git
         fi
         echo "[ensure-running-in-repo] Adding $repo as a remote."
         git remote add origin "$repo"

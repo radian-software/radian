@@ -102,7 +102,7 @@ touch ../../radian-local/.projectile
 
 ### Warn the user of upcoming awesomeness ###
 
-echo "[setup] Setting up raxod502/dotfiles. Prepare to be amazed."
+echo "[setup] Setting up Radian. Prepare to be amazed."
 
 ### Bootstrapping ###
 
@@ -215,7 +215,7 @@ prune_originals
 echo
 echo "[setup] We're all done. Enjoy!"
 echo "[setup] Note that programs such as Zsh, Leiningen, and Emacs may still have to download dependencies."
-echo "[setup] If the dotfiles repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically."
+echo "[setup] If the Radian repository is not in the correct place, simply move it and run this script again. Your symlinks will be updated automatically."
 if feature zsh; then
     echo "[setup] Starting a new shell session in $(pwd)."
     echo "[setup] Please be aware that the new shell session will be nested inside your original shell session."
