@@ -9,6 +9,6 @@ contents=$(cat <<'EOF'
 ;;; package-specific configuration is applied.
 EOF
         )
-echo "$contents" > ../../dotfiles-local/init.post.local.el
-echo "[create-init-post-local-el] Wrote the following to dotfiles-local/init.post.local.el:"
-cat ../../dotfiles-local/init.post.local.el
+echo "$contents" > ../../radian-local/init.post.local.el
+echo "[create-init-post-local-el] Wrote the following to radian-local/init.post.local.el:"
+cat ../../radian-local/init.post.local.el

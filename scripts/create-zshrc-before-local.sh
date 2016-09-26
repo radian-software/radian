@@ -45,6 +45,6 @@ while read -u 10 line; do
     fi
 done 10<../.zshrc
 
-echo -n "$contents" > ../../dotfiles-local/.zshrc.before.local
-echo "[create-zshrc-before-local] Wrote the following to dotfiles-local/.zshrc.before.local:"
-cat ../../dotfiles-local/.zshrc.before.local
+echo -n "$contents" > ../../radian-local/.zshrc.before.local
+echo "[create-zshrc-before-local] Wrote the following to radian-local/.zshrc.before.local:"
+cat ../../radian-local/.zshrc.before.local

@@ -20,6 +20,6 @@ if [[ $EDITOR ]]; then
     fi
 fi
 
-echo -n "$contents" > ../../dotfiles-local/.zshrc.local
-echo "[create-zshrc-local] Wrote the following to dotfiles-local/.zshrc.local:"
-cat ../../dotfiles-local/.zshrc.local
+echo -n "$contents" > ../../radian-local/.zshrc.local
+echo "[create-zshrc-local] Wrote the following to radian-local/.zshrc.local:"
+cat ../../radian-local/.zshrc.local

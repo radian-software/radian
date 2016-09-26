@@ -113,6 +113,6 @@ while read -u 10 line; do
     fi
 done 10<../init.el
 
-echo -n "$contents" > ../../dotfiles-local/init.before.local.el
-echo "[create-init-before-local-el] Wrote the following to dotfiles-local/init.before.local.el:"
-cat ../../dotfiles-local/init.before.local.el
+echo -n "$contents" > ../../radian-local/init.before.local.el
+echo "[create-init-before-local-el] Wrote the following to radian-local/init.before.local.el:"
+cat ../../radian-local/init.before.local.el

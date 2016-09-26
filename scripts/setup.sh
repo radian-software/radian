@@ -57,17 +57,48 @@ mkdir -p originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
 
 repo_name="$(basename "$PWD")"
-if [[ $repo_name == dotfiles-local ]]; then
-    echo "[setup] Fatal error: this repository cannot be called 'dotfiles-local'. Please rename it."
+if [[ $repo_name == radian-local ]]; then
+    echo "[setup] Fatal error: this repository cannot be called 'radian-local'. Please rename it."
     exit 1
 fi
-if [[ -f ../../dotfiles-local || -L ../../dotfiles-local && ! -e ../../dotfiles-local ]]; then
-    echo "[setup] You appear to have something called 'dotfiles-local' next to '$repo_name' that is either a file or an invalid symlink."
+if [[ -f ../../radian-local || -L ../../radian-local && ! -e ../../radian-local ]]; then
+    echo "[setup] You appear to have something called 'radian-local' next to '$repo_name' that is either a file or an invalid symlink."
     echo "[setup] Moving it to originals/$uuid."
-    mv ../../dotfiles-local originals/$uuid/dotfiles-local
+    mv ../../radian-local originals/$uuid/radian-local
 fi
-mkdir ../../dotfiles-local 2>/dev/null || true
-touch ../../dotfiles-local/.projectile
+
+# Backwards compatibility -- rename existing dotfiles-local to radian-local
+#
+# Removing this code will affect fewer than ten people, so there is no harm
+# in doing so eventually.
+if mkdir ../../radian-local 2>/dev/null && [[ -d ../../dotfiles-local && ! -e originals/.keep-dotfiles-local ]]; then
+    echo "[setup] You have a folder called 'dotfiles-local' next to '$repo_name'."
+    echo "[setup] This was likely created by an earlier version of the Radian setup script."
+    echo "[setup] If so, it needs to be renamed from 'dotfiles-local' to 'radian-local' to work with the latest version of Radian."
+    echo -n "[setup] Rename the folder? (y/n) "
+    read answer
+    if echo "$answer" | grep -qi "^y"; then
+        rmdir ../../radian-local
+        mv ../../dotfiles-local ../../radian-local
+        echo "[setup] Please note that the prefix for local configuration parameters has been changed from 'radon' to 'radian'."
+        echo "[setup] Therefore, you will either need to replace all occurrences of 'radon' with 'radian' in radian-local."
+        echo "[setup] Alternatively, you can delete 'radian-local' and re-run this script to set them up interactively again."
+        read -p "[setup] Press RET to continue."
+    else
+        echo "[setup] OK, I will not rename the folder."
+        echo -n "[setup] Would you like Radian to remember your choice and not ask again next time? (y/n) "
+        read answer
+        if echo "$answer" | grep -qi "^y"; then
+            echo "[setup] Creating originals/.keep-dotfiles-local to make your choice persistent."
+            touch originals/.keep-dotfiles-local
+        else
+            echo "[setup] Please note that if you want Radian to ask again, you will have to delete the 'radian-local' folder before re-running the setup script."
+            read -p "[setup] Press RET to continue."
+        fi
+    fi
+fi
+
+touch ../../radian-local/.projectile
 
 ### Warn the user of upcoming awesomeness ###
 
@@ -90,7 +121,7 @@ fi
 if feature git; then
     # We want to do the local setup first, so that it can read any preexisting
     # config to copy over from the original ~/.gitconfig.
-    ./ensure-symlinked.sh ~/.gitconfig.local ../../dotfiles-local/.gitconfig.local ./create-gitconfig-local.sh
+    ./ensure-symlinked.sh ~/.gitconfig.local ../../radian-local/.gitconfig.local ./create-gitconfig-local.sh
     ./ensure-symlinked.sh ~/.gitconfig ../.gitconfig
     ./ensure-symlinked.sh ~/.gitexclude ../.gitexclude
 fi
@@ -111,9 +142,9 @@ if feature zsh; then
     ./ensure-antigen-installed.sh
     ./ensure-installed.sh autojump
     ./ensure-symlinked.sh ~/.zshrc ../.zshrc
-    ./ensure-symlinked.sh ~/.zshrc.before.local ../../dotfiles-local/.zshrc.before.local ./create-zshrc-before-local.sh
-    ./ensure-symlinked.sh ~/.zshrc.antigen.local ../../dotfiles-local/.zshrc.antigen.local ./create-zshrc-antigen-local.sh
-    ./ensure-symlinked.sh ~/.zshrc.local ../../dotfiles-local/.zshrc.local ./create-zshrc-local.sh
+    ./ensure-symlinked.sh ~/.zshrc.before.local ../../radian-local/.zshrc.before.local ./create-zshrc-before-local.sh
+    ./ensure-symlinked.sh ~/.zshrc.antigen.local ../../radian-local/.zshrc.antigen.local ./create-zshrc-antigen-local.sh
+    ./ensure-symlinked.sh ~/.zshrc.local ../../radian-local/.zshrc.local ./create-zshrc-local.sh
 fi
 
 ### Tmux ###
@@ -121,7 +152,7 @@ fi
 if feature tmux; then
     ./ensure-installed.sh tmux -V tmux 2.2
     ./ensure-symlinked.sh ~/.tmux.conf ../.tmux.conf
-    ./ensure-symlinked.sh ~/.tmux.local.conf ../../dotfiles-local/.tmux.local.conf ./create-tmux-local-conf.sh
+    ./ensure-symlinked.sh ~/.tmux.local.conf ../../radian-local/.tmux.local.conf ./create-tmux-local-conf.sh
 fi
 
 ### Leiningen ###
@@ -152,10 +183,10 @@ if feature emacs; then
     ./ensure-symlinked.sh ~/.emacs
     ./ensure-symlinked.sh ~/.emacs.el
     ./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el
-    ./ensure-symlinked.sh ~/.emacs.d/init.before.local.el ../../dotfiles-local/init.before.local.el ./create-init-before-local-el.sh
-    ./ensure-symlinked.sh ~/.emacs.d/init.pre.local.el ../../dotfiles-local/init.pre.local.el ./create-init-pre-local-el.sh
-    ./ensure-symlinked.sh ~/.emacs.d/init.post.local.el ../../dotfiles-local/init.post.local.el ./create-init-post-local-el.sh
-    ./ensure-symlinked.sh ~/.emacs.d/init.local.el ../../dotfiles-local/init.local.el ./create-init-local-el.sh
+    ./ensure-symlinked.sh ~/.emacs.d/init.before.local.el ../../radian-local/init.before.local.el ./create-init-before-local-el.sh
+    ./ensure-symlinked.sh ~/.emacs.d/init.pre.local.el ../../radian-local/init.pre.local.el ./create-init-pre-local-el.sh
+    ./ensure-symlinked.sh ~/.emacs.d/init.post.local.el ../../radian-local/init.post.local.el ./create-init-post-local-el.sh
+    ./ensure-symlinked.sh ~/.emacs.d/init.local.el ../../radian-local/init.local.el ./create-init-local-el.sh
 fi
 
 ### Utilities ###

@@ -9,6 +9,6 @@ contents=$(cat <<'EOF'
 ;;; things or add your own customizations.
 EOF
         )
-echo "$contents" > ../../dotfiles-local/init.local.el
-echo "[create-init-local-el] Wrote the following to dotfiles-local/init.local.el:"
-cat ../../dotfiles-local/init.local.el
+echo "$contents" > ../../radian-local/init.local.el
+echo "[create-init-local-el] Wrote the following to radian-local/init.local.el:"
+cat ../../radian-local/init.local.el

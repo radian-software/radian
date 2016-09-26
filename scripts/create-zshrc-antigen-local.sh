@@ -80,6 +80,6 @@ if (echo "$answer" | egrep -qi "^y"); then
 
 fi
 
-echo -n "$contents" > ../../dotfiles-local/.zshrc.antigen.local
-echo "[create-zshrc-antigen-local] Wrote the following to dotfiles-local/.zshrc.antigen.local:"
-cat ../../dotfiles-local/.zshrc.antigen.local
+echo -n "$contents" > ../../radian-local/.zshrc.antigen.local
+echo "[create-zshrc-antigen-local] Wrote the following to radian-local/.zshrc.antigen.local:"
+cat ../../radian-local/.zshrc.antigen.local

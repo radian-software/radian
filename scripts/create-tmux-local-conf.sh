@@ -9,6 +9,6 @@ contents=$(cat <<'EOF'
 # override things or add your own customizations.
 EOF
         )
-echo "$contents" > ../../dotfiles-local/.tmux.local.conf
-echo "[create-tmux-local-conf] Wrote the following to dotfiles-local/.tmux.local.conf:"
-cat ../../dotfiles-local/.tmux.local.conf
+echo "$contents" > ../../radian-local/.tmux.local.conf
+echo "[create-tmux-local-conf] Wrote the following to radian-local/.tmux.local.conf:"
+cat ../../radian-local/.tmux.local.conf
