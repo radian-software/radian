@@ -4,9 +4,9 @@
 
 If you find any problems or have any ideas for improvements, please do not hesitate to [open an issue](https://github.com/raxod502/radian/issues/new), or—even better—[a pull request](https://github.com/raxod502/radian/compare).
 
-However, without attention to quality, all code becomes unmaintainable. This is especially true for dotfiles, so please try to follow the guidelines in this section when contributing code to this repository. I won't reject contributions just because of a missing period, but it is polite to put in some effort to make it easier for future contributors to maintain your code.
+However, without attention to quality, all code becomes unmaintainable. This is especially true for dotfiles, so please try to follow the guidelines in this document when contributing code to this repository. I won't reject contributions just because of a missing period, but it is polite to put in some effort to make it easier for future contributors to maintain your code.
 
-If don't have any problems, but still want to help out, check out [the currently open issues](https://github.com/raxod502/radian/issues)—I can use all the help I can get!
+If you don't have any problems, but still want to help out, check out [the currently open issues](https://github.com/raxod502/radian/issues)—I can use all the help I can get!
 
 ## Documentation
 
