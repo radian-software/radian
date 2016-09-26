@@ -8,6 +8,21 @@ However, without attention to quality, all code becomes unmaintainable. This is 
 
 If you don't have any problems, but still want to help out, check out [the currently open issues](https://github.com/raxod502/radian/issues)—I can use all the help I can get!
 
+## Table of contents
+
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-generate-toc again -->
+
+
+- [Contributing](#contributing)
+    - [Table of contents](#table-of-contents)
+    - [Documentation](#documentation)
+    - [Commit history](#commit-history)
+        - [Commit messages](#commit-messages)
+        - [Commit history](#commit-history)
+    - [Code style](#code-style)
+
+<!-- markdown-toc end -->
+
 ## Documentation
 
 > Every line or logical grouping of lines of code in every dotfile **must** have an explanatory comment.
