@@ -107,8 +107,7 @@ present."
 
 (defvar radian-dotfiles nil
   "Keybinding suffixes used after M-RET to jump to various
-dotfiles. Note that updating this list will *not* change
-the behavior of M-RET.")
+dotfiles.")
 (setq radian-dotfiles
       '(("e i" ".emacs.d/init.el")
         ("e b" ".emacs.d/init.before.local.el")
