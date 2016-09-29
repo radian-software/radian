@@ -92,6 +92,9 @@ present."
 ;;; Turn off the alarm bell.
 (setq ring-bell-function 'ignore)
 
+;;; Prevent the cursor from blinking (only affects windowed Emacs).
+(blink-cursor-mode 0)
+
 ;;;; Elisp customization
 
 ;;; This is required to have access to some basic data manipulation
