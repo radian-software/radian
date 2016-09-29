@@ -89,6 +89,9 @@ present."
 (setq show-paren-delay 0)
 (show-paren-mode 1)
 
+;;; Turn off the alarm bell.
+(setq ring-bell-function 'ignore)
+
 ;;;; Elisp customization
 
 ;;; This is required to have access to some basic data manipulation
