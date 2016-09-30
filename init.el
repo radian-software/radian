@@ -519,7 +519,11 @@ dotfiles.")
                   :filter ,(lambda (cmd)
                              (when (company-explicit-action-p)
                                cmd)))))
-  (define-key company-active-map (kbd "TAB") #'company-complete-selection)
+
+  ;; <tab> is for windowed Emacs; TAB is for terminal Emacs.
+  (dolist (key '("<tab>" "TAB"))
+    (define-key company-active-map (kbd key) #'company-complete-selection))
+
   (define-key company-active-map (kbd "SPC") nil)
 
   ;; Company appears to override the above keymap based on company-auto-complete-chars.
@@ -629,7 +633,10 @@ dotfiles.")
       ;;; fails inside Clojure docstrings. (TAB will add the requisite two
       ;;; spaces, but you shouldn't have to do this manually after pressing RET.)
       ;;; I'd like to find a more elegant solution to this problem.
-      (define-key clojure-mode-map (kbd "RET") 'newline-and-indent)
+      ;;;
+      ;;; <return> is for windowed Emacs; RET is for terminal Emacs.
+      (dolist (key '("<return>" "RET"))
+        (define-key clojure-mode-map (kbd key) 'newline-and-indent))
 
       ;;; Clojure mode does not correctly identify the docstrings of protocol
       ;;; methods as docstrings, and as such electric indentation does not work
