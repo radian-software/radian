@@ -494,20 +494,27 @@ dotfiles.")
   ;;;   interacted with Company.
   ;;; - SPC will never complete the current selection.
   ;;;
-  ;;; Based on https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
-
-  (defun company-complete-if-explicit ()
-    "Complete the current selection, but only if the user has interacted
-explicitly with Company."
-    (interactive)
-    (if (company-explicit-action-p)
-        (company-complete)
-      (call-interactively
-       (key-binding (this-command-keys)))))
+  ;;; Based on:
+  ;;; - https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
+  ;;; - http://emacs.stackexchange.com/a/13290/12534
+  ;;; - http://stackoverflow.com/a/22863701/3538165
+  ;;;
+  ;;; See also:
+  ;;; - http://emacs.stackexchange.com/a/24800/12534
+  ;;; - http://emacs.stackexchange.com/q/27459/12534
 
   ;; <return> is for windowed Emacs; RET is for terminal Emacs
-  (define-key company-active-map (kbd "<return>") #'company-complete-if-explicit)
-  (define-key company-active-map (kbd "RET") #'company-complete-if-explicit)
+  (dolist (key '("<return>" "RET"))
+    ;; Here we are using an advanced feature of define-key that lets
+    ;; us pass an "extended menu item" instead of an interactive
+    ;; function. Doing this allows RET to regain its usual
+    ;; functionality when the user has not explicitly interacted with
+    ;; Company.
+    (define-key company-active-map (kbd key)
+      `(menu-item nil company-complete
+                  :filter ,(lambda (cmd)
+                             (when (company-explicit-action-p)
+                               cmd)))))
   (define-key company-active-map (kbd "TAB") #'company-complete-selection)
   (define-key company-active-map (kbd "SPC") nil)
 
