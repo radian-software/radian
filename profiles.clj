@@ -24,6 +24,10 @@
                         #'cider.inlined-deps.compliment.v0v3v0.compliment.sources.ns-mappings/var-symbol?
                         (constantly (constantly true)))]}
 
+ :cljs {:dependencies [;; ClojureScript REPL in Emacs
+                       [com.cemerick/piggieback "0.2.1"]
+                       [figwheel-sidecar "0.5.4-7"]]}
+
  :hide-app {;; Prevent the Clojure REPL from showing in the Mac app switcher.
             ;; See http://stackoverflow.com/questions/24619300/hide-clojure-repl-from-command-tab-application-switcher-via-lein-command-line
             :jvm-opts ["-Dapple.awt.UIElement=true"]}
@@ -169,6 +173,7 @@
  ;; This is an easy way to have a custom subset of the above modular profiles enabled in your
  ;; REPL. To start an awesome REPL use 'lein with-profiles +awesome repl'.
  :awesome [:cider
+           :cljs
            :humane
            :inject
            :alembic
