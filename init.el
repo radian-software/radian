@@ -84,6 +84,10 @@ present."
 ;;; Disable the menu bar, as it doesn't seem very useful...
 (menu-bar-mode -1)
 
+;;; Also disable the toolbar. (This is only shown in windowed
+;;; Emacsen.)
+(tool-bar-mode -1)
+
 ;;; When point is on a paren, highlight the matching paren instantly,
 ;;; instead of after 1/8 of a second.
 (setq show-paren-delay 0)
