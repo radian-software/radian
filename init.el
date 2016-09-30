@@ -764,14 +764,18 @@ dotfiles.")
   ;;; Enable Paredit when editing Lisps and using Lisp REPLs.
 
   (dolist (hook '(emacs-lisp-mode-hook
-                  lisp-interaction-mode-hook))
+                  lisp-interaction-mode-hook
+                  scheme-mode-hook))
     (add-hook hook 'enable-paredit-mode))
 
   (when (member 'clojure-mode radian-packages)
     (add-hook 'clojure-mode-hook 'enable-paredit-mode))
 
   (when (member 'cider radian-packages)
-    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode)))
+    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
+
+  (when (member 'geiser radian-packages)
+    (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
 
 ;;;; Package: Aggressive Indent
 ;; Automatically, and aggressively, indents your code. Especially useful when
