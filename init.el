@@ -731,15 +731,18 @@ dotfiles.")
 
   (when (member 'company radian-packages)
 
-    ;;; Company mode overrides the CIDER REPL's bindings for M-p and M-n when
-    ;;; the completions menu is visible. Prevent this, but only in REPL mode.
+    ;;; Company mode overrides standard REPL bindings for M-p and M-n
+    ;;; when the completions menu is visible. Prevent this, but only
+    ;;; in REPL modes.
 
-    (add-hook 'cider-repl-mode-hook
-              (lambda ()
-                (make-local-variable 'company-active-map)
-                (setq company-active-map (copy-tree company-active-map))
-                (define-key company-active-map (kbd "M-p") nil)
-                (define-key company-active-map (kbd "M-n") nil))))
+    (dolist (hook '(cider-repl-mode-hook
+                    geiser-repl-mode-hook))
+      (add-hook hook
+                (lambda ()
+                  (make-local-variable 'company-active-map)
+                  (setq company-active-map (copy-tree company-active-map))
+                  (define-key company-active-map (kbd "M-p") nil)
+                  (define-key company-active-map (kbd "M-n") nil)))))
 
   ;;; Don't focus the cursor in the CIDER REPL once it starts. Since the
   ;;; REPL takes so long to start up, especially for large projects, you
