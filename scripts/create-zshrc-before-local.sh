@@ -15,6 +15,7 @@ else
 fi
 
 contents=$(cat <<'EOF'
+#!/usr/bin/env zsh
 # This file is run at the very beginning of .zshrc. This is the best
 # place to override the various parameters shown below. If a new
 # parameter has been added, delete this file and re-run setup.sh

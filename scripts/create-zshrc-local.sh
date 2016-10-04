@@ -5,6 +5,7 @@ set -o pipefail
 
 echo "[create-zshrc-local] Setting up .zshrc.local."
 contents=$(cat <<'EOF'
+#!/usr/bin/env zsh
 # This file is run at the very end of .zshrc, so you can use it to
 # override things or add your own customizations.
 EOF
