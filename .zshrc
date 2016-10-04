@@ -93,9 +93,29 @@ if [[ $radian_customize_prompt != false ]]; then
     ZSH_THEME_GIT_PROMPT_CLEAN="]"
 fi
 
-# Alias for reloading .zshrc.
+# Use 'resource' to reload .zshrc.
 if [[ $radian_resource_alias != false ]]; then
     alias resource="source ~/.zshrc"
+fi
+
+# Use 'source' or '.' with no arguments to reload .zshrc.
+if [[ $radian_source_and_dot_aliases != false ]]; then
+    source_zshrc_or_args() {
+        if [[ $# == 0 ]]; then
+            \source ~/.zshrc
+        else
+            \source "$@"
+        fi
+    }
+    dot_zshrc_or_args() {
+        if [[ $# == 0 ]]; then
+            \. ~/.zshrc
+        else
+            \. "$@"
+        fi
+    }
+    alias source=source_zshrc_or_args
+    alias .=dot_zshrc_or_args
 fi
 
 # Alias for tmuxinator.
