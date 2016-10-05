@@ -123,6 +123,22 @@ if [[ $radian_mux_alias != false ]]; then
     alias mux=tmuxinator
 fi
 
+# Aliases for copying, pasting, and moving files in multiple steps.
+if [[ $radian_copy_paste_aliases != false ]]; then
+    copy() {
+        RADIAN_COPY_TARGETS=()
+        for target; do
+            RADIAN_COPY_TARGETS+=($PWD/$target)
+        done
+    }
+    paste() {
+        cp -R $RADIAN_COPY_TARGETS ${1:-.}
+    }
+    move() {
+        mv $RADIAN_COPY_TARGETS ${1:-.}
+    }
+fi
+
 # Alias for setting up a tmux session suitable for standard development.
 # Takes a project name and an optional command. If a tmux session with
 # the project name already exists, switches to it. Otherwise, you need
