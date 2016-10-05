@@ -532,7 +532,24 @@ dotfiles.")
 
   ;;; Prevent Company completions from being lowercased in the completion menu.
   ;;; This appears to only be an issue in comments and strings in Clojure.
-  (setq company-dabbrev-downcase nil))
+  (setq company-dabbrev-downcase nil)
+
+  ;;; Company mode overrides standard REPL bindings for M-p and M-n
+  ;;; when the completions menu is visible. Prevent this, but only
+  ;;; in REPL modes.
+
+  (dolist (hook (remove nil
+                        (list
+                         (when (member 'cider radian-packages)
+                           'cider-repl-mode-hook)
+                         (when (member 'geiser radian-packages)
+                           'geiser-repl-mode-hook))))
+    (add-hook hook
+              (lambda ()
+                (make-local-variable 'company-active-map)
+                (setq company-active-map (copy-tree company-active-map))
+                (define-key company-active-map (kbd "M-p") nil)
+                (define-key company-active-map (kbd "M-n") nil)))))
 
 ;;;; Package: Company Statistics
 ;; Sorts Company completions by usage. Persistent between Emacs sessions.
@@ -728,21 +745,6 @@ dotfiles.")
   ;;; disorienting. So we reset TAB to its default functionality
   ;;; (i.e. indent only) in the CIDER REPL.
   (setq cider-repl-tab-command 'indent-for-tab-command)
-
-  (when (member 'company radian-packages)
-
-    ;;; Company mode overrides standard REPL bindings for M-p and M-n
-    ;;; when the completions menu is visible. Prevent this, but only
-    ;;; in REPL modes.
-
-    (dolist (hook '(cider-repl-mode-hook
-                    geiser-repl-mode-hook))
-      (add-hook hook
-                (lambda ()
-                  (make-local-variable 'company-active-map)
-                  (setq company-active-map (copy-tree company-active-map))
-                  (define-key company-active-map (kbd "M-p") nil)
-                  (define-key company-active-map (kbd "M-n") nil)))))
 
   ;;; Don't focus the cursor in the CIDER REPL once it starts. Since the
   ;;; REPL takes so long to start up, especially for large projects, you
