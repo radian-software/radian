@@ -71,14 +71,13 @@ fi
 #
 # Removing this code will affect fewer than ten people, so there is no harm
 # in doing so eventually.
-if mkdir ../../radian-local 2>/dev/null && [[ -d ../../dotfiles-local && ! -e originals/.keep-dotfiles-local ]]; then
+if [[ ! -d ../../radian-local && -d ../../dotfiles-local && ! -e originals/.keep-dotfiles-local ]]; then
     echo "[setup] You have a folder called 'dotfiles-local' next to '$repo_name'."
     echo "[setup] This was likely created by an earlier version of the Radian setup script."
     echo "[setup] If so, it needs to be renamed from 'dotfiles-local' to 'radian-local' to work with the latest version of Radian."
     echo -n "[setup] Rename the folder? (y/n) "
     read answer
     if echo "$answer" | grep -qi "^y"; then
-        rmdir ../../radian-local
         mv ../../dotfiles-local ../../radian-local
         echo "[setup] Please note that the prefix for local configuration parameters has been changed from 'radon' to 'radian'."
         echo "[setup] Therefore, you will either need to replace all occurrences of 'radon' with 'radian' in radian-local."
@@ -95,6 +94,33 @@ if mkdir ../../radian-local 2>/dev/null && [[ -d ../../dotfiles-local && ! -e or
             echo "[setup] Please note that if you want Radian to ask again, you will have to delete the 'radian-local' folder before re-running the setup script."
             read -p "[setup] Press RET to continue."
         fi
+    fi
+fi
+
+if [[ ! -d ../../radian-local ]]; then
+    echo "[setup] You do not have a radian-local folder next to '$repo_name'."
+    echo -n "[setup] Do you already have a radian-local folder somewhere else on your filesystem? (y/n) "
+    read answer
+    if echo "$answer" | grep -qi "^y"; then
+        finished=false
+        while [[ $finished != true ]]; do
+            path=
+            while [[ -z $path ]]; do
+                echo -n "[setup] Enter the path to your radian-local folder: "
+                read path
+            done
+            path=${path/#\~/$HOME} # expands tildes
+            if [[ -e $path ]]; then
+                echo "[setup] Creating symlink."
+                ln -s "$path" ../../radian-local
+                finished=true
+            else
+                echo "[setup] That path does not exist."
+            fi
+        done
+    else
+        echo "[setup] Creating empty radian-local folder."
+        mkdir ../../radian-local
     fi
 fi
 
