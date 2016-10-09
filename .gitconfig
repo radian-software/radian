@@ -47,6 +47,7 @@
         # git push
         pushb = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
         drb = push -d origin
+        dbb = "!_() { git db \"$1\" && git drb \"$1\"; }; _"
         # git config
         alias = "!_() { git config --global alias.$1 \"$2\"; }; _"
         unalias = "!_() { git config --global --unset alias.$1; }; _"
