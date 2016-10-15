@@ -1,8 +1,3 @@
-;;; Ensure at least Emacs 24.5.1
-(when (version< emacs-version "24.5.1")
-  (error "Radian requires at least Emacs 24.5.1 (running Emacs %s)"
-         emacs-version))
-
 ;;; Utility function for user-specific config
 (defun radian-load-user-config (filename)
   "If a file by the specified name exists in the .emacs.d directory,
