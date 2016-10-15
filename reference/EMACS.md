@@ -4,7 +4,9 @@
 
 ![Emacs vs. Vim cartoon](http://eliot.s3.amazonaws.com/eliotlash.com/0010_en_vi-vs-emacs.png)
 
-Emacs is an extremely feature-rich, customizable, and extensible text editor/filesystem manager/integrated development environment/et cetera.
+Emacs is an extremely feature-rich, customizable, and extensible text
+editor/filesystem manager/integrated development environment/et
+cetera.
 
 ## Contents
 
@@ -96,12 +98,15 @@ Emacs is an extremely feature-rich, customizable, and extensible text editor/fil
 - `f` means press the "F" key.
 - `F` means press the "F" key while holding Shift.
 - `C-f` means press the "F" key while holding Control.
-- `M-f` means press the "F" key while holding Meta. On Mac keyboards, Meta is labeled Alt.
+- `M-f` means press the "F" key while holding Meta. On Mac keyboards,
+  Meta is labeled Alt.
 - `M-^` means press the "6" key while holding both Shift and Meta.
 - `C-M-f` means press the "F" key while holding both Control and Meta.
-- `C-c M-J` means press the "C" key while holding Control, then let go and press the "J" key while holding both Shift and Control.
+- `C-c M-J` means press the "C" key while holding Control, then let go
+  and press the "J" key while holding both Shift and Control.
 - `S-left` means press the left arrow key while holding Shift.
-- `s-f` means press the "F" key while holding Super. On Mac keyboards, Super is labeled Command.
+- `s-f` means press the "F" key while holding Super. On Mac keyboards,
+  Super is labeled Command.
 
 ## Panic
 
@@ -115,7 +120,11 @@ Command | Action
 --- | ---
 `M-x` | Select a command to run using [`helm`](#helm)
 
-In Emacs, many commands are bound to keyboard shortcuts. However, there are many more commands than possible keyboard shortcuts, so you can instead run commands by name. Thanks to the `helm-smex` package, commands that you have used recently or frequently are placed near the top of the list of suggestions.
+In Emacs, many commands are bound to keyboard shortcuts. However,
+there are many more commands than possible keyboard shortcuts, so you
+can instead run commands by name. Thanks to the `helm-smex` package,
+commands that you have used recently or frequently are placed near the
+top of the list of suggestions.
 
 ## Getting help
 
@@ -130,7 +139,9 @@ Command | Action
 
 ## Frames, buffers, and windows
 
-Emacs uses some rather idiosyncratic terminology to refer to the various rectangular objects that it uses to contain text. Their definitions are as follows:
+Emacs uses some rather idiosyncratic terminology to refer to the
+various rectangular objects that it uses to contain text. Their
+definitions are as follows:
 
 Emacs name | Conventional name
 --- | ---
@@ -138,17 +149,34 @@ Buffer | File
 Window | Panel
 Frame | Window
 
-In Emacs, not all buffers have to be files. For instance, you can have a buffer for an external process that you have run, which will show the output of the process. Or you can have a buffer that shows the documentation of a function, even if the contents of the buffer do not exist anywhere on the filesystem. Or you can create any number of your own buffers, and then decide if you want to save them to files or not.
+In Emacs, not all buffers have to be files. For instance, you can have
+a buffer for an external process that you have run, which will show
+the output of the process. Or you can have a buffer that shows the
+documentation of a function, even if the contents of the buffer do not
+exist anywhere on the filesystem. Or you can create any number of your
+own buffers, and then decide if you want to save them to files or not.
 
-What most applications call windows, Emacs calls frames. Unlike in most applications, having more than one frame is not always necessary for productive work, since it is very easy to put more than one window in a frame. Most applications would call this a sort of "split-screen" functionality, but it is integrated into the fundamental behavior of Emacs.
+What most applications call windows, Emacs calls frames. Unlike in
+most applications, having more than one frame is not always necessary
+for productive work, since it is very easy to put more than one window
+in a frame. Most applications would call this a sort of "split-screen"
+functionality, but it is integrated into the fundamental behavior of
+Emacs.
 
-Each window has a buffer, but there can be buffers that are not associated with any window. These are all listed by `C-x b`. You can have multiple windows onscreen at the same time, but within the same
+Each window has a buffer, but there can be buffers that are not
+associated with any window. These are all listed by `C-x b`. You can
+have multiple windows onscreen at the same time, but within the same
 
-Most people quickly end up with a large number of buffers open (this is not a problem, since Emacs can handle a large number of buffers without slowing down) and have a few of these buffers displayed in a small number of windows (say 1-8) in a single frame.
+Most people quickly end up with a large number of buffers open (this
+is not a problem, since Emacs can handle a large number of buffers
+without slowing down) and have a few of these buffers displayed in a
+small number of windows (say 1-8) in a single frame.
 
 ## Manipulating buffers
 
-You should read [Frames, buffers, and windows](#frames-buffers-and-windows) if you have not already.
+You should
+read [Frames, buffers, and windows](#frames-buffers-and-windows) if
+you have not already.
 
 ### Switch to an already-open buffer
 
@@ -156,7 +184,12 @@ Command | Action
 --- | ---
 `C-x b` | Switch the buffer of the current window using [`helm`](#helm)
 
-There is a [known issue](https://github.com/raxod502/radian/issues/41) where sometimes `C-x b` starts using [`ido-mode`](#switch-to-an-arbitrary-file-or-a-new-file) instead of `helm`. If this happens, press `M-x helm-mode` to fix it. If you find out how to reproduce this behavior, [do tell](https://github.com/raxod502/radian/issues/41)!
+There is a [known issue](https://github.com/raxod502/radian/issues/41)
+where sometimes `C-x b` starts
+using [`ido-mode`](#switch-to-an-arbitrary-file-or-a-new-file) instead
+of `helm`. If this happens, press `M-x helm-mode` to fix it. If you
+find out how to reproduce this
+behavior, [do tell](https://github.com/raxod502/radian/issues/41)!
 
 ### Buffer history
 
@@ -165,7 +198,8 @@ Command | Action
 `C-x left` | Switch to the previous buffer for the current window
 `C-x right` | Switch to the next buffer for the current window
 
-These commands are like "undo" and "redo" for the history of buffers you have had open in a particular window.
+These commands are like "undo" and "redo" for the history of buffers
+you have had open in a particular window.
 
 ### Switch to a file within a project
 
@@ -177,11 +211,18 @@ Command | Action
 `C-c p h` | Combination of `C-c p b`, `C-c p f`, and `C-c p p`
 `C-c p F` | Open a file in any project using [`helm`](#helm) (warning: slow)
 
-The `projectile` package provides some functionality for grouping files into "projects". By default, any folders that are Git repositories are considered projects. Folders will be added automatically to the list of known projects as you visit them.
+The `projectile` package provides some functionality for grouping
+files into "projects". By default, any folders that are Git
+repositories are considered projects. Folders will be added
+automatically to the list of known projects as you visit them.
 
-Any non-file buffers you open while in a Projectile project will be marked as associated with that project, and will show up under `C-c p b` along with any buffers for files in the project.
+Any non-file buffers you open while in a Projectile project will be
+marked as associated with that project, and will show up under `C-c p
+b` along with any buffers for files in the project.
 
-You can view the project for the current buffer in the mode line at the bottom of Emacs. If you are in the `radian` project, for instance, then your mode line might look something like this:
+You can view the project for the current buffer in the mode line at
+the bottom of Emacs. If you are in the `radian` project, for instance,
+then your mode line might look something like this:
 
 ```
 [*] init.el        72% (389,30)  [radian]  (Emacs-Lisp Paredit AggrIndent)
@@ -202,11 +243,14 @@ Command | Action
 `C-x k` | Kill a buffer using [`helm`](#helm)
 `q` | Dismiss a transient buffer
 
-Examples of transient buffers are those generated by e.g. `C-h k` or `C-h f`, or documentation or stack trace buffers created by CIDER.
+Examples of transient buffers are those generated by e.g. `C-h k` or
+`C-h f`, or documentation or stack trace buffers created by CIDER.
 
 ## Manipulating files
 
-Saving files is done directly from buffers. However, to perform more complex operations on files you will need to use Dired mode, which displays a quasi-editable list of files in a directory.
+Saving files is done directly from buffers. However, to perform more
+complex operations on files you will need to use Dired mode, which
+displays a quasi-editable list of files in a directory.
 
 ### Save files
 
@@ -215,7 +259,9 @@ Command | Action
 `C-x C-s` | Save the current buffer
 `C-x s` | Prompt to save each unsaved buffer (press `?` for options)
 
-Note that if the current buffer does not correspond to a file (like the `*scratch*` buffer), then `C-x C-s` will give you a [Helm](#helm) buffer to decide where to save it.
+Note that if the current buffer does not correspond to a file (like
+the `*scratch*` buffer), then `C-x C-s` will give you a [Helm](#helm)
+buffer to decide where to save it.
 
 ### Opening Dired mode
 
@@ -228,7 +274,9 @@ Command | Action
 
 #### Moving around
 
-You can use all the normal cursor movement commands in Dired mode. Additionally, typing a number before a movement command (such as `up` or `down`) will cause it to be repeated that number of times.
+You can use all the normal cursor movement commands in Dired mode.
+Additionally, typing a number before a movement command (such as `up`
+or `down`) will cause it to be repeated that number of times.
 
 Command | Action
 --- | ---
@@ -246,7 +294,9 @@ Command | Action
 
 #### Marking and flagging
 
-In Dired, you can "mark" files and directories, which is helpful because you can then run commands that perform an action on each marked item.
+In Dired, you can "mark" files and directories, which is helpful
+because you can then run commands that perform an action on each
+marked item.
 
 Command | Action
 --- | ---
@@ -282,7 +332,9 @@ Command | Action
 
 ## Manipulating windows
 
-You should read [Frames, buffers, and windows](#frames-buffers-and-windows) if you have not already.
+You should
+read [Frames, buffers, and windows](#frames-buffers-and-windows) if
+you have not already.
 
 ### Switch the buffer of a window
 
@@ -318,7 +370,9 @@ Suppose you have a window arrangement like this:
 +-----------+-----------+
 ```
 
-If you are in `A` and press `S-down`, then whether you move to `B` or to `C` is dependent on which side of `A` the cursor is on when you press `S-down`.
+If you are in `A` and press `S-down`, then whether you move to `B` or
+to `C` is dependent on which side of `A` the cursor is on when you
+press `S-down`.
 
 ### Close windows
 
@@ -334,7 +388,8 @@ Command | Action
 `C-c left` | Previous window arrangement
 `C-c right` | Back to most recent window arrangement
 
-Note that this is a linear history, so if you do something after undoing with `C-c left`, then `C-c right` will no longer work.
+Note that this is a linear history, so if you do something after
+undoing with `C-c left`, then `C-c right` will no longer work.
 
 ## Moving within a buffer
 
@@ -347,7 +402,9 @@ Command | Action
 `C-p` or `up` | Up one line
 `C-n` or `down` | Down one line
 
-You may ask why to use the `C-letter` versions of these commands. Many people find them faster and/or more ergonomically sound. This diagram from the Emacs tutorial may help you remember the keybindings:
+You may ask why to use the `C-letter` versions of these commands. Many
+people find them faster and/or more ergonomically sound. This diagram
+from the Emacs tutorial may help you remember the keybindings:
 
 ```
                           Previous line, C-p
@@ -376,7 +433,10 @@ Command | Action
 `M-a` | Back one sentence
 `M-e` | Forward one sentence
 
-In Vim, the concept of a word is very precise, so it is easy to predict exactly where you will end up after performing a move-by-word command. This doesn't appear to be the case in Emacs—the word movement commands are a little hard to predict.
+In Vim, the concept of a word is very precise, so it is easy to
+predict exactly where you will end up after performing a move-by-word
+command. This doesn't appear to be the case in Emacs—the word movement
+commands are a little hard to predict.
 
 ### Move through Lisp code
 
@@ -391,7 +451,8 @@ Command | Action
 `C-M-a` | Beginning of top-level form
 `C-M-e` | End of top-level form
 
-The best way to explain these commands is by example. In the following code snippets, the location of the cursor is shown as a `|`.
+The best way to explain these commands is by example. In the following
+code snippets, the location of the cursor is shown as a `|`.
 
 #### `C-M-b` (back one form)
 
@@ -423,7 +484,9 @@ The best way to explain these commands is by example. In the following code snip
 
 #### `C-M-p` (descend backwards)
 
-Forms for which this command can really shine are not common in Clojure because of the threading macro (`->`). However, for illustrative purposes, here is an example:
+Forms for which this command can really shine are not common in
+Clojure because of the threading macro (`->`). However, for
+illustrative purposes, here is an example:
 
 ```
 (assoc (merge n (assoc (assoc m :a 1) :b 2)) :c 3)|
@@ -493,9 +556,18 @@ Forms for which this command can really shine are not common in Clojure because 
 
 ### Jump to an arbitrary location on-screen
 
-The `ace-jump-mode` package provides a mechanism for jumping to any piece of text you can see on the screen, even if it is in a different window. To use it, pick a word that you would like to jump to. Then press `C-c C-SPC` and enter the first letter of that word. You will notice that the letter you were looking at has been replaced by a different letter. Type this letter to jump to that location.
+The `ace-jump-mode` package provides a mechanism for jumping to any
+piece of text you can see on the screen, even if it is in a different
+window. To use it, pick a word that you would like to jump to. Then
+press `C-c C-SPC` and enter the first letter of that word. You will
+notice that the letter you were looking at has been replaced by a
+different letter. Type this letter to jump to that location.
 
-By adding a `C-u`, you can jump to any character, not just one at the beginning of a word. Or, you can jump to an arbitrary line by adding a second `C-u`. (For this last option, you do not need to provide a character—just press `C-u C-u C-SPC` and type the letter that appears on the line you desire.)
+By adding a `C-u`, you can jump to any character, not just one at the
+beginning of a word. Or, you can jump to an arbitrary line by adding a
+second `C-u`. (For this last option, you do not need to provide a
+character—just press `C-u C-u C-SPC` and type the letter that appears
+on the line you desire.)
 
 Command | Action
 --- | ---
@@ -520,7 +592,18 @@ Command | Action
 `C-s` | Search forwards
 `C-r` | Search backwards
 
-While searching, type text to enter or extend your search query. Press `C-s` (or `C-r`) to jump to the next (or previous) match. Once you reach the end (or beginning) of the buffer, it will wrap around, but you will have to press `C-s` (or `C-r`) twice in order for this to happen. Press `RET` to exit the search at the current match and set a mark where the search started (so you can `C-u C-SPC` to get back). If the search is not matching anything, press `C-g` to remove the part of the query that is preventing a match, starting at the end. Otherwise, `C-g` will exit the search and return the cursor to the starting point of the search. To enter a literal newline, use `C-j`. You can enter characters that would otherwise act as commands by prefixing them with `C-q`.
+While searching, type text to enter or extend your search query. Press
+`C-s` (or `C-r`) to jump to the next (or previous) match. Once you
+reach the end (or beginning) of the buffer, it will wrap around, but
+you will have to press `C-s` (or `C-r`) twice in order for this to
+happen. Press `RET` to exit the search at the current match and set a
+mark where the search started (so you can `C-u C-SPC` to get back). If
+the search is not matching anything, press `C-g` to remove the part of
+the query that is preventing a match, starting at the end. Otherwise,
+`C-g` will exit the search and return the cursor to the starting point
+of the search. To enter a literal newline, use `C-j`. You can enter
+characters that would otherwise act as commands by prefixing them with
+`C-q`.
 
 ### Jump to a previous location
 
@@ -530,7 +613,11 @@ Command | Action
 `C-u C-SPC` | Jump to the previous mark location in the current buffer
 `C-x C-@` | Jump to the previous mark location across all buffers
 
-Many "jump" commands, such as `M-<` and `M->`, will set a mark at the cursor location before they move the cursor. You can tell this is happening if the text "Mark set" appears in the minibuffer. So to quickly check some information at the top of a file and then return to your previous location is just `M-<` followed by `C-u C-SPC`.
+Many "jump" commands, such as `M-<` and `M->`, will set a mark at the
+cursor location before they move the cursor. You can tell this is
+happening if the text "Mark set" appears in the minibuffer. So to
+quickly check some information at the top of a file and then return to
+your previous location is just `M-<` followed by `C-u C-SPC`.
 
 ### Move the screen
 
@@ -543,7 +630,9 @@ Command | Action
 
 ### Cutting (killing), copying, and pasting (yanking)
 
-Emacs has a bit of a different nomenclature for its editing operations than most other editors. And if you previously used Vim, you will probably be even more confused. Here is a handy table:
+Emacs has a bit of a different nomenclature for its editing operations
+than most other editors. And if you previously used Vim, you will
+probably be even more confused. Here is a handy table:
 
 Emacs | Every other editor | Vim
 --- | --- | ---
@@ -564,9 +653,15 @@ Command | Action
 `M-y` | Cycle back through the history of killed/copied text
 `M-SPC` | Replace the whitespace surrounding the cursor with a single space
 
-Note `C-k`, by default, will not kill the newline at the end of the line unless the line is empty. So, to kill a non-empty line you will have to do `C-a C-k C-k`.
+Note `C-k`, by default, will not kill the newline at the end of the
+line unless the line is empty. So, to kill a non-empty line you will
+have to do `C-a C-k C-k`.
 
-See [Yanking Earlier Kills](https://www.gnu.org/software/emacs/manual/html_node/emacs/Earlier-Kills.html) in the Emacs manual for an explanation of `M-y` does. The important thing to remember is that you have to press `C-y` first, before you can start pressing `M-y`.
+See
+[Yanking Earlier Kills](https://www.gnu.org/software/emacs/manual/html_node/emacs/Earlier-Kills.html) in
+the Emacs manual for an explanation of `M-y` does. The important thing
+to remember is that you have to press `C-y` first, before you can
+start pressing `M-y`.
 
 ### Search and replace
 
@@ -575,7 +670,8 @@ Command | Action
 `M-%` | Query replace
 `C-M-%` | Query replace regex
 
-Here is a handy table correlating Emacs' query replace actions to Git's patch-mode actions:
+Here is a handy table correlating Emacs' query replace actions to
+Git's patch-mode actions:
 
 Emacs | Emacs action | Git action | Git
 --- | --- | --- | ---
@@ -587,7 +683,8 @@ Emacs | Emacs action | Git action | Git
 `Y` | Replace all remaining matches | No equivalent | N/A
 `^` | Return to previous match | Return to previous hunk | `K`
 
-Emacs' query replace offers several variations of Git's `e` option for editing the replacement.
+Emacs' query replace offers several variations of Git's `e` option for
+editing the replacement.
 
 Command | Action
 --- | ---
@@ -632,7 +729,13 @@ Command | Action
 
 > "If you think paredit is not for you, then you need to become the kind of person that paredit is for." -- Phil Hagelberg
 
-The following commands are provided by the `paredit` package. At first, it may seem like the large number of commands must make editing Lisp code more complicated. But once you become accustomed to them, you will be editing *much* more efficiently than you were before. The `aggressive-indent` package is a perfect complement to `paredit`, and the two combined make it so that you can read the structure of your code by indentation and just ignore the parentheses.
+The following commands are provided by the `paredit` package. At
+first, it may seem like the large number of commands must make editing
+Lisp code more complicated. But once you become accustomed to them,
+you will be editing *much* more efficiently than you were before. The
+`aggressive-indent` package is a perfect complement to `paredit`, and
+the two combined make it so that you can read the structure of your
+code by indentation and just ignore the parentheses.
 
 Command | Action
 --- | ---
@@ -650,7 +753,8 @@ Command | Action
 `M-J` | Join forms on either side of cursor location
 `M-?` | Reverse nesting of forms (AKA convolute)
 
-The best way to explain these commands is by example. In the following code snippets, the location of the cursor is shown as a `|`.
+The best way to explain these commands is by example. In the following
+code snippets, the location of the cursor is shown as a `|`.
 
 ### `M-(` (wrap in parentheses)
 
@@ -738,7 +842,11 @@ The best way to explain these commands is by example. In the following code snip
 
 ### `M-?` (convolute)
 
-The default keybinding for `paredit-convolute-sexp` is probably quite appropriate given most people's first reaction to it. However, it is very useful in one particular case: reversing the nesting of forms. Here is an example, where a `let` form is broadened in scope so that a symbol it binds is available in a higher form:
+The default keybinding for `paredit-convolute-sexp` is probably quite
+appropriate given most people's first reaction to it. However, it is
+very useful in one particular case: reversing the nesting of forms.
+Here is an example, where a `let` form is broadened in scope so that a
+symbol it binds is available in a higher form:
 
 ```
 (apply +
@@ -758,19 +866,28 @@ The default keybinding for `paredit-convolute-sexp` is probably quite appropriat
                    the-numbers))))
 ```
 
-Note that I had to move a line break in order to make the formatting look nice.
+Note that I had to move a line break in order to make the formatting
+look nice.
 
 ### Additional notes
 
-Note that, by default, there are no keybindings analogous to `M-(` but for square brackets or curly braces. As substitutes, you can use `[ C-right` and `{ C-right`.
+Note that, by default, there are no keybindings analogous to `M-(` but
+for square brackets or curly braces. As substitutes, you can use `[
+C-right` and `{ C-right`.
 
-The best way to remember the slurp/barf keybindings, in my opinion, is to keep in mind that the arrow key points in the direction in which the parenthesis moves.
+The best way to remember the slurp/barf keybindings, in my opinion, is
+to keep in mind that the arrow key points in the direction in which
+the parenthesis moves.
 
-You may have to substitute `ESC C-left` and `ESC C-right` for `C-M-left` and `C-M-right` in order for your terminal emulator to send the correct key signals.
+You may have to substitute `ESC C-left` and `ESC C-right` for
+`C-M-left` and `C-M-right` in order for your terminal emulator to send
+the correct key signals.
 
-Remember that strings are also forms, so you can use most of the Paredit bindings to manipulate strings as well as parenthetical forms.
+Remember that strings are also forms, so you can use most of the
+Paredit bindings to manipulate strings as well as parenthetical forms.
 
-If you really need to bypass Paredit temporarily, you can precede your command with `C-u`. But these times should be rare.
+If you really need to bypass Paredit temporarily, you can precede your
+command with `C-u`. But these times should be rare.
 
 ## Interacting with Elisp code
 
@@ -798,9 +915,14 @@ Command | Action
 `M-.` | Jump to the definition of a symbol (by default the one at the cursor)
 `M-*` | Jump back after a `M-.`
 
-If the current file is in a project (that is, you can find a `project.clj` file by looking upwards in the filesystem), then a REPL for that project will be started. Otherwise, a REPL that is not associated with any project will be started. (This functionality is just like running `lein repl`, because that is what `C-c M-j` does.)
+If the current file is in a project (that is, you can find a
+`project.clj` file by looking upwards in the filesystem), then a REPL
+for that project will be started. Otherwise, a REPL that is not
+associated with any project will be started. (This functionality is
+just like running `lein repl`, because that is what `C-c M-j` does.)
 
-Note that most "intelligent" Clojure functionality requires a running REPL for the current project.
+Note that most "intelligent" Clojure functionality requires a running
+REPL for the current project.
 
 ### Interacting with the REPL
 
@@ -826,13 +948,20 @@ Command | Action
 `C-c C-o` | Clear the output of the last command (useful for large outputs that make Emacs slow)
 `C-c C-q` | Quit the REPL
 
-Note that, just like Zsh, when you cycle through past commands with `M-p` and `M-n`, if you have already typed part of a command, only past commands that start with the same prefix will be shown. This even works with Paredit mode, so that the matching parentheses will not mess things up.
+Note that, just like Zsh, when you cycle through past commands with
+`M-p` and `M-n`, if you have already typed part of a command, only
+past commands that start with the same prefix will be shown. This even
+works with Paredit mode, so that the matching parentheses will not
+mess things up.
 
-Don't forget that the REPL is a regular text buffer at its core, so all of Emacs' navigation and editing commands will still work.
+Don't forget that the REPL is a regular text buffer at its core, so
+all of Emacs' navigation and editing commands will still work.
 
 ### Running tests
 
-Make sure that if you update a test, you re-evaluate it using `C-M-x` or `C-c C-k`. Otherwise, running it again will produce the same result, since the REPL will still have the old version.
+Make sure that if you update a test, you re-evaluate it using `C-M-x`
+or `C-c C-k`. Otherwise, running it again will produce the same
+result, since the REPL will still have the old version.
 
 Command | Action
 --- | ---
@@ -859,11 +988,17 @@ Command | Action
 `M-x cider-browse-ns` | View listing of vars defined in namespace
 `M-x cider-browse-ns-all` | View listing of all namespaces
 
-See [the CIDER documentation](https://github.com/clojure-emacs/cider/blob/master/doc/miscellaneous_features.md#macroexpansion) for more information on these amazing features.
+See
+[the CIDER documentation](https://github.com/clojure-emacs/cider/blob/master/doc/miscellaneous_features.md#macroexpansion) for
+more information on these amazing features.
 
 ## Helm
 
-The `helm` package provides an interface for selecting among multiple choices that is much easier to use than Emacs' default. This interface is used for most commands that require selecting something—a buffer, a file, a command, and so on. The `helm-projectile` package extends this interface to `projectile` commands.
+The `helm` package provides an interface for selecting among multiple
+choices that is much easier to use than Emacs' default. This interface
+is used for most commands that require selecting something—a buffer, a
+file, a command, and so on. The `helm-projectile` package extends this
+interface to `projectile` commands.
 
 Here is a list of frequent commands that use `helm`:
 
@@ -882,15 +1017,35 @@ Command | Action
 `C-c p F` | Open a file in any project
 `C-x k` | Kill a buffer
 
-The `helm` buffer displays a list of suggestions, which you can filter by typing. There are two filtering modes: fuzzy and literal. If the text you enter has no spaces, then fuzzy filtering is used. In this mode, matching suggestions must have all the characters in your query, in order, but not necessarily contiguous. So, `ffap` would match `find-file-at-point` or `diff-backup`. If the text you enter has at least one space, then literal filtering is used. In this mode, suggestions have to contain each of the space-separated components of your query, but they can be in any order. So, `face cust` would match `customize-face` but would not `file-cache-add-directory-using-locate` (which would match if you had no space).
+The `helm` buffer displays a list of suggestions, which you can filter
+by typing. There are two filtering modes: fuzzy and literal. If the
+text you enter has no spaces, then fuzzy filtering is used. In this
+mode, matching suggestions must have all the characters in your query,
+in order, but not necessarily contiguous. So, `ffap` would match
+`find-file-at-point` or `diff-backup`. If the text you enter has at
+least one space, then literal filtering is used. In this mode,
+suggestions have to contain each of the space-separated components of
+your query, but they can be in any order. So, `face cust` would match
+`customize-face` but would not `file-cache-add-directory-using-locate`
+(which would match if you had no space).
 
-The primary way to get to the suggestion you want in Helm is just to type more—the intelligent matching makes this very convenient—but you can also use `up` and `down` to select a candidate.
+The primary way to get to the suggestion you want in Helm is just to
+type more—the intelligent matching makes this very convenient—but you
+can also use `up` and `down` to select a candidate.
 
-You can press `C-j` to open a temporary buffer to preview the current selection. For selecting a buffer or file, this is a preview of the contents of the buffer or file. For `M-x`, `C-h f`, or `C-h v`, this is the documentation of the selected function or variable. Note that there are some commands, such as `C-x k`, where this doesn't seem to work.
+You can press `C-j` to open a temporary buffer to preview the current
+selection. For selecting a buffer or file, this is a preview of the
+contents of the buffer or file. For `M-x`, `C-h f`, or `C-h v`, this
+is the documentation of the selected function or variable. Note that
+there are some commands, such as `C-x k`, where this doesn't seem to
+work.
 
 ## IDO mode
 
-The `ido-mode` package (which is included in Emacs by default) provides another interface for selecting among multiple choices which is sometimes better and sometimes worse than [`helm`](#helm). (Both modes are always better than Emacs' default, though.)
+The `ido-mode` package (which is included in Emacs by default)
+provides another interface for selecting among multiple choices which
+is sometimes better and sometimes worse than [`helm`](#helm). (Both
+modes are always better than Emacs' default, though.)
 
 Here is a list of frequent commands that use `ido-mode`:
 
@@ -899,6 +1054,16 @@ Command | Action
 `C-x C-f` | Open an arbitrary file
 `C-x d` | Open Dired in an arbitrary folder
 
-You can use `left` and `right` to select an option, and `RET` to accept it. Optionally, you can also type letters to filter the options using case-insensitive fuzzy-matching (like `helm` behaves when you don't type any spaces). To go up a directory, first delete anything you have entered as a filter, and then press `DEL` again. To go down a directory, simply press `RET` on the desired directory.
+You can use `left` and `right` to select an option, and `RET` to
+accept it. Optionally, you can also type letters to filter the options
+using case-insensitive fuzzy-matching (like `helm` behaves when you
+don't type any spaces). To go up a directory, first delete anything
+you have entered as a filter, and then press `DEL` again. To go down a
+directory, simply press `RET` on the desired directory.
 
-If you want to create a new file or directory, then you can't always use `RET`. This is because if the name of your new file or directory fuzzy-matches another option being presented, then `RET` will accept that option. Use `C-j` to force `ido-mode` to accept exactly what you have typed, even if it matches something else. Finally, to enter Dired for the current `ido-mode` directory, press `C-d`.
+If you want to create a new file or directory, then you can't always
+use `RET`. This is because if the name of your new file or directory
+fuzzy-matches another option being presented, then `RET` will accept
+that option. Use `C-j` to force `ido-mode` to accept exactly what you
+have typed, even if it matches something else. Finally, to enter Dired
+for the current `ido-mode` directory, press `C-d`.
