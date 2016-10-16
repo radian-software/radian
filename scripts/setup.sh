@@ -145,6 +145,7 @@ if feature leiningen; then
 fi
 
 if feature leiningen-dotfiles; then
+    ./ensure-not-version-controlled.sh ~/.lein
     ./ensure-symlinked.sh ~/.lein/profiles.clj ../profiles.clj
 fi
 
@@ -170,6 +171,7 @@ if feature emacs-dotfiles; then
     # Therefore, we need to ensure that these files do not exist.
     ./ensure-symlinked.sh ~/.emacs
     ./ensure-symlinked.sh ~/.emacs.el
+    ./ensure-not-version-controlled.sh ~/.emacs.d
     ./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el
     ./ensure-symlinked.sh ~/.emacs.d/init.before.local.el ../../radian-local/init.before.local.el ./create-init-before-local-el.sh
     ./ensure-symlinked.sh ~/.emacs.d/init.pre.local.el ../../radian-local/init.pre.local.el ./create-init-pre-local-el.sh
