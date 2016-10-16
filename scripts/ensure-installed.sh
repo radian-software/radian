@@ -97,13 +97,28 @@ requires_package_manager() {
     [[ $optional_flag == --require ]]
 }
 
-# Returns zero if version $2 is at least as recent as version $1,
-# non-zero otherwise. The versions should be dot-separated strings of integers.
+# Returns zero if version $2 is at least as recent as version $1, two
+# if version $2 is malformed, and one otherwise. The versions should
+# be dot-separated strings of integers. Version $2 is allowed some
+# flexibility; strings such as "-alpha" are trimmed from the end.
+# Version $1 is not normalized or checked.
 version_as_recent() {
 
     # Parse arguments.
     old_version="$1"
     new_version="$2"
+
+    # Normalize $new_version (this is the version that was taken from
+    # the output of $executable $version_subcommand).
+    new_version="${new_version%%-*}"
+    new_version="${new_version%%_*}"
+    new_version="${new_version%%.}"
+    new_version="${new_version%%,}"
+
+    # Check that $new_version is formatted correctly.
+    if ! (echo "$new_version" | egrep -q '^[0-9]+(\.[0-9]+)*$'); then
+        return 2
+    fi
 
     # Split versions into components.
     IFS=. read -ra old_components <<< "$old_version"
@@ -147,20 +162,9 @@ is_installed_correctly() {
             if [[ $version_line ]]; then
                 version_and_rest="${version_line#$version_command_name}"
                 version_and_rest="${version_and_rest# }"
-                raw_version="${version_and_rest%% *}"
-                echo "[ensure-installed] The version appears to be $raw_version."
-                version="${raw_version%%-*}"
-                version="${version%%_*}"
-                version="${version%%.}"
-                version="${version%%,}"
-                if [[ $raw_version != $version ]]; then
-                    echo "[ensure-installed] After trimming, this becomes $version."
-                fi
-                if ! (echo "$version" | egrep -q '^[0-9]+(\.[0-9]+)*$'); then
-                    echo "[ensure-installed] The version appears to be malformed."
-                    echo "[ensure-installed] Assuming that the version is incorrect."
-                    return 1
-                elif version_as_recent "$min_version" "$version"; then
+                version="${version_and_rest%% *}"
+                echo "[ensure-installed] The version appears to be $version."
+                if exit_code=0 && version_as_recent "$min_version" "$version" || exit_code=$?; then
                     echo "[ensure-installed] This is at least as recent as the minimum version, $min_version."
                     if requires_package_manager; then
                         echo "[ensure-installed] Checking that $executable has been installed via $package_manager."
@@ -183,6 +187,10 @@ is_installed_correctly() {
                     fi
                     echo "[ensure-installed] The installation appears to be OK, exiting."
                     return 0
+                elif [[ $exit_code == 2 ]]; then
+                    echo "[ensure-installed] The version appears to be malformed."
+                    echo "[ensure-installed] Assuming that the version is incorrect."
+                    return 1
                 else
                     echo "[ensure-installed] This is not as recent as the minimum version, $min_version."
                     return 1
@@ -221,7 +229,7 @@ install() {
             echo "[ensure-installed] The available versions appear to be: ${versions[@]}."
             for version in "${versions[@]}"; do
                 if requires_version; then
-                    if (echo "$version" | egrep -q "^[0-9]+(\.[0-9]+)*$") && version_as_recent "$min_version" "$version"; then
+                    if version_as_recent "$min_version" "$version"; then
                         echo "[ensure-installed] The version $version is at least as recent as the minimum version, $min_version."
                         echo "[ensure-installed] Recreating symlinks using 'brew switch $package_name $version'."
                         brew switch "$package_name" "$version"
