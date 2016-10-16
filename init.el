@@ -1,12 +1,5 @@
-;;; Utility function for user-specific config
-(defun radian-load-user-config (filename)
-  "If a file by the specified name exists in the .emacs.d directory,
-loads it."
-  (let ((file (concat user-emacs-directory filename)))
-    (when (file-exists-p file)
-      (load-file file))))
-
-;;;; Tweakable parameters
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; User-specific configuration
 
 ;; These parameters let people using this init-file as a starting
 ;; point for their Emacs do some basic customization without messing
@@ -62,10 +55,28 @@ present."
   "Removes the provided package from radian-packages, if it is present."
   (setq radian-packages (delete package radian-packages)))
 
-;;;; User-specific configuration (1 of 4).
+;;; Utility function for user-specific config
+(defun radian-load-user-config (filename)
+  "If a file by the specified name exists in the .emacs.d directory,
+loads it."
+  (let ((file (concat user-emacs-directory filename)))
+    (when (file-exists-p file)
+      (load-file file))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; User-specific configuration (1 of 4)
+
 (radian-load-user-config "init.before.local.el")
 
-;;;; Appearance
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Libraries
+
+;;; This is required to have access to some basic data manipulation
+;;; functions, like cl-every. Why aren't these available by default?
+(require 'cl-lib)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Startup
 
 ;;; Disable the "For information about GNU Emacs..." message at startup,
 ;;; for *all* users.
@@ -76,6 +87,9 @@ present."
 ;;; work in the startup buffer, which is annoying.
 (setq inhibit-startup-screen t)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Appearance
+
 ;;; Disable the menu bar, as it doesn't seem very useful...
 (menu-bar-mode -1)
 
@@ -83,95 +97,35 @@ present."
 ;;; Emacsen.)
 (tool-bar-mode -1)
 
-;;; When point is on a paren, highlight the matching paren instantly,
-;;; instead of after 1/8 of a second.
-(setq show-paren-delay 0)
-(show-paren-mode 1)
-
 ;;; Turn off the alarm bell.
 (setq ring-bell-function 'ignore)
 
 ;;; Prevent the cursor from blinking (only affects windowed Emacs).
 (blink-cursor-mode 0)
 
-;;;; Elisp customization
+;;; When point is on a paren, highlight the matching paren instantly,
+;;; instead of after 1/8 of a second.
+(setq show-paren-delay 0)
+(show-paren-mode 1)
 
-;;; This is required to have access to some basic data manipulation
-;;; functions, like cl-every. Why aren't these available by default?
-(require 'cl-lib)
+;;; Get rid of the underline for the currently highlighted match in an
+;;; Isearch or query replace.
+(when radian-customize-tweak-colors
+  (set-face-underline 'isearch nil))
 
-;;; Add keybindings for jumping to various dotfiles. These all begin
-;;; with M-RET and are designed to be mnemonic, as in <M-RET e p r>
-;;; standing for "go to [e]macs init.[pr]e.local.el".
-;;;
-;;; Note that we are using the defvar-nil-setq pattern described in
-;;; [1], which makes it so that if you make changes to the list and
-;;; then reload this file (M-RET r), your changes will be visible.
-;;;
-;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
+;;; The default highlight color for I-searches is quite dark and makes it hard
+;;; to read the highlighted text. Change it to a nice light blue, and get rid of
+;;; the distracting underline. (I mean really, how is an *underline* supposed to
+;;; help you see something that's highlighted in *bright blue*?)
+(when radian-customize-tweak-colors
+  (set-face-background 'lazy-highlight "#B1EAFC")
+  (set-face-underline 'lazy-highlight nil))
 
-(defvar radian-dotfiles nil
-  "Keybinding suffixes used after M-RET to jump to various
-dotfiles.")
-(setq radian-dotfiles
-      '(("e i" ".emacs.d/init.el")
-        ("e b" ".emacs.d/init.before.local.el")
-        ("e p r" ".emacs.d/init.pre.local.el")
-        ("e p o" ".emacs.d/init.post.local.el")
-        ("e l" ".emacs.d/init.local.el")
-        ("g c" ".gitconfig")
-        ("g e" ".gitexclude")
-        ("g l" ".gitconfig.local")
-        ("l p" ".lein/profiles.clj")
-        ("t c" ".tmux.conf")
-        ("t l" ".tmux.local.conf")
-        ("z r" ".zshrc")
-        ("z a" ".zshrc.antigen.local")
-        ("z b" ".zshrc.before.local")
-        ("z l" ".zshrc.local")))
+;;; Eliminate the underline on mismatched parens.
+(set-face-underline 'show-paren-mismatch nil)
 
-(dolist (item radian-dotfiles)
-  (global-set-key (kbd (concat "M-RET " (car item)))
-                  `(lambda ()
-                     (interactive)
-                     (find-file ,(concat "~/" (cadr item))))))
-
-;;; Add a keybinding for reloading this file (init.el). This is useful
-;;; for when you have several instances of Emacs open and you change
-;;; something in your configuration, then later come back to an old
-;;; Emacs that was opened before you made the change. You can then
-;;; just press M-RET r to get the change into that instance.
-(global-set-key (kbd "M-RET r")
-                '(lambda ()
-                   (interactive)
-                   (load-file "~/.emacs.d/init.el")))
-
-;;; Keybinding for evaluating a buffer of Elisp. This is consistent
-;;; with the keybindings for evaluating a buffer in CIDER and Geiser.
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-c C-k") 'eval-buffer)))
-
-;;; Keybinding for jumping to source of Elisp functions and variables.
-;;; This is consistent with the keybindings for jumping to source in
-;;; CIDER and Geiser, with the exception of those keybindings not
-;;; requiring a prefix argument to look at variables (they "just work"
-;;; on both functions and variables).
-
-(defun find-function-or-variable (&optional prefix)
-  "Acts like `find-function' without a prefix argument, and like
-  `find-variable' with a prefix argument."
-  (interactive "P")
-  (if prefix
-      (call-interactively 'find-variable)
-    (call-interactively 'find-function)))
-
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-.")
-                           'find-function-or-variable)))
-
-;;;; OSX interop
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Host OS interop
 
 ;;; Add mouse support
 ;;; Based on http://stackoverflow.com/a/8859057/3538165
@@ -216,7 +170,77 @@ dotfiles.")
 ;;; by doing C-y M-y.
 (setq save-interprogram-paste-before-kill t)
 
-;;;; File saving and loading
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Finding files
+
+;;; Add keybindings for jumping to various dotfiles. These all begin
+;;; with M-RET and are designed to be mnemonic, as in <M-RET e p r>
+;;; standing for "go to [e]macs init.[pr]e.local.el".
+;;;
+;;; Note that we are using the defvar-nil-setq pattern described in
+;;; [1], which makes it so that if you make changes to the list and
+;;; then reload this file (M-RET r), your changes will be visible.
+;;;
+;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
+
+(defvar radian-dotfiles nil
+  "Keybinding suffixes used after M-RET to jump to various
+dotfiles.")
+(setq radian-dotfiles
+      '(("e i" ".emacs.d/init.el")
+        ("e b" ".emacs.d/init.before.local.el")
+        ("e p r" ".emacs.d/init.pre.local.el")
+        ("e p o" ".emacs.d/init.post.local.el")
+        ("e l" ".emacs.d/init.local.el")
+        ("g c" ".gitconfig")
+        ("g e" ".gitexclude")
+        ("g l" ".gitconfig.local")
+        ("l p" ".lein/profiles.clj")
+        ("t c" ".tmux.conf")
+        ("t l" ".tmux.local.conf")
+        ("z r" ".zshrc")
+        ("z a" ".zshrc.antigen.local")
+        ("z b" ".zshrc.before.local")
+        ("z l" ".zshrc.local")))
+
+(dolist (item radian-dotfiles)
+  (global-set-key (kbd (concat "M-RET " (car item)))
+                  `(lambda ()
+                     (interactive)
+                     (find-file ,(concat "~/" (cadr item))))))
+
+;;; Use IDO mode for C-x C-f and friends. (Most other things should be
+;;; using Helm mode.)
+(ido-mode 'files)
+
+;;; Use fuzzy matching.
+(setq ido-enable-flex-matching 1)
+
+;;; Follow symlinks without prompting. If this isn't done, then you will
+;;; get a prompt every time you edit init.el with F9. (This is assuming
+;;; that ~/.emacs.d/init.el is a symlink, which is how the setup script
+;;; sets it up.)
+(setq vc-follow-symlinks t)
+
+;;; Automatically reload files that were changed on disk, if they have
+;;; not been modified in Emacs since the last time they were saved.
+(global-auto-revert-mode 1)
+
+;;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
+(setq auto-revert-interval 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Dired
+
+;;; Suppress the 'ls does not support --dired' warning. Doing this instead
+;;; of installing a dired-compatibile ls is much easier, although it may
+;;; cause problems with e.g. filenames that have leading spaces. If you
+;;; have a lot of filenames with leading spaces, though, you probably have
+;;; bigger problems ;)
+(setq dired-use-ls-dired nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Saving files
 
 ;;; Put backup files in $HOME/.emacs-backups, rather than in the current
 ;;; directory.
@@ -236,37 +260,8 @@ dotfiles.")
 ;;; Don't make autosave files.
 (setq auto-save-default nil)
 
-;;; Trim trailing whitespace on save. This will get rid of end-of-line
-;;; whitespace, and reduce the number of blank lines at the end of the
-;;; file to one.
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-
-;;; Add a trailing newline if there is not one already, when
-;;; saving. This is enabled for default for certain modes, but we want
-;;; it everywhere (e.g. when editing .gitignore files).
-(setq require-final-newline t)
-
-;;; Automatically reload files that were changed on disk, if they have
-;;; not been modified in Emacs since the last time they were saved.
-(global-auto-revert-mode 1)
-
-;;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
-(setq auto-revert-interval 1)
-
-;;; Follow symlinks without prompting. If this isn't done, then you will
-;;; get a prompt every time you edit init.el with F9. (This is assuming
-;;; that ~/.emacs.d/init.el is a symlink, which is how the setup script
-;;; sets it up.)
-(setq vc-follow-symlinks t)
-
-;;; Suppress the 'ls does not support --dired' warning. Doing this instead
-;;; of installing a dired-compatibile ls is much easier, although it may
-;;; cause problems with e.g. filenames that have leading spaces. If you
-;;; have a lot of filenames with leading spaces, though, you probably have
-;;; bigger problems ;)
-(setq dired-use-ls-dired nil)
-
-;;;; Text format
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Text formatting
 
 ;;; Don't use tabs for indentation, even in deeply indented lines. (Why
 ;;; would anyone want their editor to *sometimes* use tabs?)
@@ -282,31 +277,105 @@ dotfiles.")
 ;;; after the period when it is wrapped to the next line.
 (setq sentence-end-double-space nil)
 
-;;;; Copying and pasting
+;;; Trim trailing whitespace on save. This will get rid of end-of-line
+;;; whitespace, and reduce the number of blank lines at the end of the
+;;; file to one.
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;;; Add a trailing newline if there is not one already, when
+;;; saving. This is enabled for default for certain modes, but we want
+;;; it everywhere (e.g. when editing .gitignore files).
+(setq require-final-newline t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Killing and yanking
 
 ;;; Eliminate duplicates in the kill ring. That is, if you kill the same
 ;;; thing twice, you won't have to use M-y twice to get past it to older
 ;;; entries in the kill ring.
 (setq kill-do-not-save-duplicates t)
 
-;;;; I-search
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Searching
 
 ;;; Eliminate the quarter-second delay before I-search matches are
 ;;; highlighted, because delays suck.
 (setq lazy-highlight-initial-delay 0)
 
-;;;; Packages
-;; Downloads any packages that are not included with Emacs 24 by default.
-;; This allows Radian to run on other systems without any additional
-;; setup (other than Emacs 24 being installed).
-;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Windows
+
+(windmove-default-keybindings)
+
+(winner-mode 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; ElDoc
+
+;;; Enable ElDoc when editing Lisps and using Lisp REPLs.
+
+(dolist (hook '(emacs-lisp-mode-hook
+                lisp-interaction-mode-hook))
+  (add-hook hook (lambda () (eldoc-mode 1))))
+
+(when (member 'clojure-mode radian-packages)
+  (add-hook 'clojure-mode-hook (lambda () (eldoc-mode 1))))
+
+(when (member 'cider radian-packages)
+  (add-hook 'cider-repl-mode-hook (lambda () (eldoc-mode 1))))
+
+;;; Turn off the delay before ElDoc messages are shown in the echo area.
+(setq eldoc-idle-delay 0)
+
+;;; Always truncate ElDoc messages to one line. This prevents the echo area from
+;;; resizing itself unexpectedly when point is on a Clojure variable with a
+;;; multiline docstring.
+(setq eldoc-echo-area-use-multiline-p nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Emacs Lisp
+
+;;; Add a keybinding for reloading this file (init.el). This is useful
+;;; for when you have several instances of Emacs open and you change
+;;; something in your configuration, then later come back to an old
+;;; Emacs that was opened before you made the change. You can then
+;;; just press M-RET r to get the change into that instance.
+(global-set-key (kbd "M-RET r")
+                '(lambda ()
+                   (interactive)
+                   (load-file "~/.emacs.d/init.el")))
+
+;;; Keybinding for evaluating a buffer of Elisp. This is consistent
+;;; with the keybindings for evaluating a buffer in CIDER and Geiser.
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (local-set-key (kbd "C-c C-k") 'eval-buffer)))
+
+;;; Keybinding for jumping to source of Elisp functions and variables.
+;;; This is consistent with the keybindings for jumping to source in
+;;; CIDER and Geiser, with the exception of those keybindings not
+;;; requiring a prefix argument to look at variables (they "just work"
+;;; on both functions and variables).
+
+(defun find-function-or-variable (&optional prefix)
+  "Acts like `find-function' without a prefix argument, and like
+  `find-variable' with a prefix argument."
+  (interactive "P")
+  (if prefix
+      (call-interactively 'find-variable)
+    (call-interactively 'find-function)))
+
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (local-set-key (kbd "M-.")
+                           'find-function-or-variable)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Set up package installation system
 
 ;;; Based on http://batsov.com/articles/2012/02/19/package-management-in-emacs-the-good-the-bad-and-the-ugly/
 
-;;; Initialize the package management system, before we start trying
-;;; to add packages.
 (require 'package)
-(package-initialize)
 
 ;;; The default package repository in Emacs doesn't have a lot of the
 ;;; packages we need, such as Projectile. Therefore, add the melpa-stable
@@ -325,8 +394,17 @@ dotfiles.")
 (setq package-pinned-packages
       '((cider . "melpa-stable")))
 
-;;;; User-specific configuration (2 of 4).
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; User-specific configuration (2 of 4)
+
 (radian-load-user-config "init.pre.local.el")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Install and activate packages
+
+;;; Initialize the package management system, before we start trying
+;;; to add packages.
+(package-initialize)
 
 ;;; Install required packages, if necessary.
 (unless (cl-every 'package-installed-p radian-packages)
@@ -340,78 +418,13 @@ dotfiles.")
 ;;; Make the installed packages available.
 (provide 'radian-packages)
 
-;;;; User-specific configuration (3 of 4).
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; User-specific configuration (3 of 4)
+
 (radian-load-user-config "init.post.local.el")
 
-;;;; Package: Ace Jump Mode
-;; Allows quickly jumping to an arbitrary word, character, or line.
-;;;;
-
-(when (member 'ace-jump-mode radian-packages)
-
-  ;; Clojure mode already binds C-c SPC to clojure-align, so use C-c C-SPC
-  ;; instead.
-  (global-set-key (kbd "C-c C-SPC") 'ace-jump-mode))
-
-;;;; Package: Windmove
-;; Allows switching to adjacent windows using shift + arrow keys.
-;;;;
-
-(windmove-default-keybindings)
-
-;;;; Package: Winner Mode
-;; Allows navigating through window layout history using C-c <left> and C-c <right>.
-;;;;
-
-(winner-mode 1)
-
-;;;; Package: Undo Tree
-;; Replaces Emacs' default redo-as-undo behavior with a more sensible undo/redo
-;; tree, which can be visualized in complex situations.
-;;;;
-
-(when (member 'undo-tree radian-packages)
-
-  ;;; Turn on Undo Tree everywhere.
-  (global-undo-tree-mode 1)
-
-  ;;; Override the default binding of M-/ to dabbrev-expand.
-  (global-set-key (kbd "M-/") 'undo-tree-redo)
-
-  ;;; Make undo history persistent between Emacs sessions.
-  (setq undo-tree-auto-save-history t)
-
-  ;;; Put all the undo information in a single directory.
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos"))))
-
-;;;; Package: IDO
-;; Makes completion more intelligent by using fuzzy matching and better
-;; keybindings.
-;;;;
-
-;;; Use IDO mode for C-x C-f and friends. (Most other things should be
-;;; using Helm mode.)
-(ido-mode 'files)
-
-;;; Use fuzzy matching.
-(setq ido-enable-flex-matching 1)
-
-;;;; Package: Projectile
-;; Enables quickly jumping to any file in a project by filename, or
-;; jumping to files in previously visited projects.
-;;
-;; http://projectile.readthedocs.io/en/latest/
-;;;;
-
-(when (member 'projectile radian-packages)
-
-  ;;; Enable Projectile everywhere.
-  (projectile-global-mode 1))
-
-;;;; Package: Helm
-;; Shows completions for switching to files and buffers in a separate,
-;; easy-to-navigate buffer.
-;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Helm (and helm-projectile and helm-smex)
 
 (when (member 'helm radian-packages)
 
@@ -449,10 +462,42 @@ dotfiles.")
   (when radian-customize-tweak-colors
     (set-face-background 'helm-buffer-saved-out nil)))
 
-;;;; Package: Company
-;; Shows autocompletion suggestions in a pop-up menu while typing. Includes
-;; interop with CIDER.
-;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Projectile
+
+(when (member 'projectile radian-packages)
+
+  ;;; Enable Projectile everywhere.
+  (projectile-global-mode 1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Undo Tree
+
+(when (member 'undo-tree radian-packages)
+
+  ;;; Turn on Undo Tree everywhere.
+  (global-undo-tree-mode 1)
+
+  ;;; Override the default binding of M-/ to dabbrev-expand.
+  (global-set-key (kbd "M-/") 'undo-tree-redo)
+
+  ;;; Make undo history persistent between Emacs sessions.
+  (setq undo-tree-auto-save-history t)
+
+  ;;; Put all the undo information in a single directory.
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: ace-jump-mode
+
+(when (member 'ace-jump-mode radian-packages)
+
+  ;; Clojure mode already binds C-c SPC to clojure-align, so use C-c C-SPC
+  ;; instead.
+  (global-set-key (kbd "C-c C-SPC") 'ace-jump-mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Company (and company-statistics)
 
 (when (member 'company radian-packages)
 
@@ -546,56 +591,47 @@ dotfiles.")
                 (define-key company-active-map (kbd "M-p") nil)
                 (define-key company-active-map (kbd "M-n") nil)))))
 
-;;;; Package: Company Statistics
-;; Sorts Company completions by usage. Persistent between Emacs sessions.
-;;;;
-
 (when (member 'company-statistics radian-packages)
 
   ;;; Turn on company-statistics.
   (company-statistics-mode 1))
 
-;;;; Package: Markdown TOC
-;; Generates tables of contents for Markdown files.
-;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Aggressive Indent
 
-(when (member 'markdown-toc radian-packages)
+(when (member 'aggressive-indent radian-packages)
 
-  ;; Remove the header inserted before the table of contents. If you want a
-  ;; header, just add one before the "markdown-toc start" comment -- this way,
-  ;; you can have different header styles in different documents.
-  (setq markdown-toc-header-toc-title ""))
+  ;;; Enable Aggressive Indent (almost) everywhere.
+  (global-aggressive-indent-mode 1)
 
-;;;; Package: ElDoc
-;; Automatically shows the signature of the function at point in the echo
-;; area. Also works with variables, for which the first line of the docstring
-;; is shown.
-;;;;
+  ;;; Disable Aggressive Indent in Re-Builder mode. I don't think it
+  ;;; does anything in this mode, and it shadows the C-c C-q binding
+  ;;; provided by Re-Builder (so you can't quit!).
+  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode))
 
-;;; Enable ElDoc when editing Lisps and using Lisp REPLs.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Paredit
 
-(dolist (hook '(emacs-lisp-mode-hook
-                lisp-interaction-mode-hook))
-  (add-hook hook (lambda () (eldoc-mode 1))))
+(when (member 'paredit radian-packages)
 
-(when (member 'clojure-mode radian-packages)
-  (add-hook 'clojure-mode-hook (lambda () (eldoc-mode 1))))
+  ;;; Enable Paredit when editing Lisps and using Lisp REPLs.
 
-(when (member 'cider radian-packages)
-  (add-hook 'cider-repl-mode-hook (lambda () (eldoc-mode 1))))
+  (dolist (hook '(emacs-lisp-mode-hook
+                  lisp-interaction-mode-hook
+                  scheme-mode-hook))
+    (add-hook hook 'enable-paredit-mode))
 
-;;; Turn off the delay before ElDoc messages are shown in the echo area.
-(setq eldoc-idle-delay 0)
+  (when (member 'clojure-mode radian-packages)
+    (add-hook 'clojure-mode-hook 'enable-paredit-mode))
 
-;;; Always truncate ElDoc messages to one line. This prevents the echo area from
-;;; resizing itself unexpectedly when point is on a Clojure variable with a
-;;; multiline docstring.
-(setq eldoc-echo-area-use-multiline-p nil)
+  (when (member 'cider radian-packages)
+    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
 
-;;;; Package: Clojure mode
-;; Provides indentation and syntax highlighting for Clojure and
-;; ClojureScript files.
-;;;;
+  (when (member 'geiser radian-packages)
+    (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: clojure-mode
 
 (when (member 'clojure-mode radian-packages)
 
@@ -685,10 +721,8 @@ dotfiles.")
                 (replace-match (clojure-docstring-fill-prefix))))
           (lisp-indent-line))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: CIDER
-;; Provides nREPL integration for Clojure and ClojureScript, documentation
-;; and source lookups, and more.
-;;;;
 
 (when (member 'cider radian-packages)
 
@@ -765,69 +799,25 @@ dotfiles.")
   (figwheel-sidecar.repl-api/start-figwheel!)
   (figwheel-sidecar.repl-api/cljs-repl))"))
 
-;;;; Package: Paredit
-;; Automatically balances parentheses and provides keybindings for structural
-;; editing of s-expressions.
-;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: markdown-toc
 
-(when (member 'paredit radian-packages)
+(when (member 'markdown-toc radian-packages)
 
-  ;;; Enable Paredit when editing Lisps and using Lisp REPLs.
+  ;; Remove the header inserted before the table of contents. If you want a
+  ;; header, just add one before the "markdown-toc start" comment -- this way,
+  ;; you can have different header styles in different documents.
+  (setq markdown-toc-header-toc-title ""))
 
-  (dolist (hook '(emacs-lisp-mode-hook
-                  lisp-interaction-mode-hook
-                  scheme-mode-hook))
-    (add-hook hook 'enable-paredit-mode))
-
-  (when (member 'clojure-mode radian-packages)
-    (add-hook 'clojure-mode-hook 'enable-paredit-mode))
-
-  (when (member 'cider radian-packages)
-    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
-
-  (when (member 'geiser radian-packages)
-    (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
-
-;;;; Package: Aggressive Indent
-;; Automatically, and aggressively, indents your code. Especially useful when
-;; combined with Paredit, as you can read code structure off the indentation
-;; without checking the parentheses.
-;;;;
-
-(when (member 'aggressive-indent radian-packages)
-
-  ;;; Enable Aggressive Indent (almost) everywhere.
-  (global-aggressive-indent-mode 1)
-
-  ;;; Disable Aggressive Indent in Re-Builder mode. I don't think it
-  ;;; does anything in this mode, and it shadows the C-c C-q binding
-  ;;; provided by Re-Builder (so you can't quit!).
-  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode))
-
-;;;; Appearance - continued
-
-;;; Adding these tweaks at the end prevents them from making Emacs look
-;;; weird while it's starting up.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Color themes
 
 ;;; Load a color theme that looks good with Solarized Light.
 (when radian-customize-tweak-colors
   (load-theme 'leuven t)) ; the last argument suppresses a confirmation message
 
-;;; Get rid of the underline for the currently highlighted match in an
-;;; Isearch or query replace.
-(when radian-customize-tweak-colors
-  (set-face-underline 'isearch nil))
-
-;;; The default highlight color for I-searches is quite dark and makes it hard
-;;; to read the highlighted text. Change it to a nice light blue, and get rid of
-;;; the distracting underline. (I mean really, how is an *underline* supposed to
-;;; help you see something that's highlighted in *bright blue*?)
-(when radian-customize-tweak-colors
-  (set-face-background 'lazy-highlight "#B1EAFC")
-  (set-face-underline 'lazy-highlight nil))
-
-;;; Eliminate the underline on mismatched parens.
-(set-face-underline 'show-paren-mismatch nil)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Mode line
 
 ;;; Customize the mode bar to something like:
 ;;; [*] init.el        72% (389,30)  [radian]  (Emacs-Lisp Paredit AggrIndent)
@@ -906,5 +896,7 @@ brackets."))
 (when (member 'helm radian-packages)
   (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist)))
 
-;;;; User-specific configuration (4 of 4).
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; User-specific configuration (4 of 4)
+
 (radian-load-user-config "init.local.el")
