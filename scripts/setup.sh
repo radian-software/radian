@@ -36,16 +36,23 @@ trap handle_error EXIT
 ### Compute features ###
 
 specs=(
-    "brew"
-    "wget -> brew"
-    "git"
-    "zsh -> brew"
-    "tmux -> brew"
-    "leiningen -> brew"
+    "homebrew"
+    "wget -> homebrew"
+    "git-dotfiles"
+    "zsh -> homebrew"
+    "antigen -> zsh"
+    "autojump -> homebrew"
+    "zsh-dotfiles -> zsh antigen"
+    "tmux -> homebrew"
+    "tmux-dotfiles -> tmux"
+    "java"
+    "leiningen -> homebrew java"
+    "leiningen-dotfiles -> leiningen"
     "racket -> wget"
     "emacs -> wget"
-    "tree -> brew"
-    "tmuxinator -> tmux"
+    "emacs-dotfiles -> emacs"
+    "tree -> homebrew"
+    "tmuxinator -> homebrew tmux"
 )
 
 source compute-features.sh
@@ -67,7 +74,7 @@ echo "[setup] Setting up Radian. Prepare to be amazed."
 
 ./ensure-xcode-cl-tools-installed.sh
 
-if feature brew; then
+if feature homebrew; then
     ./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
 fi
 
@@ -77,7 +84,7 @@ fi
 
 ### Git ###
 
-if feature git; then
+if feature git-dotfiles; then
     # We want to do the local setup first, so that it can read any preexisting
     # config to copy over from the original ~/.gitconfig.
     ./ensure-symlinked.sh ~/.gitconfig.local ../../radian-local/.gitconfig.local ./create-gitconfig-local.sh
@@ -98,8 +105,17 @@ if feature zsh; then
     # newly created windows will still be using bash. Exporting $SHELL
     # should fix the problem, though.
     export SHELL="$(which zsh)"
+fi
+
+if feature antigen; then
     ./ensure-antigen-installed.sh
+fi
+
+if feature autojump; then
     ./ensure-installed.sh autojump
+fi
+
+if feature zsh-dotfiles; then
     ./ensure-symlinked.sh ~/.zshrc ../.zshrc
     ./ensure-symlinked.sh ~/.zshrc.before.local ../../radian-local/.zshrc.before.local ./create-zshrc-before-local.sh
     ./ensure-symlinked.sh ~/.zshrc.antigen.local ../../radian-local/.zshrc.antigen.local ./create-zshrc-antigen-local.sh
@@ -110,15 +126,24 @@ fi
 
 if feature tmux; then
     ./ensure-installed.sh tmux -V tmux 2.2
+fi
+
+if feature tmux-dotfiles; then
     ./ensure-symlinked.sh ~/.tmux.conf ../.tmux.conf
     ./ensure-symlinked.sh ~/.tmux.local.conf ../../radian-local/.tmux.local.conf ./create-tmux-local-conf.sh
 fi
 
 ### Leiningen ###
 
-if feature leiningen; then
+if feature java; then
     ./ensure-installed.sh javac -version javac 1.6 ./install-java.sh
+fi
+
+if feature leiningen; then
     ./ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
+fi
+
+if feature leiningen-dotfiles; then
     ./ensure-symlinked.sh ~/.lein/profiles.clj ../profiles.clj
 fi
 
@@ -137,6 +162,9 @@ if feature emacs; then
     else
         ./ensure-symlinked.sh /usr/local/bin/emacsw "$(which emacs)"
     fi
+fi
+
+if feature emacs-dotfiles; then
     # If the .emacs or .emacs.el files are present, then Emacs will not load init.el.
     # Therefore, we need to ensure that these files do not exist.
     ./ensure-symlinked.sh ~/.emacs
