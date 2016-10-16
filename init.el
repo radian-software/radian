@@ -204,22 +204,24 @@ loads it. Otherwise, fails silently."
 ;; Based on https://gist.github.com/the-kenny/267162
 ;; Modified based on http://emacs.stackexchange.com/q/26471/12534
 
-(setq radian-last-paste-to-osx nil)
+(unless (display-graphic-p)
 
-(defun copy-from-osx ()
-  (let ((copied-text (shell-command-to-string "pbpaste")))
-    (unless (string= copied-text radian-last-paste-to-osx)
-      copied-text)))
+  (setq radian-last-paste-to-osx nil)
 
-(defun paste-to-osx (text &optional push)
-  (let ((process-connection-type nil))
-    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
-      (process-send-string proc text)
-      (process-send-eof proc)))
-  (setq radian-last-paste-to-osx text))
+  (defun copy-from-osx ()
+    (let ((copied-text (shell-command-to-string "pbpaste")))
+      (unless (string= copied-text radian-last-paste-to-osx)
+        copied-text)))
 
-(setq interprogram-cut-function 'paste-to-osx)
-(setq interprogram-paste-function 'copy-from-osx)
+  (defun paste-to-osx (text &optional push)
+    (let ((process-connection-type nil))
+      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+        (process-send-string proc text)
+        (process-send-eof proc)))
+    (setq radian-last-paste-to-osx text))
+
+  (setq interprogram-cut-function 'paste-to-osx)
+  (setq interprogram-paste-function 'copy-from-osx))
 
 ;; If you have something on the system clipboard, and then kill something in
 ;; Emacs, then by default whatever you had on the system clipboard is gone
