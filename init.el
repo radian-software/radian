@@ -465,13 +465,12 @@ M-RET to the file opened by the resulting keybinding.")
 (require 'package)
 
 ;; Add package repositories. Our primary repository is melpa, but we
-;; need melpa-stable for CIDER (see below).
-(add-to-list 'package-archives
-             '("melpa-stable" . "https://stable.melpa.org/packages/")
-             t) ; this appends to the end of the list
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/")
-             t) ; this appends to the end of the list
+;; need melpa-stable for CIDER (see below). The default GNU repository
+;; is required for some libraries (such as queue).
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")
+        ("melpa-stable" . "https://stable.melpa.org/packages/")))
 
 ;;; Ensure that we get a stable version of CIDER, and not a snapshot
 ;;; version. This resolved an issue with the 0.13.0 update to CIDER
