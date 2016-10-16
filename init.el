@@ -970,41 +970,45 @@ brackets."))
                ;; Show the active major and minor modes.
                mode-line-modes))
 
-(column-number-mode 1) ; makes mode-line-position show the column
+;; Make `mode-line-position' show the column, not just the row.
+(column-number-mode 1)
 
-;;; Customize mode indicators
+;;; Customize mode line indicators
 
-;;; Major modes.
+;; aggressive-indent-mode
+(when (member 'aggressive-indent radian-packages)
+  (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent")))
 
+;; company-mode
+(when (member 'company radian-packages)
+  (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist)))
+
+;; cider-mode
+(when (member 'cider radian-packages)
+  (setq cider-mode-line nil))
+
+;; eldoc-mode
+(setq eldoc-minor-mode-string nil)
+
+;; helm-mode
+;;
+;; Note that Helm has `helm-mode-line-string', but this only affects
+;; what is shown in the mode line for a Helm buffer.
+(when (member 'helm radian-packages)
+  (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist)))
+
+;; lisp-interaction-mode
 (add-hook 'lisp-interaction-mode-hook
           (lambda ()
             (setq mode-name "Lisp-Interaction")))
 
-;;; Minor modes that provide a customizable variable.
-
-(when (member 'cider radian-packages)
-  (setq cider-mode-line nil))
-
-(setq eldoc-minor-mode-string nil)
-
+;; projectile-mode
 (when (member 'projectile radian-packages)
   (setq projectile-mode-line nil))
 
+;; undo-tree-mode
 (when (member 'undo-tree radian-packages)
   (setq undo-tree-mode-lighter nil))
-
-;;; Minor modes that do not provide a customizable variable.
-;;; Note that Helm has helm-mode-line-string, but this only affects what is
-;;; shown in the mode line for a Helm buffer.
-
-(when (member 'aggressive-indent radian-packages)
-  (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent")))
-
-(when (member 'company radian-packages)
-  (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist)))
-
-(when (member 'helm radian-packages)
-  (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific configuration (4 of 4)
