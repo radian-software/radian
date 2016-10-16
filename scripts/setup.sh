@@ -76,6 +76,7 @@ echo "[setup] Setting up Radian. Prepare to be amazed."
 
 if feature homebrew; then
     ./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
+    ./ensure-installed.sh grealpath --version "realpath (GNU coreutils)" any-version brew coreutils
 fi
 
 if feature wget; then

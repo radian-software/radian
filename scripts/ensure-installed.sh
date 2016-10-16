@@ -16,6 +16,12 @@
 # $4 = minimum version (defaults to any-version)
 # $5 = package manager (brew, gem, assert, or other script; defaults to brew)
 # $6 = name of package for package manager (defaults to executable name)
+# $7 = optional flag
+#
+# If the optional flag is --require, then the executable is required
+# to be installed via the provided package manager. Pre-existing
+# installations via other methods are not allowable. Currently this
+# only works if the package manager is brew.
 
 # Preconditions:
 # - The package manager must be available on the $PATH.
@@ -57,6 +63,7 @@ elif [[ $package_manager == assert ]]; then
 else
     install_command="$package_manager"
 fi
+optional_flag="$7"
 
 ### Report task ###
 
@@ -77,11 +84,17 @@ if [[ $package_manager != assert ]]; then
     echo "[ensure-installed] If necessary, will install via '$install_command'."
 fi
 
-### Version checking functions ###
+### Utility functions ###
 
 # Returns zero if a minimum version is required, non-zero otherwise.
 requires_version() {
     [[ $min_version != any-version ]]
+}
+
+# Returns zero if the installation is required to be through the
+# provided package manager, non-zero otherwise.
+requires_package_manager() {
+    [[ $optional_flag == --require ]]
 }
 
 # Returns zero if version $2 is at least as recent as version $1,
@@ -149,6 +162,25 @@ is_installed_correctly() {
                     return 1
                 elif version_as_recent "$min_version" "$version"; then
                     echo "[ensure-installed] This is at least as recent as the minimum version, $min_version."
+                    if requires_package_manager; then
+                        echo "[ensure-installed] Checking that $executable has been installed via $package_manager."
+                        if [[ $package_manager == brew ]]; then
+                            brew_prefix=$(brew config | egrep "^HOMEBREW_CELLAR: ")
+                            brew_prefix=${brew_prefix#HOMEBREW_CELLAR: }
+                            echo "[ensure-installed] The Homebrew prefix is '$brew_prefix'."
+                            executable_path=$(grealpath "$(which "$executable")")
+                            echo "[ensure-installed] The $executable executable in '$(which "$executable")' points to '$executable_path'."
+                            if [[ $executable_path == $brew_prefix* ]]; then
+                                echo "[ensure-installed] It looks like $executable has been installed via $package_manager."
+                            else
+                                echo "[ensure-installed] It looks like $executable has not been installed via $package_manager."
+                                return 1
+                            fi
+                        else
+                            echo "[ensure-installed] Fatal error: I don't know how to --require for '$package_manager'!"
+                            exit 1
+                        fi
+                    fi
                     echo "[ensure-installed] The installation appears to be OK, exiting."
                     return 0
                 else
