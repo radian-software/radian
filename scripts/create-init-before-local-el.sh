@@ -90,7 +90,7 @@ else
 fi
 collected_comments=
 while read -u 10 line; do
-    if [[ $line == \;\;\;* ]]; then
+    if [[ $line == \;\;* ]]; then
         collected_comments="$collected_comments$line"$'\n'
     else
         if (echo "$line" | egrep -q "\\(setq radian-customize-[a-z-]+"); then
