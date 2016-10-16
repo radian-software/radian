@@ -684,12 +684,12 @@ M-RET to the file opened by the resulting keybinding.")
                 (make-local-variable 'company-active-map)
                 (setq company-active-map (copy-tree company-active-map))
                 (define-key company-active-map (kbd "M-p") nil)
-                (define-key company-active-map (kbd "M-n") nil)))))
+                (define-key company-active-map (kbd "M-n") nil))))
 
-(when (member 'company-statistics radian-packages)
+  (when (member 'company-statistics radian-packages)
 
-  ;;; Turn on company-statistics.
-  (company-statistics-mode 1))
+    ;; Turn on company-statistics if available.
+    (company-statistics-mode 1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Aggressive Indent
