@@ -20,7 +20,7 @@ index_of() {
     return 1
 }
 
-### Parse quantifier ###
+### Parse qualifier ###
 
 case $1 in
     include | only ) default=false ;;
