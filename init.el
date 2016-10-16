@@ -528,10 +528,11 @@ M-RET to the file opened by the resulting keybinding.")
     (let ((ad-redefinition-action 'accept))
       (helm-projectile-toggle 1)))
 
-  (when (member 'helm-smex radian-packages)
-
-    ;;; Use Helm mode for M-x, using helm-smex to get sorting by usage.
-    (global-set-key (kbd "M-x") 'helm-smex))
+  ;; Use Helm mode for M-x. If helm-smex is enabled, use it to get
+  ;; sorting by usage.
+  (global-set-key (kbd "M-x")
+                  (if (member 'helm-smex radian-packages)
+                      'helm-smex 'helm-M-x))
 
   ;; Fix the unreadable default color for the prefix argument in the
   ;; Helm M-x buffer.
