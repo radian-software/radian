@@ -502,8 +502,6 @@ M-RET to the file opened by the resulting keybinding.")
     (unless (package-installed-p package)
       (package-install package))))
 
-(provide 'radian-packages)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific configuration (3 of 4)
 
