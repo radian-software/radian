@@ -464,21 +464,11 @@ M-RET to the file opened by the resulting keybinding.")
 ;; package.el before using any of them.
 (require 'package)
 
-;; Add package repositories. Our primary repository is melpa, but we
-;; need melpa-stable for CIDER (see below). The default GNU repository
-;; is required for some libraries (such as queue).
+;; Add package repositories. GNU is the default repository; MELPA is
+;; necessary to get most of the packages we are interested in.
 (setq package-archives
       '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")
-        ("melpa-stable" . "https://stable.melpa.org/packages/")))
-
-;;; Ensure that we get a stable version of CIDER, and not a snapshot
-;;; version. This resolved an issue with the 0.13.0 update to CIDER
-;;; trying to inject a nonexistent snapshot version of cider-nrepl, if
-;;; you used the snapshot version of CIDER. (This bug may be fixed by
-;;; now.)
-(setq package-pinned-packages
-      '((cider . "melpa-stable")))
+        ("melpa" . "https://melpa.org/packages/")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific configuration (2 of 4)
