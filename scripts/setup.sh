@@ -117,7 +117,7 @@ fi
 ### Leiningen ###
 
 if feature leiningen; then
-    ./ensure-installed.sh javac -version javac 1.6 ./install-jdk.sh
+    ./ensure-installed.sh javac -version javac 1.6 ./install-java.sh
     ./ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
     ./ensure-symlinked.sh ~/.lein/profiles.clj ../profiles.clj
 fi
