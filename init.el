@@ -283,6 +283,17 @@ M-RET to the file opened by the resulting keybinding.")
 ;; Use fuzzy matching for IDO.
 (setq ido-enable-flex-matching 1)
 
+;; By default, if you type in a filename that does not exist in the
+;; current directory, IDO will wait 0.7 seconds and then whisk you off
+;; to some totally unrelated directory that happens to already have a
+;; file by that filename. Here we turn off that "feature".
+;;
+;; If you want to quickly get to a file somewhere else on the
+;; filesystem, helm-projectile offers a much better user experience.
+;; IDO is better for navigating in the traditional directory-based
+;; system.
+(setq ido-auto-merge-work-directories-length -1)
+
 ;; Follow symlinks without prompting. If this isn't done, then you
 ;; will get a prompt every time you edit init.el with M-RET e i. (That
 ;; is, assuming that ~/.emacs.d/init.el is a symlink, which is how the
