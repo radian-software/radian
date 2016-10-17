@@ -71,6 +71,7 @@
         company ; autocompletion with pop-up menu
         company-statistics ; sort Company completions by usage
         geiser ; support for Racket
+        git-commit ; edit Git commit messages intelligently
         helm ; better interface for selecting files, buffers, or commands
         helm-projectile ; use Helm for Projectile
         helm-smex ; sort M-x suggestions by usage
@@ -909,6 +910,21 @@ M-RET to the file opened by the resulting keybinding.")
   (require 'figwheel-sidecar.repl-api)
   (figwheel-sidecar.repl-api/start-figwheel!)
   (figwheel-sidecar.repl-api/cljs-repl))"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: git-commit
+
+(when (member 'git-commit radian-packages)
+
+  ;; Enable the functionality of the git-commit package. This should
+  ;; be enabled by default for emacsclient, but we need to turn it on
+  ;; explicitly for regular Emacs.
+  (global-git-commit-mode 1)
+
+  ;; Wrap summary at 50 characters as per [1].
+  ;;
+  ;; [1]: http://chris.beams.io/posts/git-commit/
+  (setq git-commit-summary-max-length 50))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: markdown-toc

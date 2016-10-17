@@ -3,6 +3,7 @@
 [core]
         pager = less -FRSX
         excludesfile = ~/.gitexclude
+        editor = emacsc
 [alias]
         # git init
         setup = !git init && git commit --allow-empty -m \"Initial commit\"
