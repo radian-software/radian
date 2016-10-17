@@ -165,7 +165,7 @@ is_installed_correctly() {
                 version="${version_and_rest%% *}"
                 echo "[ensure-installed] The version appears to be $version."
                 exit_code=0 && version_as_recent "$min_version" "$version" || exit_code=$?
-                if [[ exit_code == 0 ]]; then
+                if [[ $exit_code == 0 ]]; then
                     echo "[ensure-installed] This is at least as recent as the minimum version, $min_version."
                     if requires_package_manager; then
                         echo "[ensure-installed] Checking that $executable has been installed via $package_manager."
