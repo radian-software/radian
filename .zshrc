@@ -139,6 +139,34 @@ if [[ $radian_copy_paste_aliases != false ]]; then
     }
 fi
 
+# Alias for replacing a symlink with a copy of the file it points to.
+if [[ $radian_delink_alias != false ]]; then
+    delink() {
+        if [[ -z $1 ]]; then
+            echo "usage: delink <symlinks>"
+            return 1
+        fi
+        for link; do
+            if [[ -L $link ]]; then
+                if [[ -e $link ]]; then
+                    target=$(grealpath $link)
+                    if rm $link; then
+                        if cp -R $target $link; then
+                            echo "Copied $target to $link"
+                        else
+                            ln -s $target $link
+                        fi
+                    fi
+                else
+                    echo "Broken symlink: $link"
+                fi
+            else
+                echo "Not a symlink: $link"
+            fi
+        done
+    }
+fi
+
 # Alias for setting up a tmux session suitable for standard development.
 # Takes a project name and an optional command. If a tmux session with
 # the project name already exists, switches to it. Otherwise, you need
