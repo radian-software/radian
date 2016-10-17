@@ -68,3 +68,6 @@
         autosquash = true
 [rerere]
 	enabled = true
+[filter "spacify"]
+        smudge = gexpand --tabs=4
+        clean = gexpand --tabs=4
