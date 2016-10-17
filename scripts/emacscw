@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [[ /usr/local/bin/emacs -ef ~/.radian/scripts/emacs ]]; then
+    /Applications/Emacs.app/Contents/MacOS/bin/emacsclient --alternate-editor="" --create-frame "$@"
+else
+    emacsclient --alternate-editor="" --create-frame "$@"
+fi

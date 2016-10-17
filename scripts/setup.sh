@@ -66,6 +66,9 @@ repo_name="$(basename "$PWD")"
 
 source create-radian-local.sh
 
+./ensure-symlinked.sh ~/.radian ..
+./ensure-symlinked.sh ~/.radian-local ../../radian-local
+
 ### Warn the user of upcoming awesomeness ###
 
 echo "[setup] Setting up Radian. Prepare to be amazed."
@@ -159,11 +162,9 @@ fi
 
 if feature emacs; then
     ./ensure-installed.sh emacs --version "GNU Emacs" 24.5.1 ./install-emacs.sh
-    if [[ /usr/local/bin/emacs -ef emacs ]]; then
-        ./ensure-symlinked.sh /usr/local/bin/emacsw emacsw
-    else
-        ./ensure-symlinked.sh /usr/local/bin/emacsw "$(which emacs)"
-    fi
+    ./ensure-symlinked.sh /usr/local/bin/emacsw emacsw
+    ./ensure-symlinked.sh /usr/local/bin/emacsc emacsc
+    ./ensure-symlinked.sh /usr/local/bin/emacscw emacscw
 fi
 
 if feature emacs-dotfiles; then

@@ -1,3 +1,7 @@
 #!/bin/bash
 
-/Applications/Emacs.app/Contents/MacOS/Emacs "$@"
+if [[ /usr/local/bin/emacs -ef ~/.radian/scripts/emacs ]]; then
+    /Applications/Emacs.app/Contents/MacOS/Emacs "$@"
+else
+    emacs "$@"
+fi
