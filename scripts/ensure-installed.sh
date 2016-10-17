@@ -188,12 +188,12 @@ is_installed_correctly() {
                     fi
                     echo "[ensure-installed] The installation appears to be OK, exiting."
                     return 0
+                elif [[ $exit_code == 1 ]]; then
+                    echo "[ensure-installed] This is not as recent as the minimum version, $min_version."
+                    return 1
                 elif [[ $exit_code == 2 ]]; then
                     echo "[ensure-installed] The version appears to be malformed."
                     echo "[ensure-installed] Assuming that the version is incorrect."
-                    return 1
-                elif [[ $exit_code == 1 ]]; then
-                    echo "[ensure-installed] This is not as recent as the minimum version, $min_version."
                     return 1
                 else
                     echo "[ensure-installed] Fatal error: unexpected exit code."
