@@ -234,16 +234,16 @@ loads it. Otherwise, fails silently."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Finding files
 
-;;; The following code adds keybindings for jumping to the various
-;;; dotfiles set up by Radian. These all begin with M-RET and are
-;;; designed to be mnemonic, as in <M-RET e p r> standing for "go to
-;;; [e]macs init.[pr]e.local.el".
-;;;
-;;; Here we are using the defvar-nil-setq pattern described in [1],
-;;; which makes it so that changes to `radian-dotfiles' will be picked
-;;; up by a reload of init.el (M-RET r).
-;;;
-;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
+;; The following code adds keybindings for jumping to the various
+;; dotfiles set up by Radian. These all begin with M-RET and are
+;; designed to be mnemonic, as in <M-RET e p r> standing for "go to
+;; [e]macs init.[pr]e.local.el".
+;;
+;; Here we are using the defvar-nil-setq pattern described in [1],
+;; which makes it so that changes to `radian-dotfiles' will be picked
+;; up by a reload of init.el (M-RET r).
+;;
+;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
 (defvar radian-dotfiles nil
   "Association list from a keybinding suffix to be used after
@@ -272,14 +272,14 @@ M-RET to the file opened by the resulting keybinding.")
                      (interactive)
                      (find-file ,(concat "~/" (cadr item))))))
 
-;;; Use IDO ("interactive do") for C-x C-f and other file-finding
-;;; operations. There is a known issue (#41) that sometimes causes C-x
-;;; b (which is not a file-finding operation, and should be using
-;;; Helm) to switch back to IDO. Unfortunately, a consistently
-;;; reproducible test case has not been forthcoming.
+;; Use IDO ("interactive do") for C-x C-f and other file-finding
+;; operations. There is a known issue (#41) that sometimes causes C-x
+;; b (which is not a file-finding operation, and should be using
+;; Helm) to switch back to IDO. Unfortunately, a consistently
+;; reproducible test case has not been forthcoming.
 (ido-mode 'files)
 
-;;; Use fuzzy matching for IDO.
+;; Use fuzzy matching for IDO.
 (setq ido-enable-flex-matching 1)
 
 ;; Follow symlinks without prompting. If this isn't done, then you
@@ -288,11 +288,11 @@ M-RET to the file opened by the resulting keybinding.")
 ;; setup script sets it up.)
 (setq vc-follow-symlinks t)
 
-;;; Automatically reload files that were changed on disk, if they have
-;;; not been modified in Emacs since the last time they were saved.
+;; Automatically reload files that were changed on disk, if they have
+;; not been modified in Emacs since the last time they were saved.
 (global-auto-revert-mode 1)
 
-;;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
+;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
 (setq auto-revert-interval 1)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -401,9 +401,9 @@ M-RET to the file opened by the resulting keybinding.")
 ;; 1/2 a second.
 (setq eldoc-idle-delay 0)
 
-;;; Always truncate ElDoc messages to one line. This prevents the echo
-;;; area from resizing itself unexpectedly when point is on a variable
-;;; with a multiline docstring.
+;; Always truncate ElDoc messages to one line. This prevents the echo
+;; area from resizing itself unexpectedly when point is on a variable
+;; with a multiline docstring.
 (setq eldoc-echo-area-use-multiline-p nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
