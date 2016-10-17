@@ -164,7 +164,8 @@ is_installed_correctly() {
                 version_and_rest="${version_and_rest# }"
                 version="${version_and_rest%% *}"
                 echo "[ensure-installed] The version appears to be $version."
-                if exit_code=0 && version_as_recent "$min_version" "$version" || exit_code=$?; then
+                exit_code=0 && version_as_recent "$min_version" "$version" || exit_code=$?
+                if [[ exit_code == 0 ]]; then
                     echo "[ensure-installed] This is at least as recent as the minimum version, $min_version."
                     if requires_package_manager; then
                         echo "[ensure-installed] Checking that $executable has been installed via $package_manager."
@@ -191,9 +192,12 @@ is_installed_correctly() {
                     echo "[ensure-installed] The version appears to be malformed."
                     echo "[ensure-installed] Assuming that the version is incorrect."
                     return 1
-                else
+                elif [[ $exit_code == 1 ]]; then
                     echo "[ensure-installed] This is not as recent as the minimum version, $min_version."
                     return 1
+                else
+                    echo "[ensure-installed] Fatal error: unexpected exit code."
+                    exit 1
                 fi
             else
                 echo "[ensure-installed] The version string appears to be malformed or empty."
