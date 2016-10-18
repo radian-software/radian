@@ -78,6 +78,7 @@
         markdown-toc ; generate tables of contents for Markdown files
         paredit ; keep parentheses correctly balanced at all times
         projectile ; quickly jump to files organized by project
+        transpose-frame ; easily mirror, rotate, and transpose windows
         undo-tree ; more intuitive and powerful undo/redo
         ))
 
