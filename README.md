@@ -78,7 +78,8 @@ your system might be in, there are a few things to watch out for:
   open a new shell if you want them to be cleared.
 - If you already have Emacs packages installed, the setup script has
   no way of checking if they are outdated. You might want to run `M-x
-  list-packages` to check if there are any updates available.
+  list-packages` to check if there are any updates available. To be
+  extra safe, just `rm -rf ~/.emacs.d/elpa` and restart Emacs.
 
 ## Setup on Linux
 
