@@ -35,7 +35,7 @@ fi
 
 ### Compute useful strings ###
 
-dirname=$(basename "$(grealpath "$directory")")
+dirname=$(basename "$(grealpath -s "$directory")")
 marker_file=originals/.keep-version-controlled-$dirname
 
 ### Main logic ###
