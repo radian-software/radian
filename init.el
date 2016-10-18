@@ -70,6 +70,7 @@
         clojure-mode ; Clojure indentation and syntax highlighting
         company ; autocompletion with pop-up menu
         company-statistics ; sort Company completions by usage
+        diminish ; easily change mode line indicators
         geiser ; support for Racket
         git-commit ; edit Git commit messages intelligently
         helm ; better interface for selecting files, buffers, or commands
@@ -1009,7 +1010,7 @@ brackets."))
 
 ;; aggressive-indent-mode
 (when (member 'aggressive-indent radian-packages)
-  (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent")))
+  (diminish 'aggressive-indent-mode "AggrIndent"))
 
 ;; cider-mode
 (when (member 'cider radian-packages)
@@ -1017,7 +1018,7 @@ brackets."))
 
 ;; company-mode
 (when (member 'company radian-packages)
-  (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist)))
+  (diminish 'company-mode))
 
 ;; eldoc-mode
 (setq eldoc-minor-mode-string nil)
@@ -1027,7 +1028,7 @@ brackets."))
 ;; Note that Helm has `helm-mode-line-string', but this only affects
 ;; what is shown in the mode line for a Helm buffer.
 (when (member 'helm radian-packages)
-  (setq minor-mode-alist (assq-delete-all 'helm-mode minor-mode-alist)))
+  (diminish 'helm-mode))
 
 ;; lisp-interaction-mode
 (add-hook 'lisp-interaction-mode-hook
