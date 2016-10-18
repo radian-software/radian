@@ -67,6 +67,7 @@
         ace-jump-mode ; quickly jump to words, characters, or lines onscreen
         aggressive-indent ; keep code correctly indented at all times
         cider ; Clojure REPL integration
+        clj-refactor ; refactoring tools for Clojure
         clojure-mode ; Clojure indentation and syntax highlighting
         company ; autocompletion with pop-up menu
         company-statistics ; sort Company completions by usage
@@ -925,6 +926,19 @@ M-RET to the file opened by the resulting keybinding.")
   (figwheel-sidecar.repl-api/cljs-repl))"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: clj-refactor
+
+;; Enable clj-refactor in Clojure buffers. This is taken directly from
+;; the clj-refactor README [1].
+;;
+;; [1]: https://github.com/clojure-emacs/clj-refactor.el
+(add-hook 'clojure-mode-hook
+          (lambda ()
+            (clj-refactor-mode 1)
+            (yas-minor-mode 1)
+            (cljr-add-keybindings-with-prefix "C-c RET")))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: git-commit
 
 (when (member 'git-commit radian-packages)
@@ -1016,6 +1030,11 @@ brackets."))
 (when (member 'cider radian-packages)
   (setq cider-mode-line nil))
 
+;; clj-refactor-mode
+(when (member 'clj-refactor radian-packages)
+  (eval-after-load 'clj-refactor
+    '(diminish 'clj-refactor-mode)))
+
 ;; company-mode
 (when (member 'company radian-packages)
   (diminish 'company-mode))
@@ -1042,6 +1061,11 @@ brackets."))
 ;; undo-tree-mode
 (when (member 'undo-tree radian-packages)
   (setq undo-tree-mode-lighter nil))
+
+;; yas-minor-mode
+(when (member 'clj-refactor radian-packages)
+  (eval-after-load 'yasnippet
+    '(diminish 'yas-minor-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific configuration (4 of 4)

@@ -156,7 +156,7 @@
                            [org.clojure/clojure "1.8.0"]]
 
             :plugins [;; REPL-side support for clj-refactor
-                      [refactor-nrepl "2.2.0"]]}
+                      [refactor-nrepl "2.3.0-SNAPSHOT"]]}
 
  :spyscope {:dependencies [;; Quick-and-dirty debugging tools
                            [spyscope "0.1.5"]]
@@ -178,6 +178,7 @@
            :inject
            :alembic
            :pretty
+           :refactor
            :refresh]
 
  ;; When running tests.
