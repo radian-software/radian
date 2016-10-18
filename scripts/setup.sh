@@ -144,7 +144,15 @@ if feature java; then
 fi
 
 if feature leiningen; then
+    if [[ -e ~/.lein/profiles.clj || -L ~/.lein/profiles.clj ]]; then
+        echo "[setup] Temporarily moving profiles.clj."
+    fi
+    ./ensure-symlinked.sh ~/.lein/profiles.clj
     ./ensure-installed.sh lein --version Leiningen 2.6.1 brew leiningen
+    if [[ -e originals/$uuid/profiles.clj || -L originals/$uuid/profiles.clj ]]; then
+        echo "[setup] Restoring profiles.clj."
+        mv originals/$uuid/profiles.clj ~/.lein/profiles.clj
+    fi
 fi
 
 if feature leiningen-dotfiles; then
