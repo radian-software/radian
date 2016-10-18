@@ -69,6 +69,17 @@ now—have to do the following steps manually:
   `Left/Right option key acts as +Esc`
   (see [open issue][settings issue]).
 
+Although the setup script is extremely good at fixing whatever mess
+your system might be in, there are a few things to watch out for:
+
+- It's not easy to correctly reset the shell environment, so the setup
+  script doesn't try. This means that if your environment variables
+  are configured oddly, they will stay that way and you will have to
+  open a new shell if you want them to be cleared.
+- If you already have Emacs packages installed, the setup script has
+  no way of checking if they are outdated. You might want to run `M-x
+  list-packages` to check if there are any updates available.
+
 ## Setup on Linux
 
 A setup script for Linux is coming soon. In the meantime, you can
