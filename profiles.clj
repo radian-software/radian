@@ -177,8 +177,8 @@
            :humane
            :inject
            :alembic
-           :refresh
-           :pretty]
+           :pretty
+           :refresh]
 
  ;; When running tests.
  :test [:humane]
