@@ -1011,13 +1011,13 @@ brackets."))
 (when (member 'aggressive-indent radian-packages)
   (setf (cdr (assoc 'aggressive-indent-mode minor-mode-alist)) '(" AggrIndent")))
 
-;; company-mode
-(when (member 'company radian-packages)
-  (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist)))
-
 ;; cider-mode
 (when (member 'cider radian-packages)
   (setq cider-mode-line nil))
+
+;; company-mode
+(when (member 'company radian-packages)
+  (setq minor-mode-alist (assq-delete-all 'company-mode minor-mode-alist)))
 
 ;; eldoc-mode
 (setq eldoc-minor-mode-string nil)
