@@ -608,109 +608,6 @@ M-RET to the file opened by the resulting keybinding.")
   (global-set-key (kbd "C-c C-SPC") 'ace-jump-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Company (and company-statistics)
-
-(when (member 'company radian-packages)
-
-  ;; Turn on Company everywhere.
-  (global-company-mode 1)
-
-  ;; Show completions instantly, rather than after half a second.
-  (setq company-idle-delay 0)
-
-  ;; Show completions after typing a single character, rather than
-  ;; after typing three characters.
-  (setq company-minimum-prefix-length 1)
-
-  ;; Show a maximum of 20 suggestions, rather than 10.
-  (setq company-tooltip-limit 20)
-
-  ;; Always display the entire suggestion list onscreen, placing it
-  ;; above the cursor if necessary.
-  (setq company-tooltip-minimum 21)
-
-  ;; Always display suggestions in the tooltip, even if there is only
-  ;; one. Also, don't display metadata in the echo area. (This
-  ;; conflicts with ElDoc.)
-  (setq company-frontends '(company-pseudo-tooltip-frontend))
-
-  ;; Show quick-reference numbers in the tooltip. (Select a completion
-  ;; with M-1 through M-0.)
-  (setq company-show-numbers t)
-
-  ;; Don't prevent non-matching input (which will dismiss the
-  ;; completions menu), even if the user interacts explicitly with
-  ;; Company.
-  (setq company-require-match nil)
-
-  ;; Prevent suggestions from being triggered automatically. In particular,
-  ;; this makes it so that:
-  ;; - TAB will always complete the current selection.
-  ;; - RET will only complete the current selection if the user has explicitly
-  ;;   interacted with Company.
-  ;; - SPC will never complete the current selection.
-  ;;
-  ;; Based on:
-  ;; - https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
-  ;; - http://emacs.stackexchange.com/a/13290/12534
-  ;; - http://stackoverflow.com/a/22863701/3538165
-  ;;
-  ;; See also:
-  ;; - http://emacs.stackexchange.com/a/24800/12534
-  ;; - http://emacs.stackexchange.com/q/27459/12534
-
-  ;; <return> is for windowed Emacs; RET is for terminal Emacs
-  (dolist (key '("<return>" "RET"))
-    ;; Here we are using an advanced feature of define-key that lets
-    ;; us pass an "extended menu item" instead of an interactive
-    ;; function. Doing this allows RET to regain its usual
-    ;; functionality when the user has not explicitly interacted with
-    ;; Company.
-    (define-key company-active-map (kbd key)
-      `(menu-item nil company-complete
-                  :filter ,(lambda (cmd)
-                             (when (company-explicit-action-p)
-                               cmd)))))
-
-  ;; <tab> is for windowed Emacs; TAB is for terminal Emacs.
-  (dolist (key '("<tab>" "TAB"))
-    (define-key company-active-map (kbd key) #'company-complete-selection))
-
-  (define-key company-active-map (kbd "SPC") nil)
-
-  ;; Company appears to override the above keymap based on
-  ;; company-auto-complete-chars. Turning it off ensures we have full
-  ;; control.
-  (setq company-auto-complete-chars nil)
-
-  ;; Prevent Company completions from being lowercased in the
-  ;; completion menu. This appears to only be an issue in comments and
-  ;; strings in Clojure.
-  (setq company-dabbrev-downcase nil)
-
-  ;; Company mode overrides standard REPL bindings for M-p and M-n
-  ;; when the completions menu is visible. Prevent this, but only in
-  ;; REPL modes.
-
-  (dolist (hook (remove nil
-                        (list
-                         (when (member 'cider radian-packages)
-                           'cider-repl-mode-hook)
-                         (when (member 'geiser radian-packages)
-                           'geiser-repl-mode-hook))))
-    (add-hook hook
-              (lambda ()
-                (make-local-variable 'company-active-map)
-                (setq company-active-map (copy-tree company-active-map))
-                (define-key company-active-map (kbd "M-p") nil)
-                (define-key company-active-map (kbd "M-n") nil))))
-
-  (when (member 'company-statistics radian-packages)
-
-    ;; Turn on company-statistics if available.
-    (company-statistics-mode 1)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Aggressive Indent
 
 (when (member 'aggressive-indent radian-packages)
@@ -957,6 +854,117 @@ M-RET to the file opened by the resulting keybinding.")
   ;; header, just add one before the "markdown-toc start" comment -- this way,
   ;; you can have different header styles in different documents.
   (setq markdown-toc-header-toc-title ""))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Company (and company-statistics)
+
+;; Note that Company must be enabled very late during initialization,
+;; because the hook it adds to `after-change-functions' can get messed
+;; up if other modes add hooks later. Notably, this can happen with
+;; `aggressive-indent-mode' and `clj-refactor-mode'. See [1] for an
+;; example.
+;;
+;; [1]: https://github.com/Malabarba/aggressive-indent-mode/issues/61
+
+(when (member 'company radian-packages)
+
+  ;; Turn on Company everywhere.
+  (global-company-mode 1)
+
+  ;; Show completions instantly, rather than after half a second.
+  (setq company-idle-delay 0)
+
+  ;; Show completions after typing a single character, rather than
+  ;; after typing three characters.
+  (setq company-minimum-prefix-length 1)
+
+  ;; Show a maximum of 20 suggestions, rather than 10.
+  (setq company-tooltip-limit 20)
+
+  ;; Always display the entire suggestion list onscreen, placing it
+  ;; above the cursor if necessary.
+  (setq company-tooltip-minimum 21)
+
+  ;; Always display suggestions in the tooltip, even if there is only
+  ;; one. Also, don't display metadata in the echo area. (This
+  ;; conflicts with ElDoc.)
+  (setq company-frontends '(company-pseudo-tooltip-frontend))
+
+  ;; Show quick-reference numbers in the tooltip. (Select a completion
+  ;; with M-1 through M-0.)
+  (setq company-show-numbers t)
+
+  ;; Don't prevent non-matching input (which will dismiss the
+  ;; completions menu), even if the user interacts explicitly with
+  ;; Company.
+  (setq company-require-match nil)
+
+  ;; Prevent suggestions from being triggered automatically. In particular,
+  ;; this makes it so that:
+  ;; - TAB will always complete the current selection.
+  ;; - RET will only complete the current selection if the user has explicitly
+  ;;   interacted with Company.
+  ;; - SPC will never complete the current selection.
+  ;;
+  ;; Based on:
+  ;; - https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
+  ;; - http://emacs.stackexchange.com/a/13290/12534
+  ;; - http://stackoverflow.com/a/22863701/3538165
+  ;;
+  ;; See also:
+  ;; - http://emacs.stackexchange.com/a/24800/12534
+  ;; - http://emacs.stackexchange.com/q/27459/12534
+
+  ;; <return> is for windowed Emacs; RET is for terminal Emacs
+  (dolist (key '("<return>" "RET"))
+    ;; Here we are using an advanced feature of define-key that lets
+    ;; us pass an "extended menu item" instead of an interactive
+    ;; function. Doing this allows RET to regain its usual
+    ;; functionality when the user has not explicitly interacted with
+    ;; Company.
+    (define-key company-active-map (kbd key)
+      `(menu-item nil company-complete
+                  :filter ,(lambda (cmd)
+                             (when (company-explicit-action-p)
+                               cmd)))))
+
+  ;; <tab> is for windowed Emacs; TAB is for terminal Emacs.
+  (dolist (key '("<tab>" "TAB"))
+    (define-key company-active-map (kbd key) #'company-complete-selection))
+
+  (define-key company-active-map (kbd "SPC") nil)
+
+  ;; Company appears to override the above keymap based on
+  ;; company-auto-complete-chars. Turning it off ensures we have full
+  ;; control.
+  (setq company-auto-complete-chars nil)
+
+  ;; Prevent Company completions from being lowercased in the
+  ;; completion menu. This appears to only be an issue in comments and
+  ;; strings in Clojure.
+  (setq company-dabbrev-downcase nil)
+
+  ;; Company mode overrides standard REPL bindings for M-p and M-n
+  ;; when the completions menu is visible. Prevent this, but only in
+  ;; REPL modes.
+
+  (dolist (hook (remove nil
+                        (list
+                         (when (member 'cider radian-packages)
+                           'cider-repl-mode-hook)
+                         (when (member 'geiser radian-packages)
+                           'geiser-repl-mode-hook))))
+    (add-hook hook
+              (lambda ()
+                (make-local-variable 'company-active-map)
+                (setq company-active-map (copy-tree company-active-map))
+                (define-key company-active-map (kbd "M-p") nil)
+                (define-key company-active-map (kbd "M-n") nil))))
+
+  (when (member 'company-statistics radian-packages)
+
+    ;; Turn on company-statistics if available.
+    (company-statistics-mode 1)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Color themes
