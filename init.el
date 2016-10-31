@@ -897,18 +897,17 @@ Lisp function does not specify a special indentation."
   ;; when the completions menu is visible. Prevent this, but only in
   ;; REPL modes.
 
-  (dolist (hook (remove nil
-                        (list
-                         (when (radian-package-enabled-p 'cider)
-                           'cider-repl-mode-hook)
-                         (when (radian-package-enabled-p 'geiser)
-                           'geiser-repl-mode-hook))))
-    (add-hook hook
-              (lambda ()
-                (make-local-variable 'company-active-map)
-                (setq company-active-map (copy-tree company-active-map))
-                (define-key company-active-map (kbd "M-p") nil)
-                (define-key company-active-map (kbd "M-n") nil))))
+  (dolist (spec '((cider . cider-repl-mode-hook)
+                  (geiser . geiser-repl-mode-hook)))
+    (let ((package (car spec))
+          (hook (cdr spec)))
+      (when (radian-package-enabled-p package)
+        (add-hook hook
+                  (lambda ()
+                    (make-local-variable 'company-active-map)
+                    (setq company-active-map (copy-tree company-active-map))
+                    (define-key company-active-map (kbd "M-p") nil)
+                    (define-key company-active-map (kbd "M-n") nil))))))
 
   ;; We want pressing RET to trigger a Company completion only if the
   ;; user has interacted explicitly with Company. The only way I can
