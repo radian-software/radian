@@ -310,6 +310,14 @@ M-RET to the file opened by the resulting keybinding.")
 ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
 (setq auto-revert-interval 1)
 
+;; If you want to edit e.g. /etc/hosts, just C-x C-f it and then run
+;; M-x sudo-edit.
+(defun sudo-edit ()
+  "Reopens the current file as the superuser."
+  (interactive)
+  (find-alternate-file
+   (concat "/sudo::" buffer-file-name)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Dired
 
