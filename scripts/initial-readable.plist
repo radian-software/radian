@@ -1,0 +1,47 @@
+{
+  "AppleAntiAliasingThreshold" => 1
+  "NSTableView Sort Ordering KeyBingingTable" => [
+  ]
+  "NSScrollAnimationEnabled" => 0
+  "NoSyncInstallationId" => "6A1EF5A4-C119-43FB-8047-C165F39682BB"
+  "SUHasLaunchedBefore" => 1
+  "SUFeedAlternateAppNameKey" => "iTerm"
+  "NSScrollViewShouldScrollUnderTitlebar" => 0
+  "NSRepeatCountBinding" => ""
+  "Default Bookmark Guid" => "2A3374EC-6DD7-4C4A-AD90-DF625EF822F8"
+  "iTerm Version" => "3.0.7"
+  "PointerActions" => {
+    "Gesture,ThreeFingerSwipeDown,," => {
+      "Action" => "kPrevWindowPointerAction"
+    }
+    "Gesture,ThreeFingerSwipeUp,," => {
+      "Action" => "kNextWindowPointerAction"
+    }
+    "Gesture,ThreeFingerSwipeLeft,," => {
+      "Action" => "kPrevTabPointerAction"
+    }
+    "Button,1,1,," => {
+      "Action" => "kContextMenuPointerAction"
+    }
+    "Gesture,ThreeFingerSwipeRight,," => {
+      "Action" => "kNextTabPointerAction"
+    }
+    "Button,2,1,," => {
+      "Action" => "kPasteFromSelectionPointerAction"
+    }
+  }
+  "NSQuotedKeystrokeBinding" => ""
+  "SUFeedURL" => "https://iterm2.com/appcasts/final.xml?shard=35"
+  "NoSyncTimeOfFirstLaunchOfVersionWithTip" => 491462576.820049
+  "NSTableView Columns KeyBingingTable" => [
+    0 => <040b7374 7265616d 74797065 6481e803 84014084 8484084e 53537472 696e6701 8484084e 534f626a 65637400 8584012b 013086>
+    1 => "198"
+    2 => <040b7374 7265616d 74797065 6481e803 84014084 8484084e 53537472 696e6701 8484084e 534f626a 65637400 8584012b 013186>
+    3 => "307"
+  ]
+  "NSTableView Hidden Columns KeyBingingTable" => [
+  ]
+  "AppleScrollAnimationEnabled" => 0
+  "AppleSmoothFixedFontsSizeThreshold" => 1
+  "NSWindow Frame SharedPreferences" => "0 129 796 473 0 0 1024 745 "
+}
