@@ -896,7 +896,6 @@ Lisp function does not specify a special indentation."
   ;; Company mode overrides standard REPL bindings for M-p and M-n
   ;; when the completions menu is visible. Prevent this, but only in
   ;; REPL modes.
-
   (dolist (spec '((cider . cider-repl-mode-hook)
                   (geiser . geiser-repl-mode-hook)))
     (let ((package (car spec))
