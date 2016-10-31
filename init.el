@@ -19,7 +19,7 @@
 ;; * Run the user-specific configuration file init.local.el.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; User-specific configuration
+;;;; User-specific configuration variables
 
 ;;; The following are user-specific configuration options that can be
 ;;; overridden in init.before.local.el. They parsed by
