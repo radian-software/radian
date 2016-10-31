@@ -1039,7 +1039,6 @@ Lisp function does not specify a special indentation."
   (dolist (spec '((-> 1)
                   (->> 1)
                   (:import 0)
-                  (:overall-average 0)
                   (:require 0)
                   (:use 0)))
     (put-clojure-indent (car spec) (cdr spec)))
