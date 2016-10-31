@@ -5,81 +5,79 @@ set -o pipefail
 
 echo "[create-init-before-local-el] Setting up init.before.local.el."
 
-contents=$(cat <<'EOF'
-;;; This file is run near the beginning of init.el. This is the best place to
-;;; override the various parameters shown below. Additionally, you can
-;;; customize which packages are loaded, using the radian-add-package and
-;;; radian-remove-package functions. They work like this:
+define contents <<'EOF'
+;;; This file is run near the beginning of init.el. Here, you can
+;;; customize various aspects of Radian.
 ;;;
-;;; (radian-add-package 'neotree)
-;;; (radian-remove-package 'aggressive-indent)
+;;; There are a number of customizable parameters, which begin with
+;;; "radian-customize-". These parameters are set to their default
+;;; values using `setq' at the very beginning of init.el, and each
+;;; `setq' declaration is accompanied by a comment explaining the
+;;; meaning of the parameter.
 ;;;
-;;; Or, you can completely overwrite the package list by setting the
-;;; radian-packages variable to a new value.
+;;; If you use the setup script to generate this file, then all of the
+;;; `setq' declarations and their explanatory comments are copied into
+;;; this file (see below). When a new parameter is added, you have two
+;;; options: either copy the declaration from init.el into this file,
+;;; or delete this file and run the setup script again. (Obviously,
+;;; the second option will cause you to lose anything you previously
+;;; had in this file.)
+;;;
+;;; You can also use this file to inhibit the loading of packages that
+;;; would otherwise be included with Radian by default. The following
+;;; functions are provided:
+;;;
+;;; * `radian-disable-package'
+;;; * `radian-reenable-package'
+;;; * `radian-package-enabled-p'
+;;; * `radian-package-disabled-p'
+;;;
+;;; See their docstrings for more information. As a simple example,
+;;; however, here is how you can disable Aggressive Indent:
+;;;
+;;; (radian-disable-package 'aggressive-indent)
 EOF
-        )
 contents="$contents"$'\n'
 
-echo "[create-init-before-local-el] You can use the default package list, or customize it."
+echo "[create-init-before-local-el] Radian Emacs includes a number of packages by default."
+echo "[create-init-before-local-el] You can configure this list or leave it at the default for now."
 echo "[create-init-before-local-el] Either way, you can configure it later in init.before.local.el."
-echo -n "[create-init-before-local-el] Configure packages now? (y/n) "
+echo -n "[create-init-before-local-el] Configure package list now? (y/n) "
 read answer
 if (echo "$answer" | egrep -qi "^y"); then
-
-    collecting_packages=false
-    collected_packages=
-    while read line; do
-        if [[ $collecting_packages == true ]]; then
-            if [[ $line == "))" ]]; then
-                break
-            else
-                collected_packages="$collected_packages$line"$'\n'
+    configure=true
+else
+    configure=false
+fi
+is_anything_disabled=false
+collected_comments=
+while read -u 10 line; do
+    if [[ $line == \;\;* ]]; then
+        collected_comments="$collected_comments$line"$'\n'
+    else
+        if (echo "$line" | fgrep -q "(use-package"); then
+            package=${line#"(use-package "}
+            if [[ $configure == true ]]; then
+                echo "Package: $package"
+                echo -n "$collected_comments"
+                echo -n "[create-init-before-local-el] Include this package? (y/n) "
+                read answer
+                if ! (echo "$answer" | egrep -qi "^y"); then
+                    contents="$contents(radian-disable-package '$package)"$'\n'
+                    is_anything_disabled=true
+                fi
             fi
-        elif [[ $collecting_packages == setq ]]; then
-            collecting_packages=begin
-        elif [[ $collecting_packages == begin ]]; then
-            collecting_packages=true
-        elif [[ $line == "(defvar radian-packages "* ]]; then
-            collecting_packages=setq
         fi
-    done <../init.el
-
-    echo "[create-init-before-local-el] Here is the default package list:"
-    echo -n "$collected_packages"
-
-    exclude_contents=
-    echo "[create-init-before-local-el] If you want to exclude a package, enter its name now. Or, just press RET to continue."
-    while true; do
-        echo -n "[create-init-before-local-el] Exclude package: "
-        read package
-        if [[ $package ]]; then
-            exclude_contents="${exclude_contents}(radian-remove-package '$package)"$'\n'
-        else
-            break
-        fi
-    done
-    if [[ $exclude_contents ]]; then
-        contents="$contents"$'\n'"$exclude_contents"
+        collected_comments=
     fi
+done 10<../init.el
 
-    include_contents=
-    echo "[create-init-before-local-el] If you want to include an additional package, enter its name now. Or, just press RET to continue."
-    while true; do
-        echo -n "[create-init-before-local-el] Include package: "
-        read package
-        if [[ $package ]]; then
-            include_contents="${include_contents}(radian-add-package '$package)"$'\n'
-        else
-            break
-        fi
-    done
-    if [[ $include_contents ]]; then
-        contents="$contents"$'\n'"$include_contents"
-    fi
-
+if [[ $is_anything_disabled == false ]]; then
+    contents="$contents"$'\n'
 fi
 
-echo "[create-init-before-local-el] There are a number of configurable parameters. You can configure them or leave them at the defaults for now."
+echo "[create-init-before-local-el] There are a number of configurable parameters."
+echo "[create-init-before-local-el] You can configure them or leave them at the defaults for now."
 echo "[create-init-before-local-el] Either way, you can configure them later in init.before.local.el."
 echo -n "[create-init-before-local-el] Configure parameters now? (y/n) "
 read answer
@@ -96,7 +94,7 @@ while read -u 10 line; do
         if (echo "$line" | egrep -q "\\(setq radian-customize-[a-z-]+"); then
             variable=$(echo "$line" | egrep -o "radian-customize-[a-z-]+" | head -n 1)
             value=
-            if [[ $configure == true ]]; then
+            if [[ $configure == true ]] && ! (echo "$collected_comments" | fgrep -qi "manual configuration only"); then
                 echo -n "$collected_comments"
                 echo "$line"
                 echo "[create-init-before-local-el] You can enter a new value to override the default shown above. Be sure to quote symbols."

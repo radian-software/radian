@@ -7,19 +7,11 @@
 ;;
 ;; * Run the user-specific configuration file init.before.local.el.
 ;;
-;; * Perform Emacs-specific configuration. This is organized roughly
-;;   so that more general/basic functionality is customized first.
+;; * Perform configuration of native Emacs functionality.
 ;;
-;; * Set up the package installation system.
+;; * Bootstrap use-package.
 ;;
-;; * Run the user-specific configuration file init.pre.local.el.
-;;
-;; * Install packages.
-;;
-;; * Run the user-specific configuration file init.post.local.el.
-;;
-;; * Perform package-specific configuration. This is organized roughly
-;;   so that more general/basic packages are customized first.
+;; * Load and configure packages.
 ;;
 ;; * Load color schemes and perform other appearance tweaks that look
 ;;   odd unless they are done at the very end of initialization.
@@ -32,7 +24,10 @@
 ;;; The following are user-specific configuration options that can be
 ;;; overridden in init.before.local.el. They parsed by
 ;;; create-init-before-local-el.sh so the user can set them up
-;;; interactively.
+;;; interactively. Configuration variables marked with "For manual
+;;; configuration only" are placed in the created init.before.local.el
+;;; file, but the user is not offered the option to change their
+;;; values interactively.
 
 ;; Control color customizations. If you want to use the default
 ;; Radian color scheme (Solarized Light + Leuven), which is
@@ -44,70 +39,168 @@
 ;; this to `nil'.
 (setq radian-customize-tweak-colors t)
 
-;;; Now we define the package list. Every package specified in this
-;;; list will be automatically installed when Emacs starts, if it is
-;;; not already installed. In the future, packages that are not
-;;; specified in this list may be automatically uninstalled. Unless
-;;; you are requesting that a package be added to or removed from the
-;;; official version of Radian, you should use the
-;;; `radian-add-package' and `radian-remove-package' functions in your
-;;; init.before.local.el to add and remove packages in your local setup.
-;;;
-;;; This section is parsed by create-init-before-local-el.sh so that
-;;; the user can set up their preferred packages interactively.
+;; Override package archives. If this is non-nil, then it is used as
+;; the value of `package-archives' instead of the Radian default (GNU
+;; plus MELPA).
+;;
+;; For manual configuration only.
+(setq radian-customize-package-archives nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Utility functions
+
+;; To avoid an explicit dependency on cl, we define our own version of
+;; `cl-every'. Based on [1].
+;;
+;; [1]: http://stackoverflow.com/a/30826662/3538165
+(defun radian--every (predicate list)
+  "Returns t if PREDICATE returns non-nil for every element of
+LIST, and otherwise nil."
+  (while (and list (funcall predicate (car list)))
+    (setq list (cdr list)))
+  (null list))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; User-specific package management
+
+;;; The following code sets up a simple way for users to selectively
+;;; disable Radian's default packages in their init.before.local.el.
 ;;;
 ;;; Here we are using the defvar-nil-setq pattern described in [1],
-;;; which makes it so that changes to this list will be picked up by a
-;;; reload of init.el (M-RET r).
+;;; which makes it so that changes to this declaration will be picked
+;;; up by a reload of init.el (M-RET r).
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
-(defvar radian-packages nil "The packages required by Radian.")
-(setq radian-packages
-      '(
-        ace-jump-mode ; quickly jump to words, characters, or lines onscreen
-        aggressive-indent ; keep code correctly indented at all times
-        cider ; Clojure REPL integration
-        clj-refactor ; refactoring tools for Clojure
-        clojure-mode ; Clojure indentation and syntax highlighting
-        company ; autocompletion with pop-up menu
-        company-statistics ; sort Company completions by usage
-        diminish ; easily change mode line indicators
-        geiser ; support for Racket
-        git-commit ; edit Git commit messages intelligently
-        helm ; better interface for selecting files, buffers, or commands
-        helm-projectile ; use Helm for Projectile
-        helm-smex ; sort M-x suggestions by usage
-        markdown-toc ; generate tables of contents for Markdown files
-        paredit ; keep parentheses correctly balanced at all times
-        projectile ; quickly jump to files organized by project
-        transpose-frame ; easily mirror, rotate, and transpose windows
-        undo-tree ; more intuitive and powerful undo/redo
-        ))
 
-;;; The following are utility functions for use in adding and removing
-;;; packages in init.before.local.el.
+(defvar radian-disabled-packages nil
+  "Association list from packages to integers. Any package with
+an entry greater than zero will not be automatically loaded by
+Radian. Missing packages are treated as having entries of zero.
 
-(defun radian-add-package (package)
-  "Adds the provided package from `radian-packages', if it is not
-already present. For use in init.before.local.el. Note that this
-function will not install the provided package. To do that, call
-`radian-update-packages'."
+You can manipulate this list using `radian-disable-package',
+which increments the entries of packages, and
+`radian-reenable-package', which decrements the entries of
+packages.
+
+Note that this variable only affects the loading of packages that
+are normally loaded automatically by Radian. If you want to
+install your own package, add a `use-package' call to your
+init.local.el.
+
+Also note that you must make any modifications to this list
+*before* packages are loaded, in order for your changes to have
+an effect. This means your modifications should be done in
+init.before.local.el.")
+(setq radian-disabled-packages ())
+
+(defun radian-disable-package (&rest packages)
+  "Disables packages that would otherwise be loaded automatically
+by Radian, by incrementing their entries in
+`radian-disabled-packages'.
+
+You can undo the effects of this function using
+`radian-reenable-package'. In fact, you can even call
+`radian-reenable-package' before this function is called, in
+order to cancel out the effect preemptively.
+
+Note that you must call this function *before* packages are
+loaded, in order for your change to have an effect. This means
+the call must be done in init.before.local.el."
   ;; Passing `t' to `add-to-list' makes the addition happen at the end
   ;; of the list.
-  (add-to-list 'radian-packages package t))
+  (dolist (package packages)
+    (let ((association (assoc package radian-disabled-packages)))
+      (if association
+          (setf (assoc package radian-disabled-packages)
+                (1+ (cdr association)))
+        (push (cons package 1) packages)))))
+
+(defun radian-reenable-package (&rest packages)
+  "Undoes the effects of `radian-disable-package', by
+decrementing the entries of the provided packages in
+`radian-disabled-packages'.
+
+In fact, you can even call this function before
+`radian-disable-package' is called, in order to cancel out its
+effect preemptively.
+
+Note that you must call this function *before* packages are
+loaded, in order for your change to have an effect. This means
+the call must be done in init.before.local.el."
+  (dolist (package packages)
+    (let ((association (assoc package radian-disabled-packages)))
+      (if association
+          (setf (assoc package radian-disabled-packages)
+                (1+ (cdr association)))
+        (push (cons package -1) packages)))))
+
+(defun radian-package-enabled-p (&rest packages)
+  "Returns `t' if none of the given packages are disabled (for example,
+by `radian-disable-package'), and `nil' otherwise.
+
+See also `radian-disabled-packages'."
+  (radian--every (lambda (package)
+                   (let ((association (assoc package radian-disabled-packages)))
+                     (or (not association)
+                         (<= (cdr association) 0))))
+                 packages))
+
+(defun radian-package-disabled-p (&rest packages)
+  "Returns `t' if all of the given packages are disabled (for
+example, by `radian-disable-package'), and `nil' otherwise.
+
+See also `radian-disabled-packages'."
+  (radian--every (lambda (package)
+                   (let ((association (assoc package radian-disabled-packages)))
+                     (and association
+                          (> (cdr association) 1))))
+                 packages))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Deprecated API for user-specific package management
+
+;;; The following code is deprecated, and is provided for backwards
+;;; compatibility.
+
+(defvar radian-packages nil
+  "This variable is DEPRECATED. To add a package to Radian, call
+`use-package' in init.local.el. To remove a package, call
+`radian-disable-package' in init.before.local.el.
+
+The packages required by Radian.")
+(setq radian-packages ())
+
+(defun radian-add-package (package)
+  "This function is DEPRECATED. Call `use-package' in
+init.local.el instead.
+
+Adds the provided package to `radian-packages', if it is not
+already present. For use in init.before.local.el. Note that this
+function will not install the provided package."
+  ;; Passing `t' to `add-to-list' makes the addition happen at the end
+  ;; of the list.
+  (add-to-list 'radian-packages package t)
+  (radian-reenable-package package))
 
 (defun radian-remove-package (package)
-  "Removes the provided package from `radian-packages', if it is
+  "This function is DEPRECATED. Call `radian-disable-package' instead.
+
+Removes the provided package from `radian-packages', if it is
 present. For use in init.before.local.el. Note that this function
 will not uninstall the package; it will only prevent the package
 from being installed automatically. For now, you have to
 uninstall packages manually, by deleting their folders in
 ~/.emacs.d/elpa."
-  (setq radian-packages (delete package radian-packages)))
+  (setq radian-packages (delete package radian-packages))
+  (radian-disable-package package))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Function for loading user-specific configuration files
 
 ;;; The following function is used four times in init.el to load
-;;; user-specific configuration files (init.before.local.el,
-;;; init.pre.local.el, init.post.local.el, and init.local.le).
+;;; user-specific configuration files (init.before.local.el and
+;;; init.local.el, as well as the deprecated init.pre.local.el and
+;;; init.post.local.el).
 
 (defun radian-load-user-config (filename)
   "If a file by the specified name exists in the ~/.emacs.d directory,
@@ -117,18 +210,9 @@ loads it. Otherwise, fails silently."
       (load-file file))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; User-specific configuration (1 of 4)
+;;;; Load user-specific configuration file (1 of 2)
 
 (radian-load-user-config "init.before.local.el")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Libraries
-
-;; The cl-lib library provides `cl-every', which is used in the code
-;; for determining if any packages need to be installed. The library
-;; might also be needed by one of the packages loaded by Radian, but
-;; I'm not sure.
-(require 'cl-lib)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
@@ -420,10 +504,10 @@ M-RET to the file opened by the resulting keybinding.")
                 lisp-interaction-mode-hook))
   (add-hook hook (lambda () (eldoc-mode 1))))
 
-(when (member 'clojure-mode radian-packages)
+(when (radian-package-enabled-p 'clojure-mode)
   (add-hook 'clojure-mode-hook (lambda () (eldoc-mode 1))))
 
-(when (member 'cider radian-packages)
+(when (radian-package-enabled-p 'cider)
   (add-hook 'cider-repl-mode-hook (lambda () (eldoc-mode 1))))
 
 ;; Show ElDoc messages in the echo area immediately, instead of after
@@ -434,6 +518,9 @@ M-RET to the file opened by the resulting keybinding.")
 ;; area from resizing itself unexpectedly when point is on a variable
 ;; with a multiline docstring.
 (setq eldoc-echo-area-use-multiline-p nil)
+
+;; Don't show ElDoc in the mode line.
+(setq eldoc-minor-mode-string nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Emacs Lisp
@@ -558,82 +645,55 @@ Lisp function does not specify a special indentation."
             (local-set-key (kbd "M-.")
                            'find-function-or-variable)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Set up package installation system
-
-;;; The following code will install any packages specified in
-;;; `radian-packages' that are not already installed. It will only
-;;; call `package-refresh-contents' if it is necessary to install a
-;;; new package. The main logic is based on [1]. In future, this code
-;;; may be extended to uninstall packages that are not present in
-;;; `radian-packages', as per issue #99.
-;;;
-;;; [1]: http://batsov.com/articles/2012/02/19/package-management-in-emacs-the-good-the-bad-and-the-ugly/
-
-;; Since `package-archives', `package-pinned-packages', and
-;; `package-installed-p' are not autoloaded, we must explicitly load
-;; package.el before using any of them.
-(require 'package)
-
-;; Add package repositories. GNU is the default repository; MELPA is
-;; necessary to get most of the packages we are interested in.
-(setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")))
+;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
+;; Interaction" in the mode line.
+(add-hook 'lisp-interaction-mode-hook
+          (lambda ()
+            (setq mode-name "Lisp-Interaction")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; User-specific configuration (2 of 4)
+;;;; Bootstrap use-package
 
+;; Load deprecated user-specific configuration file.
 (radian-load-user-config "init.pre.local.el")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Install and activate packages
+;; Add package repositories. GNU is the default repository; MELPA is
+;; necessary to get most of the packages we are interested in. Note
+;; that `package-initialize' appears to use the value of
+;; `package-archives', so we place this declaration first.
+(setq package-archives
+      (or radian-customize-package-archives
+          '(("gnu" . "http://elpa.gnu.org/packages/")
+            ("melpa" . "https://melpa.org/packages/"))))
 
-;; Initialize package.el. This is necessary to use
-;; `package-installed-p'.
+;; Initialize package.el. We can't use anything from package.el until
+;; we do this.
 (package-initialize)
 
-;; If any of the packages in `radian-packages' are not installed...
-(unless (cl-every 'package-installed-p radian-packages)
-  ;; ... then make sure that we know about the latest versions of all
-  ;;     the packages...
+;; If use-package is not installed, then make sure we know what the
+;; latest version is, and install it.
+(unless (package-installed-p 'use-package)
   (package-refresh-contents)
-  ;; ... and install any packages that aren't already installed.
-  (dolist (package radian-packages)
-    (unless (package-installed-p package)
-      (package-install package))))
+  (package-install 'use-package))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; User-specific configuration (3 of 4)
+;; Tell use-package to always install missing packages if necessary.
+(setq use-package-always-ensure t)
 
+;; Load deprecated user-specific configuration file.
 (radian-load-user-config "init.post.local.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Helm (and helm-projectile and helm-smex)
 
-(when (member 'helm radian-packages)
+;; Provides a general-purpose completion and narrowing mechanism, and
+;; enhanced versions of many standard Emacs commands that use it.
+(use-package helm
+  :if (radian-package-enabled-p 'helm)
+  :demand t
+  :config
 
   ;; Use Helm mode for many standard Emacs commands.
   (helm-mode 1)
-
-  (when (member 'helm-projectile radian-packages)
-
-    ;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
-    ;; instead of helm-projectile-on means we don't get a useless "Turn on
-    ;; helm-projectile key bindings" message in the minibuffer during startup.
-    ;;
-    ;; The local binding of ad-redefinition works around a warning message
-    ;; "ad-handle-definition: `tramp-read-passwd' got redefined", as per [1].
-    ;;
-    ;; [1]: https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
-    (let ((ad-redefinition-action 'accept))
-      (helm-projectile-toggle 1)))
-
-  ;; Use Helm mode for M-x. If helm-smex is enabled, use it to get
-  ;; sorting by usage.
-  (global-set-key (kbd "M-x")
-                  (if (member 'helm-smex radian-packages)
-                      'helm-smex 'helm-M-x))
 
   ;; Fix the unreadable default color for the prefix argument in the
   ;; Helm M-x buffer.
@@ -646,29 +706,96 @@ Lisp function does not specify a special indentation."
   ;; Get rid of the awful background color for buffers corresponding to files
   ;; modified outside of Emacs.
   (when radian-customize-tweak-colors
-    (set-face-background 'helm-buffer-saved-out nil)))
+    (set-face-background 'helm-buffer-saved-out nil))
+
+  :bind (;; Use Helm mode for M-x.
+         ("M-x" . helm-M-x))
+  ;; Note that Helm has `helm-mode-line-string', but this only affects
+  ;; what is shown in the mode line for a Helm buffer.
+  :diminish helm-mode)
+
+;; Provides enhanced versions of the Projectile commands that use
+;; Helm.
+(use-package helm-projectile
+  :if (radian-package-enabled-p 'helm 'helm-projectile)
+  :demand t
+  :config
+
+  ;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
+  ;; instead of helm-projectile-on means we don't get a useless "Turn on
+  ;; helm-projectile key bindings" message in the minibuffer during startup.
+  ;;
+  ;; The local binding of ad-redefinition works around a warning message
+  ;; "ad-handle-definition: `tramp-read-passwd' got redefined", as per [1].
+  ;;
+  ;; [1]: https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
+  (let ((ad-redefinition-action 'accept))
+    (helm-projectile-toggle 1)))
+
+;; Sorts M-x completions by usage.
+(use-package smex
+  :if (radian-package-enabled-p 'smex)
+  :defer t
+  :bind (;; Use smex for M-x.
+         ("M-x" . smex)))
+
+;; Provides an enhanced version of smex that uses Helm for completion.
+(use-package helm-smex
+  :if (radian-package-enabled-p 'helm 'smex 'helm-smex)
+  :defer t
+  :bind (;; Use helm-smex for M-x.
+         ("M-x" . helm-smex)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Diminish
+
+;; Provides an easy way to change the display of minor modes in the
+;; mode line.
+(use-package diminish
+  :if (radian-package-enabled-p 'diminish)
+  :defer t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Transpose Frame
+
+;; Provides simple commands to mirror, rotate, and transpose Emacs
+;; windows.
+(use-package transpose-frame
+  :if (radian-package-enabled-p 'transpose-frame)
+  :defer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Projectile
 
-(when (member 'projectile radian-packages)
+;; Provides commands to quickly navigate within and between
+;; "projects".
+(use-package projectile
+  :if (radian-package-enabled-p 'projectile)
+  :demand t
+  :config
 
   ;; Enable Projectile everywhere.
-  (projectile-global-mode 1))
+  (projectile-global-mode 1)
+
+  ;; Don't show Projectile in the mode line. (Radian already adds a
+  ;; custom indicator for the current project, so there's no need to
+  ;; show the mode separately.)
+  (setq projectile-mode-line nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Undo Tree
 
-(when (member 'undo-tree radian-packages)
+;; Provides undo/redo commands that are both more intuitive and more
+;; powerful than the Emacs defaults. Allows you to visualize the
+;; undo/redo tree, which uses a branching model to ensure that you can
+;; never lose changes.
+(use-package undo-tree
+  :if (radian-package-enabled-p 'undo-tree)
+  :demand t
+  :config
 
   ;; Enable Undo Tree everywhere.
   (global-undo-tree-mode 1)
-
-  ;; By default, `undo' (and by extension `undo-tree-undo') is bound
-  ;; to C-_ and C-/, and `undo-tree-redo' is bound to M-_. It's
-  ;; logical to also bind M-/ to `undo-tree-redo'. This overrides the
-  ;; default binding of M-/, which is to `dabbrev-expand'.
-  (global-set-key (kbd "M-/") 'undo-tree-redo)
 
   ;; Make undo history persistent between Emacs sessions. Don't rely
   ;; on this too much if your files tend to change outside of Emacs
@@ -677,22 +804,38 @@ Lisp function does not specify a special indentation."
 
   ;; Put all the undo information in a single directory, instead of in
   ;; each file's directory.
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos"))))
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos")))
+
+  ;; Don't show Undo Tree in the mode line.
+  (setq undo-tree-mode-lighter nil)
+
+  :bind (;; By default, `undo' (and by extension `undo-tree-undo') is bound
+         ;; to C-_ and C-/, and `undo-tree-redo' is bound to M-_. It's
+         ;; logical to also bind M-/ to `undo-tree-redo'. This overrides the
+         ;; default binding of M-/, which is to `dabbrev-expand'.
+         ("M-/" . undo-tree-redo)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: ace-jump-mode
 
-(when (member 'ace-jump-mode radian-packages)
-
-  ;; Create a keybinding for ace-jump-mode. Clojure mode already binds
-  ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
-  ;; C-c C-SPC instead.
-  (global-set-key (kbd "C-c C-SPC") 'ace-jump-mode))
+;; Allows you to jump to any particular occurrence of a character
+;; visible on-screen.
+(use-package ace-jump-mode
+  :if (radian-package-enabled-p 'ace-jump-mode)
+  :defer t
+  :bind (;; Create a keybinding for ace-jump-mode. Clojure mode already binds
+         ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
+         ;; C-c C-SPC instead.
+         ("C-C C-SPC" . ace-jump-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Aggressive Indent
 
-(when (member 'aggressive-indent radian-packages)
+;; Keeps indentation correct at all times.
+(use-package aggressive-indent
+  :if (radian-package-enabled-p 'aggressive-indent)
+  :demand t
+  :config
 
   ;; Enable Aggressive Indent everywhere, except the modes in
   ;; `aggressive-indent-excluded-modes'.
@@ -701,12 +844,19 @@ Lisp function does not specify a special indentation."
   ;; Disable Aggressive Indent in Re-Builder mode. I don't think it
   ;; does anything in this mode, and it shadows the C-c C-q binding
   ;; provided by Re-Builder (so you can't quit!).
-  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode)
+
+  :diminish (aggressive-indent-mode . "AggrIndent"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: Paredit
 
-(when (member 'paredit radian-packages)
+;; Keeps parentheses balanced at all times, and provides structural
+;; navigation and editing commands for s-expressions.
+(use-package paredit
+  :if (radian-package-enabled-p 'paredit)
+  :defer t
+  :init
 
   ;; Enable Paredit when editing Lisps and using Lisp REPLs.
 
@@ -715,120 +865,123 @@ Lisp function does not specify a special indentation."
                   scheme-mode-hook))
     (add-hook hook 'enable-paredit-mode))
 
-  (when (member 'clojure-mode radian-packages)
+  (when (radian-package-enabled-p 'clojure-mode)
     (add-hook 'clojure-mode-hook 'enable-paredit-mode))
 
-  (when (member 'cider radian-packages)
+  (when (radian-package-enabled-p 'cider)
     (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
 
-  (when (member 'geiser radian-packages)
+  (when (radian-package-enabled-p 'geiser)
     (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: clojure-mode
 
-(when (member 'clojure-mode radian-packages)
+;; Provides indentation and syntax highlighting for Clojure code.
+(use-package clojure-mode
+  :if (radian-package-enabled-p 'clojure-mode)
+  :defer t
+  :config
 
-  (eval-after-load 'clojure-mode
-    (lambda ()
+  ;;; Customize indentation like this:
+  ;;;
+  ;;; (some-function
+  ;;;   argument
+  ;;;   argument)
+  ;;;
+  ;;; (some-function argument
+  ;;;                argument)
+  ;;;
+  ;;; (-> foo
+  ;;;   thread
+  ;;;   thread)
+  ;;;
+  ;;; (->> foo
+  ;;;   thread
+  ;;;   thread)
+  ;;;
+  ;;; (:keyword
+  ;;;   map)
 
-      ;;; Customize indentation like this:
-      ;;;
-      ;;; (some-function
-      ;;;   argument
-      ;;;   argument)
-      ;;;
-      ;;; (some-function argument
-      ;;;                argument)
-      ;;;
-      ;;; (-> foo
-      ;;;   thread
-      ;;;   thread)
-      ;;;
-      ;;; (->> foo
-      ;;;   thread
-      ;;;   thread)
-      ;;;
-      ;;; (:keyword
-      ;;;   map)
+  (setq clojure-indent-style ':align-arguments)
 
-      (setq clojure-indent-style ':align-arguments)
+  ;; We can't use define-clojure-indent here, due to a perverse
+  ;; threefold conspiracy perpetrated by dash.el, recursive
+  ;; macroexpansion, and the Gilardi scenario. See [1].
+  ;;
+  ;; Ideally, we would be able to set the identation rules for
+  ;; *all* keywords at the same time. But until we figure out how
+  ;; to do that, we just have to deal with every keyword
+  ;; individually. See issue #26.
+  ;;
+  ;; [1]: http://emacs.stackexchange.com/q/26261/12534
+  (dolist (spec '((-> 1)
+                  (->> 1)
+                  (:import 0)
+                  (:overall-average 0)
+                  (:require 0)
+                  (:use 0)))
+    (put-clojure-indent (car spec) (cdr spec)))
 
-      ;; We can't use define-clojure-indent here, due to a perverse
-      ;; threefold conspiracy perpetrated by dash.el, recursive
-      ;; macroexpansion, and the Gilardi scenario. See [1].
-      ;;
-      ;; Ideally, we would be able to set the identation rules for
-      ;; *all* keywords at the same time. But until we figure out how
-      ;; to do that, we just have to deal with every keyword
-      ;; individually. See issue #26.
-      ;;
-      ;; [1]: http://emacs.stackexchange.com/q/26261/12534
-      (dolist (spec '((-> 1)
-                      (->> 1)
-                      (:import 0)
-                      (:overall-average 0)
-                      (:require 0)
-                      (:use 0)))
-        (put-clojure-indent (car spec) (cdr spec)))
+  ;; clojure-mode does not correctly identify the docstrings of
+  ;; protocol methods as docstrings, and as such electric
+  ;; indentation does not work for them. Additionally, when you
+  ;; hack a clojure.core function, such as defonce or defrecord,
+  ;; to provide docstring functionality, those docstrings are
+  ;; (perhaps rightly, but annoyingly) not recognized as
+  ;; docstrings either. However, there is an easy way to get
+  ;; electric indentation working for all potential docstrings:
+  ;; simply tell clojure-mode that *all* strings are docstrings.
+  ;; This will not change the font locking, because for some weird
+  ;; reason clojure-mode determines whether you're in a docstring
+  ;; by the font color instead of the other way around. Note that
+  ;; this will cause electric indentation by two spaces in *all*
+  ;; multiline strings, but since there are not very many
+  ;; non-docstring multiline strings in Clojure this is not too
+  ;; inconvenient. (And, after all, it's only electric, not
+  ;; aggressive, indentation.)
 
-      ;; Make sure electric indentation *always* works. For some
-      ;; reason, if this is omitted, electric indentation works most
-      ;; of the time, but it fails inside Clojure docstrings. (TAB
-      ;; will add the requisite two spaces, but you shouldn't have to
-      ;; do this manually after pressing RET.) I'd like to find a more
-      ;; elegant solution to this problem. See issue #2.
-      ;;
-      ;; <return> is for windowed Emacs; RET is for terminal Emacs.
-      (dolist (key '("<return>" "RET"))
-        (define-key clojure-mode-map (kbd key) 'newline-and-indent))
+  ;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
+  ;; so we can't override it. Instead, we replace clojure-indent-line.
 
-      ;; clojure-mode does not correctly identify the docstrings of
-      ;; protocol methods as docstrings, and as such electric
-      ;; indentation does not work for them. Additionally, when you
-      ;; hack a clojure.core function, such as defonce or defrecord,
-      ;; to provide docstring functionality, those docstrings are
-      ;; (perhaps rightly, but annoyingly) not recognized as
-      ;; docstrings either. However, there is an easy way to get
-      ;; electric indentation working for all potential docstrings:
-      ;; simply tell clojure-mode that *all* strings are docstrings.
-      ;; This will not change the font locking, because for some weird
-      ;; reason clojure-mode determines whether you're in a docstring
-      ;; by the font color instead of the other way around. Note that
-      ;; this will cause electric indentation by two spaces in *all*
-      ;; multiline strings, but since there are not very many
-      ;; non-docstring multiline strings in Clojure this is not too
-      ;; inconvenient. (And, after all, it's only electric, not
-      ;; aggressive, indentation.)
+  (defun radian-clojure-in-docstring-p ()
+    "Check whether point is in a docstring."
+    (or
+     (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+     (eq (get-text-property (point) 'face) 'font-lock-string-face)))
 
-      ;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
-      ;; so we can't override it. Instead, we replace clojure-indent-line.
+  (defun clojure-indent-line ()
+    "Indent current line as Clojure code."
+    (if (radian-clojure-in-docstring-p)
+        (save-excursion
+          (beginning-of-line)
+          (when (and (looking-at "^\\s-*")
+                     (<= (string-width (match-string-no-properties 0))
+                         (string-width (clojure-docstring-fill-prefix))))
+            (replace-match (clojure-docstring-fill-prefix))))
+      (lisp-indent-line)))
 
-      (defun radian-clojure-in-docstring-p ()
-        "Check whether point is in a docstring."
-        (or
-         (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-         (eq (get-text-property (point) 'face) 'font-lock-string-face)))
-
-      (defun clojure-indent-line ()
-        "Indent current line as Clojure code."
-        (if (radian-clojure-in-docstring-p)
-            (save-excursion
-              (beginning-of-line)
-              (when (and (looking-at "^\\s-*")
-                         (<= (string-width (match-string-no-properties 0))
-                             (string-width (clojure-docstring-fill-prefix))))
-                (replace-match (clojure-docstring-fill-prefix))))
-          (lisp-indent-line))))))
+  :bind (;; Make sure electric indentation *always* works. For some
+         ;; reason, if this is omitted, electric indentation works most
+         ;; of the time, but it fails inside Clojure docstrings. (TAB
+         ;; will add the requisite two spaces, but you shouldn't have to
+         ;; do this manually after pressing RET.) I'd like to find a more
+         ;; elegant solution to this problem. See issue #2.
+         ;;
+         ;; <return> is for windowed Emacs; RET is for terminal Emacs.
+         :map clojure-mode-map
+         ("<return>" . newline-and-indent)
+         ("RET" . newline-and-indent)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: CIDER
 
-(when (member 'cider radian-packages)
-
-  ;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
-  (global-set-key (kbd "C-c M-j") 'cider-jack-in)
-  (global-set-key (kbd "C-c M-J") 'cider-jack-in-clojurescript)
+;; Provides Clojure and ClojureScript REPL integration, including
+;; documentation and source lookups, among many other features.
+(use-package cider
+  :if (radian-package-enabled-p 'clojure-mode 'cider)
+  :defer t
+  :config
 
   ;; By default, any error messages that occur when CIDER is starting
   ;; up are placed in the *nrepl-server* buffer and not in the
@@ -897,25 +1050,46 @@ Lisp function does not specify a special indentation."
         "(do
   (require 'figwheel-sidecar.repl-api)
   (figwheel-sidecar.repl-api/start-figwheel!)
-  (figwheel-sidecar.repl-api/cljs-repl))"))
+  (figwheel-sidecar.repl-api/cljs-repl))")
+
+  ;; Don't show CIDER in the mode line.
+  (setq cider-mode-line nil)
+
+  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
+         ("C-c M-j" . cider-jack-in)
+         ("C-c M-J" . cider-jack-in-clojurescript)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: clj-refactor
 
-;; Enable clj-refactor in Clojure buffers. This is taken directly from
-;; the clj-refactor README [1].
-;;
-;; [1]: https://github.com/clojure-emacs/clj-refactor.el
-(add-hook 'clojure-mode-hook
-          (lambda ()
-            (clj-refactor-mode 1)
-            (yas-minor-mode 1)
-            (cljr-add-keybindings-with-prefix "C-c RET")))
+;; Makes Emacs into a real Clojure IDE by providing a mountain of
+;; automated refactoring tools.
+(use-package clj-refactor
+  :if (radian-package-enabled-p 'clojure-mode 'cider 'yasnippet 'clj-refactor)
+  :defer t
+  :init
+
+  ;; Enable clj-refactor in Clojure buffers. This is taken directly from
+  ;; the clj-refactor README [1].
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/clj-refactor.el
+  (add-hook 'clojure-mode-hook
+            (lambda ()
+              (clj-refactor-mode 1)
+              (yas-minor-mode 1)
+              (cljr-add-keybindings-with-prefix "C-c RET")))
+
+  :diminish clj-refactor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: git-commit
 
-(when (member 'git-commit radian-packages)
+;; Allows editing Git commit messages from the command line (i.e. with
+;; emacs or emacsclient as your core.editor).
+(use-package git-commit
+  :if (radian-package-enabled-p 'git-commit)
+  :demand t
+  :config
 
   ;; Enable the functionality of the git-commit package. This should
   ;; be enabled by default for emacsclient, but we need to turn it on
@@ -928,9 +1102,32 @@ Lisp function does not specify a special indentation."
   (setq git-commit-summary-max-length 50))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Geiser
+
+;; Provides Racket REPL integration, including documentation and
+;; source lookups. Basically CIDER for Racket.
+(use-package geiser
+  :if (radian-package-enabled-p 'geiser)
+  :defer t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: markdown-mode
+
+;; Provides syntax highlighting, indentation, and editing commands for
+;; Markdown files.
+(use-package markdown-mode
+  :if (radian-package-enabled-p 'markdown-mode)
+  :defer t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Package: markdown-toc
 
-(when (member 'markdown-toc radian-packages)
+;; Provides the `markdown-toc-generate-toc' command to generate a
+;; table of contents for a Markdown file.
+(use-package markdown-toc
+  :if (radian-package-enabled-p 'markdown-mode 'markdown-toc)
+  :defer t
+  :config
 
   ;; Remove the header inserted before the table of contents. If you want a
   ;; header, just add one before the "markdown-toc start" comment -- this way,
@@ -948,7 +1145,12 @@ Lisp function does not specify a special indentation."
 ;;
 ;; [1]: https://github.com/Malabarba/aggressive-indent-mode/issues/61
 
-(when (member 'company radian-packages)
+;; Provides a powerful autocomplete mechanism that integrates with
+;; many different sources of completions.
+(use-package company
+  :if (radian-package-enabled-p 'company)
+  :demand t
+  :config
 
   ;; Turn on Company everywhere.
   (global-company-mode 1)
@@ -981,44 +1183,9 @@ Lisp function does not specify a special indentation."
   ;; Company.
   (setq company-require-match nil)
 
-  ;; Prevent suggestions from being triggered automatically. In particular,
-  ;; this makes it so that:
-  ;; - TAB will always complete the current selection.
-  ;; - RET will only complete the current selection if the user has explicitly
-  ;;   interacted with Company.
-  ;; - SPC will never complete the current selection.
-  ;;
-  ;; Based on:
-  ;; - https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
-  ;; - http://emacs.stackexchange.com/a/13290/12534
-  ;; - http://stackoverflow.com/a/22863701/3538165
-  ;;
-  ;; See also:
-  ;; - http://emacs.stackexchange.com/a/24800/12534
-  ;; - http://emacs.stackexchange.com/q/27459/12534
-
-  ;; <return> is for windowed Emacs; RET is for terminal Emacs
-  (dolist (key '("<return>" "RET"))
-    ;; Here we are using an advanced feature of define-key that lets
-    ;; us pass an "extended menu item" instead of an interactive
-    ;; function. Doing this allows RET to regain its usual
-    ;; functionality when the user has not explicitly interacted with
-    ;; Company.
-    (define-key company-active-map (kbd key)
-      `(menu-item nil company-complete
-                  :filter ,(lambda (cmd)
-                             (when (company-explicit-action-p)
-                               cmd)))))
-
-  ;; <tab> is for windowed Emacs; TAB is for terminal Emacs.
-  (dolist (key '("<tab>" "TAB"))
-    (define-key company-active-map (kbd key) #'company-complete-selection))
-
-  (define-key company-active-map (kbd "SPC") nil)
-
-  ;; Company appears to override the above keymap based on
-  ;; company-auto-complete-chars. Turning it off ensures we have full
-  ;; control.
+  ;; Company appears to override our settings in `company-active-map'
+  ;; based on `company-auto-complete-chars'. Turning it off ensures we
+  ;; have full control.
   (setq company-auto-complete-chars nil)
 
   ;; Prevent Company completions from being lowercased in the
@@ -1032,9 +1199,9 @@ Lisp function does not specify a special indentation."
 
   (dolist (hook (remove nil
                         (list
-                         (when (member 'cider radian-packages)
+                         (when (radian-package-enabled-p 'cider)
                            'cider-repl-mode-hook)
-                         (when (member 'geiser radian-packages)
+                         (when (radian-package-enabled-p 'geiser)
                            'geiser-repl-mode-hook))))
     (add-hook hook
               (lambda ()
@@ -1043,10 +1210,76 @@ Lisp function does not specify a special indentation."
                 (define-key company-active-map (kbd "M-p") nil)
                 (define-key company-active-map (kbd "M-n") nil))))
 
-  (when (member 'company-statistics radian-packages)
+  ;; We want pressing RET to trigger a Company completion only if the
+  ;; user has interacted explicitly with Company. The only way I can
+  ;; find to do this is to define what is called an "extended menu
+  ;; item" and bind it to RET in the `company-active-map'. Extended
+  ;; menu items appear to have the ability (by returning nil) to tell
+  ;; Emacs to perform whatever action the keybinding just pressed
+  ;; would otherwise perform. Other solutions I have found, such as
+  ;; [1], do not work correctly if the key that was pressed is
+  ;; supposed to be automatically translated by Emacs (for instance,
+  ;; C-c C-K to C-c C-k; or, more relevantly to Company, <return> to
+  ;; RET). I found out about the option of using an extended menu item
+  ;; from [2], which led to [3].
+  ;;
+  ;; [1]: https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
+  ;; [2]: http://stackoverflow.com/a/22863701/3538165
+  ;; [3]: http://stackoverflow.com/a/22863701/3538165
+  (setq radian--company-complete-if-explicit
+        `(menu-item nil company-complete
+                    :filter ,(lambda (cmd)
+                               (when (company-explicit-action-p)
+                                 cmd))))
 
-    ;; Turn on company-statistics if available.
-    (company-statistics-mode 1)))
+  ;; Make RET trigger a completion if and only if the user
+  ;; has explicitly interacted with Company. Note that
+  ;; <return> is for windowed Emacs and RET is for
+  ;; terminal Emacs.
+  (define-key company-active-map (kbd "<return>")
+    radian--company-complete-if-explicit)
+  (define-key company-active-map (kbd "RET")
+    radian--company-complete-if-explicit)
+
+  :bind (:map company-active-map
+         ;; Make TAB always complete the current selection. Note
+         ;; that <tab> is for windowed Emacs and TAB is for
+         ;; terminal Emacs.
+         ("<tab>" . company-complete-selection)
+         ("TAB" . company-complete-selection)
+
+         ;; Prevent SPC from ever triggering a completion.
+         ("SPC" . nil))
+  :diminish company-mode)
+
+;; Sorts Company suggestions by usage, persistent between sessions.
+(use-package company-statistics
+  :if (radian-package-enabled-p 'company 'company-statistics)
+  :demand t
+  :config
+
+  ;; Enable Company Statistics.
+  (company-statistics-mode 1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Package: Yasnippet
+
+;; Allows the expansion of user-defined abbreviations into fillable
+;; templates. This is used by clj-refactor for some of its
+;; refactorings.
+(use-package yasnippet
+  :if (radian-package-enabled-p 'yasnippet)
+  :defer t
+  :diminish yas-minor-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Load packages added via deprecated API
+
+(unless (radian--every 'package-installed-p radian-packages)
+  (package-refresh-contents)
+  (dolist (package radian-packages)
+    (unless (package-installed-p package)
+      (package-install package))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Color themes
@@ -1072,7 +1305,7 @@ Lisp function does not specify a special indentation."
   "Construct for the mode line that shows [*] if the buffer
 has been modified, and whitespace otherwise.")
 
-(when (member 'projectile radian-packages)
+(when (radian-package-enabled-p 'projectile)
   (defvar mode-line-projectile-project
     '("["
       (:eval (projectile-project-name))
@@ -1093,7 +1326,7 @@ brackets."))
                "   "
                ;; Show the row and column of point.
                mode-line-position
-               (when (member 'projectile radian-packages)
+               (when (radian-package-enabled-p 'projectile)
                  (list
                   " "
                   ;; Show the current Projectile project.
@@ -1105,54 +1338,7 @@ brackets."))
 ;; Make `mode-line-position' show the column, not just the row.
 (column-number-mode 1)
 
-;;; Customize mode line indicators
-
-;; aggressive-indent-mode
-(when (member 'aggressive-indent radian-packages)
-  (diminish 'aggressive-indent-mode "AggrIndent"))
-
-;; cider-mode
-(when (member 'cider radian-packages)
-  (setq cider-mode-line nil))
-
-;; clj-refactor-mode
-(when (member 'clj-refactor radian-packages)
-  (eval-after-load 'clj-refactor
-    '(diminish 'clj-refactor-mode)))
-
-;; company-mode
-(when (member 'company radian-packages)
-  (diminish 'company-mode))
-
-;; eldoc-mode
-(setq eldoc-minor-mode-string nil)
-
-;; helm-mode
-;;
-;; Note that Helm has `helm-mode-line-string', but this only affects
-;; what is shown in the mode line for a Helm buffer.
-(when (member 'helm radian-packages)
-  (diminish 'helm-mode))
-
-;; lisp-interaction-mode
-(add-hook 'lisp-interaction-mode-hook
-          (lambda ()
-            (setq mode-name "Lisp-Interaction")))
-
-;; projectile-mode
-(when (member 'projectile radian-packages)
-  (setq projectile-mode-line nil))
-
-;; undo-tree-mode
-(when (member 'undo-tree radian-packages)
-  (setq undo-tree-mode-lighter nil))
-
-;; yas-minor-mode
-(when (member 'clj-refactor radian-packages)
-  (eval-after-load 'yasnippet
-    '(diminish 'yas-minor-mode)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; User-specific configuration (4 of 4)
+;;;; Load user-specific configuration file (2 of 2)
 
 (radian-load-user-config "init.local.el")
