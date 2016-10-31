@@ -1148,7 +1148,9 @@ Lisp function does not specify a special indentation."
   ;; projects, you either have to wait for a minute without doing
   ;; anything or be prepared for your cursur to suddenly shift buffers
   ;; without warning sometime in the near future. This is annoying, so
-  ;; turn off the behavior.
+  ;; turn off the behavior. An issue has been opened at [1].
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/cider/issues/1872
   (setq cider-repl-pop-to-buffer-on-connect nil)
 
   ;; However, turning off the pop-to-buffer setting also prevents the
