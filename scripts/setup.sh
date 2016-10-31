@@ -59,6 +59,7 @@ specs=(
     "racket -> wget"
     "emacs -> wget"
     "emacs-dotfiles -> emacs"
+    "ag -> homebrew"
     "tree -> homebrew"
     "tmuxinator -> homebrew tmux"
 )
@@ -195,6 +196,10 @@ if feature emacs-dotfiles; then
 fi
 
 ### Utilities ###
+
+if feature ag; then
+    ./ensure-installed.sh ag --version ag any-version brew the_silver_searcher
+fi
 
 if feature tree; then
     ./ensure-installed.sh tree
