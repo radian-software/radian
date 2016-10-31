@@ -310,6 +310,17 @@ M-RET to the file opened by the resulting keybinding.")
 ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
 (setq auto-revert-interval 1)
 
+;; The following patches C-x C-f to automatically open non-writable
+;; files as superuser (prompting for your password if necessary).
+;;
+;; [1]: http://emacsredux.com/blog/2013/04/21/edit-files-as-root/
+
+(defadvice ido-file-internal (after find-file-sudo activate)
+  "Find file as root if necessary."
+  (unless (and buffer-file-name
+               (file-writable-p buffer-file-name))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Dired
 
