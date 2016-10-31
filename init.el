@@ -889,8 +889,8 @@ Lisp function does not specify a special indentation."
   (setq company-auto-complete-chars nil)
 
   ;; Prevent Company completions from being lowercased in the
-  ;; completion menu. This appears to only be an issue in comments and
-  ;; strings in Clojure.
+  ;; completion menu. This has only been observed to happen for
+  ;; comments and strings in Clojure.
   (setq company-dabbrev-downcase nil)
 
   ;; Company mode overrides standard REPL bindings for M-p and M-n
