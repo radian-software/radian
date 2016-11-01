@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "[compute-features] Computing features."
+
 ### Utility function ###
 
 # Usage: contains <element> <array> <var>
