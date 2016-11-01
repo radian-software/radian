@@ -687,6 +687,23 @@ Lisp function does not specify a special indentation."
 ;; Tell use-package to always install missing packages if necessary.
 (setq use-package-always-ensure t)
 
+;; Add an advice to `use-package' to make it so that disabled packages
+;; are not loaded. See the docstring for more information.
+
+(defun use-package--radian (use-package name &rest args)
+  "Only initialize and load a package if it is enabled (according
+to `radian-package-enabled-p'). If the first argument specified
+after the package name is :dependencies, then also require any
+packages specified in the list of symbols immediately
+following :dependencies to be enabled."
+  (when (radian-package-enabled-p name)
+    (if (equal (car args) :dependencies)
+        (when (radian--every 'radian-package-enabled-p (cadr args))
+          (apply use-package name (cddr args)))
+      (apply use-package name args))))
+
+(advice-add 'use-package :around 'use-package--radian)
+
 ;; Load deprecated user-specific configuration file.
 (radian-load-user-config "init.post.local.el")
 
@@ -696,7 +713,6 @@ Lisp function does not specify a special indentation."
 ;; Provides a general-purpose completion and narrowing mechanism, and
 ;; enhanced versions of many standard Emacs commands that use it.
 (use-package helm
-  :if (radian-package-enabled-p 'helm)
   :demand t
   :config
 
@@ -725,7 +741,7 @@ Lisp function does not specify a special indentation."
 ;; Provides enhanced versions of the Projectile commands that use
 ;; Helm.
 (use-package helm-projectile
-  :if (radian-package-enabled-p 'helm 'helm-projectile)
+  :dependencies (helm)
   :demand t
   :config
 
@@ -742,14 +758,13 @@ Lisp function does not specify a special indentation."
 
 ;; Sorts M-x completions by usage.
 (use-package smex
-  :if (radian-package-enabled-p 'smex)
   :defer t
   :bind (;; Use smex for M-x.
          ("M-x" . smex)))
 
 ;; Provides an enhanced version of smex that uses Helm for completion.
 (use-package helm-smex
-  :if (radian-package-enabled-p 'helm 'smex 'helm-smex)
+  :dependencies (helm smex)
   :defer t
   :bind (;; Use helm-smex for M-x.
          ("M-x" . helm-smex)))
@@ -760,7 +775,6 @@ Lisp function does not specify a special indentation."
 ;; Provides an easy way to change the display of minor modes in the
 ;; mode line.
 (use-package diminish
-  :if (radian-package-enabled-p 'diminish)
   :defer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -769,7 +783,6 @@ Lisp function does not specify a special indentation."
 ;; Provides simple commands to mirror, rotate, and transpose Emacs
 ;; windows.
 (use-package transpose-frame
-  :if (radian-package-enabled-p 'transpose-frame)
   :defer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -778,7 +791,6 @@ Lisp function does not specify a special indentation."
 ;; Keeps parentheses balanced at all times, and provides structural
 ;; navigation and editing commands for s-expressions.
 (use-package paredit
-  :if (radian-package-enabled-p 'paredit)
   :defer t
   :init
 
@@ -800,7 +812,6 @@ Lisp function does not specify a special indentation."
 
 ;; Keeps indentation correct at all times.
 (use-package aggressive-indent
-  :if (radian-package-enabled-p 'aggressive-indent)
   :demand t
   :config
 
@@ -820,7 +831,6 @@ Lisp function does not specify a special indentation."
 ;; undo/redo tree, which uses a branching model to ensure that you can
 ;; never lose changes.
 (use-package undo-tree
-  :if (radian-package-enabled-p 'undo-tree)
   :demand t
   :config
 
@@ -848,7 +858,6 @@ Lisp function does not specify a special indentation."
 ;; Provides a powerful autocomplete mechanism that integrates with
 ;; many different sources of completions.
 (use-package company
-  :if (radian-package-enabled-p 'company)
   :demand t
   :config
 
@@ -952,7 +961,7 @@ Lisp function does not specify a special indentation."
 
 ;; Sorts Company suggestions by usage, persistent between sessions.
 (use-package company-statistics
-  :if (radian-package-enabled-p 'company 'company-statistics)
+  :dependencies (company)
   :demand t
   :config
 
@@ -963,7 +972,6 @@ Lisp function does not specify a special indentation."
 ;; templates. This is used by clj-refactor for some of its
 ;; refactorings.
 (use-package yasnippet
-  :if (radian-package-enabled-p 'yasnippet)
   :defer t
   :diminish yas-minor-mode)
 
@@ -973,7 +981,6 @@ Lisp function does not specify a special indentation."
 ;; Provides commands to quickly navigate within and between
 ;; "projects".
 (use-package projectile
-  :if (radian-package-enabled-p 'projectile)
   :demand t
   :config
 
@@ -988,7 +995,6 @@ Lisp function does not specify a special indentation."
 ;; Allows you to jump to any particular occurrence of a character
 ;; visible on-screen.
 (use-package ace-jump-mode
-  :if (radian-package-enabled-p 'ace-jump-mode)
   :defer t
   :bind (;; Create a keybinding for ace-jump-mode. Clojure mode already binds
          ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
@@ -1000,7 +1006,6 @@ Lisp function does not specify a special indentation."
 
 ;; Provides indentation and syntax highlighting for Clojure code.
 (use-package clojure-mode
-  :if (radian-package-enabled-p 'clojure-mode)
   :defer t
   :config
 
@@ -1096,7 +1101,7 @@ Lisp function does not specify a special indentation."
 ;; Provides Clojure and ClojureScript REPL integration, including
 ;; documentation and source lookups, among many other features.
 (use-package cider
-  :if (radian-package-enabled-p 'clojure-mode 'cider)
+  :dependencies (clojure-mode)
   :defer t
   :config
 
@@ -1181,7 +1186,7 @@ Lisp function does not specify a special indentation."
 ;; Makes Emacs into a real Clojure IDE by providing a mountain of
 ;; automated refactoring tools.
 (use-package clj-refactor
-  :if (radian-package-enabled-p 'clojure-mode 'cider 'yasnippet 'clj-refactor)
+  :dependencies (clojure-mode cider yasnippet)
   :defer t
   :init
 
@@ -1203,7 +1208,6 @@ Lisp function does not specify a special indentation."
 ;; Provides Racket REPL integration, including documentation and
 ;; source lookups. Basically CIDER for Racket.
 (use-package geiser
-  :if (radian-package-enabled-p 'geiser)
   :defer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1212,13 +1216,12 @@ Lisp function does not specify a special indentation."
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; Markdown files.
 (use-package markdown-mode
-  :if (radian-package-enabled-p 'markdown-mode)
   :defer t)
 
 ;; Provides the `markdown-toc-generate-toc' command to generate a
 ;; table of contents for a Markdown file.
 (use-package markdown-toc
-  :if (radian-package-enabled-p 'markdown-mode 'markdown-toc)
+  :dependencies (markdown-mode)
   :defer t
   :config
 
@@ -1233,7 +1236,6 @@ Lisp function does not specify a special indentation."
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
 (use-package git-commit
-  :if (radian-package-enabled-p 'git-commit)
   :demand t
   :config
 
