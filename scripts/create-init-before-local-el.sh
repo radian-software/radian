@@ -55,8 +55,9 @@ while read -u 10 line; do
     if [[ $line == \;\;* ]]; then
         collected_comments="$collected_comments$line"$'\n'
     else
-        if (echo "$line" | fgrep -q "(use-package"); then
+        if (echo "$line" | egrep -q "^\\(use-package"); then
             package=${line#"(use-package "}
+            package=${package%")"}
             if [[ $configure == true ]]; then
                 echo "Package: $package"
                 echo -n "$collected_comments"
