@@ -48,20 +48,18 @@ fi
 
 contents=
 
-format=$(cat <<'EOF'
+define format <<'EOF'
 [user]
         name = %s
         email = %s
 EOF
-      )
 contents="$contents$(printf "$format" "$name" "$email")"$'\n'
 
 if [[ $editor ]]; then
-    format=$(cat <<'EOF'
+    define format <<'EOF'
 [core]
         editor = %s
 EOF
-          )
     contents="$contents$(printf "$format" "$editor")"$'\n'
 fi
 

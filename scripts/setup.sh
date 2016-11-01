@@ -33,6 +33,14 @@ handle_error() {
 
 trap handle_error EXIT
 
+### Define helper functions ###
+
+define() {
+    IFS='' read -r -d '' $1 || true
+}
+
+export -f define
+
 ### Compute features ###
 
 specs=(

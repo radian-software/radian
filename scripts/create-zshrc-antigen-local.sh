@@ -5,7 +5,7 @@ set -o pipefail
 
 echo "[create-zshrc-antigen-local] Setting up .zshrc.antigen.local."
 
-contents=$(cat <<'EOF'
+define contents <<'EOF'
 #!/usr/bin/env zsh
 # This file is run just after the bundle list is defined in .zshrc, but just
 # before bundles are loaded. This means you can customize the bundle list.
@@ -21,7 +21,6 @@ contents=$(cat <<'EOF'
 #
 # add_bundle "robbyrussell/oh-my-zsh plugins/ruby"
 EOF
-        )
 contents="$contents"$'\n'
 
 echo "[create-zshrc-antigen-local] You can use the default bundle list, or customize it."

@@ -14,7 +14,7 @@ else
     configure=false
 fi
 
-contents=$(cat <<'EOF'
+define contents <<'EOF'
 #!/usr/bin/env zsh
 # This file is run at the very beginning of .zshrc. This is the best
 # place to override the various parameters shown below. If a new
@@ -22,7 +22,6 @@ contents=$(cat <<'EOF'
 # to get it to show up here. Or, you can just add the 'export' line
 # yourself.
 EOF
-        )
 contents="$contents"$'\n'
 collected_comments=
 while read -u 10 line; do
