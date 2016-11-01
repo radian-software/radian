@@ -50,15 +50,15 @@ contents=
 
 define format <<'EOF'
 [user]
-        name = %s
-        email = %s
+	name = %s
+	email = %s
 EOF
 contents="$contents$(printf "$format" "$name" "$email")"$'\n'
 
 if [[ $editor ]]; then
     define format <<'EOF'
 [core]
-        editor = %s
+	editor = %s
 EOF
     contents="$contents$(printf "$format" "$editor")"$'\n'
 fi
