@@ -687,6 +687,10 @@ Lisp function does not specify a special indentation."
 ;; Tell use-package to always install missing packages if necessary.
 (setq use-package-always-ensure t)
 
+;; Tell use-package to always load packages lazily unless told
+;; otherwise.
+(setq use-package-always-defer t)
+
 ;; Add an advice to `use-package' to make it so that disabled packages
 ;; are not loaded. See the docstring for more information.
 
@@ -758,14 +762,12 @@ following :dependencies to be enabled."
 
 ;; Sorts M-x completions by usage.
 (use-package smex
-  :defer t
   :bind (;; Use smex for M-x.
          ("M-x" . smex)))
 
 ;; Provides an enhanced version of smex that uses Helm for completion.
 (use-package helm-smex
   :dependencies (helm smex)
-  :defer t
   :bind (;; Use helm-smex for M-x.
          ("M-x" . helm-smex)))
 
@@ -774,16 +776,14 @@ following :dependencies to be enabled."
 
 ;; Provides an easy way to change the display of minor modes in the
 ;; mode line.
-(use-package diminish
-  :defer t)
+(use-package diminish)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Window management
 
 ;; Provides simple commands to mirror, rotate, and transpose Emacs
 ;; windows.
-(use-package transpose-frame
-  :defer t)
+(use-package transpose-frame)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Text editing
@@ -791,7 +791,6 @@ following :dependencies to be enabled."
 ;; Keeps parentheses balanced at all times, and provides structural
 ;; navigation and editing commands for s-expressions.
 (use-package paredit
-  :defer t
   :init
 
   ;; Enable Paredit when editing Lisps and using Lisp REPLs.
@@ -972,7 +971,6 @@ following :dependencies to be enabled."
 ;; templates. This is used by clj-refactor for some of its
 ;; refactorings.
 (use-package yasnippet
-  :defer t
   :diminish yas-minor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -995,7 +993,6 @@ following :dependencies to be enabled."
 ;; Allows you to jump to any particular occurrence of a character
 ;; visible on-screen.
 (use-package ace-jump-mode
-  :defer t
   :bind (;; Create a keybinding for ace-jump-mode. Clojure mode already binds
          ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
          ;; C-c C-SPC instead.
@@ -1006,7 +1003,6 @@ following :dependencies to be enabled."
 
 ;; Provides indentation and syntax highlighting for Clojure code.
 (use-package clojure-mode
-  :defer t
   :config
 
   ;;; Customize indentation like this:
@@ -1102,7 +1098,6 @@ following :dependencies to be enabled."
 ;; documentation and source lookups, among many other features.
 (use-package cider
   :dependencies (clojure-mode)
-  :defer t
   :config
 
   ;; By default, any error messages that occur when CIDER is starting
@@ -1187,7 +1182,6 @@ following :dependencies to be enabled."
 ;; automated refactoring tools.
 (use-package clj-refactor
   :dependencies (clojure-mode cider yasnippet)
-  :defer t
   :init
 
   ;; Enable clj-refactor in Clojure buffers. This is taken directly from
@@ -1207,22 +1201,19 @@ following :dependencies to be enabled."
 
 ;; Provides Racket REPL integration, including documentation and
 ;; source lookups. Basically CIDER for Racket.
-(use-package geiser
-  :defer t)
+(use-package geiser)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
 
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; Markdown files.
-(use-package markdown-mode
-  :defer t)
+(use-package markdown-mode)
 
 ;; Provides the `markdown-toc-generate-toc' command to generate a
 ;; table of contents for a Markdown file.
 (use-package markdown-toc
   :dependencies (markdown-mode)
-  :defer t
   :config
 
   ;; Remove the header inserted before the table of contents. If you want a
