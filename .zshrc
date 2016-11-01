@@ -17,7 +17,6 @@ antigen use oh-my-zsh
 # create-zshrc-antigen-local.sh.
 bundles=(
     autojump # Use 'j' to jump to frequent directories with fuzzy-matching
-    brew # Completion for brew
     git # Aliases for git
     lein # Completion for lein
     osx # Interop with OSX and iTunes
