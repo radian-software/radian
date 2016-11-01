@@ -691,7 +691,7 @@ Lisp function does not specify a special indentation."
 (radian-load-user-config "init.post.local.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Helm (and helm-projectile and helm-smex)
+;;;; Packages: Helm
 
 ;; Provides a general-purpose completion and narrowing mechanism, and
 ;; enhanced versions of many standard Emacs commands that use it.
@@ -755,7 +755,7 @@ Lisp function does not specify a special indentation."
          ("M-x" . helm-smex)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Diminish
+;;;; Packages: User interface
 
 ;; Provides an easy way to change the display of minor modes in the
 ;; mode line.
@@ -764,7 +764,7 @@ Lisp function does not specify a special indentation."
   :defer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Transpose Frame
+;;;; Packages: Window management
 
 ;; Provides simple commands to mirror, rotate, and transpose Emacs
 ;; windows.
@@ -773,25 +773,47 @@ Lisp function does not specify a special indentation."
   :defer t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Projectile
+;;;; Packages: Text editing
 
-;; Provides commands to quickly navigate within and between
-;; "projects".
-(use-package projectile
-  :if (radian-package-enabled-p 'projectile)
+;; Keeps parentheses balanced at all times, and provides structural
+;; navigation and editing commands for s-expressions.
+(use-package paredit
+  :if (radian-package-enabled-p 'paredit)
+  :defer t
+  :init
+
+  ;; Enable Paredit when editing Lisps and using Lisp REPLs.
+
+  (dolist (hook '(emacs-lisp-mode-hook
+                  lisp-interaction-mode-hook
+                  scheme-mode-hook))
+    (add-hook hook 'enable-paredit-mode))
+
+  (when (radian-package-enabled-p 'clojure-mode)
+    (add-hook 'clojure-mode-hook 'enable-paredit-mode))
+
+  (when (radian-package-enabled-p 'cider)
+    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
+
+  (when (radian-package-enabled-p 'geiser)
+    (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
+
+;; Keeps indentation correct at all times.
+(use-package aggressive-indent
+  :if (radian-package-enabled-p 'aggressive-indent)
   :demand t
   :config
 
-  ;; Enable Projectile everywhere.
-  (projectile-global-mode 1)
+  ;; Enable Aggressive Indent everywhere, except the modes in
+  ;; `aggressive-indent-excluded-modes'.
+  (global-aggressive-indent-mode 1)
 
-  ;; Don't show Projectile in the mode line. (Radian already adds a
-  ;; custom indicator for the current project, so there's no need to
-  ;; show the mode separately.)
-  (setq projectile-mode-line nil))
+  ;; Disable Aggressive Indent in Re-Builder mode. I don't think it
+  ;; does anything in this mode, and it shadows the C-c C-q binding
+  ;; provided by Re-Builder (so you can't quit!).
+  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Undo Tree
+  :diminish (aggressive-indent-mode . "AggrIndent"))
 
 ;; Provides undo/redo commands that are both more intuitive and more
 ;; powerful than the Emacs defaults. Allows you to visualize the
@@ -822,336 +844,6 @@ Lisp function does not specify a special indentation."
          ;; logical to also bind M-/ to `undo-tree-redo'. This overrides the
          ;; default binding of M-/, which is to `dabbrev-expand'.
          ("M-/" . undo-tree-redo)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: ace-jump-mode
-
-;; Allows you to jump to any particular occurrence of a character
-;; visible on-screen.
-(use-package ace-jump-mode
-  :if (radian-package-enabled-p 'ace-jump-mode)
-  :defer t
-  :bind (;; Create a keybinding for ace-jump-mode. Clojure mode already binds
-         ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
-         ;; C-c C-SPC instead.
-         ("C-C C-SPC" . ace-jump-mode)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Aggressive Indent
-
-;; Keeps indentation correct at all times.
-(use-package aggressive-indent
-  :if (radian-package-enabled-p 'aggressive-indent)
-  :demand t
-  :config
-
-  ;; Enable Aggressive Indent everywhere, except the modes in
-  ;; `aggressive-indent-excluded-modes'.
-  (global-aggressive-indent-mode 1)
-
-  ;; Disable Aggressive Indent in Re-Builder mode. I don't think it
-  ;; does anything in this mode, and it shadows the C-c C-q binding
-  ;; provided by Re-Builder (so you can't quit!).
-  (add-to-list 'aggressive-indent-excluded-modes 'reb-mode)
-
-  :diminish (aggressive-indent-mode . "AggrIndent"))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Paredit
-
-;; Keeps parentheses balanced at all times, and provides structural
-;; navigation and editing commands for s-expressions.
-(use-package paredit
-  :if (radian-package-enabled-p 'paredit)
-  :defer t
-  :init
-
-  ;; Enable Paredit when editing Lisps and using Lisp REPLs.
-
-  (dolist (hook '(emacs-lisp-mode-hook
-                  lisp-interaction-mode-hook
-                  scheme-mode-hook))
-    (add-hook hook 'enable-paredit-mode))
-
-  (when (radian-package-enabled-p 'clojure-mode)
-    (add-hook 'clojure-mode-hook 'enable-paredit-mode))
-
-  (when (radian-package-enabled-p 'cider)
-    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
-
-  (when (radian-package-enabled-p 'geiser)
-    (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: clojure-mode
-
-;; Provides indentation and syntax highlighting for Clojure code.
-(use-package clojure-mode
-  :if (radian-package-enabled-p 'clojure-mode)
-  :defer t
-  :config
-
-  ;;; Customize indentation like this:
-  ;;;
-  ;;; (some-function
-  ;;;   argument
-  ;;;   argument)
-  ;;;
-  ;;; (some-function argument
-  ;;;                argument)
-  ;;;
-  ;;; (-> foo
-  ;;;   thread
-  ;;;   thread)
-  ;;;
-  ;;; (->> foo
-  ;;;   thread
-  ;;;   thread)
-  ;;;
-  ;;; (:keyword
-  ;;;   map)
-
-  (setq clojure-indent-style ':align-arguments)
-
-  ;; We can't use define-clojure-indent here, due to a perverse
-  ;; threefold conspiracy perpetrated by dash.el, recursive
-  ;; macroexpansion, and the Gilardi scenario. See [1].
-  ;;
-  ;; Ideally, we would be able to set the identation rules for
-  ;; *all* keywords at the same time. But until we figure out how
-  ;; to do that, we just have to deal with every keyword
-  ;; individually. See issue #26.
-  ;;
-  ;; [1]: http://emacs.stackexchange.com/q/26261/12534
-  (dolist (spec '((-> 1)
-                  (->> 1)
-                  (:import 0)
-                  (:overall-average 0)
-                  (:require 0)
-                  (:use 0)))
-    (put-clojure-indent (car spec) (cdr spec)))
-
-  ;; clojure-mode does not correctly identify the docstrings of
-  ;; protocol methods as docstrings, and as such electric
-  ;; indentation does not work for them. Additionally, when you
-  ;; hack a clojure.core function, such as defonce or defrecord,
-  ;; to provide docstring functionality, those docstrings are
-  ;; (perhaps rightly, but annoyingly) not recognized as
-  ;; docstrings either. However, there is an easy way to get
-  ;; electric indentation working for all potential docstrings:
-  ;; simply tell clojure-mode that *all* strings are docstrings.
-  ;; This will not change the font locking, because for some weird
-  ;; reason clojure-mode determines whether you're in a docstring
-  ;; by the font color instead of the other way around. Note that
-  ;; this will cause electric indentation by two spaces in *all*
-  ;; multiline strings, but since there are not very many
-  ;; non-docstring multiline strings in Clojure this is not too
-  ;; inconvenient. (And, after all, it's only electric, not
-  ;; aggressive, indentation.)
-
-  ;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
-  ;; so we can't override it. Instead, we replace clojure-indent-line.
-
-  (defun radian-clojure-in-docstring-p ()
-    "Check whether point is in a docstring."
-    (or
-     (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-     (eq (get-text-property (point) 'face) 'font-lock-string-face)))
-
-  (defun clojure-indent-line ()
-    "Indent current line as Clojure code."
-    (if (radian-clojure-in-docstring-p)
-        (save-excursion
-          (beginning-of-line)
-          (when (and (looking-at "^\\s-*")
-                     (<= (string-width (match-string-no-properties 0))
-                         (string-width (clojure-docstring-fill-prefix))))
-            (replace-match (clojure-docstring-fill-prefix))))
-      (lisp-indent-line)))
-
-  :bind (;; Make sure electric indentation *always* works. For some
-         ;; reason, if this is omitted, electric indentation works most
-         ;; of the time, but it fails inside Clojure docstrings. (TAB
-         ;; will add the requisite two spaces, but you shouldn't have to
-         ;; do this manually after pressing RET.) I'd like to find a more
-         ;; elegant solution to this problem. See issue #2.
-         ;;
-         ;; <return> is for windowed Emacs; RET is for terminal Emacs.
-         :map clojure-mode-map
-         ("<return>" . newline-and-indent)
-         ("RET" . newline-and-indent)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: CIDER
-
-;; Provides Clojure and ClojureScript REPL integration, including
-;; documentation and source lookups, among many other features.
-(use-package cider
-  :if (radian-package-enabled-p 'clojure-mode 'cider)
-  :defer t
-  :config
-
-  ;; By default, any error messages that occur when CIDER is starting
-  ;; up are placed in the *nrepl-server* buffer and not in the
-  ;; *cider-repl* buffer. This is silly, since no-one wants to check
-  ;; *nrepl-server* every time they start a REPL, and if you don't
-  ;; then startup errors (including errors in anything loaded by the
-  ;; :main namespace) are effectively silenced. So we copy everything
-  ;; from the *nrepl-server* buffer to the *cider-repl* buffer, as
-  ;; soon as the latter is available.
-
-  ;; Note that this does *not* help in the case of things going so
-  ;; horribly wrong that the REPL can't even start. In this case you
-  ;; will have to check the *nrepl-server* buffer manually. Perhaps an
-  ;; error message that is visible from any buffer could be added in
-  ;; future.
-
-  ;; Thanks to malabarba on Clojurians Slack for providing the
-  ;; following code:
-
-  (add-hook 'cider-connected-hook
-            (lambda ()
-              (save-excursion
-                (goto-char (point-min))
-                (insert
-                 (with-current-buffer nrepl-server-buffer
-                   (buffer-string))))))
-
-  ;; Make the REPL a lot more awesome. This injects a bunch of extra
-  ;; features specified by the :awesome vector in profiles.clj. Note
-  ;; that refactor-nrepl is *not* enabled by default.
-  (setq cider-lein-parameters "with-profile +awesome repl :headless")
-
-  ;; The CIDER welcome message often obscures any error messages that
-  ;; the above code is supposed to be making visible. So, we need to
-  ;; turn off the welcome message.
-  (setq cider-repl-display-help-banner nil)
-
-  ;; Sometimes in the CIDER REPL, when Emacs is running slowly, you
-  ;; can manage to press TAB before the Company completions menu pops
-  ;; up. This makes a Helm completions buffer appear, which is
-  ;; disorienting. So we reset TAB to its default functionality (i.e.
-  ;; indent only) in the CIDER REPL.
-  (setq cider-repl-tab-command 'indent-for-tab-command)
-
-  ;; Don't focus the cursor in the CIDER REPL once it starts. Since
-  ;; the REPL takes so long to start up, especially for large
-  ;; projects, you either have to wait for a minute without doing
-  ;; anything or be prepared for your cursur to suddenly shift buffers
-  ;; without warning sometime in the near future. This is annoying, so
-  ;; turn off the behavior.
-  (setq cider-repl-pop-to-buffer-on-connect nil)
-
-  ;; However, turning off the pop-to-buffer setting also prevents the
-  ;; REPL buffer from *opening*. To fix this problem, we add an advice
-  ;; to open the REPL buffer after the REPL has started.
-  (defadvice cider-repl-init (after display-repl-buffer)
-    (display-buffer buffer))
-
-  ;; Use figwheel-sidecar for launching ClojureScript REPLs. This
-  ;; supports a fully integrated ClojureScript development experience
-  ;; in Emacs. For more information about how to use such a setup,
-  ;; see [1].
-  ;;
-  ;; [1]: https://github.com/raxod502/minimal-webapp
-  (setq cider-cljs-lein-repl
-        "(do
-  (require 'figwheel-sidecar.repl-api)
-  (figwheel-sidecar.repl-api/start-figwheel!)
-  (figwheel-sidecar.repl-api/cljs-repl))")
-
-  ;; Don't show CIDER in the mode line.
-  (setq cider-mode-line nil)
-
-  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
-         ("C-c M-j" . cider-jack-in)
-         ("C-c M-J" . cider-jack-in-clojurescript)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: clj-refactor
-
-;; Makes Emacs into a real Clojure IDE by providing a mountain of
-;; automated refactoring tools.
-(use-package clj-refactor
-  :if (radian-package-enabled-p 'clojure-mode 'cider 'yasnippet 'clj-refactor)
-  :defer t
-  :init
-
-  ;; Enable clj-refactor in Clojure buffers. This is taken directly from
-  ;; the clj-refactor README [1].
-  ;;
-  ;; [1]: https://github.com/clojure-emacs/clj-refactor.el
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (clj-refactor-mode 1)
-              (yas-minor-mode 1)
-              (cljr-add-keybindings-with-prefix "C-c RET")))
-
-  :diminish clj-refactor-mode)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: git-commit
-
-;; Allows editing Git commit messages from the command line (i.e. with
-;; emacs or emacsclient as your core.editor).
-(use-package git-commit
-  :if (radian-package-enabled-p 'git-commit)
-  :demand t
-  :config
-
-  ;; Enable the functionality of the git-commit package. This should
-  ;; be enabled by default for emacsclient, but we need to turn it on
-  ;; explicitly for regular Emacs.
-  (global-git-commit-mode 1)
-
-  ;; Wrap summary at 50 characters as per [1].
-  ;;
-  ;; [1]: http://chris.beams.io/posts/git-commit/
-  (setq git-commit-summary-max-length 50))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Geiser
-
-;; Provides Racket REPL integration, including documentation and
-;; source lookups. Basically CIDER for Racket.
-(use-package geiser
-  :if (radian-package-enabled-p 'geiser)
-  :defer t)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: markdown-mode
-
-;; Provides syntax highlighting, indentation, and editing commands for
-;; Markdown files.
-(use-package markdown-mode
-  :if (radian-package-enabled-p 'markdown-mode)
-  :defer t)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: markdown-toc
-
-;; Provides the `markdown-toc-generate-toc' command to generate a
-;; table of contents for a Markdown file.
-(use-package markdown-toc
-  :if (radian-package-enabled-p 'markdown-mode 'markdown-toc)
-  :defer t
-  :config
-
-  ;; Remove the header inserted before the table of contents. If you want a
-  ;; header, just add one before the "markdown-toc start" comment -- this way,
-  ;; you can have different header styles in different documents.
-  (setq markdown-toc-header-toc-title ""))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Company (and company-statistics)
-
-;; Note that Company must be enabled very late during initialization,
-;; because the hook it adds to `after-change-functions' can get messed
-;; up if other modes add hooks later. Notably, this can happen with
-;; `aggressive-indent-mode' and `clj-refactor-mode'. See [1] for an
-;; example.
-;;
-;; [1]: https://github.com/Malabarba/aggressive-indent-mode/issues/61
 
 ;; Provides a powerful autocomplete mechanism that integrates with
 ;; many different sources of completions.
@@ -1269,9 +961,6 @@ Lisp function does not specify a special indentation."
   ;; Enable Company Statistics.
   (company-statistics-mode 1))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Package: Yasnippet
-
 ;; Allows the expansion of user-defined abbreviations into fillable
 ;; templates. This is used by clj-refactor for some of its
 ;; refactorings.
@@ -1279,6 +968,285 @@ Lisp function does not specify a special indentation."
   :if (radian-package-enabled-p 'yasnippet)
   :defer t
   :diminish yas-minor-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: navigation
+
+;; Provides commands to quickly navigate within and between
+;; "projects".
+(use-package projectile
+  :if (radian-package-enabled-p 'projectile)
+  :demand t
+  :config
+
+  ;; Enable Projectile everywhere.
+  (projectile-global-mode 1)
+
+  ;; Don't show Projectile in the mode line. (Radian already adds a
+  ;; custom indicator for the current project, so there's no need to
+  ;; show the mode separately.)
+  (setq projectile-mode-line nil))
+
+;; Allows you to jump to any particular occurrence of a character
+;; visible on-screen.
+(use-package ace-jump-mode
+  :if (radian-package-enabled-p 'ace-jump-mode)
+  :defer t
+  :bind (;; Create a keybinding for ace-jump-mode. Clojure mode already binds
+         ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
+         ;; C-c C-SPC instead.
+         ("C-C C-SPC" . ace-jump-mode)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Clojure
+
+;; Provides indentation and syntax highlighting for Clojure code.
+(use-package clojure-mode
+  :if (radian-package-enabled-p 'clojure-mode)
+  :defer t
+  :config
+
+  ;;; Customize indentation like this:
+  ;;;
+  ;;; (some-function
+  ;;;   argument
+  ;;;   argument)
+  ;;;
+  ;;; (some-function argument
+  ;;;                argument)
+  ;;;
+  ;;; (-> foo
+  ;;;   thread
+  ;;;   thread)
+  ;;;
+  ;;; (->> foo
+  ;;;   thread
+  ;;;   thread)
+  ;;;
+  ;;; (:keyword
+  ;;;   map)
+
+  (setq clojure-indent-style ':align-arguments)
+
+  ;; We can't use define-clojure-indent here, due to a perverse
+  ;; threefold conspiracy perpetrated by dash.el, recursive
+  ;; macroexpansion, and the Gilardi scenario. See [1].
+  ;;
+  ;; Ideally, we would be able to set the identation rules for
+  ;; *all* keywords at the same time. But until we figure out how
+  ;; to do that, we just have to deal with every keyword
+  ;; individually. See issue #26.
+  ;;
+  ;; [1]: http://emacs.stackexchange.com/q/26261/12534
+  (dolist (spec '((-> 1)
+                  (->> 1)
+                  (:import 0)
+                  (:overall-average 0)
+                  (:require 0)
+                  (:use 0)))
+    (put-clojure-indent (car spec) (cdr spec)))
+
+  ;; clojure-mode does not correctly identify the docstrings of
+  ;; protocol methods as docstrings, and as such electric
+  ;; indentation does not work for them. Additionally, when you
+  ;; hack a clojure.core function, such as defonce or defrecord,
+  ;; to provide docstring functionality, those docstrings are
+  ;; (perhaps rightly, but annoyingly) not recognized as
+  ;; docstrings either. However, there is an easy way to get
+  ;; electric indentation working for all potential docstrings:
+  ;; simply tell clojure-mode that *all* strings are docstrings.
+  ;; This will not change the font locking, because for some weird
+  ;; reason clojure-mode determines whether you're in a docstring
+  ;; by the font color instead of the other way around. Note that
+  ;; this will cause electric indentation by two spaces in *all*
+  ;; multiline strings, but since there are not very many
+  ;; non-docstring multiline strings in Clojure this is not too
+  ;; inconvenient. (And, after all, it's only electric, not
+  ;; aggressive, indentation.)
+
+  ;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
+  ;; so we can't override it. Instead, we replace clojure-indent-line.
+
+  (defun radian-clojure-in-docstring-p ()
+    "Check whether point is in a docstring."
+    (or
+     (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+     (eq (get-text-property (point) 'face) 'font-lock-string-face)))
+
+  (defun clojure-indent-line ()
+    "Indent current line as Clojure code."
+    (if (radian-clojure-in-docstring-p)
+        (save-excursion
+          (beginning-of-line)
+          (when (and (looking-at "^\\s-*")
+                     (<= (string-width (match-string-no-properties 0))
+                         (string-width (clojure-docstring-fill-prefix))))
+            (replace-match (clojure-docstring-fill-prefix))))
+      (lisp-indent-line)))
+
+  :bind (;; Make sure electric indentation *always* works. For some
+         ;; reason, if this is omitted, electric indentation works most
+         ;; of the time, but it fails inside Clojure docstrings. (TAB
+         ;; will add the requisite two spaces, but you shouldn't have to
+         ;; do this manually after pressing RET.) I'd like to find a more
+         ;; elegant solution to this problem. See issue #2.
+         ;;
+         ;; <return> is for windowed Emacs; RET is for terminal Emacs.
+         :map clojure-mode-map
+         ("<return>" . newline-and-indent)
+         ("RET" . newline-and-indent)))
+
+;; Provides Clojure and ClojureScript REPL integration, including
+;; documentation and source lookups, among many other features.
+(use-package cider
+  :if (radian-package-enabled-p 'clojure-mode 'cider)
+  :defer t
+  :config
+
+  ;; By default, any error messages that occur when CIDER is starting
+  ;; up are placed in the *nrepl-server* buffer and not in the
+  ;; *cider-repl* buffer. This is silly, since no-one wants to check
+  ;; *nrepl-server* every time they start a REPL, and if you don't
+  ;; then startup errors (including errors in anything loaded by the
+  ;; :main namespace) are effectively silenced. So we copy everything
+  ;; from the *nrepl-server* buffer to the *cider-repl* buffer, as
+  ;; soon as the latter is available.
+
+  ;; Note that this does *not* help in the case of things going so
+  ;; horribly wrong that the REPL can't even start. In this case you
+  ;; will have to check the *nrepl-server* buffer manually. Perhaps an
+  ;; error message that is visible from any buffer could be added in
+  ;; future.
+
+  ;; Thanks to malabarba on Clojurians Slack for providing the
+  ;; following code:
+
+  (add-hook 'cider-connected-hook
+            (lambda ()
+              (save-excursion
+                (goto-char (point-min))
+                (insert
+                 (with-current-buffer nrepl-server-buffer
+                   (buffer-string))))))
+
+  ;; Make the REPL a lot more awesome. This injects a bunch of extra
+  ;; features specified by the :awesome vector in profiles.clj. Note
+  ;; that refactor-nrepl is *not* enabled by default.
+  (setq cider-lein-parameters "with-profile +awesome repl :headless")
+
+  ;; The CIDER welcome message often obscures any error messages that
+  ;; the above code is supposed to be making visible. So, we need to
+  ;; turn off the welcome message.
+  (setq cider-repl-display-help-banner nil)
+
+  ;; Sometimes in the CIDER REPL, when Emacs is running slowly, you
+  ;; can manage to press TAB before the Company completions menu pops
+  ;; up. This makes a Helm completions buffer appear, which is
+  ;; disorienting. So we reset TAB to its default functionality (i.e.
+  ;; indent only) in the CIDER REPL.
+  (setq cider-repl-tab-command 'indent-for-tab-command)
+
+  ;; Don't focus the cursor in the CIDER REPL once it starts. Since
+  ;; the REPL takes so long to start up, especially for large
+  ;; projects, you either have to wait for a minute without doing
+  ;; anything or be prepared for your cursur to suddenly shift buffers
+  ;; without warning sometime in the near future. This is annoying, so
+  ;; turn off the behavior.
+  (setq cider-repl-pop-to-buffer-on-connect nil)
+
+  ;; However, turning off the pop-to-buffer setting also prevents the
+  ;; REPL buffer from *opening*. To fix this problem, we add an advice
+  ;; to open the REPL buffer after the REPL has started.
+  (defadvice cider-repl-init (after display-repl-buffer)
+    (display-buffer buffer))
+
+  ;; Use figwheel-sidecar for launching ClojureScript REPLs. This
+  ;; supports a fully integrated ClojureScript development experience
+  ;; in Emacs. For more information about how to use such a setup,
+  ;; see [1].
+  ;;
+  ;; [1]: https://github.com/raxod502/minimal-webapp
+  (setq cider-cljs-lein-repl
+        "(do
+  (require 'figwheel-sidecar.repl-api)
+  (figwheel-sidecar.repl-api/start-figwheel!)
+  (figwheel-sidecar.repl-api/cljs-repl))")
+
+  ;; Don't show CIDER in the mode line.
+  (setq cider-mode-line nil)
+
+  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
+         ("C-c M-j" . cider-jack-in)
+         ("C-c M-J" . cider-jack-in-clojurescript)))
+
+;; Makes Emacs into a real Clojure IDE by providing a mountain of
+;; automated refactoring tools.
+(use-package clj-refactor
+  :if (radian-package-enabled-p 'clojure-mode 'cider 'yasnippet 'clj-refactor)
+  :defer t
+  :init
+
+  ;; Enable clj-refactor in Clojure buffers. This is taken directly from
+  ;; the clj-refactor README [1].
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/clj-refactor.el
+  (add-hook 'clojure-mode-hook
+            (lambda ()
+              (clj-refactor-mode 1)
+              (yas-minor-mode 1)
+              (cljr-add-keybindings-with-prefix "C-c RET")))
+
+  :diminish clj-refactor-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Racket
+
+;; Provides Racket REPL integration, including documentation and
+;; source lookups. Basically CIDER for Racket.
+(use-package geiser
+  :if (radian-package-enabled-p 'geiser)
+  :defer t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Markdown
+
+;; Provides syntax highlighting, indentation, and editing commands for
+;; Markdown files.
+(use-package markdown-mode
+  :if (radian-package-enabled-p 'markdown-mode)
+  :defer t)
+
+;; Provides the `markdown-toc-generate-toc' command to generate a
+;; table of contents for a Markdown file.
+(use-package markdown-toc
+  :if (radian-package-enabled-p 'markdown-mode 'markdown-toc)
+  :defer t
+  :config
+
+  ;; Remove the header inserted before the table of contents. If you want a
+  ;; header, just add one before the "markdown-toc start" comment -- this way,
+  ;; you can have different header styles in different documents.
+  (setq markdown-toc-header-toc-title ""))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Version control
+
+;; Allows editing Git commit messages from the command line (i.e. with
+;; emacs or emacsclient as your core.editor).
+(use-package git-commit
+  :if (radian-package-enabled-p 'git-commit)
+  :demand t
+  :config
+
+  ;; Enable the functionality of the git-commit package. This should
+  ;; be enabled by default for emacsclient, but we need to turn it on
+  ;; explicitly for regular Emacs.
+  (global-git-commit-mode 1)
+
+  ;; Wrap summary at 50 characters as per [1].
+  ;;
+  ;; [1]: http://chris.beams.io/posts/git-commit/
+  (setq git-commit-summary-max-length 50))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Load packages added via deprecated API
