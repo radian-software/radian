@@ -21,7 +21,6 @@ define contents <<'EOF'
 #
 # add_bundle "robbyrussell/oh-my-zsh plugins/ruby"
 EOF
-contents="$contents"$'\n'
 
 echo "[create-zshrc-antigen-local] You can use the default bundle list, or customize it."
 echo "[create-zshrc-antigen-local] Either way, you can configure it later in .zshrc.antigen.local."
@@ -48,34 +47,56 @@ if (echo "$answer" | egrep -qi "^y"); then
     echo "[create-zshrc-antigen-local] Here is the default bundle list:"
     echo -n "$collected_bundles"
 
-    exclude_contents=
-    echo "[create-zshrc-antigen-local] If you want to exclude a bundle, enter its name now. Or, just press RET to continue."
-    while true; do
-        echo -n "[create-zshrc-antigen-local] Exclude bundle: "
-        read bundle
-        if [[ $bundle ]]; then
-            exclude_contents="${exclude_contents}remove_bundle \"$bundle\""$'\n'
-        else
-            break
-        fi
-    done
-    if [[ $exclude_contents ]]; then
-        contents="$contents"$'\n'"$exclude_contents"
-    fi
-
     include_contents=
     echo "[create-zshrc-antigen-local] If you want to include an additional bundle, enter its name now. Or, just press RET to continue."
     while true; do
         echo -n "[create-zshrc-antigen-local] Include bundle: "
         read bundle
         if [[ $bundle ]]; then
-            include_contents="${include_contents}add_bundle \"$bundle\""$'\n'
+            define format <<'EOF'
+add_bundle "%s"
+EOF
+            printf -v format "$format" "$bundle"
+            include_contents="$include_contents$format"
         else
             break
         fi
     done
     if [[ $include_contents ]]; then
-        contents="$contents"$'\n'"$include_contents"
+        # Strip the trailing newline from include_contents.
+        include_contents=$(echo "$include_contents")
+        define format <<'EOF'
+
+%s
+EOF
+        printf -v format "$format" "$include_contents"
+        contents="$contents$format"
+    fi
+
+    exclude_contents=
+    echo "[create-zshrc-antigen-local] If you want to exclude a bundle, enter its name now. Or, just press RET to continue."
+    while true; do
+        echo -n "[create-zshrc-antigen-local] Exclude bundle: "
+        read bundle
+        if [[ $bundle ]]; then
+            define format <<'EOF'
+remove_bundle "%s"
+EOF
+            printf -v format "$format" "$bundle"
+            exclude_contents="$exclude_contents$format"
+        else
+            break
+        fi
+    done
+    if [[ $exclude_contents ]]; then
+        # Strip the trailing newline from exclude_contents.
+        exclude_contents=$(echo "$exclude_contents")
+        define format <<'EOF'
+
+%s
+EOF
+        printf -v format "$format" "$exclude_contents"
+        contents="$contents$format"
     fi
 
 fi

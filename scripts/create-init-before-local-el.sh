@@ -36,8 +36,8 @@ define contents <<'EOF'
 ;;; however, here is how you can disable Aggressive Indent:
 ;;;
 ;;; (radian-disable-package 'aggressive-indent)
+
 EOF
-contents="$contents"$'\n'
 
 echo "[create-init-before-local-el] Radian Emacs includes a number of packages by default."
 echo "[create-init-before-local-el] You can configure this list or leave it at the default for now."
@@ -53,18 +53,28 @@ is_anything_disabled=false
 collected_comments=
 while read -u 10 line; do
     if [[ $line == \;\;* ]]; then
-        collected_comments="$collected_comments$line"$'\n'
+        define format <<'EOF'
+%s
+EOF
+        printf -v format "$format" "$line"
+        collected_comments="$collected_comments$format"
     else
         if (echo "$line" | egrep -q "^\\(use-package"); then
+            # Strip the trailing newline from collected_comments.
+            collected_comments=$(echo "$collected_comments")
             package=${line#"(use-package "}
             package=${package%")"}
             if [[ $configure == true ]]; then
                 echo "Package: $package"
-                echo -n "$collected_comments"
+                echo "$collected_comments"
                 echo -n "[create-init-before-local-el] Include this package? (y/n) "
                 read answer
                 if ! (echo "$answer" | egrep -qi "^y"); then
-                    contents="$contents(radian-disable-package '$package)"$'\n'
+                    define format <<'EOF'
+(radian-disable-package '%s)
+EOF
+                    printf -v format "$format" "$package"
+                    contents="$contents$format"
                     is_anything_disabled=true
                 fi
             fi
@@ -74,7 +84,10 @@ while read -u 10 line; do
 done 10<../init.el
 
 if [[ $is_anything_disabled == false ]]; then
-    contents="$contents"$'\n'
+    define format <<'EOF'
+
+EOF
+    contents="$contents$format"
 fi
 
 echo "[create-init-before-local-el] There are a number of configurable parameters."
@@ -90,24 +103,41 @@ fi
 collected_comments=
 while read -u 10 line; do
     if [[ $line == \;\;* ]]; then
-        collected_comments="$collected_comments$line"$'\n'
+        define format <<'EOF'
+%s
+EOF
+        printf -v format "$format" "$line"
+        collected_comments="$collected_comments$format"
     elif (echo "$line" | egrep -q "\\(defvar radian-customize-[a-z-]+ nil\\)"); then
         variable=$(echo "$line" | egrep -o "radian-customize-[a-z-]+" | head -n 1)
     else
         if [[ $variable ]]; then
+            # Strip the trailing newline from collected_comments.
+            collected_comments=$(echo "$collected_comments")
             value=
             if [[ $configure == true ]] && ! (echo "$collected_comments" | fgrep -qi "manual configuration only"); then
-                echo -n "$collected_comments"
+                echo "$collected_comments"
                 echo "$line"
                 echo "[create-init-before-local-el] You can enter a new value to override the default shown above. Be sure to quote symbols."
                 echo -n "[create-init-before-local-el] Enter new value or leave blank to use default: "
                 read value
             fi
             if [[ $value ]]; then
-                contents="$contents"$'\n'"${collected_comments}(setq $variable $value)"$'\n'
+                define format <<'EOF'
+
+%s
+(setq %s %s)
+EOF
+                printf -v format "$format" "$collected_comments" "$variable" "$value"
             else
-                contents="$contents"$'\n'"${collected_comments}$line"$'\n'
+                define format <<'EOF'
+
+%s
+%s
+EOF
+                printf -v format "$format" "$collected_comments" "$line"
             fi
+            contents="$contents$format"
             variable=
         fi
         collected_comments=

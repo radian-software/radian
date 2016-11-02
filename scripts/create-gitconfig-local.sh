@@ -53,14 +53,16 @@ define format <<'EOF'
 	name = %s
 	email = %s
 EOF
-contents="$contents$(printf "$format" "$name" "$email")"$'\n'
+printf -v format "$format" "$name" "$email"
+contents="$contents$format"
 
 if [[ $editor ]]; then
     define format <<'EOF'
 [core]
 	editor = %s
 EOF
-    contents="$contents$(printf "$format" "$editor")"$'\n'
+    printf -v format "$format" "$editor"
+    contents="$contents$format"
 fi
 
 echo -n "$contents" > ../../radian-local/.gitconfig.local
