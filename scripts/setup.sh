@@ -75,9 +75,6 @@ repo_name="$(basename "$PWD")"
 
 source create-radian-local.sh
 
-./ensure-symlinked.sh ~/.radian ..
-./ensure-symlinked.sh ~/.radian-local ../../radian-local
-
 ### Warn the user of upcoming awesomeness ###
 
 echo "[setup] Setting up Radian. Prepare to be amazed."
@@ -94,6 +91,11 @@ fi
 if feature wget; then
     ./ensure-installed.sh wget
 fi
+
+### Radian symlinks ###
+
+./ensure-symlinked.sh ~/.radian ..
+./ensure-symlinked.sh ~/.radian-local ../../radian-local
 
 ### Git ###
 

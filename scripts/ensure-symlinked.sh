@@ -122,7 +122,7 @@ if [[ $real ]]; then
             echo "[ensure-symlinked] $link does not exist, and needs to be created."
         fi
         echo "[ensure-symlinked] Creating symlink from $link to $real."
-        ln -s "$real" "$link"
+        ln -s "$(grealpath "$real")" "$(grealpath "$link")"
     fi
 else
     if [[ -e $link || -L $link ]]; then
