@@ -122,7 +122,8 @@ if [[ $radian_mux_alias != false ]]; then
     alias mux=tmuxinator
 fi
 
-# Aliases for copying, pasting, and moving files in multiple steps.
+# Aliases for copying, pasting, moving, and linking files in multiple
+# steps.
 if [[ $radian_copy_paste_aliases != false ]]; then
     copy() {
         RADIAN_COPY_TARGETS=()
@@ -135,6 +136,9 @@ if [[ $radian_copy_paste_aliases != false ]]; then
     }
     move() {
         mv $RADIAN_COPY_TARGETS ${1:-.}
+    }
+    pasteln() {
+        ln -s $RADIAN_COPY_TARGETS ${1:-.}
     }
 fi
 
