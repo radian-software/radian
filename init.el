@@ -1105,7 +1105,7 @@ following :dependencies to be enabled."
   :diminish yas-minor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Packages: navigation
+;;;; Packages: Navigation
 
 ;; Provides commands to quickly navigate within and between
 ;; "projects".
