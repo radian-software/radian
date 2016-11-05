@@ -159,7 +159,11 @@ if [[ $radian_copy_paste_aliases != false ]]; then
     copy() {
         RADIAN_COPY_TARGETS=()
         for target; do
-            RADIAN_COPY_TARGETS+=($PWD/$target)
+            if [[ $target == /* ]]; then
+                RADIAN_COPY_TARGETS+=($target)
+            else
+                RADIAN_COPY_TARGETS+=($PWD/$target)
+            fi
         done
     }
     paste() {
