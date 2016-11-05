@@ -99,18 +99,49 @@ fi
 
 # Use 'source' or '.' with no arguments to reload .zshrc.
 if [[ $radian_source_and_dot_aliases != false ]]; then
+    # Normally, "source" and "." require at least one argument, which
+    # is the file to be sourced. However, if you provide additional
+    # arguments, then they are passed to the file you are sourcing, as
+    # command-line arguments in $@.
+    #
+    # There appears to be an interesting edge case, however, that will
+    # cause the following functions to misbehave if they are not
+    # implemented carefullly. If you provide only one argument to
+    # "source" (or "."), i.e. you specify a file to be sourced but you
+    # do not want any arguments to be passed when that file is
+    # sourced, and you are calling "source" from within a function
+    # (like the ones below), then the arguments to the function will
+    # transparently be passed through to the file being sourced!
+    #
+    # This edge case shows up when the following functions are called
+    # with exactly one argument (the file to be sourced), and it
+    # causes that filename to be passed as a command-line argument to
+    # the file being sourced. To avoid this behavior (which tends to
+    # cause obscure errors that are hard to track down), we have to
+    # remove the filename from the list of arguments passed to the
+    # function, and pass it separately to "source" or ".". That way,
+    # the filename is no longer in $@, so it's no longer pass through
+    # to the file being sourced.
+    #
+    # Note, by the way, that prefixing a command with a backslash
+    # prevents it from being interpreted as an alias. This prevents
+    # infinite recursion!
     source_zshrc_or_args() {
         if [[ $# == 0 ]]; then
             \source ~/.zshrc
         else
-            \source "$@"
+            radian_filename=$1
+            shift
+            \source $radian_filename $@
         fi
     }
     dot_zshrc_or_args() {
         if [[ $# == 0 ]]; then
             \. ~/.zshrc
         else
-            \. "$@"
+            radian_filename=$1
+            shift
+            \. $radian_filename $@
         fi
     }
     alias source=source_zshrc_or_args
