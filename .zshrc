@@ -3,6 +3,40 @@ if [[ -f ~/.zshrc.before.local ]]; then
     source ~/.zshrc.before.local
 fi
 
+# Provide backwards compatibility for old parameter names.
+
+if [[ $radian_colored_man_pages ]]; then
+    export RADIAN_CUSTOMIZE_COLORED_MAN_PAGES=$radian_colored_man_pages
+fi
+
+if [[ $radian_customize_prompt ]]; then
+    export RADIAN_CUSTOMIZE_PROMPT=$radian_customize_prompt
+fi
+
+if [[ $radian_resource_alias ]]; then
+    export RADIAN_CUSTOMIZE_RESOURCE_ALIAS=$radian_resource_alias
+fi
+
+if [[ $radian_source_and_dot_aliases ]]; then
+    export RADIAN_CUSTOMIZE_SOURCE_AND_DOT_ALIASES=$radian_source_and_dot_aliases
+fi
+
+if [[ $radian_mux_alias ]]; then
+    export RADIAN_CUSTOMIZE_MUX_ALIAS=$radian_mux_alias
+fi
+
+if [[ $radian_copy_paste_aliases ]]; then
+    export RADIAN_CUSTOMIZE_COPY_PASTE_ALIASES=$radian_copy_paste_aliases
+fi
+
+if [[ $radian_delink_alias ]]; then
+    export RADIAN_CUSTOMIZE_DELINK_ALIAS=$radian_delink_alias
+fi
+
+if [[ $radian_proj_alias ]]; then
+    export RADIAN_CUSTOMIZE_PROJ_ALIAS=$radian_proj_alias
+fi
+
 ### Antigen ###
 
 # Load Antigen.
@@ -71,7 +105,7 @@ autoload run-help
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/colored-man-pages/colored-man-pages.plugin.zsh
 # However, this version eliminates the horrid grey-on-blue highlighting
 # for search matches.
-if [[ $radian_colored_man_pages != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_COLORED_MAN_PAGES != false ]]; then
     man() {
         env \
 	    LESS_TERMCAP_mb=$(printf "\e[1;31m") \
@@ -84,7 +118,7 @@ if [[ $radian_colored_man_pages != false ]]; then
 fi
 
 # Better prompt (like oh-my-zsh/mgutz, but turns red on nonzero exit code).
-if [[ $radian_customize_prompt != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_PROMPT != false ]]; then
     PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(git_prompt_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
     ZSH_THEME_GIT_PROMPT_PREFIX="["
     ZSH_THEME_GIT_PROMPT_SUFFIX=
@@ -93,12 +127,12 @@ if [[ $radian_customize_prompt != false ]]; then
 fi
 
 # Use 'resource' to reload .zshrc.
-if [[ $radian_resource_alias != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_RESOURCE_ALIAS != false ]]; then
     alias resource="source ~/.zshrc"
 fi
 
 # Use 'source' or '.' with no arguments to reload .zshrc.
-if [[ $radian_source_and_dot_aliases != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_SOURCE_AND_DOT_ALIASES != false ]]; then
     # Normally, "source" and "." require at least one argument, which
     # is the file to be sourced. However, if you provide additional
     # arguments, then they are passed to the file you are sourcing, as
@@ -149,13 +183,13 @@ if [[ $radian_source_and_dot_aliases != false ]]; then
 fi
 
 # Alias for tmuxinator.
-if [[ $radian_mux_alias != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_MUX_ALIAS != false ]]; then
     alias mux=tmuxinator
 fi
 
 # Aliases for copying, pasting, moving, and linking files in multiple
 # steps.
-if [[ $radian_copy_paste_aliases != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_COPY_PASTE_ALIASES != false ]]; then
     copy() {
         RADIAN_COPY_TARGETS=()
         for target; do
@@ -178,7 +212,7 @@ if [[ $radian_copy_paste_aliases != false ]]; then
 fi
 
 # Alias for replacing a symlink with a copy of the file it points to.
-if [[ $radian_delink_alias != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_DELINK_ALIAS != false ]]; then
     delink() {
         if [[ -z $1 ]]; then
             echo "usage: delink <symlinks>"
@@ -216,7 +250,7 @@ fi
 # 'git checkup' in the second. If you provide a second argument, runs
 # it as a shell command (provide multiple commands with '&&' or ';')
 # in all four windows before anything else.
-if [[ $radian_proj_alias != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_PROJ_ALIAS != false ]]; then
     proj() {
         if echo "$1" | egrep -q "^\s*$"; then
             echo "Please provide a project name."
