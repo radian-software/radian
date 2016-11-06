@@ -140,6 +140,7 @@ fi
 ### Tmux ###
 
 if feature tmux; then
+    ./ensure-installed.sh reattach-to-user-namespace
     ./ensure-installed.sh tmux -V tmux 2.2
 fi
 
