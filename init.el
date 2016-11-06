@@ -132,7 +132,7 @@ the call must be done in init.before.local.el."
       (if association
           (setf (assoc package radian-disabled-packages)
                 (1+ (cdr association)))
-        (push (cons package 1) packages)))))
+        (push (cons package 1) radian-disabled-packages)))))
 
 (defun radian-reenable-package (&rest packages)
   "Undoes the effects of `radian-disable-package', by
@@ -151,7 +151,7 @@ the call must be done in init.before.local.el."
       (if association
           (setf (assoc package radian-disabled-packages)
                 (1+ (cdr association)))
-        (push (cons package -1) packages)))))
+        (push (cons package -1) radian-disabled-packages)))))
 
 (defun radian-package-enabled-p (&rest packages)
   "Returns `t' if none of the given packages are disabled (for example,
@@ -172,7 +172,7 @@ See also `radian-disabled-packages'."
   (radian--every (lambda (package)
                    (let ((association (assoc package radian-disabled-packages)))
                      (and association
-                          (> (cdr association) 1))))
+                          (> (cdr association) 0))))
                  packages))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
