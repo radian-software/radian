@@ -71,7 +71,7 @@ source compute-features.sh
 source generate-uuid.sh
 mkdir -p originals/$uuid
 echo "[setup] The UUID for this session is $uuid."
-repo_name="$(basename "$PWD")"
+repo_name="$(cd .. && basename "$PWD")"
 
 source create-radian-local.sh
 
