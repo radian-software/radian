@@ -28,6 +28,12 @@
 ;;; configuration only" are placed in the created init.before.local.el
 ;;; file, but the user is not offered the option to change their
 ;;; values interactively.
+;;;
+;;; Here we are using the defvar-nil-setq pattern described in [1],
+;;; which makes it so that changes to these declarations will be
+;;; picked up by a reload of init.el (M-RET r).
+;;;
+;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
 ;; Control color customizations. If you want to use the default
 ;; Radian color scheme (Solarized Light + Leuven), which is
@@ -37,6 +43,7 @@
 ;; to make various parts of the Leuven theme look better. If you want
 ;; to set up your own color scheme, or use the Emacs default, set
 ;; this to `nil'.
+(defvar radian-customize-tweak-colors nil)
 (setq radian-customize-tweak-colors t)
 
 ;; Override package archives. If this is non-nil, then it is used as
@@ -44,6 +51,7 @@
 ;; plus MELPA).
 ;;
 ;; For manual configuration only.
+(defvar radian-customize-package-archives nil)
 (setq radian-customize-package-archives nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -90,9 +90,10 @@ collected_comments=
 while read -u 10 line; do
     if [[ $line == \;\;* ]]; then
         collected_comments="$collected_comments$line"$'\n'
+    elif (echo "$line" | egrep -q "\\(defvar radian-customize-[a-z-]+ nil\\)"); then
+        variable=$(echo "$line" | egrep -o "radian-customize-[a-z-]+" | head -n 1)
     else
-        if (echo "$line" | egrep -q "\\(setq radian-customize-[a-z-]+"); then
-            variable=$(echo "$line" | egrep -o "radian-customize-[a-z-]+" | head -n 1)
+        if [[ $variable ]]; then
             value=
             if [[ $configure == true ]] && ! (echo "$collected_comments" | fgrep -qi "manual configuration only"); then
                 echo -n "$collected_comments"
@@ -106,6 +107,7 @@ while read -u 10 line; do
             else
                 contents="$contents"$'\n'"${collected_comments}$line"$'\n'
             fi
+            variable=
         fi
         collected_comments=
     fi
