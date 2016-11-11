@@ -44,24 +44,23 @@ export -f define
 ### Compute features ###
 
 specs=(
-    "homebrew"
-    "wget -> homebrew"
+    "wget"
     "git-dotfiles"
-    "zsh -> homebrew"
+    "zsh"
     "antigen -> zsh"
-    "autojump -> homebrew"
+    "autojump"
     "zsh-dotfiles -> zsh antigen"
-    "tmux -> homebrew"
+    "tmux"
     "tmux-dotfiles -> tmux"
     "java"
-    "leiningen -> homebrew java"
+    "leiningen java"
     "leiningen-dotfiles -> leiningen"
     "racket -> wget"
     "emacs -> wget"
     "emacs-dotfiles -> emacs"
-    "ag -> homebrew"
-    "tree -> homebrew"
-    "tmuxinator -> homebrew tmux"
+    "ag"
+    "tree"
+    "tmuxinator tmux"
 )
 
 source compute-features.sh
@@ -82,15 +81,9 @@ echo "[setup] Setting up Radian. Prepare to be amazed."
 ### Bootstrapping ###
 
 ./ensure-xcode-cl-tools-installed.sh
-
-if feature homebrew; then
-    ./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
-    ./ensure-installed.sh grealpath --version "realpath (GNU coreutils)" any-version brew coreutils
-fi
-
-if feature wget; then
-    ./ensure-installed.sh wget
-fi
+./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
+./ensure-installed.sh grealpath --version "realpath (GNU coreutils)" any-version brew coreutils
+./ensure-installed.sh wget
 
 ### Radian symlinks ###
 
