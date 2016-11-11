@@ -4,6 +4,7 @@
 	pager = less -FRSX
 	excludesfile = ~/.gitexclude
 	editor = emacsc
+	autocrlf = input
 [alias]
 	# git init
 	setup = !git init && git commit --allow-empty -m \"Initial commit\"
