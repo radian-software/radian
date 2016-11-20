@@ -463,6 +463,12 @@ M-RET to the file opened by the resulting keybinding.")
 ;; bigger problems ;)
 (setq dired-use-ls-dired nil)
 
+;; Automatically update Dired buffers when things change on disk. Note
+;; that `global-auto-revert-mode' does not cover non-file buffers like
+;; Dired buffer, by default, so we have to make this change
+;; separately.
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Saving files
 
