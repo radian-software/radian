@@ -1351,6 +1351,59 @@ following :dependencies to be enabled."
 (use-package geiser)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: C-like languages
+
+;; General support for C, C++, and Objective-C based on libclang.
+(use-package irony
+  :init
+
+  ;; Enable Irony for C, C++, and Objective-C files.
+  (add-hook 'c-mode-hook 'irony-mode)
+  (add-hook 'c++-mode-hook 'irony-mode)
+  (add-hook 'objc-mode-hook 'irony-mode)
+
+  :config
+
+  ;; Taken from the README of irony-mode [1]. If it's not present,
+  ;; company-irony seems to only be able to work in a single buffer.
+  ;;
+  ;; [1]: https://github.com/Sarcasm/irony-mode
+  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+
+  ;; Automatically install irony-server if it is missing. irony-server
+  ;; is necessary for Irony to work at all!
+  (unless (irony--locate-server-executable)
+    ;; The following `let' is copied from the definition of
+    ;; `irony-install-server'. A better solution would be to
+    ;; dynamically bind `irony--install-server-read-command' to
+    ;; `identity' and then just use `call-interactively' to invoke
+    ;; `irony-install-server' with no arguments, but I don't know how
+    ;; to do this.
+    (let ((command
+           (format
+            (concat "%s %s %s && %s --build . "
+                    "--use-stderr --config Release --target install")
+            (shell-quote-argument irony-cmake-executable)
+            (shell-quote-argument (concat "-DCMAKE_INSTALL_PREFIX="
+                                          (expand-file-name
+                                           irony-server-install-prefix)))
+            (shell-quote-argument irony-server-source-dir)
+            (shell-quote-argument irony-cmake-executable))))
+      (irony-install-server command))))
+
+;; Company integration for Irony.
+(use-package company-irony
+  :dependencies (company irony)
+  :init
+
+  ;; Tell Company about company-irony. For some reason, this appears
+  ;; to cause Irony to be eagerly loaded. So we only do it after Irony
+  ;; has been loaded.
+  (add-hook 'irony-mode-hook
+            (lambda ()
+              (add-to-list 'company-backends 'company-irony))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
 
 ;; Provides syntax highlighting, indentation, and editing commands for
