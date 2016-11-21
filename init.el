@@ -1001,6 +1001,13 @@ following :dependencies to be enabled."
   ;; provided by Re-Builder (so you can't quit!).
   (add-to-list 'aggressive-indent-excluded-modes 'reb-mode)
 
+  ;; Fix `aggressive-indent-protected-commands'. See [1] for
+  ;; discussion.
+  ;;
+  ;; [1]: https://github.com/Malabarba/aggressive-indent-mode/issues/101
+  (add-to-list 'aggressive-indent-dont-indent-if
+               '(memq last-command aggressive-indent-protected-commands))
+
   :diminish (aggressive-indent-mode . "AggrIndent"))
 
 ;; Provides undo/redo commands that are both more intuitive and more
