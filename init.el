@@ -130,8 +130,8 @@ the call must be done in init.before.local.el."
   (dolist (package packages)
     (let ((association (assoc package radian-disabled-packages)))
       (if association
-          (setf (assoc package radian-disabled-packages)
-                (1+ (cdr association)))
+          (setcdr (assoc package radian-disabled-packages)
+                  (1+ (cdr association)))
         (push (cons package 1) radian-disabled-packages)))))
 
 (defun radian-reenable-package (&rest packages)
@@ -149,8 +149,8 @@ the call must be done in init.before.local.el."
   (dolist (package packages)
     (let ((association (assoc package radian-disabled-packages)))
       (if association
-          (setf (assoc package radian-disabled-packages)
-                (1+ (cdr association)))
+          (setcdr (assoc package radian-disabled-packages)
+                  (1+ (cdr association)))
         (push (cons package -1) radian-disabled-packages)))))
 
 (defun radian-package-enabled-p (&rest packages)
