@@ -226,7 +226,7 @@ uninstall packages manually, by deleting their folders in
 loads it. Otherwise, fails silently."
   (let ((file (concat user-emacs-directory filename)))
     (when (file-exists-p file)
-      (load-file file))))
+      (load file 'noerror 'nomessage))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Load user-specific configuration file (1 of 2)
@@ -691,7 +691,7 @@ Lisp function does not specify a special indentation."
                 '(lambda ()
                    "Reload init.el."
                    (interactive)
-                   (load-file "~/.emacs.d/init.el")))
+                   (radian-load-user-config "init.el")))
 
 ;; Add a keybinding (C-c C-k) for evaluating a buffer of Elisp. This
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
@@ -1141,6 +1141,11 @@ following :dependencies to be enabled."
   :dependencies (company)
   :demand t
   :config
+
+  ;; Disable the message that is normally printed when Company
+  ;; Statistics loads its statistics file from disk.
+  (defun company-statistics--load ()
+    (load company-statistics-file 'noerror 'nomessage 'nosuffix))
 
   ;; Enable Company Statistics.
   (company-statistics-mode 1))
