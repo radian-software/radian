@@ -56,6 +56,8 @@ specs=(
     "leiningen java"
     "leiningen-dotfiles -> leiningen"
     "racket -> wget"
+    "cmake"
+    "libclang"
     "emacs -> wget"
     "emacs-dotfiles -> emacs"
     "ag"
@@ -169,6 +171,16 @@ fi
 
 if feature racket; then
     ./ensure-installed.sh racket --version "Welcome to Racket v" 6.6 ./install-racket.sh
+fi
+
+### C ###
+
+if feature cmake; then
+    ./ensure-installed.sh cmake --version "cmake version" 3.7.0
+fi
+
+if feature libclang; then
+    ./ensure-installed.sh libclang version libclang 3.9.0 brew llvm --require --headless
 fi
 
 ### Emacs ###
