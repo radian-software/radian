@@ -10,28 +10,36 @@
 # arguments).
 
 # Arguments:
-# $1 = name of executable that should be installed
-# $2 = subcommand to get version (defaults to --version)
-# $3 = command name in version command output (defaults to executable name)
-# $4 = minimum version (defaults to any-version)
-# $5 = package manager (brew, gem, assert, or other script; defaults to brew)
-# $6 = name of package for package manager (defaults to executable name)
-# $7 = optional flag
+# $1  = name of executable that should be installed
+# $2  = subcommand to get version (defaults to --version)
+# $3  = command name in version command output (defaults to executable name)
+# $4  = minimum version (defaults to any-version)
+# $5  = package manager (brew, gem, assert, or other script; defaults to brew)
+# $6  = name of package for package manager (defaults to executable name)
+# ... = optional flags
 #
-# If the optional flag is --require, then the executable is required
-# to be installed via the provided package manager. Pre-existing
+# If one of the flags is --require, then the executable is required to
+# be installed via the provided package manager. Pre-existing
 # installations via other methods are not allowable. Currently this
 # only works if the package manager is brew.
+#
+# If one of the flags is --headless, then ensure-installed.sh does not
+# attempt to run the executable. However, if --require is specified,
+# it still checks that the package is installed via the package
+# manager. This is useful for libraries like libclang.
 
 # Preconditions:
+#
 # - The package manager must be available on the $PATH.
 
 # Postconditions:
-# - An appropriate version of the executable will be available on the $PATH.
+#
+# - An appropriate version of the executable will be available on the
+#   $PATH, unless --headless was specified.
 
 # Exit code:
-# - zero if no errors occurred;
-# - non-zero if an error occurred.
+#
+# - Zero if no errors occurred; non-zero if an error occurred.
 
 ### Setup ###
 
@@ -49,7 +57,7 @@ version_subcommand="${2:---version}"
 version_command_name="${3:-$executable}"
 min_version="${4:-any-version}"
 if [[ $min_version != any-version ]] && ! (echo "$min_version" | egrep -q "^[0-9]+(\.[0-9]+)*$"); then
-    echo "[ensure-installed] Fatal error: the minimum version string is malformed."
+    echo "[ensure-installed] Fatal error: the minimum version string '$min_version' is malformed."
     exit 1
 fi
 package_manager="${5:-brew}"
@@ -63,28 +71,16 @@ elif [[ $package_manager == assert ]]; then
 else
     install_command="$package_manager"
 fi
-optional_flag="$7"
+shift 6 || true
+flags="$@"
 
-### Report task ###
+### Argument utility functions ###
 
-if [[ $package_manager != assert ]]; then
-    echo -n "[ensure-installed] Ensuring that "
-else
-    echo -n "[ensure-installed] Checking if "
-fi
-if [[ $min_version != any-version ]]; then
-    echo -n "version $min_version or more recent of "
-fi
-echo "$executable is installed."
-if [[ $min_version != any-version ]]; then
-    echo "[ensure-installed] Will check the version using '$executable $version_subcommand'."
-    echo "[ensure-installed] Expecting the output to look something like '$version_command_name $min_version'."
-fi
-if [[ $package_manager != assert ]]; then
-    echo "[ensure-installed] If necessary, will install via '$install_command'."
-fi
-
-### Utility functions ###
+# Returns zero if installation should not be attempted, non-zero
+# otherwise.
+actually_installing() {
+    [[ $package_manager != assert ]]
+}
 
 # Returns zero if a minimum version is required, non-zero otherwise.
 requires_version() {
@@ -94,8 +90,38 @@ requires_version() {
 # Returns zero if the installation is required to be through the
 # provided package manager, non-zero otherwise.
 requires_package_manager() {
-    [[ $optional_flag == --require ]]
+    # Note that this *will* produce false positives, but dealing with
+    # all the corner cases is too painful to be worth it for now. Same
+    # for is_headless below.
+    [[ " ${flags[@]} " =~ " --require " ]]
 }
+
+# Returns zero if a library rather than an executable is being
+# installed, non-zero otherwise.
+is_headless() {
+    [[ " ${flags[@]} " =~ " --headless " ]]
+}
+
+### Report task ###
+
+if actually_installing; then
+    echo -n "[ensure-installed] Ensuring that "
+else
+    echo -n "[ensure-installed] Checking if "
+fi
+if requires_version; then
+    echo -n "version $min_version or more recent of "
+fi
+echo "$executable is installed."
+if requires_version && ! is_headless; then
+    echo "[ensure-installed] Will check the version using '$executable $version_subcommand'."
+    echo "[ensure-installed] Expecting the output to look something like '$version_command_name $min_version'."
+fi
+if actually_installing; then
+    echo "[ensure-installed] If necessary, will install via '$install_command'."
+fi
+
+### Utility functions ###
 
 # Returns zero if version $2 is at least as recent as version $1, two
 # if version $2 is malformed, and one otherwise. The versions should
@@ -231,7 +257,13 @@ install() {
             version_list="${version_line#$prefix}"
             IFS=" " read -ra versions <<< "$version_list"
             echo "[ensure-installed] The available versions appear to be: ${versions[@]}."
-            for version in "${versions[@]}"; do
+            # Iterate through the version list in reverse, to ensure
+            # that we install the most recent version possible. Taken
+            # from [1].
+            #
+            # [1]: http://stackoverflow.com/a/13360181/3538165
+            for (( idx=${#versions[@]}-1; idx>=0; idx-- )); do
+                version=${versions[idx]}
                 if requires_version; then
                     if version_as_recent "$min_version" "$version"; then
                         echo "[ensure-installed] The version $version is at least as recent as the minimum version, $min_version."
@@ -258,11 +290,13 @@ install() {
 
 ### Main logic ###
 
-if ! is_installed_correctly; then
+if is_headless || ! is_installed_correctly; then
     install
-    echo "[ensure-installed] Making sure that the installation went OK."
-    if ! is_installed_correctly; then
-        echo "[ensure-installed] Fatal error: $executable should be installed by this point."
-        exit 1
+    if ! is_headless; then
+        echo "[ensure-installed] Making sure that the installation went OK."
+        if ! is_installed_correctly; then
+            echo "[ensure-installed] Fatal error: $executable should be installed by this point."
+            exit 1
+        fi
     fi
 fi
