@@ -26,7 +26,7 @@ index_of() {
 
 case $1 in
     include | only ) default=false ;;
-    exclude | except | but | "" ) default=true ;;
+    exclude | except | but | without | "" ) default=true ;;
     * ) echo "[compute-features] Invalid qualifier '$1'. Must be one of [include only exclude except but]."
         exit 1 ;;
 esac
