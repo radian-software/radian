@@ -702,25 +702,18 @@ Lisp function does not specify a special indentation."
           (lambda ()
             (local-set-key (kbd "C-c C-k") 'eval-buffer)))
 
-;; Add a keybinding (M-.) for jumping to the source of Elisp functions
-;; and variables. This is consistent with the keybindings for jumping
-;; to source in CIDER and Geiser, with the exception of those
-;; keybindings not requiring a prefix argument to look at variables
-;; (because Elisp has separate namespaces for functions and variables,
-;; whereas Clojure and Schemes do not).
+;; Add keybindings (C-h C-f and C-h C-v) for jumping to the source of
+;; Elisp functions and variables. The reason we don't use M-. for this
+;; is twofold. Firstly, in Elisp functions and variables have
+;; different namespaces, and thus different commands are needed to
+;; jump to functions and variables. Secondly, we might want to jump to
+;; the source of an Elisp function while editing another language,
+;; where M-. is rebound to jump to the source of symbols in that
+;; language. Note that this overrides the default binding of C-h C-f
+;; to `view-emacs-FAQ', but I think this is not very important.
 
-(defun find-function-or-variable (&optional prefix)
-  "Acts like `find-function' without a prefix argument, and like
-`find-variable' with a prefix argument."
-  (interactive "P")
-  (if prefix
-      (call-interactively 'find-variable)
-    (call-interactively 'find-function)))
-
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (local-set-key (kbd "M-.")
-                           'find-function-or-variable)))
+(global-set-key (kbd "C-h C-f") 'find-function)
+(global-set-key (kbd "C-h C-v") 'find-variable)
 
 ;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
 ;; Interaction" in the mode line.
