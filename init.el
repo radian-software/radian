@@ -1446,7 +1446,30 @@ following :dependencies to be enabled."
   ;; has been loaded.
   (add-hook 'irony-mode-hook
             (lambda ()
-              (add-to-list 'company-backends 'company-irony))))
+              ;; Don't add `company-irony' as a backend if we have
+              ;; already added `company-irony-c-headers'. The backend
+              ;; for `company-irony-c-headers' is a grouped backend,
+              ;; so it accounts for both, and if we add
+              ;; `company-irony' it will take precedence and inhibit
+              ;; the functionality of `company-irony-c-headers'.
+              (unless (member '(company-irony-c-headers
+                                company-irony)
+                              company-backends)
+                (add-to-list 'company-backends 'company-irony)))))
+
+;; Extends company-irony to work for completing #includes.
+(use-package company-irony-c-headers
+  :dependencies (company irony company-irony)
+  :init
+
+  ;; Tell Company about company-irony-c-headers. As per the README
+  ;; [1], we must add a grouped backend for things to work properly.
+  ;;
+  ;; [1]: https://github.com/hotpxl/company-irony-c-headers
+  (add-hook 'irony-mode-hook
+            (lambda ()
+              (add-to-list 'company-backends '(company-irony-c-headers
+                                               company-irony)))))
 
 ;; ElDoc integration for Irony.
 (use-package irony-eldoc
