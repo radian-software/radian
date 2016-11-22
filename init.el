@@ -956,7 +956,12 @@ following :dependencies to be enabled."
 
 ;; Provides an easy way to change the display of minor modes in the
 ;; mode line.
-(use-package diminish)
+(use-package diminish
+  :demand t
+  :config
+
+  ;; Don't show `abbrev-mode' in the mode line.
+  (diminish 'abbrev-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Window management
@@ -1434,7 +1439,9 @@ following :dependencies to be enabled."
                                            irony-server-install-prefix)))
             (shell-quote-argument irony-server-source-dir)
             (shell-quote-argument irony-cmake-executable))))
-      (irony-install-server command))))
+      (irony-install-server command)))
+
+  :diminish irony-mode)
 
 ;; Company integration for Irony.
 (use-package company-irony
