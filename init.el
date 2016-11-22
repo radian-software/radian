@@ -1451,7 +1451,7 @@ following :dependencies to be enabled."
   :dependencies (irony)
   :quelpa (irony-eldoc
            :fetcher github
-           :repo "josteink/irony-eldoc")
+           :repo "raxod502/irony-eldoc")
   :init
 
   ;; Enable irony-eldoc.
