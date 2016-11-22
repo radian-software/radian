@@ -722,6 +722,16 @@ Lisp function does not specify a special indentation."
             (setq mode-name "Lisp-Interaction")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; C-like languages
+
+;; Get rid of the submode indicators in the mode line. This transforms
+;; e.g. "C++/l" into "C++". Since we are overriding a function
+;; provided by `cc-mode', which is not initially loaded, we have to
+;; make sure to do so *after* it is loaded and not before.
+(eval-after-load 'cc-mode
+  '(defun c-update-modeline ()))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Bootstrap use-package
 
 ;; Load deprecated user-specific configuration file.
