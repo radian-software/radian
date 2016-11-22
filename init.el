@@ -691,7 +691,9 @@ Lisp function does not specify a special indentation."
                 '(lambda ()
                    "Reload init.el."
                    (interactive)
-                   (radian-load-user-config "init.el")))
+                   (message "Reloading init.el...")
+                   (radian-load-user-config "init.el")
+                   (message "Reloading init.el... done.")))
 
 ;; Add a keybinding (C-c C-k) for evaluating a buffer of Elisp. This
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
