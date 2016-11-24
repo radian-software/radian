@@ -298,6 +298,22 @@ install() {
             ./ensure-symlinked.sh "$binary"
         done
     fi
+    if [[ $package_manager == "brew cask" ]]; then
+        # Here we try to fix the problem with curl SSL errors by
+        # manually downloading the DMG. This is obviously a horrible
+        # hack. Strangely, these errors only seem to occur for
+        # brew-cask (not regular brew), and seem to be time-dependent
+        # (eventually they will stop occurring). See [1] for one
+        # discussion of the error.
+        #
+        # [1]: https://github.com/Homebrew/legacy-homebrew/issues/6103
+        echo "[ensure-installed] Ensuring that ~/Library/Caches/Homebrew/Cask exists."
+        mkdir -p ~/Library/Caches/Homebrew/Cask
+        if [[ $executable == emacs ]]; then
+            echo "[ensure-installed] Downloading the Emacs disk image."
+            curl --insecure -f#L https://emacsformacosx.com/emacs-builds/Emacs-25.1-1-universal.dmg -o ~/Library/Caches/Homebrew/Cask/emacs--25.1-1.dmg
+        fi
+    fi
     $install_command
     if [[ $executable == emacs ]]; then
         ./ensure-symlinked.sh /usr/local/bin/emacs emacs
