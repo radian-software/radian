@@ -463,11 +463,21 @@ M-RET to the file opened by the resulting keybinding.")
 ;; bigger problems ;)
 (setq dired-use-ls-dired nil)
 
-;; Automatically update Dired buffers when things change on disk. Note
-;; that `global-auto-revert-mode' does not cover non-file buffers like
-;; Dired buffer, by default, so we have to make this change
-;; separately.
-(add-hook 'dired-mode-hook 'auto-revert-mode)
+(defun radian--dired-mode-hook ()
+
+  ;; Automatically update Dired buffers when things change on disk. Note
+  ;; that `global-auto-revert-mode' does not cover non-file buffers like
+  ;; Dired buffer, by default, so we have to make this change
+  ;; separately. Might want to disable this, or at least make it so that
+  ;; `auto-revert-mode' is only enabled while the user is actively
+  ;; viewing the buffer.
+  (auto-revert-mode 1)
+
+  ;; Don't notify the user when a `dired' buffer is reverted, since
+  ;; this will happen every time a file is saved in that directory.
+  (setq-local auto-revert-verbose nil))
+
+(add-hook 'dired-mode-hook 'radian--dired-mode-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Saving files
