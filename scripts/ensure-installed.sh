@@ -14,7 +14,8 @@
 # $2  = subcommand to get version (defaults to --version)
 # $3  = command name in version command output (defaults to executable name)
 # $4  = minimum version (defaults to any-version)
-# $5  = package manager (brew, gem, assert, or other script; defaults to brew)
+# $5  = package manager (brew, brew cask, gem, assert, or other script;
+#       defaults to brew)
 # $6  = name of package for package manager (defaults to executable name)
 # ... = optional flags
 #
@@ -64,6 +65,8 @@ package_manager="${5:-brew}"
 package_name="${6:-$executable}"
 if [[ $package_manager == brew ]]; then
     install_command="brew install $package_name"
+elif [[ $package_manager == "brew cask" ]]; then
+    install_command="brew cask reinstall $package_name"
 elif [[ $package_manager == gem ]]; then
     install_command="sudo gem install $package_name"
 elif [[ $package_manager == assert ]]; then
@@ -286,6 +289,9 @@ install() {
         echo "[ensure-installed] Installing the most recent version of $executable using '$install_command'."
     fi
     $install_command
+    if [[ $executable == emacs ]]; then
+        ./ensure-symlinked.sh /usr/local/bin/emacs emacs
+    fi
 }
 
 ### Main logic ###

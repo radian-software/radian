@@ -186,7 +186,7 @@ fi
 ### Emacs ###
 
 if feature emacs; then
-    ./ensure-installed.sh emacs --version "GNU Emacs" 24.5.1 ./install-emacs.sh
+    ./ensure-installed.sh emacs --version "GNU Emacs" 25.1 "brew cask" emacs
     ./ensure-symlinked.sh /usr/local/bin/emacsw emacsw
     ./ensure-symlinked.sh /usr/local/bin/emacsc emacsc
     ./ensure-symlinked.sh /usr/local/bin/emacscw emacscw
