@@ -288,6 +288,16 @@ install() {
     if [[ $package_manager != assert ]]; then
         echo "[ensure-installed] Installing the most recent version of $executable using '$install_command'."
     fi
+    if [[ $package_manager == "brew cask" ]]; then
+        brew cask info $package_name | fgrep "(app)" | while read line; do
+            app=${line%" (app)"}
+            ./ensure-symlinked.sh "/Applications/$app"
+        done
+        brew cask info $package_name | fgrep "(binary)" | while read line; do
+            binary=${line%" (binary)"}
+            ./ensure-symlinked.sh "$binary"
+        done
+    fi
     $install_command
     if [[ $executable == emacs ]]; then
         ./ensure-symlinked.sh /usr/local/bin/emacs emacs
