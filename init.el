@@ -731,6 +731,25 @@ Lisp function does not specify a special indentation."
 (eval-after-load 'cc-mode
   '(defun c-update-modeline ()))
 
+;; Switch to a better indentation-and-braces style. This turns the
+;; following code:
+;;
+;; if (condition)
+;;   {
+;;     statement;
+;;   }
+;;
+;; Into this:
+;;
+;; if (condition) {
+;;   statement;
+;; }
+(eval-after-load 'cc-mode
+  '(if (assoc 'other c-default-style)
+       (setcdr (assoc 'other c-default-style)
+               "k&r")
+     (push '(other . "k&r") c-default-style)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Bootstrap use-package
 
