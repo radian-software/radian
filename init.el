@@ -573,6 +573,12 @@ M-RET to the file opened by the resulting keybinding.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; ElDoc
 
+;; Disable ElDoc globally. This prevents it from being enabled in the
+;; minibuffer (ElDoc messages go into the mode line when you are in
+;; the minibuffer, which looks very bad with Radian's default color
+;; scheme).
+(global-eldoc-mode -1)
+
 ;; Enable ElDoc when editing Lisps and using Lisp REPLs.
 
 (dolist (hook '(emacs-lisp-mode-hook
