@@ -586,7 +586,7 @@ M-RET to the file opened by the resulting keybinding.")
   (add-hook hook (lambda () (eldoc-mode 1))))
 
 (when (radian-package-enabled-p 'clojure-mode)
-  (add-hook 'clojure-mode-hook (lambda () (eldoc-mode 1))))
+  (add-hook 'cider-mode-hook (lambda () (eldoc-mode 1))))
 
 (when (radian-package-enabled-p 'cider)
   (add-hook 'cider-repl-mode-hook (lambda () (eldoc-mode 1))))
