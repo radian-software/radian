@@ -940,136 +940,134 @@ following :dependencies to be enabled."
   :bind (;; Use smex for M-x.
          ("M-x" . smex)))
 
-(when (equal radian-customize-completion-mechanism 'helm-ido)
-  ;; Provides a general-purpose completion and narrowing mechanism, and
-  ;; enhanced versions of many standard Emacs commands that use it.
-  (use-package helm
-    :demand t
-    :config
+;; Provides a general-purpose completion and narrowing mechanism, and
+;; enhanced versions of many standard Emacs commands that use it.
+(use-package helm
+  :demand t
+  :config
 
-    ;; Use Helm mode for many standard Emacs commands.
-    (helm-mode 1)
+  ;; Use Helm mode for many standard Emacs commands.
+  (helm-mode 1)
 
-    ;; Fix the unreadable default color for the prefix argument in the
-    ;; Helm M-x buffer.
-    (when radian-customize-tweak-colors
-      (set-face-foreground 'helm-prefarg "#FFFF66"))
+  ;; Fix the unreadable default color for the prefix argument in the
+  ;; Helm M-x buffer.
+  (when radian-customize-tweak-colors
+    (set-face-foreground 'helm-prefarg "#FFFF66"))
 
-    ;; Use fuzzy matching for Helm.
-    (setq helm-mode-fuzzy-match t)
+  ;; Use fuzzy matching for Helm.
+  (setq helm-mode-fuzzy-match t)
 
-    ;; Get rid of the awful background color for buffers corresponding to files
-    ;; modified outside of Emacs.
-    (when radian-customize-tweak-colors
-      (set-face-background 'helm-buffer-saved-out nil))
+  ;; Get rid of the awful background color for buffers corresponding to files
+  ;; modified outside of Emacs.
+  (when radian-customize-tweak-colors
+    (set-face-background 'helm-buffer-saved-out nil))
 
-    :bind (;; Use Helm mode for M-x.
-           ("M-x" . helm-M-x))
-    ;; Note that Helm has `helm-mode-line-string', but this only affects
-    ;; what is shown in the mode line for a Helm buffer.
-    :diminish helm-mode)
+  :bind (;; Use Helm mode for M-x.
+         ("M-x" . helm-M-x))
+  ;; Note that Helm has `helm-mode-line-string', but this only affects
+  ;; what is shown in the mode line for a Helm buffer.
+  :diminish helm-mode)
 
-  ;; Provides enhanced versions of the Projectile commands that use
-  ;; Helm.
-  (use-package helm-projectile
-    :dependencies (helm)
-    :demand t
-    :config
+;; Provides enhanced versions of the Projectile commands that use
+;; Helm.
+(use-package helm-projectile
+  :dependencies (helm)
+  :demand t
+  :config
 
-    ;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
-    ;; instead of helm-projectile-on means we don't get a useless "Turn on
-    ;; helm-projectile key bindings" message in the minibuffer during startup.
-    ;;
-    ;; The local binding of ad-redefinition works around a warning message
-    ;; "ad-handle-definition: `tramp-read-passwd' got redefined", as per [1].
-    ;;
-    ;; [1]: https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
-    (let ((ad-redefinition-action 'accept))
-      (helm-projectile-toggle 1)))
+  ;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
+  ;; instead of helm-projectile-on means we don't get a useless "Turn on
+  ;; helm-projectile key bindings" message in the minibuffer during startup.
+  ;;
+  ;; The local binding of ad-redefinition works around a warning message
+  ;; "ad-handle-definition: `tramp-read-passwd' got redefined", as per [1].
+  ;;
+  ;; [1]: https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
+  (let ((ad-redefinition-action 'accept))
+    (helm-projectile-toggle 1)))
 
-  ;; Provides an enhanced version of smex that uses Helm for completion.
-  (use-package helm-smex
-    :dependencies (helm smex)
-    :bind (;; Use helm-smex for M-x.
-           ("M-x" . helm-smex))))
+;; Provides an enhanced version of smex that uses Helm for completion.
+(use-package helm-smex
+  :dependencies (helm smex)
+  :bind (;; Use helm-smex for M-x.
+         ("M-x" . helm-smex)))
 
-(when (equal radian-customize-completion-mechanism 'ivy)
-  ;; Provides intelligent fuzzy matching and sorting mechanisms that
-  ;; can be used by various other packages, including Ivy.
-  (use-package flx)
+;; Provides intelligent fuzzy matching and sorting mechanisms that
+;; can be used by various other packages, including Ivy.
+(use-package flx)
 
-  ;; Provides a general-purpose completion mechanism.
-  (use-package ivy
-    :demand t
-    :config
+;; Provides a general-purpose completion mechanism.
+(use-package ivy
+  :demand t
+  :config
 
-    ;; Use Ivy for `completing-read'.
-    (ivy-mode 1)
+  ;; Use Ivy for `completing-read'.
+  (ivy-mode 1)
 
-    ;; Use fuzzy matching for Ivy, powered by flx, but not for Swiper
-    ;; (because fuzzy matching is typically not desired in grep-style
-    ;; searches, just plain 'ol regex).
-    ;;
-    ;; [1]: http://oremacs.com/2016/01/06/ivy-flx/
-    (setq ivy-re-builders-alist
-          '((swiper . ivy--regex-plus)
-            (t . ivy--regex-fuzzy)))
+  ;; Use fuzzy matching for Ivy, powered by flx, but not for Swiper
+  ;; (because fuzzy matching is typically not desired in grep-style
+  ;; searches, just plain 'ol regex).
+  ;;
+  ;; [1]: http://oremacs.com/2016/01/06/ivy-flx/
+  (setq ivy-re-builders-alist
+        '((swiper . ivy--regex-plus)
+          (t . ivy--regex-fuzzy)))
 
-    ;; Don't automatically insert a "^" character when starting an Ivy
-    ;; completion. This has the effect of making it so that matches
-    ;; are not required to start at the beginning of the symbol being
-    ;; matched, by default.
-    (setq ivy-initial-inputs-alist
-          '((t . "")))
+  ;; Don't automatically insert a "^" character when starting an Ivy
+  ;; completion. This has the effect of making it so that matches
+  ;; are not required to start at the beginning of the symbol being
+  ;; matched, by default.
+  (setq ivy-initial-inputs-alist
+        '((t . "")))
 
-    :bind (;; Add the README-suggested keybinding for resuming the last
-           ;; completion session.
-           ("C-c C-r" . ivy-resume))
-    :diminish ivy-mode)
+  :bind (;; Add the README-suggested keybinding for resuming the last
+         ;; completion session.
+         ("C-c C-r" . ivy-resume))
+  :diminish ivy-mode)
 
-  ;; Provides enhanced versions of many command Emacs commands that
-  ;; use Ivy for completion, and adds a few new commands (such as
-  ;; `counsel-git-ag').
-  (use-package counsel
-    :bind (;; Use Counsel for common Emacs commands.
-           ("M-x" . counsel-M-x)
-           ("C-h f" . counsel-describe-function)
-           ("C-h v" . counsel-describe-variable)
-           ("C-h l" . counsel-load-library)
-           ("C-h S" . counsel-info-lookup-symbol)
-           ("C-x 8 RET" . counsel-unicode-char)
+;; Provides enhanced versions of many command Emacs commands that
+;; use Ivy for completion, and adds a few new commands (such as
+;; `counsel-git-ag').
+(use-package counsel
+  :bind (;; Use Counsel for common Emacs commands.
+         ("M-x" . counsel-M-x)
+         ("C-h f" . counsel-describe-function)
+         ("C-h v" . counsel-describe-variable)
+         ("C-h l" . counsel-load-library)
+         ("C-h S" . counsel-info-lookup-symbol)
+         ("C-x 8 RET" . counsel-unicode-char)
 
-           ;; Introduce a few new commands that use Counsel. The
-           ;; bindings are suggested by the README [1].
-           ;;
-           ;; [1]: https://github.com/abo-abo/swiper
-           ("C-c g" . counsel-git)
-           ("C-c j" . counsel-git-grep)
-           ("C-c k" . counsel-ag)
+         ;; Introduce a few new commands that use Counsel. The
+         ;; bindings are suggested by the README [1].
+         ;;
+         ;; [1]: https://github.com/abo-abo/swiper
+         ("C-c g" . counsel-git)
+         ("C-c j" . counsel-git-grep)
+         ("C-c k" . counsel-ag)
 
-           ;; After you have pressed M-:, you can use C-r to select a
-           ;; previous entry using Counsel.
-           :map read-expression-map
-           ("C-r" . counsel-expression-history)))
+         ;; After you have pressed M-:, you can use C-r to select a
+         ;; previous entry using Counsel.
+         :map read-expression-map
+         ("C-r" . counsel-expression-history)))
 
-  ;; Provides enhanced versions of the Projectile commands that use Ivy.
-  (use-package counsel-projectile
-    :demand t
-    :config
+;; Provides enhanced versions of the Projectile commands that use Ivy.
+(use-package counsel-projectile
+  :demand t
+  :config
 
-    ;; Use Counsel for the standard Projectile commands, in addition
-    ;; to the default C-c p SPC command. Using
-    ;; `counsel-projectile-toggle' instead of `counsel-projectile-on'
-    ;; means we don't get a silly message about "Turn on
-    ;; counsel-projectile key bindings".
-    (counsel-projectile-toggle 1))
+  ;; Use Counsel for the standard Projectile commands, in addition
+  ;; to the default C-c p SPC command. Using
+  ;; `counsel-projectile-toggle' instead of `counsel-projectile-on'
+  ;; means we don't get a silly message about "Turn on
+  ;; counsel-projectile key bindings".
+  (counsel-projectile-toggle 1))
 
-  ;; Provides an enhanced version of Isearch that uses Ivy to display
-  ;; a preview of the results.
-  (use-package swiper
-    :bind (;; Use Swiper for Isearches.
-           ("C-s" . swiper)
-           ("C-r" . swiper))))
+;; Provides an enhanced version of Isearch that uses Ivy to display
+;; a preview of the results.
+(use-package swiper
+  :bind (;; Use Swiper for Isearches.
+         ("C-s" . swiper)
+         ("C-r" . swiper)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: User interface
