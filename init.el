@@ -429,12 +429,67 @@ M-RET to the file opened by the resulting keybinding.")
 ;; setup script sets it up.)
 (setq vc-follow-symlinks t)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Auto revert
+
 ;; Automatically reload files that were changed on disk, if they have
 ;; not been modified in Emacs since the last time they were saved.
 (global-auto-revert-mode 1)
 
 ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
-(setq auto-revert-interval 1)
+;; We have to set this using `custom' in order for the change to take
+;; effect.
+(customize-set-variable 'auto-revert-interval 1)
+
+;; Only automatically revert buffers that are visible. This should
+;; improve performance (because if you have 200 buffers open...). This
+;; code is courtesy of @Tobias from Emacs Stack Exchange [1]. Thanks!
+;;
+;; Note that calling `global-auto-revert-mode' above triggers an
+;; autoload for `autorevert', so there's no need to `require' it again
+;; here.
+;;
+;; [1]: http://emacs.stackexchange.com/a/28899/12534
+
+(defvar auto-revert-some-buffers-filter #'get-buffer-window
+  "Filter for the output of `buffer-list' in `auto-revert-buffers'.
+The function is called with a buffer as argument. It should
+return a non-nil value if this buffer should really be
+auto-reverted.")
+
+(defun auto-revert-some-buffers-advice--buffer-list (ret)
+  "Filter output of the first call of `buffer-list' in `auto-revert-buffers'.
+This filter de-installs itself after this call."
+  (advice-remove #'buffer-list #'auto-revert-some-buffers-advice--buffer-list)
+  (cl-remove-if-not auto-revert-some-buffers-filter ret))
+
+(defun auto-revert-some-buffers-advice (oldfun &rest args)
+  "Filter the buffers to be auto-reverted through
+`auto-revert-some-buffers-filter' (which see)."
+  (let (ret)
+    (if global-auto-revert-mode
+        (unwind-protect
+            (progn
+              (advice-add #'buffer-list :filter-return #'auto-revert-some-buffers-advice--buffer-list)
+              (setq ret (apply oldfun args)))
+          ;; being over-protective
+          (advice-remove #'buffer-list #'auto-revert-some-buffers-advice--buffer-list))
+      (let ((old-auto-revert-buffer-list (cl-remove-if-not auto-revert-some-buffers-filter auto-revert-buffer-list))
+            ;; Note: We interpret `auto-revert-remaining-buffers' as
+            ;; transient effect and don't filter this list.
+            deleted-buffers)
+        (let ((auto-revert-buffer-list old-auto-revert-buffer-list))
+          (setq ret (apply oldfun args))
+          (setq deleted-buffers (cl-set-difference old-auto-revert-buffer-list auto-revert-buffer-list)))
+        (setq auto-revert-buffer-list (cl-set-difference auto-revert-buffer-list deleted-buffers))))
+    ret))
+
+(advice-add #'auto-revert-buffers :around #'auto-revert-some-buffers-advice)
+
+;; Since we automatically revert all visible buffers after one second,
+;; there's no point in asking the user whether or not they want to it
+;; when they find a file. This disables that prompt.
+(setq revert-without-query '(".*"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Dired
