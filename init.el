@@ -66,18 +66,13 @@
 (setq radian-customize-package-archives nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Utility functions
+;;;; Libraries
 
-;; To avoid an explicit dependency on cl, we define our own version of
-;; `cl-every'. Based on [1].
-;;
-;; [1]: http://stackoverflow.com/a/30826662/3538165
-(defun radian--every (predicate list)
-  "Returns t if PREDICATE returns non-nil for every element of
-LIST, and otherwise nil."
-  (while (and list (funcall predicate (car list)))
-    (setq list (cdr list)))
-  (null list))
+;; This provides some functions that are really quite necessary to
+;; write productive Emacs-Lisp. It's unfortunate that we have to load
+;; it eagerly, but it's loaded eagerly by many other packages as well,
+;; so we're probably not losing much time by doing it here.
+(require 'cl-lib)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific package management
@@ -158,22 +153,22 @@ the call must be done in init.before.local.el."
 by `radian-disable-package'), and `nil' otherwise.
 
 See also `radian-disabled-packages'."
-  (radian--every (lambda (package)
-                   (let ((association (assoc package radian-disabled-packages)))
-                     (or (not association)
-                         (<= (cdr association) 0))))
-                 packages))
+  (cl-every (lambda (package)
+              (let ((association (assoc package radian-disabled-packages)))
+                (or (not association)
+                    (<= (cdr association) 0))))
+            packages))
 
 (defun radian-package-disabled-p (&rest packages)
   "Returns `t' if all of the given packages are disabled (for
 example, by `radian-disable-package'), and `nil' otherwise.
 
 See also `radian-disabled-packages'."
-  (radian--every (lambda (package)
-                   (let ((association (assoc package radian-disabled-packages)))
-                     (and association
-                          (> (cdr association) 0))))
-                 packages))
+  (cl-every (lambda (package)
+              (let ((association (assoc package radian-disabled-packages)))
+                (and association
+                     (> (cdr association) 0))))
+            packages))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Deprecated API for user-specific package management
@@ -801,7 +796,7 @@ packages specified in the list of symbols immediately
 following :dependencies to be enabled."
   (when (radian-package-enabled-p name)
     (if (equal (car args) :dependencies)
-        (when (radian--every 'radian-package-enabled-p (cadr args))
+        (when (cl-every 'radian-package-enabled-p (cadr args))
           (apply use-package name (cddr args)))
       (apply use-package name args))))
 
@@ -1559,7 +1554,7 @@ following :dependencies to be enabled."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Load packages added via deprecated API
 
-(unless (radian--every 'package-installed-p radian-packages)
+(unless (cl-every 'package-installed-p radian-packages)
   (package-refresh-contents)
   (dolist (package radian-packages)
     (unless (package-installed-p package)
