@@ -64,6 +64,8 @@ specs=(
     "libclang -> homebrew coreutils"
     "emacs -> homebrew coreutils radian-symlinks"
     "emacs-dotfiles -> coreutils emacs"
+    "vim -> homebrew coreutils"
+    "vim-dotfiles -> coreutils vim"
     "ag -> homebrew coreutils"
     "tree -> homebrew coreutils"
     "tmuxinator -> homebrew coreutils tmux"
@@ -218,6 +220,19 @@ if feature emacs-dotfiles; then
     ./ensure-symlinked.sh ~/.emacs.d/init.el ../init.el
     ./ensure-symlinked.sh ~/.emacs.d/init.before.local.el ../../radian-local/init.before.local.el ./create-init-before-local-el.sh
     ./ensure-symlinked.sh ~/.emacs.d/init.local.el ../../radian-local/init.local.el ./create-init-local-el.sh
+fi
+
+### Vim ###
+
+if feature vim; then
+    ./ensure-installed.sh nvim --version NVIM 0.1.6 brew neovim/neovim/neovim
+    ./ensure-symlinked.sh /usr/local/bin/vim /usr/local/bin/nvim
+fi
+
+if feature vim-dotfiles; then
+    ./ensure-not-version-controlled.sh ~/.config
+    ./ensure-not-version-controlled.sh ~/.config/nvim
+    ./ensure-symlinked.sh ~/.config/nvim/init.vim ../init.vim
 fi
 
 ### Utilities ###

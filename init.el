@@ -428,6 +428,9 @@ If additionally KEYBINDING is \"e i\" then
 (radian-register-dotfile ".tmux.conf" "t c")
 (radian-register-dotfile ".tmux.local.conf" "t l")
 
+;; Vim
+(radian-register-dotfile ".config/nvim/init.vim" "v i")
+
 ;; Zsh
 (radian-register-dotfile ".zshrc" "z r")
 (radian-register-dotfile ".zshrc.antigen.local" "z a")
