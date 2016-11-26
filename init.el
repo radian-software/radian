@@ -751,10 +751,12 @@ Lisp function does not specify a special indentation."
 ;;   statement;
 ;; }
 (eval-after-load 'cc-mode
-  '(if (assoc 'other c-default-style)
-       (setcdr (assoc 'other c-default-style)
-               "k&r")
-     (push '(other . "k&r") c-default-style)))
+  '(progn
+     (if (assoc 'other c-default-style)
+         (setcdr (assoc 'other c-default-style)
+                 "k&r")
+       (push '(other . "k&r") c-default-style))
+     (setq-default c-basic-offset 2)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Bootstrap use-package
