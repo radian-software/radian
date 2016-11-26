@@ -44,25 +44,29 @@ export -f define
 ### Compute features ###
 
 specs=(
-    "wget"
-    "git-dotfiles"
-    "zsh"
-    "antigen -> zsh"
-    "autojump"
-    "zsh-dotfiles -> zsh antigen"
-    "tmux"
-    "tmux-dotfiles -> tmux"
-    "java"
-    "leiningen java"
-    "leiningen-dotfiles -> leiningen"
+    "xcode-cl-tools"
+    "homebrew -> xcode-cl-tools"
+    "coreutils -> homebrew"
+    "wget -> homebrew coreutils"
+    "radian-symlinks -> coreutils"
+    "git-dotfiles -> coreutils"
+    "zsh -> homebrew coreutils"
+    "antigen -> xcode-cl-tools zsh"
+    "autojump -> homebrew coreutils"
+    "zsh-dotfiles -> coreutils zsh antigen"
+    "tmux -> homebrew coreutils"
+    "tmux-dotfiles -> coreutils tmux"
+    "java -> wget"
+    "leiningen -> homebrew coreutils java"
+    "leiningen-dotfiles -> coreutils leiningen"
     "racket -> wget"
-    "cmake"
-    "libclang"
-    "emacs -> wget"
-    "emacs-dotfiles -> emacs"
-    "ag"
-    "tree"
-    "tmuxinator tmux"
+    "cmake -> homebrew coreutils"
+    "libclang -> homebrew coreutils"
+    "emacs -> homebrew coreutils radian-symlinks"
+    "emacs-dotfiles -> coreutils emacs"
+    "ag -> homebrew coreutils"
+    "tree -> homebrew coreutils"
+    "tmuxinator -> homebrew coreutils tmux"
 )
 
 source compute-features.sh
@@ -82,15 +86,28 @@ echo "[setup] Setting up Radian. Prepare to be amazed."
 
 ### Bootstrapping ###
 
-./ensure-xcode-cl-tools-installed.sh
-./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
-./ensure-installed.sh grealpath --version "realpath (GNU coreutils)" any-version brew coreutils
-./ensure-installed.sh wget
+if feature xcode-cl-tools; then
+    ./ensure-xcode-cl-tools-installed.sh
+fi
+
+if feature homebrew; then
+    ./ensure-installed.sh brew --version Homebrew any-version ./install-homebrew.sh
+fi
+
+if feature coreutils; then
+    ./ensure-installed.sh grealpath --version "realpath (GNU coreutils)" any-version brew coreutils
+fi
+
+if feature wget; then
+    ./ensure-installed.sh wget
+fi
 
 ### Radian symlinks ###
 
-./ensure-symlinked.sh ~/.radian ..
-./ensure-symlinked.sh ~/.radian-local ../../radian-local
+if feature radian-symlinks; then
+    ./ensure-symlinked.sh ~/.radian ..
+    ./ensure-symlinked.sh ~/.radian-local ../../radian-local
+fi
 
 ### Git ###
 

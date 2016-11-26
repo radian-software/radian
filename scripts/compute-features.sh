@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "[compute-features] Computing features."
+echo "[compute-features] Computing features. This may take a while, because Bash is horribly slow in addition to being generally horrible."
 
 ### Utility function ###
 

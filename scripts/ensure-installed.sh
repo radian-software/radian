@@ -183,7 +183,9 @@ is_installed_correctly() {
     echo "[ensure-installed] Checking if $executable is available on the \$PATH."
     if command -v "$executable" &>/dev/null; then
         echo "[ensure-installed] $executable appears to be available on the \$PATH."
-        if requires_version; then
+        # We have to install grealpath using this script, so we need
+        # to do this to avoid a circular dependency:
+        if requires_version && command -v grealpath &>/dev/null; then
             echo "[ensure-installed] Checking the version of $executable using '$executable $version_subcommand'."
             version_output="$("$executable" $version_subcommand 2>&1)"
             echo "$version_output"
