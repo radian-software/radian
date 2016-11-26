@@ -1127,6 +1127,12 @@ following :dependencies to be enabled."
   ;; provided by Re-Builder (so you can't quit!).
   (add-to-list 'aggressive-indent-excluded-modes 'reb-mode)
 
+  ;; Disable Aggressive Indent in `vimrc-mode', because `vimrc-mode'
+  ;; does not provide any information about indentation (so
+  ;; `aggressive-indent' just deletes all indentation, which is not
+  ;; helpful).
+  (add-to-list 'aggressive-indent-excluded-modes 'vimrc-mode)
+
   ;; Fix `aggressive-indent-protected-commands'. See [1] for
   ;; discussion.
   ;;
@@ -1615,6 +1621,24 @@ following :dependencies to be enabled."
 
   ;; Enable irony-eldoc.
   (add-hook 'irony-mode-hook #'irony-eldoc))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: VimScript
+
+;; Provides syntax highlighting for VimScript files.
+(use-package vimrc-mode
+  :config
+
+  ;; Indent by two spaces in `vimrc-mode' rather than eight spaces.
+  ;; Based on [1].
+  ;;
+  ;; [1]: http://stackoverflow.com/a/1819405/3538165
+
+  (defun radian--fix-vimrc-indentation ()
+    (setq-local tab-width 2)
+    (setq-local indent-line-function 'insert-tab))
+
+  (add-hook 'vimrc-mode-hook #'radian--fix-vimrc-indentation))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
