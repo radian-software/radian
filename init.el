@@ -527,7 +527,7 @@ This filter de-installs itself after this call."
   ;; this will happen every time a file is saved in that directory.
   (setq-local auto-revert-verbose nil))
 
-(add-hook 'dired-mode-hook 'radian--dired-mode-hook)
+(add-hook 'dired-mode-hook #'radian--dired-mode-hook)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Saving files
@@ -571,7 +571,7 @@ This filter de-installs itself after this call."
 ;; Trim trailing whitespace on save. This will get rid of end-of-line
 ;; whitespace, and reduce the number of blank lines at the end of the
 ;; file to one.
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'before-save-hook #'delete-trailing-whitespace)
 
 ;; Add a trailing newline if there is not one already, when saving.
 ;; This is enabled for default for certain modes, but we want it
@@ -631,15 +631,14 @@ This filter de-installs itself after this call."
 
 ;; Enable ElDoc when editing Lisps and using Lisp REPLs.
 
-(dolist (hook '(emacs-lisp-mode-hook
-                lisp-interaction-mode-hook))
-  (add-hook hook (lambda () (eldoc-mode 1))))
+(add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
+(add-hook 'lisp-interaction-mode-hook #'eldoc-mode)
 
 (when (radian-package-enabled-p 'clojure-mode)
-  (add-hook 'cider-mode-hook (lambda () (eldoc-mode 1))))
+  (add-hook 'cider-mode-hook #'eldoc-mode))
 
 (when (radian-package-enabled-p 'cider)
-  (add-hook 'cider-repl-mode-hook (lambda () (eldoc-mode 1))))
+  (add-hook 'cider-repl-mode-hook #'eldoc-mode))
 
 ;; Show ElDoc messages in the echo area immediately, instead of after
 ;; 1/2 a second.
@@ -754,9 +753,11 @@ Lisp function does not specify a special indentation."
 ;; Add a keybinding (C-c C-k) for evaluating a buffer of Elisp. This
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
 ;; and Geiser.
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (local-set-key (kbd "C-c C-k") 'eval-buffer)))
+
+(defun radian--bind-eval-buffer ()
+  (local-set-key (kbd "C-c C-k") 'eval-buffer))
+
+(add-hook 'emacs-lisp-mode-hook #'radian--bind-eval-buffer)
 
 ;; Add keybindings (C-h C-f and C-h C-v) for jumping to the source of
 ;; Elisp functions and variables. The reason we don't use M-. for this
@@ -773,9 +774,11 @@ Lisp function does not specify a special indentation."
 
 ;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
 ;; Interaction" in the mode line.
-(add-hook 'lisp-interaction-mode-hook
-          (lambda ()
-            (setq mode-name "Lisp-Interaction")))
+
+(defun radian--rename-lisp-interaction-mode ()
+  (setq mode-name "Lisp-Interaction"))
+
+(add-hook 'lisp-interaction-mode-hook #'radian--rename-lisp-interaction-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; C-like languages
@@ -1060,19 +1063,18 @@ following :dependencies to be enabled."
 
   ;; Enable Paredit when editing Lisps and using Lisp REPLs.
 
-  (dolist (hook '(emacs-lisp-mode-hook
-                  lisp-interaction-mode-hook
-                  scheme-mode-hook))
-    (add-hook hook 'enable-paredit-mode))
+  (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
+  (add-hook 'lisp-interaction-mode #'paredit-mode)
+  (add-hook 'scheme-mode-hook #'paredit-mode)
 
   (when (radian-package-enabled-p 'clojure-mode)
-    (add-hook 'clojure-mode-hook 'enable-paredit-mode))
+    (add-hook 'clojure-mode-hook #'paredit-mode))
 
   (when (radian-package-enabled-p 'cider)
-    (add-hook 'cider-repl-mode-hook 'enable-paredit-mode))
+    (add-hook 'cider-repl-mode-hook #'paredit-mode))
 
   (when (radian-package-enabled-p 'geiser)
-    (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode)))
+    (add-hook 'geiser-repl-mode-hook #'paredit-mode)))
 
 ;; Keeps indentation correct at all times.
 (use-package aggressive-indent
@@ -1176,17 +1178,18 @@ following :dependencies to be enabled."
   ;; Company mode overrides standard REPL bindings for M-p and M-n
   ;; when the completions menu is visible. Prevent this, but only in
   ;; REPL modes.
-  (dolist (spec '((cider . cider-repl-mode-hook)
-                  (geiser . geiser-repl-mode-hook)))
-    (let ((package (car spec))
-          (hook (cdr spec)))
-      (when (radian-package-enabled-p package)
-        (add-hook hook
-                  (lambda ()
-                    (make-local-variable 'company-active-map)
-                    (setq company-active-map (copy-tree company-active-map))
-                    (define-key company-active-map (kbd "M-p") nil)
-                    (define-key company-active-map (kbd "M-n") nil))))))
+
+  (defun radian--unbind-company-navigation-keys ()
+    (make-local-variable 'company-active-map)
+    (setq company-active-map (copy-tree company-active-map))
+    (define-key company-active-map (kbd "M-p") nil)
+    (define-key company-active-map (kbd "M-n") nil))
+
+  (when (radian-package-enabled-p 'cider)
+    (add-hook 'cider-repl-mode-hook #'radian--unbind-company-navigation-keys))
+
+  (when (radian-package-enabled-p 'geiser)
+    (add-hook 'geiser-repl-mode-hook #'radian--unbind-company-navigation-keys))
 
   ;; We want pressing RET to trigger a Company completion only if the
   ;; user has interacted explicitly with Company. The only way I can
@@ -1395,13 +1398,14 @@ following :dependencies to be enabled."
   ;; Thanks to malabarba on Clojurians Slack for providing the
   ;; following code:
 
-  (add-hook 'cider-connected-hook
-            (lambda ()
-              (save-excursion
-                (goto-char (point-min))
-                (insert
-                 (with-current-buffer nrepl-server-buffer
-                   (buffer-string))))))
+  (defun radian--dump-nrepl-server-log ()
+    (save-excursion
+      (goto-char (point-min))
+      (insert
+       (with-current-buffer nrepl-server-buffer
+         (buffer-string)))))
+
+  (add-hook 'cider-connected-hook #'radian--dump-nrepl-server-log)
 
   ;; Make the REPL a lot more awesome. This injects a bunch of extra
   ;; features specified by the :awesome vector in profiles.clj. Note
@@ -1461,15 +1465,17 @@ following :dependencies to be enabled."
   :dependencies (clojure-mode cider yasnippet)
   :init
 
-  ;; Enable clj-refactor in Clojure buffers. This is taken directly from
-  ;; the clj-refactor README [1].
+  ;; Enable clj-refactor in Clojure buffers. This is adapted from the
+  ;; clj-refactor README [1].
   ;;
   ;; [1]: https://github.com/clojure-emacs/clj-refactor.el
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (clj-refactor-mode 1)
-              (yas-minor-mode 1)
-              (cljr-add-keybindings-with-prefix "C-c RET")))
+
+  (defun radian--enable-clj-refactor-mode ()
+    (clj-refactor-mode 1)
+    (yas-minor-mode 1)
+    (cljr-add-keybindings-with-prefix "C-c RET"))
+
+  (add-hook 'clojure-mode-hook #'radian--enable-clj-refactor-mode)
 
   :diminish clj-refactor-mode)
 
@@ -1488,9 +1494,9 @@ following :dependencies to be enabled."
   :init
 
   ;; Enable Irony for C, C++, and Objective-C files.
-  (add-hook 'c-mode-hook 'irony-mode)
-  (add-hook 'c++-mode-hook 'irony-mode)
-  (add-hook 'objc-mode-hook 'irony-mode)
+  (add-hook 'c-mode-hook #'irony-mode)
+  (add-hook 'c++-mode-hook #'irony-mode)
+  (add-hook 'objc-mode-hook #'irony-mode)
 
   :config
 
@@ -1498,7 +1504,7 @@ following :dependencies to be enabled."
   ;; company-irony seems to only be able to work in a single buffer.
   ;;
   ;; [1]: https://github.com/Sarcasm/irony-mode
-  (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+  (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
 
   ;; Automatically install irony-server if it is missing. irony-server
   ;; is necessary for Irony to work at all!
@@ -1531,18 +1537,20 @@ following :dependencies to be enabled."
   ;; Tell Company about company-irony. For some reason, this appears
   ;; to cause Irony to be eagerly loaded. So we only do it after Irony
   ;; has been loaded.
-  (add-hook 'irony-mode-hook
-            (lambda ()
-              ;; Don't add `company-irony' as a backend if we have
-              ;; already added `company-irony-c-headers'. The backend
-              ;; for `company-irony-c-headers' is a grouped backend,
-              ;; so it accounts for both, and if we add
-              ;; `company-irony' it will take precedence and inhibit
-              ;; the functionality of `company-irony-c-headers'.
-              (unless (member '(company-irony-c-headers
-                                company-irony)
-                              company-backends)
-                (add-to-list 'company-backends 'company-irony)))))
+
+  (defun radian--set-up-company-irony ()
+    ;; Don't add `company-irony' as a backend if we have
+    ;; already added `company-irony-c-headers'. The backend
+    ;; for `company-irony-c-headers' is a grouped backend,
+    ;; so it accounts for both, and if we add
+    ;; `company-irony' it will take precedence and inhibit
+    ;; the functionality of `company-irony-c-headers'.
+    (unless (member '(company-irony-c-headers
+                      company-irony)
+                    company-backends)
+      (add-to-list 'company-backends 'company-irony)))
+
+  (add-hook 'irony-mode-hook #'radian--set-up-company-irony))
 
 ;; Extends company-irony to work for completing #includes.
 (use-package company-irony-c-headers
@@ -1553,10 +1561,12 @@ following :dependencies to be enabled."
   ;; [1], we must add a grouped backend for things to work properly.
   ;;
   ;; [1]: https://github.com/hotpxl/company-irony-c-headers
-  (add-hook 'irony-mode-hook
-            (lambda ()
-              (add-to-list 'company-backends '(company-irony-c-headers
-                                               company-irony)))))
+
+  (defun radian--set-up-company-irony-c-headers ()
+    (add-to-list 'company-backends '(company-irony-c-headers
+                                     company-irony)))
+
+  (add-hook 'irony-mode-hook #'radian--set-up-company-irony-c-headers))
 
 ;; ElDoc integration for Irony.
 (use-package irony-eldoc
@@ -1567,7 +1577,7 @@ following :dependencies to be enabled."
   :init
 
   ;; Enable irony-eldoc.
-  (add-hook 'irony-mode-hook 'irony-eldoc))
+  (add-hook 'irony-mode-hook #'irony-eldoc))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
