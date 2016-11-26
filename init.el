@@ -319,15 +319,18 @@ loads it. Otherwise, fails silently."
 
   (xterm-mouse-mode t)
 
-  (global-set-key [mouse-4]
-                  (lambda ()
-                    (interactive)
-                    (scroll-down 1)))
+  (defun radian-scroll-down ()
+    "Scroll down one line."
+    (interactive)
+    (scroll-down 1))
 
-  (global-set-key [mouse-5]
-                  (lambda ()
-                    (interactive)
-                    (scroll-up 1))))
+  (defun radian-scroll-up ()
+    "Scroll up one line."
+    (interactive)
+    (scroll-up 1))
+
+  (global-set-key (kbd "<mouse-4>") #'radian-scroll-down)
+  (global-set-key (kbd "<mouse-5>") #'radian-scroll-up))
 
 ;;; Clipboard
 ;; Based on https://gist.github.com/the-kenny/267162
@@ -374,32 +377,62 @@ loads it. Otherwise, fails silently."
 ;;
 ;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
-(defvar radian-dotfiles nil
-  "Association list from a keybinding suffix to be used after
-M-RET to the file opened by the resulting keybinding.")
-(setq radian-dotfiles
-      '(("e i"   ".emacs.d/init.el")
-        ("e b"   ".emacs.d/init.before.local.el")
-        ("e p r" ".emacs.d/init.pre.local.el")
-        ("e p o" ".emacs.d/init.post.local.el")
-        ("e l"   ".emacs.d/init.local.el")
-        ("g c"   ".gitconfig")
-        ("g e"   ".gitexclude")
-        ("g l"   ".gitconfig.local")
-        ("l p"   ".lein/profiles.clj")
-        ("t c"   ".tmux.conf")
-        ("t l"   ".tmux.local.conf")
-        ("z r"   ".zshrc")
-        ("z a"   ".zshrc.antigen.local")
-        ("z b"   ".zshrc.before.local")
-        ("z l"   ".zshrc.local")))
+(defmacro radian-register-dotfile (filename &optional keybinding)
+  "Tell Radian about a dotfile.
 
-(dolist (item radian-dotfiles)
-  (global-set-key (kbd (concat "M-RET " (car item)))
-                  `(lambda ()
-                     ,(concat "Open ~/" (cadr item) " in the current buffer.")
-                     (interactive)
-                     (find-file ,(concat "~/" (cadr item))))))
+This is best demonstrated by example. If NAME is
+\".emacs.d/init.el\" then `radian-register-dotfile' will create
+the interactive function `radian-find-init-el'. Calling that
+function will invoke `find-file' on ~/.emacs.d/init.el.
+
+If additionally KEYBINDING is \"e i\" then
+`radian-register-dotfile' will use `global-set-key' to bind
+`radian-find-init-el' to (kbd \"M-RET e i\")."
+  (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
+         (defun-name (make-symbol
+                      (concat
+                       "radian-find-"
+                       (replace-regexp-in-string "[^a-z0-9]" "-" bare-filename))))
+         (full-filename (concat "~/" filename))
+         (docstring (format "Open %s in the current buffer."
+                            full-filename))
+         (defun-form `(defun ,defun-name ()
+                        ,docstring
+                        (interactive)
+                        (find-file ,full-filename))))
+    (if keybinding
+        (let* ((full-keybinding (concat "M-RET " keybinding))
+               (set-key-form `(global-set-key (kbd ,full-keybinding)
+                                              #',defun-name)))
+          `(progn
+             ,defun-form
+             ,set-key-form))
+      defun-form)))
+
+;; Emacs
+(radian-register-dotfile ".emacs.d/init.el" "e i")
+(radian-register-dotfile ".emacs.d/init.before.local.el" "e b")
+(radian-register-dotfile ".emacs.d/init.pre.local.el" "e p r") ; deprecated
+(radian-register-dotfile ".emacs.d/init.post.local.el" "e p o") ; deprecated
+(radian-register-dotfile ".emacs.d/init.local.el" "e l")
+
+;; Git
+(radian-register-dotfile ".gitconfig" "g c")
+(radian-register-dotfile ".gitexclude" "g e")
+(radian-register-dotfile ".gitconfig.local" "g l")
+
+;; Leiningen
+(radian-register-dotfile ".lein/profiles.clj" "l p")
+
+;; Tmux
+(radian-register-dotfile ".tmux.conf" "t c")
+(radian-register-dotfile ".tmux.local.conf" "t l")
+
+;; Zsh
+(radian-register-dotfile ".zshrc" "z r")
+(radian-register-dotfile ".zshrc.antigen.local" "z a")
+(radian-register-dotfile ".zshrc.before.local" "z b")
+(radian-register-dotfile ".zshrc.local" "z l")
 
 (when (equal radian-customize-completion-mechanism 'helm-ido)
   ;; Use IDO ("interactive do") for C-x C-f and other file-finding
@@ -503,8 +536,8 @@ This filter de-installs itself after this call."
 (when (radian-package-disabled-p 'helm)
   (autoload 'dired-jump "dired-x")
   (autoload 'dired-jump-other-window "dired-x")
-  (global-set-key (kbd "C-x C-j") 'dired-jump)
-  (global-set-key (kbd "C-x 4 C-j") 'dired-jump-other-window))
+  (global-set-key (kbd "C-x C-j") #'dired-jump)
+  (global-set-key (kbd "C-x 4 C-j") #'dired-jump-other-window))
 
 ;; Suppress the 'ls does not support --dired' warning. Doing this instead
 ;; of installing a dired-compatibile ls is much easier, although it may
@@ -742,35 +775,36 @@ Lisp function does not specify a special indentation."
 ;; change something in your configuration, then later come back to an
 ;; old Emacs that was opened before you made the change. You can then
 ;; just press M-RET r to get the change into that instance.
-(global-set-key (kbd "M-RET r")
-                '(lambda ()
-                   "Reload init.el."
-                   (interactive)
-                   (message "Reloading init.el...")
-                   (radian-load-user-config "init.el")
-                   (message "Reloading init.el... done.")))
+
+(defun radian-reload-init ()
+  "Reload init.el."
+  (interactive)
+  (message "Reloading init.el...")
+  (radian-load-user-config "init.el")
+  (message "Reloading init.el... done."))
+
+(global-set-key (kbd "M-RET r") #'radian-reload-init)
 
 ;; Add a keybinding (C-c C-k) for evaluating a buffer of Elisp. This
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
 ;; and Geiser.
 
 (defun radian--bind-eval-buffer ()
-  (local-set-key (kbd "C-c C-k") 'eval-buffer))
+  (local-set-key (kbd "C-c C-k") #'eval-buffer))
 
 (add-hook 'emacs-lisp-mode-hook #'radian--bind-eval-buffer)
 
 ;; Add keybindings (C-h C-f and C-h C-v) for jumping to the source of
-;; Elisp functions and variables. The reason we don't use M-. for this
-;; is twofold. Firstly, in Elisp functions and variables have
-;; different namespaces, and thus different commands are needed to
-;; jump to functions and variables. Secondly, we might want to jump to
-;; the source of an Elisp function while editing another language,
-;; where M-. is rebound to jump to the source of symbols in that
-;; language. Note that this overrides the default binding of C-h C-f
-;; to `view-emacs-FAQ', but I think this is not very important.
+;; Elisp functions and variables. Also, add a keybinding (C-h C-o)
+;; that duplicates the functionality of M-., because the latter
+;; command is often rebound by other major modes. Note that this
+;; overrides the default bindings of C-h C-f to `view-emacs-FAQ' and
+;; C-h C-o to `describe-distribution', but I think this is not very
+;; important.
 
-(global-set-key (kbd "C-h C-f") 'find-function)
-(global-set-key (kbd "C-h C-v") 'find-variable)
+(global-set-key (kbd "C-h C-f") #'find-function)
+(global-set-key (kbd "C-h C-v") #'find-variable)
+(global-set-key (kbd "C-h C-o") #'xref-find-definitions)
 
 ;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
 ;; Interaction" in the mode line.
