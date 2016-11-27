@@ -55,7 +55,7 @@
 ;; automatically disables the packages for the other completion
 ;; system.
 (defvar radian-customize-completion-mechanism nil)
-(setq radian-customize-completion-mechanism 'helm-ido)
+(setq radian-customize-completion-mechanism 'ivy)
 
 ;; Override package archives. If this is non-nil, then it is used as
 ;; the value of `package-archives' instead of the Radian default (GNU
