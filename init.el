@@ -1029,6 +1029,11 @@ following :dependencies to be enabled."
 ;; use Ivy for completion, and adds a few new commands (such as
 ;; `counsel-git-ag').
 (use-package counsel
+  :config
+
+  ;; If there is a valid file at point, pre-select in C-x C-f.
+  (setq counsel-find-file-at-point t)
+
   :bind (;; Use Counsel for common Emacs commands.
          ("M-x" . counsel-M-x)
          ("C-x C-f" . counsel-find-file)
