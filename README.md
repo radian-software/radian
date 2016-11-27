@@ -7,21 +7,19 @@ This repository contains configurations for [Emacs], [Zsh], [Tmux],
 [Leiningen], and [Git] based on the philosophy that good
 configurations should:
 
-- be easily customizable and extensible, so that people with a wide
+* be easily customizable and extensible, so that people with a wide
   range of preferences can use them easily;
-- be highly modular, so that components can be added or removed
+* be highly modular, so that components can be added or removed
   easily;
-- contain high-quality, well-documented code, so that every part of
+* contain high-quality, well-documented code, so that every part of
   them can be easily modified; and perhaps most importantly,
-- Just Work&trade;.
+* Just Work&trade;.
 
 ## Contents
 
-- Information on how to set up Radian (see below)
-- Information on how to use Emacs
-  (see [`reference/EMACS.md`](reference/EMACS.md))
-- Information on how to contribute to Radian
-  (see [`CONTRIBUTING.md`](CONTRIBUTING.md))
+* How to set up Radian (see below)
+* [How to use Radian Emacs](docs/emacs/summary.md)
+* [How to contribute to Radian](CONTRIBUTING.md)
 
 ## Setup on macOS
 
@@ -45,11 +43,11 @@ automatically detect and fix what is wrong.
 Depending on your system and what tools you want to use, you may—for
 now—have to do the following steps manually:
 
-- If you want to use Tmux, you will need to install
+* If you want to use Tmux, you will need to install
   a [powerline-patched font][fonts] and select it in your terminal
   emulator (Terminal.app or [iTerm2]). I
   use [Ubuntu Mono derivative Powerline Bold][font].
-- In Emacs, some of the more unusual keyboard shortcuts (such as
+* In Emacs, some of the more unusual keyboard shortcuts (such as
   `C-)`) may not work correctly. This is a general problem with
   terminal emulators, unfortunately—getting non-alphabetic keyboard
   combinations to be passed through to programs is very difficult.
@@ -58,22 +56,22 @@ now—have to do the following steps manually:
   your experience somewhat by copying
   the [iTerm2 preferences file from `rally-emacs`][plist], which has
   some patches to improve keybinding support.
-- To get copy/paste to integrate with the system clipboard in iTerm2,
+* To get copy/paste to integrate with the system clipboard in iTerm2,
   you will need to enable `Applications in terminal may access
   clipboard`
   (see [open issue][settings issue]).
-- To get the Meta key to work in iTerm2, you will need to select
+* To get the Meta key to work in iTerm2, you will need to select
   `Left/Right option key acts as +Esc`
   (see [open issue][settings issue]).
 
 Although the setup script is extremely good at fixing whatever mess
 your system might be in, there are a few things to watch out for:
 
-- It's not easy to correctly reset the shell environment, so the setup
+* It's not easy to correctly reset the shell environment, so the setup
   script doesn't try. This means that if your environment variables
   are configured oddly, they will stay that way and you will have to
   open a new shell if you want them to be cleared.
-- If you already have Emacs packages installed, the setup script has
+* If you already have Emacs packages installed, the setup script has
   no way of checking if they are the correct versions. You might want
   to run `M-x list-packages` to check if there are any updates
   available. To be extra safe, just `rm -rf ~/.emacs.d/elpa` and
