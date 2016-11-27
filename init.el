@@ -1031,6 +1031,7 @@ following :dependencies to be enabled."
 (use-package counsel
   :bind (;; Use Counsel for common Emacs commands.
          ("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
          ("C-h f" . counsel-describe-function)
          ("C-h v" . counsel-describe-variable)
          ("C-h l" . counsel-load-library)
