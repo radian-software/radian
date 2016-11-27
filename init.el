@@ -1054,7 +1054,30 @@ following :dependencies to be enabled."
          ;; After you have pressed M-:, you can use C-r to select a
          ;; previous entry using Counsel.
          :map read-expression-map
-         ("C-r" . counsel-expression-history)))
+         ("C-r" . counsel-expression-history)
+
+         ;; Improve the Ivy keybindings, making them more predictable.
+         ;;
+         ;; There are essentially three "accept" actions in Ivy: RET,
+         ;; TAB, and C-j. Sometimes two or even all three of them do
+         ;; the same thing, but there is one situation when there are
+         ;; three different behaviors that might be desirable. This is
+         ;; when you are in `counsel-find-file', and you have typed in
+         ;; "foo", and there is a folder called "foobar" in the same
+         ;; directory.
+         ;;
+         ;; In this situation, RET will `dired' the folder "foobar",
+         ;; TAB will move Ivy into the "foobar" folder, and C-j will
+         ;; create a new file called "foo". But only with the
+         ;; keybindings below! The default behavior is different, and
+         ;; weird. I think this is the most intuitive and useful.
+         ;;
+         ;; As always, TAB is for terminal Emacs and <tab> is for
+         ;; windowed Emacs.
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("<tab>" . ivy-alt-done)
+         ("C-j" . ivy-immediate-done)))
 
 ;; Provides enhanced versions of the Projectile commands that use Ivy.
 (use-package counsel-projectile
