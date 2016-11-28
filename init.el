@@ -906,6 +906,33 @@ following :dependencies to be enabled."
 
 (advice-add 'use-package :around 'radian--use-package-add-dependencies)
 
+;; Add an advice to automatically refresh the package list before
+;; installing a package (but only once). This has an effect because
+;; `use-package' eventually calls through to `package-install'.
+;;
+;; If we don't do this, then we might get errors when you try to
+;; install a package with `use-package' without first manually running
+;; `package-refresh-contents'. Specifically, this will happen if the
+;; package you are trying to install has been updated since the last
+;; time `package-refresh-contents' was run (or, by default, the first
+;; time you ever tried to install a package).
+;;
+;; The issue is discussed at [1], but the solution used here is
+;; modified so that it does not require `cl' (currently, Radian only
+;; loads `cl-lib').
+;;
+;; This problem should not happen when packages are installed via
+;; Quelpa, but just in case the user puts a plain `use-package' form
+;; in their init.local.el, we have to fix this error.
+;;
+;; [1]: https://github.com/jwiegley/use-package/issues/256
+
+(defun radian--package-install-refresh-contents (&rest args)
+  (package-refresh-contents)
+  (advice-remove 'package-install 'radian--package-install-refresh-contents))
+
+(advice-add 'package-install :before 'radian--package-install-refresh-contents)
+
 ;; Load deprecated user-specific configuration file.
 (radian-load-user-config "init.post.local.el")
 
