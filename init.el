@@ -892,7 +892,7 @@ Lisp function does not specify a special indentation."
 ;; Add an advice to `use-package' to make it so that disabled packages
 ;; are not loaded. See the docstring for more information.
 
-(defun use-package--radian (use-package name &rest args)
+(defun radian--use-package-add-dependencies (use-package name &rest args)
   "Only initialize and load a package if it is enabled (according
 to `radian-package-enabled-p'). If the first argument specified
 after the package name is :dependencies, then also require any
@@ -904,7 +904,7 @@ following :dependencies to be enabled."
           (apply use-package name (cddr args)))
       (apply use-package name args))))
 
-(advice-add 'use-package :around 'use-package--radian)
+(advice-add 'use-package :around 'radian--use-package-add-dependencies)
 
 ;; Load deprecated user-specific configuration file.
 (radian-load-user-config "init.post.local.el")
