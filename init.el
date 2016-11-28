@@ -623,6 +623,15 @@ This filter de-installs itself after this call."
 (setq kill-do-not-save-duplicates t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Navigation
+
+;; When using M-. and friends, always prompt for the identifier (it
+;; defaults to the identifier at point). This behavior is more
+;; consistent and predictable than the default, which is to jump
+;; immediately if there is a valid symbol at point.
+(setq xref-prompt-for-identifier t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Searching
 
 ;; Eliminate the quarter-second delay before I-search matches are
