@@ -126,7 +126,7 @@ if [[ $RADIAN_CUSTOMIZE_PROMPT != false ]]; then
     ZSH_THEME_GIT_PROMPT_CLEAN="]"
 fi
 
-# Use 'resource' to reload .zshrc.
+# Use "resource" to reload .zshrc.
 if [[ $RADIAN_CUSTOMIZE_RESOURCE_ALIAS != false ]]; then
     alias resource="source ~/.zshrc"
 fi
