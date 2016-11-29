@@ -52,7 +52,7 @@ specs=(
     "git-dotfiles -> coreutils"
     "zsh -> homebrew coreutils"
     "antigen -> xcode-cl-tools zsh"
-    "autojump -> homebrew coreutils"
+    "fasd -> homebrew coreutils"
     "zsh-dotfiles -> coreutils zsh antigen"
     "tmux -> homebrew coreutils"
     "tmux-dotfiles -> coreutils tmux"
@@ -140,8 +140,8 @@ if feature antigen; then
     ./ensure-antigen-installed.sh
 fi
 
-if feature autojump; then
-    ./ensure-installed.sh autojump
+if feature fasd; then
+    ./ensure-installed.sh fasd
 fi
 
 if feature zsh-dotfiles; then

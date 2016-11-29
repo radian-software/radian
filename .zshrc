@@ -50,7 +50,7 @@ antigen use oh-my-zsh
 # definition *must* be preserved, as it is read programmatically by
 # create-zshrc-antigen-local.sh.
 bundles=(
-    autojump # Use 'j' to jump to frequent directories with fuzzy-matching
+    fasd # Quickly jump to frequently used directories
     git # Aliases for git
     lein # Completion for lein
     osx # Interop with OSX and iTunes
