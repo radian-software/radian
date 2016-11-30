@@ -126,6 +126,13 @@ if [[ $RADIAN_CUSTOMIZE_PROMPT != false ]]; then
     ZSH_THEME_GIT_PROMPT_CLEAN="]"
 fi
 
+# Support for "hub" commands, see [1].
+#
+# [1]: https://github.com/github/hub
+if [[ $RADIAN_HUB_ALIAS != false ]]; then
+    eval "$(hub alias -s)" 2>/dev/null || true
+fi
+
 # Use "resource" to reload .zshrc.
 if [[ $RADIAN_CUSTOMIZE_RESOURCE_ALIAS != false ]]; then
     alias resource="source ~/.zshrc"

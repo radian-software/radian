@@ -67,6 +67,7 @@ specs=(
     "vim -> homebrew coreutils"
     "vim-dotfiles -> coreutils vim"
     "ag -> homebrew coreutils"
+    "hub -> homebrew coreutils"
     "tree -> homebrew coreutils"
     "tmuxinator -> homebrew coreutils tmux"
 )
@@ -239,6 +240,10 @@ fi
 
 if feature ag; then
     ./ensure-installed.sh ag --version ag any-version brew the_silver_searcher
+fi
+
+if feature hub; then
+    ./ensure-installed.sh hub
 fi
 
 if feature tree; then
