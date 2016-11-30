@@ -1120,15 +1120,51 @@ following :dependencies to be enabled."
 
 ;; Provides enhanced versions of the Projectile commands that use Ivy.
 (use-package counsel-projectile
-  :demand t
-  :config
+  :init
 
-  ;; Use Counsel for the standard Projectile commands, in addition
-  ;; to the default C-c p SPC command. Using
-  ;; `counsel-projectile-toggle' instead of `counsel-projectile-on'
-  ;; means we don't get a silly message about "Turn on
-  ;; counsel-projectile key bindings".
-  (counsel-projectile-toggle 1))
+  ;; Define the keybindings for counsel-projectile. The next two
+  ;; functions are adapted from the definition of
+  ;; `counsel-projectile-toggle'. Copying them out here means that we
+  ;; can call them without loading `counsel-projectile', so that the
+  ;; keybindings are defined but everything else is left autoloaded.
+  ;; We use plain `define-key' calls because there was difficulty
+  ;; getting use-package's `:bind' to work correctly, see [1].
+  ;;
+  ;; [1]: https://github.com/jwiegley/use-package/issues/413
+
+  (defun radian--counsel-projectile-commander-bindings ()
+    (def-projectile-commander-method ?f
+      "Find file in project."
+      (counsel-projectile-find-file))
+    (def-projectile-commander-method ?d
+      "Find directory in project."
+      (counsel-projectile-find-dir))
+    (def-projectile-commander-method ?b
+      "Switch to project buffer."
+      (counsel-projectile-switch-to-buffer))
+    (def-projectile-commander-method ?A
+      "Search project files with ag."
+      (counsel-projectile-ag))
+    (def-projectile-commander-method ?s
+      "Switch project."
+      (counsel-projectile-switch-project)))
+
+  (defun radian--counsel-projectile-on ()
+    (when (eq projectile-switch-project-action #'projectile-find-file)
+      (setq projectile-switch-project-action #'counsel-projectile))
+    (define-key projectile-mode-map [remap projectile-find-file]
+      #'counsel-projectile-find-file)
+    (define-key projectile-mode-map [remap projectile-find-dir]
+      #'counsel-projectile-find-dir)
+    (define-key projectile-mode-map [remap projectile-switch-project]
+      #'counsel-projectile-switch-project)
+    (define-key projectile-mode-map [remap projectile-ag]
+      #'counsel-projectile-ag)
+    (define-key projectile-mode-map [remap projectile-switch-to-buffer]
+      #'counsel-projectile-switch-to-buffer)
+    (radian--counsel-projectile-commander-bindings))
+
+  (eval-after-load 'projectile '(radian--counsel-projectile-on)))
 
 ;; Provides an enhanced version of Isearch that uses Ivy to display
 ;; a preview of the results.
