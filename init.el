@@ -1235,13 +1235,6 @@ following :dependencies to be enabled."
   ;; helpful).
   (add-to-list 'aggressive-indent-excluded-modes 'vimrc-mode)
 
-  ;; Fix `aggressive-indent-protected-commands'. See [1] for
-  ;; discussion.
-  ;;
-  ;; [1]: https://github.com/Malabarba/aggressive-indent-mode/issues/101
-  (add-to-list 'aggressive-indent-dont-indent-if
-               '(memq last-command aggressive-indent-protected-commands))
-
   :diminish (aggressive-indent-mode . "AggrIndent"))
 
 ;; Provides undo/redo commands that are both more intuitive and more
