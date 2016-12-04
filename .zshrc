@@ -215,7 +215,7 @@ fi
 # Takes a project name and an optional command. If a tmux session with
 # the project name already exists, switches to it. Otherwise, you need
 # to have wd installed. If a warp point with the project name already
-# exists, jumps to it. Otherwise, uses autojump to make a guess at the
+# exists, jumps to it. Otherwise, uses fasd to make a guess at the
 # correct directory (and creates a warp point, with your permission).
 # After getting to the correct directory, sets up a tmux session with
 # windows: emacs, git, zsh, zsh. Runs 'emacs' in the first window and
@@ -277,15 +277,16 @@ if [[ $RADIAN_CUSTOMIZE_PROJ_ALIAS != false ]]; then
                     )
                 else
                     echo "Warp point '$1' not found."
-                    if which autojump &>/dev/null && type j &>/dev/null; then
-                        guess="$(cd / && autojump $1)"
-                        if [[ $guess != . ]]; then
+                    if which fasd &>/dev/null && type z &>/dev/null; then
+                        guess="$(z $1 && echo $PWD)"
+                        if [[ $guess ]]; then
                             echo "$guess"
-                            echo -n "Is this the correct directory? (y/n) "
+                            echo -n "Is this the correct directory? (Y/n) "
                             read answer
-                            if echo "$answer" | egrep -qi "^y"; then
-                                echo -n "Please enter the project name: "
+                            if echo "$answer" | egrep -qiv "^n"; then
+                                echo -n "Please enter the project name or leave blank to use $1: "
                                 read project
+                                project=${project:-$1}
                                 (cd "$guess" && wd add "$project")
                                 proj "$project" "$2"
                                 return 0
@@ -296,7 +297,7 @@ if [[ $RADIAN_CUSTOMIZE_PROJ_ALIAS != false ]]; then
                         echo "You'll have to navigate to the directory manually before running proj."
                         return 1
                     else
-                        echo "You need autojump installed for this to work."
+                        echo "You need fasd installed for this to work."
                         return 1
                     fi
                 fi
