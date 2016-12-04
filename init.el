@@ -370,12 +370,6 @@ loads it. Otherwise, fails silently."
 ;; dotfiles set up by Radian. These all begin with M-RET and are
 ;; designed to be mnemonic, as in <M-RET e p r> standing for "go to
 ;; [e]macs init.[pr]e.local.el".
-;;
-;; Here we are using the defvar-nil-setq pattern described in [1],
-;; which makes it so that changes to `radian-dotfiles' will be picked
-;; up by a reload of init.el (M-RET r).
-;;
-;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
 (defmacro radian-register-dotfile (filename &optional keybinding)
   "Tell Radian about a dotfile.
