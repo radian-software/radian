@@ -1093,6 +1093,15 @@ following :dependencies to be enabled."
   (quelpa-use-package-activate-advice))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Managing Emacs
+
+;; Allows you to restart Emacs from within Emacs.
+(use-package restart-emacs
+  :bind (;; Add a binding that parallels C-x C-c, so that it is very
+         ;; easy and natural to restart Emacs from within Emacs.
+         "C-x M-c" . restart-emacs))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Completion systems
 
 ;; Sorts M-x completions by usage. Automatically used by Ivy if
