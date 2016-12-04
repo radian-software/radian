@@ -1394,6 +1394,25 @@ following :dependencies to be enabled."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Navigation
 
+;; Jump to frequently used directories by name.
+(use-package fasd
+  :demand t
+  :config
+
+  ;; Use completion from a list of fasd candidates for
+  ;; `fasd-find-file', instead of just prompting for an input.
+  (setq fasd-enable-initial-prompt nil)
+
+  ;; Use Ivy (or Helm, if `radian-customize-completion-mechanism' is
+  ;; set to `helm-ido') for completion, instead of `grizzl'.
+  (setq fasd-completing-read-function nil)
+
+  ;; Make it so that Emacs file-finding updates the fasd database.
+  (global-fasd-mode 1)
+
+  :bind (;; Add a keybinding for using the functionality of `fasd'.
+         ("C-c f" . fasd-find-file)))
+
 ;; Provides commands to quickly navigate within and between
 ;; "projects".
 (use-package projectile
