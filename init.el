@@ -470,11 +470,18 @@ If additionally KEYBINDING is \"e i\" then
   ;; system.
   (setq ido-auto-merge-work-directories-length -1))
 
-;; Follow symlinks without prompting. If this isn't done, then you
-;; will get a prompt every time you edit init.el with M-RET e i. (That
-;; is, assuming that ~/.emacs.d/init.el is a symlink, which is how the
-;; setup script sets it up.)
-(setq vc-follow-symlinks t)
+;; Follow symlinks when opening files. This has the concrete impact,
+;; for instance, that when you edit this file with M-RET e i and then
+;; later do C-x C-f, you will be in the Radian repository instead of
+;; your home directory.
+(setq find-file-visit-truename t)
+
+;; Disable Emacs' built-in version control handling. This improves
+;; performance and disables some annoying warning messages and
+;; prompts, especially regarding symlinks. See [1].
+;;
+;; [1]: http://stackoverflow.com/a/6190338/3538165
+(setq vc-handled-backends nil)
 
 ;; Automatically create any nonexistent parent directories when
 ;; finding a file. If the buffer for the new file is killed without
