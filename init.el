@@ -1939,13 +1939,32 @@ following :dependencies to be enabled."
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
 (use-package git-commit
-  :demand t
-  :config
+  :init
 
-  ;; Enable the functionality of the git-commit package. This should
-  ;; be enabled by default for emacsclient, but we need to turn it on
-  ;; explicitly for regular Emacs.
-  (global-git-commit-mode 1)
+  ;; Enable the functionality of the git-commit package.
+  ;; Unfortunately, doing this via `global-git-commit-mode' is *very
+  ;; slow* because it requires `git-commit' to be loaded eagerly,
+  ;; which means that `log-edit' and `with-editor' need to be loaded
+  ;; eagerly, which adds up to almost 1/4 second at startup. So we
+  ;; have to copy the setup code from `git-commit' in order to avoid
+  ;; loading the package.
+
+  (defconst radian--git-commit-filename-regexp "/\\(\
+\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\
+\\|BRANCH_DESCRIPTION\\)\\'")
+
+  (defun radian--git-commit-setup-check-buffer ()
+    (when (and buffer-file-name
+               (string-match-p radian--git-commit-filename-regexp
+                               buffer-file-name))
+      ;; The `git-commit-setup' function is regrettably not
+      ;; autoloaded, so we have to `require' the package manually.
+      (require 'git-commit)
+      (git-commit-setup)))
+
+  (add-hook 'find-file-hook #'radian--git-commit-setup-check-buffer)
+
+  :config
 
   ;; Wrap summary at 50 characters as per [1].
   ;;
