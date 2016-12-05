@@ -1100,16 +1100,45 @@ following :dependencies to be enabled."
   (setq quelpa-update-melpa-p nil))
 
 ;; Add a :quelpa keyword to `use-package', which allows installing
-;; packages with quelpa.
-(use-package quelpa-use-package
-  :demand t
-  :config
+;; packages with quelpa. We have a bit of a chicken and egg problem
+;; here. We don't want to load quelpa during startup, because that's
+;; slow. But quelpa-use-package loads quelpa eagerly. So we have to
+;; use my fork of quelpa-use-package, which fixes that. But installing
+;; from a fork requires quelpa. But we don't want to load it eagerly.
+;; So we have to use my fork of quelpa-use-package...
+;;
+;; The solution here is to use two separate code paths. On first
+;; install, quelpa will be loaded eagerly and used to install
+;; quelpa-use-package. But after that, quelpa-use-package can install
+;; itself, thus solving the problem of quelpa being loaded eagerly.
+;;
+;; (Note that, as long as we are using my fork, loading
+;; quelpa-use-package eagerly is not a problem. In fact, it's required
+;; because we need to activate its advice before processing
+;; use-package forms that might contain `:quelpa' keywords.)
 
-  ;; Allow the :quelpa keyword to work even when
-  ;; `use-package-always-ensure' is enabled. See [1].
-  ;;
-  ;; [1]: https://github.com/quelpa/quelpa-use-package
-  (quelpa-use-package-activate-advice))
+(if (require 'quelpa-use-package nil 'noerror)
+    (progn
+      ;; If I don't include this then I get an error about eager
+      ;; macro-expansion because the `:quelpa' keyword in the next
+      ;; use-package form is not defined for the compiler.
+      (eval-when-compile
+        (require 'quelpa-use-package))
+      (use-package quelpa-use-package
+        :demand t
+        :quelpa (quelpa-use-package
+                 :fetcher github
+                 :repo "raxod502/quelpa-use-package")))
+  (quelpa '(quelpa-use-package
+            :fetcher github
+            :repo "raxod502/quelpa-use-package"))
+  (require 'quelpa-use-package))
+
+;; Allow the :quelpa keyword to work even when
+;; `use-package-always-ensure' is enabled. See [1].
+;;
+;; [1]: https://github.com/quelpa/quelpa-use-package
+(quelpa-use-package-activate-advice)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Managing Emacs
