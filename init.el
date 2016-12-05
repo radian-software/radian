@@ -66,6 +66,23 @@
 (setq radian-customize-package-archives nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Optimization
+
+;; Turn off garbage collection during startup, and then re-enable it.
+;; This is supposed to improve startup time, because invoking the
+;; garbage collector many times is slow. See [1].
+;;
+;; [1]: http://emacs.stackexchange.com/a/16595/12534
+
+(setq gc-cons-threshold most-positive-fixnum)
+
+(defun radian--reset-gc-cons-threshold ()
+  "Reset `gc-cons-threshold' to its default value."
+  (setq gc-cons-threshold 800000))
+
+(add-hook 'emacs-startup-hook #'radian--reset-gc-cons-threshold)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Libraries
 
 ;; This provides some functions that are really quite necessary to
