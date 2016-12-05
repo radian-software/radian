@@ -1445,7 +1445,8 @@ following :dependencies to be enabled."
 
   ;; Put all the undo information in a single directory, instead of in
   ;; each file's directory.
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs-undos")))
+  (setq undo-tree-history-directory-alist
+	`(("." . ,(concat user-emacs-directory "undo-tree"))))
 
   ;; Don't show Undo Tree in the mode line.
   (setq undo-tree-mode-lighter nil)
