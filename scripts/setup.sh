@@ -51,9 +51,9 @@ specs=(
     "radian-symlinks -> coreutils"
     "git-dotfiles -> coreutils"
     "zsh -> homebrew coreutils"
-    "antigen -> xcode-cl-tools zsh"
+    "zplug -> homebrew coreutils zsh"
     "fasd -> homebrew coreutils"
-    "zsh-dotfiles -> coreutils zsh antigen"
+    "zsh-dotfiles -> coreutils zsh zplug"
     "tmux -> homebrew coreutils"
     "tmux-dotfiles -> coreutils tmux"
     "java -> wget"
@@ -137,8 +137,8 @@ if feature zsh; then
     export SHELL="$(which zsh)"
 fi
 
-if feature antigen; then
-    ./ensure-antigen-installed.sh
+if feature zplug; then
+    ./ensure-installed.sh zplug version zplug 2.3.2 brew zplug --require --headless
 fi
 
 if feature fasd; then
@@ -148,7 +148,6 @@ fi
 if feature zsh-dotfiles; then
     ./ensure-symlinked.sh ~/.zshrc ../.zshrc
     ./ensure-symlinked.sh ~/.zshrc.before.local ../../radian-local/.zshrc.before.local ./create-zshrc-before-local.sh
-    ./ensure-symlinked.sh ~/.zshrc.antigen.local ../../radian-local/.zshrc.antigen.local ./create-zshrc-antigen-local.sh
     ./ensure-symlinked.sh ~/.zshrc.local ../../radian-local/.zshrc.local ./create-zshrc-local.sh
 fi
 
