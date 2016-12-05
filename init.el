@@ -438,7 +438,6 @@ If additionally KEYBINDING is \"e i\" then
 
 ;; Zsh
 (radian-register-dotfile ".zshrc" "z r")
-(radian-register-dotfile ".zshrc.antigen.local" "z a")
 (radian-register-dotfile ".zshrc.before.local" "z b")
 (radian-register-dotfile ".zshrc.local" "z l")
 

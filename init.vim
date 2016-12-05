@@ -45,7 +45,6 @@ nnoremap <leader>evi :edit ~/.config/nvim/init.vim<cr>
 
 "" Zsh
 nnoremap <leader>ezr :edit ~/.zshrc<cr>
-nnoremap <leader>eza :edit ~/.zshrc.antigen.local<cr>
 nnoremap <leader>ezb :edit ~/.zshrc.before.local<cr>
 nnoremap <leader>ezl :edit ~/.zshrc.local<cr>
 

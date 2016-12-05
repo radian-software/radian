@@ -1,9 +1,44 @@
-# Local overrides (1 of 3)
+### Define default bundle list ###
+
+bundles=(
+    "plugins/fasd, from:oh-my-zsh" # Quickly jump to directories
+    "plugins/git, from:oh-my-zsh" # Aliases for git
+    "plugins/lein, from:oh-my-zsh" # Completion for lein
+    "plugins/osx, from:oh-my-zsh" # Interop with OSX and iTunes
+    "plugins/sudo, from:oh-my-zsh" # Quickly re-run commands with sudo
+    "plugins/tmuxinator, from:oh-my-zsh" # Completion for tmuxinator
+    "plugins/wd, from:oh-my-zsh" # Quickly jump to directories
+    "plugins/web-search, from:oh-my-zsh" # Search the web
+    "zsh-users/zsh-autosuggestions" # Autosuggestions from history
+)
+
+### Define bundle list management functions ###
+
+# Usage: add_bundle <zplug-args>
+#
+# Adds a bundle to $bundles. Word splitting will be performed on
+# zplug-args to determine the arguments that will be passed to zplug.
+add_bundle() {
+    if ! (( ${bundles[(I)$1]} )); then
+        bundles+=($1)
+    fi
+}
+
+# Usage: remove_bundle <zplug-args>
+#
+# Removes a bundle from $bundles by name. The name should be exactly
+# the same as it appears in $bundles, with spaces if necessary.
+remove_bundle() {
+    bundles=("${(@)bundles:#$1}")
+}
+
+### Load user-specific configuration file (1 of 2) ###
+
 if [[ -f ~/.zshrc.before.local ]]; then
     source ~/.zshrc.before.local
 fi
 
-# Provide backwards compatibility for old parameter names.
+### Provide backwards compatibility for old parameter names ###
 
 if [[ $radian_colored_man_pages ]]; then
     export RADIAN_CUSTOMIZE_COLORED_MAN_PAGES=$radian_colored_man_pages
@@ -37,69 +72,119 @@ if [[ $radian_proj_alias ]]; then
     export RADIAN_CUSTOMIZE_PROJ_ALIAS=$radian_proj_alias
 fi
 
-### Antigen ###
-
-# Load Antigen.
-source ~/.antigen-repo/antigen.zsh
-
-# Just to be safe: The core oh-my-zsh library is necessary for a
-# number of oh-my-zsh plugins and themes to work correctly.
-antigen use oh-my-zsh
-
-# Define default bundle list. Please note that the formatting of this
-# definition *must* be preserved, as it is read programmatically by
-# create-zshrc-antigen-local.sh.
-bundles=(
-    fasd # Quickly jump to frequently used directories
-    git # Aliases for git
-    lein # Completion for lein
-    osx # Interop with OSX and iTunes
-    sudo # Use ESC ESC to prefix previous or current command with 'sudo'
-    tmuxinator # Completion for tmuxinator
-    wd # Mark directories with 'wd add' and jump to them with 'wd'
-    web-search # Search Google, DuckDuckGo, Maps, etc.
-    zsh-users/zsh-autosuggestions # Suggest completions based on past commands
-)
-
-# Usage: add_bundle <antigen-bundle-args>
-# Adds a bundle to $bundles. Word splitting will be performed on
-# antigen-bundle-args to determine the arguments that will be passed to
-# 'antigen bundle'.
-add_bundle() {
-    if ! (( ${bundles[(I)$1]} )); then
-        bundles+=($1)
-    fi
-}
-
-# Usage: remove_bundle <antigen-bundle-args>
-# Removes a bundle from $bundles by name. The name should be exactly the
-# same as it appears in $bundles, with spaces if necessary.
-remove_bundle() {
-    bundles=("${(@)bundles:#$1}")
-}
-
-# Local overrides (2 of 3)
-if [[ -f ~/.zshrc.antigen.local ]]; then
-    source ~/.zshrc.antigen.local
+if [[ $RADIAN_CUSTOMIZE_SOURCE_AND_DOT_ALIASES ]]; then
+    export RADIAN_CUSTOMIZE_MAGIC_DOT=$RADIAN_CUSTOMIZE_SOURCE_AND_DOT_ALIASES
 fi
 
-# Load bundles.
-for bundle in $bundles; do
-    antigen bundle $=bundle
-done
+### zplug ###
 
-# Tell Antigen to apply the changes in which bundles are loaded.
-antigen apply
+export ZPLUG_HOME=/usr/local/opt/zplug
 
-### Zsh ###
+if [[ -f $ZPLUG_HOME/init.zsh ]]; then
+    source $ZPLUG_HOME/init.zsh
 
-# No (practical) limit to many commands are kept in history.
-HISTSIZE=1000000 # session history
-SAVEHIST=1000000 # saved history
+    for bundle in $bundles; do
+        zplug $=bundle
+    done
+
+    if ! zplug check; then
+        zplug install
+    fi
+
+    zplug load
+fi
+
+### Load Zsh features ###
 
 # Better help command (like man, but finds more and better results).
 unalias run-help &>/dev/null
 autoload run-help
+
+### Prompt ###
+
+# Better prompt (like oh-my-zsh/mgutz, but turns red on nonzero exit code).
+if [[ $RADIAN_CUSTOMIZE_PROMPT != false ]]; then
+    # The following three functions are adapted from Oh My Zsh [1].
+    #
+    # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/3705d47bb3f3229234cba992320eadc97a221caf/lib/git.zsh
+
+    # Compares the provided version of git to the version installed and on path
+    # Outputs -1, 0, or 1 if the installed version is less than, equal to, or
+    # greater than the input version, respectively.
+    function git_compare_version() {
+        local INPUT_GIT_VERSION INSTALLED_GIT_VERSION
+        INPUT_GIT_VERSION=(${(s/./)1})
+        INSTALLED_GIT_VERSION=($(command git --version 2>/dev/null))
+        INSTALLED_GIT_VERSION=(${(s/./)INSTALLED_GIT_VERSION[3]})
+
+        for i in {1..3}; do
+            if [[ $INSTALLED_GIT_VERSION[$i] -gt $INPUT_GIT_VERSION[$i] ]]; then
+                echo 1
+                return 0
+            fi
+            if [[ $INSTALLED_GIT_VERSION[$i] -lt $INPUT_GIT_VERSION[$i] ]]; then
+                echo -1
+                return 0
+            fi
+        done
+        echo 0
+    }
+    POST_1_7_2_GIT=$(git_compare_version "1.7.2")
+    unfunction git_compare_version
+
+    # Prints the branch or revision of the current HEAD, surrounded by
+    # square brackets and followed by an asterisk if the working
+    # directory is dirty, if the user is inside a Git repository.
+    function radian_prompt_git_info() {
+        local ref
+        ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
+            ref=$(command git rev-parse --short HEAD 2> /dev/null) || \
+            return 0
+        echo "[${ref#refs/heads/}$(radian_prompt_git_dirty)]"
+    }
+
+    # Prints an asterisk if the working directory is dirty. Untracked
+    # files are not counted as dirty if
+    # $RADIAN_PROMPT_UNTRACKED_FILES_DIRTY is equal to "false".
+    function radian_prompt_git_dirty() {
+        local FLAGS
+        FLAGS=('--porcelain')
+        if [[ $POST_1_7_2_GIT -gt 0 ]]; then
+            FLAGS+='--ignore-submodules=dirty'
+        fi
+        if [[ "$RADIAN_PROMPT_UNTRACKED_FILES_DIRTY" != "false" ]]; then
+            FLAGS+='--untracked-files=no'
+        fi
+        if [[ $(command git status ${FLAGS} 2> /dev/null | tail -n1) ]]; then
+            echo "*"
+        fi
+    }
+
+    # Enable parameter expansion and other substitutions in the $PROMPT.
+    setopt promptsubst
+
+    # The actual prompt.
+    PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(radian_prompt_git_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
+fi
+
+### Command history ###
+
+# Make the length limit for session history ludicrously large.
+export HISTSIZE=1000000
+
+# Save history to disk. The value of this option is the default
+# installed by zsh-newuser-install.
+export HISTFILE=~/.zsh_history
+
+# Also make the length limit for the history file on disk ludicrously
+# large.
+export SAVEHIST=1000000
+
+# Don't save commands to the history if they start with a leading
+# space.
+setopt histignorespace
+
+### Appearance ###
 
 # Colored man pages. Based on:
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/plugins/colored-man-pages/colored-man-pages.plugin.zsh
@@ -117,32 +202,13 @@ if [[ $RADIAN_CUSTOMIZE_COLORED_MAN_PAGES != false ]]; then
     }
 fi
 
-# Better prompt (like oh-my-zsh/mgutz, but turns red on nonzero exit code).
-if [[ $RADIAN_CUSTOMIZE_PROMPT != false ]]; then
-    PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(git_prompt_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
-    ZSH_THEME_GIT_PROMPT_PREFIX="["
-    ZSH_THEME_GIT_PROMPT_SUFFIX=
-    ZSH_THEME_GIT_PROMPT_DIRTY="*]"
-    ZSH_THEME_GIT_PROMPT_CLEAN="]"
-fi
-
-# Support for "hub" commands, see [1].
-#
-# [1]: https://github.com/github/hub
-if [[ $RADIAN_HUB_ALIAS != false ]]; then
-    eval "$(hub alias -s)" 2>/dev/null || true
-fi
-
-# Use "resource" to reload .zshrc.
-if [[ $RADIAN_CUSTOMIZE_RESOURCE_ALIAS != false ]]; then
-    alias resource="source ~/.zshrc"
-fi
+### Command line behavior ###
 
 # When no arguments are provided to "." or "source", they default to
 # sourcing .zshrc. Based on [1], thanks @PythonNut!
 #
 # [1]: http://unix.stackexchange.com/a/326948/176805
-if [[ $RADIAN_CUSTOMIZE_SOURCE_AND_DOT_ALIASES != false ]]; then
+if [[ $RADIAN_CUSTOMIZE_MAGIC_DOT != false ]]; then
     function _accept-line() {
         if [[ $BUFFER == "." ]]; then
             BUFFER=". ~/.zshrc"
@@ -154,10 +220,34 @@ if [[ $RADIAN_CUSTOMIZE_SOURCE_AND_DOT_ALIASES != false ]]; then
     zle -N accept-line _accept-line
 fi
 
-# Alias for tmuxinator.
-if [[ $RADIAN_CUSTOMIZE_MUX_ALIAS != false ]]; then
-    alias mux=tmuxinator
+### Aliases: zsh ###
+
+# Use "resource" to reload .zshrc.
+if [[ $RADIAN_CUSTOMIZE_RESOURCE_ALIAS != false ]]; then
+    alias resource="source ~/.zshrc"
 fi
+
+### Aliases: filesystem navigation ###
+
+# Add some useful parameters to "ls" by default.
+if [[ $RADIAN_CUSTOMIZE_LS_ALIAS != false ]]; then
+    alias ls='ls -lah'
+fi
+
+# Use "..", "...", "....", etc. to move to parent directories.
+if [[ $RADIAN_CUSTOMIZE_DOT_DOT_ALIASES != false ]]; then
+    alias ..='cd ..'
+    alias ...='cd ...'
+    alias ....='cd ....'
+    alias .....='cd .....'
+    alias ......='cd ......'
+    alias .......='cd .......'
+    alias ........='cd ........'
+    alias .........='cd .........'
+    alias ..........='cd ..........'
+fi
+
+### Aliases: moving files ###
 
 # Aliases for copying, pasting, moving, and linking files in multiple
 # steps.
@@ -209,6 +299,22 @@ if [[ $RADIAN_CUSTOMIZE_DELINK_ALIAS != false ]]; then
             fi
         done
     }
+fi
+
+### Aliases: version control ###
+
+# Support for "hub" commands, see [1].
+#
+# [1]: https://github.com/github/hub
+if [[ $RADIAN_CUSTOMIZE_HUB_ALIAS != false ]]; then
+    eval "$(hub alias -s)" 2>/dev/null || true
+fi
+
+### Aliases: tmux ###
+
+# Alias for tmuxinator.
+if [[ $RADIAN_CUSTOMIZE_MUX_ALIAS != false ]]; then
+    alias mux=tmuxinator
 fi
 
 # Alias for setting up a tmux session suitable for standard development.
@@ -309,7 +415,8 @@ if [[ $RADIAN_CUSTOMIZE_PROJ_ALIAS != false ]]; then
     }
 fi
 
-# Local overrides (3 of 3)
+### Load user-specific configuration file (2 of 2) ###
+
 if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
