@@ -601,14 +601,16 @@ from `kill-buffer-hook', and also remove this function from
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Auto revert
 
+;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
+;; We have to do this before turning on `auto-revert-mode' for the
+;; change to take effect, unless we do it through
+;; `customize-set-variable' (which is slow enough to show up in
+;; startup profiling).
+(setq auto-revert-interval 1)
+
 ;; Automatically reload files that were changed on disk, if they have
 ;; not been modified in Emacs since the last time they were saved.
 (global-auto-revert-mode 1)
-
-;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
-;; We have to set this using `custom' in order for the change to take
-;; effect.
-(customize-set-variable 'auto-revert-interval 1)
 
 ;; Only automatically revert buffers that are visible. This should
 ;; improve performance (because if you have 200 buffers open...). This
