@@ -1451,6 +1451,25 @@ following :dependencies to be enabled."
   ;; Don't show Undo Tree in the mode line.
   (setq undo-tree-mode-lighter nil)
 
+  ;; Suppress the message saying that the undo history file was
+  ;; saved (because this happens every single time you save a file).
+
+  (defun radian--undo-tree-suppress-undo-history-saved-message
+      (undo-tree-save-history &rest args)
+    (let ((inhibit-message t))
+      (apply undo-tree-save-history args)))
+
+  ;; Suppress the message saying that the undo history could not be
+  ;; loaded because the file changed outside of Emacs.
+
+  (defun radian--undo-tree-suppress-buffer-modified-message
+      (undo-tree-load-history &rest args)
+    (let ((inhibit-message t))
+      (apply undo-tree-load-history args)))
+
+  (advice-add #'undo-tree-load-history :around
+              #'radian--undo-tree-suppress-buffer-modified-message)
+
   :bind (;; By default, `undo' (and by extension `undo-tree-undo') is bound
          ;; to C-_ and C-/, and `undo-tree-redo' is bound to M-_. It's
          ;; logical to also bind M-/ to `undo-tree-redo'. This overrides the
