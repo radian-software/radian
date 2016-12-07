@@ -1256,6 +1256,11 @@ following :dependencies to be enabled."
   (setq ivy-initial-inputs-alist
         '((t . "")))
 
+  ;; Allow the C-c C-r binding defined below to work in `sh-mode',
+  ;; where it is bound by default to `sh-repeat'.
+  (eval-after-load 'sh-script
+    '(define-key sh-mode-map (kbd "C-c C-r") nil))
+
   :bind (;; Add the README-suggested keybinding for resuming the last
          ;; completion session.
          ("C-c C-r" . ivy-resume))
