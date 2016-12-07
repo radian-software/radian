@@ -202,6 +202,13 @@ if [[ $RADIAN_CUSTOMIZE_COLORED_MAN_PAGES != false ]]; then
     }
 fi
 
+### Completions ###
+
+# Fuzzy tab completions.
+if [[ $RADIAN_CUSTOMIZE_FUZZY_COMPLETIONS != false ]]; then
+    zstyle ':completion:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
+fi
+
 ### Command line behavior ###
 
 # When no arguments are provided to "." or "source", they default to
