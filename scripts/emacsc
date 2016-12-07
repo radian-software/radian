@@ -1,7 +1,0 @@
-#!/bin/bash
-
-if [[ /usr/local/bin/emacs -ef ~/.radian/scripts/emacs ]]; then
-    /Applications/Emacs.app/Contents/MacOS/bin/emacsclient --alternate-editor="" -nw "$@"
-else
-    emacsclient --alternate-editor="" -nw "$@"
-fi

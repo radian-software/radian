@@ -1,9 +1,3 @@
-#!/bin/bash
-
-set -e
-set -o pipefail
-
-define contents <<'EOF'
 #!/usr/bin/env zsh
 #
 # This file is run near the beginning of .zshrc.
@@ -18,9 +12,3 @@ define contents <<'EOF'
 # remove_bundle "zsh-users/zsh-autosuggestions"
 #
 # [1]: https://github.com/zplug/zplug
-EOF
-
-echo "[create-zshrc-before-local] Setting up .zshrc.before.local."
-echo -n "$contents" > ../../radian-local/.zshrc.before.local
-echo "[create-zshrc-before-local] Wrote the following to radian-local/.zshrc.before.local:"
-cat ../../radian-local/.zshrc.before.local
