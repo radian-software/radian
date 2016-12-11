@@ -187,6 +187,44 @@ See also `radian-disabled-packages'."
                      (> (cdr association) 0))))
             packages))
 
+(defvar radian-quelpa-overrides nil
+  "Association list from packages to quelpa forms. This alist
+allows you to override where packages are loaded from. If the
+entry for a package is nil (as distinct from a package not being
+in the alist), then quelpa is not used to load the package even
+if `:quelpa' is specified in the `use-package' form. If a package
+has a non-nil entry, the package is loaded using quelpa no matter
+what, and the entry is used as the recipe to pass to the
+`:quelpa' keyword.
+
+You can manipulate this list using `radian-override-quelpa' and
+`radian-disable-quelpa-override'.
+
+Note that this variable only affects the loading of packages that
+are normally loaded automatically by Radian. If you want to load
+your own package from quelpa, just put a `:quelpa' keyword in
+your `use-package' form for that package.
+
+Also note that you must make any modifications to this list
+*before* packages are loaded, in order for your changes to have
+an effect. This means your modifications should be done in
+init.before.local.el.")
+(setq radian-quelpa-overrides ())
+
+(defun radian-override-quelpa (package &optional recipe)
+  "Force PACKAGE to be loaded using quelpa with the provided
+RECIPE, or using the default recipe from MELPA if RECIPE is not
+provided. This only has an effect for packages that are loaded
+via `use-package' by Radian."
+  (let ((association (assoc package radian-quelpa-overrides)))
+    (if association
+        (setcdr association recipe)
+      (push (cons package recipe) radian-quelpa-overrides))))
+
+(defun radian-disable-quelpa-override (package)
+  "Undo the effects of `radian-override-quelpa'."
+  (assq-delete-all package radian-quelpa-overrides))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Deprecated API for user-specific package management
 
@@ -1054,6 +1092,57 @@ Lisp function does not specify a special indentation."
 ;; otherwise.
 (setq use-package-always-defer t)
 
+;; Add an advice to `use-package' to make it so that
+;; `radian-quelpa-overrides' has an effect.
+
+(defun radian--use-package-allow-quelpa-overrides (use-package name &rest args)
+  "Allow the value of `radian-quelpa-overrides' to have an effect
+on the `:quelpa' keyword.
+
+Note that this advice is not implemented very intelligently, so
+it will only work correctly if `:quelpa' is specified as the
+first keyword in the `use-package' form (except that it can be
+after `:dependencies')."
+  ;; First we want to check if there's an entry for the package in
+  ;; `radian-quelpa-overrides'.
+  (let ((association (assoc name radian-quelpa-overrides)))
+    (if association
+        ;; If there is an association, we'll extract the recipe.
+        (let ((recipe (cdr association)))
+          (if recipe
+              ;; If the recipe is non-nil it means the user wants to
+              ;; use quelpa for the package.
+              (if (equal (car args) :quelpa)
+                  (if (keywordp (cadr args))
+                      ;; This happens for (use-package name :quelpa
+                      ;; :config ...).
+                      (apply use-package name :quelpa recipe (cdr args))
+                    ;; This happens for (use-package name
+                    ;; :quelpa (recipe) :config ...).
+                    (apply use-package name :quelpa recipe (cddr args)))
+                ;; This happens for (use-package name :config ...).
+                (apply use-package name :quelpa recipe args))
+            ;; If the recipe is nil it means the user doesn't want to
+            ;; use quelpa for the package.
+            (if (equal (car args) :quelpa)
+                (if (keywordp (cadr args))
+                    ;; This happens for (use-package name :quelpa
+                    ;; :config ...).
+                    (apply use-package name (cdr args))
+                  ;; This happens for (use-package name
+                  ;; :quelpa (recipe) :config ...).
+                  (apply use-package name (cddr args)))
+              ;; This happens for (use-package name :config ...), in
+              ;; which case there's nothing that needs to be changed.
+              (apply use-package name args))))
+      ;; If there's no special behavior requested, we can just pass
+      ;; control to `use-package'.
+      (apply use-package name args))))
+
+(advice-add 'use-package
+            :around 'radian--use-package-allow-quelpa-overrides
+  '((:depth . -1)))
+
 ;; Add an advice to `use-package' to make it so that disabled packages
 ;; are not loaded. See the docstring for more information.
 
@@ -1062,14 +1151,20 @@ Lisp function does not specify a special indentation."
 to `radian-package-enabled-p'). If the first argument specified
 after the package name is :dependencies, then also require any
 packages specified in the list of symbols immediately
-following :dependencies to be enabled."
+following :dependencies to be enabled.
+
+Note that this advice is not implemented very intelligently, so
+it will only work correctly if `:dependencies' is specified as
+the first keyword in the `use-package' form."
   (when (radian-package-enabled-p name)
     (if (equal (car args) :dependencies)
         (when (cl-every 'radian-package-enabled-p (cadr args))
           (apply use-package name (cddr args)))
       (apply use-package name args))))
 
-(advice-add 'use-package :around 'radian--use-package-add-dependencies)
+(advice-add 'use-package
+            :around 'radian--use-package-add-dependencies
+  '((:depth . -2)))
 
 ;; Add an advice to automatically refresh the package list before
 ;; installing a package (but only once). This has an effect because
@@ -1161,10 +1256,10 @@ following :dependencies to be enabled."
       (eval-when-compile
         (require 'quelpa-use-package))
       (use-package quelpa-use-package
-        :demand t
         :quelpa (quelpa-use-package
                  :fetcher github
-                 :repo "raxod502/quelpa-use-package")))
+                 :repo "raxod502/quelpa-use-package")
+        :demand t))
   (quelpa '(quelpa-use-package
             :fetcher github
             :repo "raxod502/quelpa-use-package"))
