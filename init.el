@@ -401,9 +401,14 @@ If additionally KEYBINDING is \"e i\" then
 `radian-find-init-el' to (kbd \"M-RET e i\")."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (defun-name (make-symbol
-                      (concat
-                       "radian-find-"
-                       (replace-regexp-in-string "[^a-z0-9]" "-" bare-filename))))
+                      (replace-regexp-in-string
+                       "-+"
+                       "-"
+                       (concat
+                        "radian-find-"
+                        (replace-regexp-in-string
+                         "[^a-z0-9]" "-"
+                         bare-filename)))))
          (full-filename (concat "~/" filename))
          (docstring (format "Open %s in the current buffer."
                             full-filename))
