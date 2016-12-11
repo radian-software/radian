@@ -355,11 +355,11 @@ loads it. Otherwise, fails silently."
 
 (unless (display-graphic-p)
 
-  (setq radian-last-paste-to-osx nil)
+  (setq radian--last-paste nil)
 
   (defun copy-from-osx ()
     (let ((copied-text (shell-command-to-string "pbpaste")))
-      (unless (string= copied-text radian-last-paste-to-osx)
+      (unless (string= copied-text radian--last-paste)
         copied-text)))
 
   (defun paste-to-osx (text &optional push)
@@ -367,7 +367,7 @@ loads it. Otherwise, fails silently."
       (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
         (process-send-string proc text)
         (process-send-eof proc)))
-    (setq radian-last-paste-to-osx text))
+    (setq radian--last-paste text))
 
   (setq interprogram-cut-function 'paste-to-osx)
   (setq interprogram-paste-function 'copy-from-osx))
