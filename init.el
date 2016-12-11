@@ -952,10 +952,11 @@ Lisp function does not specify a special indentation."
 ;; old Emacs that was opened before you made the change. You can then
 ;; just press M-RET r to get the change into that instance.
 
-(defun radian-reload-init ()
-  "Reload init.el."
-  (interactive)
+(defun radian-reload-init (&optional upgrade)
+  "Reload init.el. With prefix argument, upgrades packages."
+  (interactive "P")
   (message "Reloading init.el...")
+  (setq radian--inhibit-loading-quelpa (not upgrade))
   (radian-load-user-config "init.el")
   (message "Reloading init.el... done."))
 
@@ -1085,10 +1086,6 @@ following :dependencies to be enabled."
 ;; modified so that it does not require `cl' (currently, Radian only
 ;; loads `cl-lib').
 ;;
-;; This problem should not happen when packages are installed via
-;; Quelpa, but just in case the user puts a plain `use-package' form
-;; in their init.local.el, we have to fix this error.
-;;
 ;; [1]: https://github.com/jwiegley/use-package/issues/256
 
 (defun radian--package-install-refresh-contents (&rest args)
@@ -1109,7 +1106,16 @@ following :dependencies to be enabled."
   :config
 
   ;; Tell quelpa not to update MELPA every time Emacs is started.
-  (setq quelpa-update-melpa-p nil))
+  (setq quelpa-update-melpa-p nil)
+
+  ;; Automatically upgrade packages. This does not actually take
+  ;; effect if the call to quelpa comes from a `:quelpa' keyword in a
+  ;; `use-package' form and
+  ;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (as it is
+  ;; by default in Radian). It only affects what happens when
+  ;; `radian-reload-init' is called with a prefix argument; in that
+  ;; case it allows packages to be upgraded, as desired.
+  (setq quelpa-upgrade-p t))
 
 ;; Add a :quelpa keyword to `use-package', which allows installing
 ;; packages with quelpa. We have a bit of a chicken and egg problem
@@ -1128,6 +1134,24 @@ following :dependencies to be enabled."
 ;; quelpa-use-package eagerly is not a problem. In fact, it's required
 ;; because we need to activate its advice before processing
 ;; use-package forms that might contain `:quelpa' keywords.)
+;;
+;; To maintain reverse compatibility, my fork of quelpa-use-package
+;; only lazily loads quelpa if the variable
+;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (it is nil
+;; by default). So we have to set it here. But we also want to allow
+;; for disabling that optimization in the case that
+;; `radian-reload-init' is called with a prefix argument. To solve
+;; this problem we use `defvar', which will only set
+;; `radian--inhibit-loading-quelpa' to `t' if that variable has not
+;; already been defined. That way, we can override the value of
+;; `radian--inhibit-loading-quelpa' in `radian-reload-init' and have
+;; that value be transferred to
+;; `quelpa-use-package-inhibit-loading-quelpa' below, while
+;; maintaining a default value of `t' when Emacs is first started.
+
+(defvar radian--inhibit-loading-quelpa t)
+(setq quelpa-use-package-inhibit-loading-quelpa
+      radian--inhibit-loading-quelpa)
 
 (if (require 'quelpa-use-package nil 'noerror)
     (progn
