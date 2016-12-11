@@ -1915,6 +1915,16 @@ the first keyword in the `use-package' form."
   ;; that refactor-nrepl is *not* enabled by default.
   (setq cider-lein-parameters "with-profile +awesome repl :headless")
 
+  ;; Make CIDER automatically inject Clojure in addition to the
+  ;; various other dependencies it injects, when starting a REPL. This
+  ;; fixes mysterious warning messages that refactor-nrepl seems to
+  ;; like emitting when you cider-jack-in outside of a Clojure
+  ;; project. See [1]. This solution was suggested by @benedek on
+  ;; Clojurians Slack. Thanks!
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/cider-nrepl/issues/384
+  (setq cider-jack-in-auto-inject-clojure 'latest)
+
   ;; The CIDER welcome message often obscures any error messages that
   ;; the above code is supposed to be making visible. So, we need to
   ;; turn off the welcome message.
