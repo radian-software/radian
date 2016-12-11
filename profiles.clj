@@ -9,20 +9,7 @@
                         [org.clojure/tools.nrepl "0.2.12"]]
 
          :plugins [;; REPL-side support for CIDER and other editor tools
-                   [cider/cider-nrepl "0.15.0-SNAPSHOT"]]
-
-         :injections [;; Make a tweak to the internal code used by compliment, the
-                      ;; completion library used by cider-nrepl, to recognize which
-                      ;; symbols could be vars. In particular, change the function
-                      ;; to (constantly true) -- that is, *all* symbols could be
-                      ;; vars. I haven't found any downsides to this (yet), and it
-                      ;; fixes a problem with the regex used by default not
-                      ;; recognizing vars in the '.' namespace.
-                      ;;
-                      ;; Needless to say, this is a hack.
-                      (alter-var-root
-                        #'cider.inlined-deps.compliment.v0v3v1.compliment.sources.ns-mappings/var-symbol?
-                        (constantly (constantly true)))]}
+                   [cider/cider-nrepl "0.15.0-SNAPSHOT"]]}
 
  :cljs {:dependencies [;; ClojureScript REPL in Emacs
                        [com.cemerick/piggieback "0.2.1"]
