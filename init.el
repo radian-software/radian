@@ -1813,16 +1813,10 @@ following :dependencies to be enabled."
   ;; projects, you either have to wait for a minute without doing
   ;; anything or be prepared for your cursur to suddenly shift buffers
   ;; without warning sometime in the near future. This is annoying, so
-  ;; turn off the behavior. An issue has been opened at [1].
+  ;; turn off the behavior. For a historical perspective see [1].
   ;;
   ;; [1]: https://github.com/clojure-emacs/cider/issues/1872
-  (setq cider-repl-pop-to-buffer-on-connect nil)
-
-  ;; However, turning off the pop-to-buffer setting also prevents the
-  ;; REPL buffer from *opening*. To fix this problem, we add an advice
-  ;; to open the REPL buffer after the REPL has started.
-  (defadvice cider-repl-init (after display-repl-buffer)
-    (display-buffer buffer))
+  (setq cider-repl-pop-to-buffer-on-connect 'display-only)
 
   ;; Use figwheel-sidecar for launching ClojureScript REPLs. This
   ;; supports a fully integrated ClojureScript development experience
