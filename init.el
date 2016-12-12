@@ -1762,6 +1762,10 @@ the first keyword in the `use-package' form."
 ;; Provides commands to quickly navigate within and between
 ;; "projects".
 (use-package projectile
+  :quelpa (projectile
+           :fetcher github
+           :repo "raxod502/projectile"
+           :files ("projectile.el"))
   :demand t
   :config
 
