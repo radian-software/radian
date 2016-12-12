@@ -1915,16 +1915,6 @@ the first keyword in the `use-package' form."
   ;; that refactor-nrepl is *not* enabled by default.
   (setq cider-lein-parameters "with-profile +awesome repl :headless")
 
-  ;; Make CIDER automatically inject Clojure in addition to the
-  ;; various other dependencies it injects, when starting a REPL. This
-  ;; fixes mysterious warning messages that refactor-nrepl seems to
-  ;; like emitting when you cider-jack-in outside of a Clojure
-  ;; project. See [1]. This solution was suggested by @benedek on
-  ;; Clojurians Slack. Thanks!
-  ;;
-  ;; [1]: https://github.com/clojure-emacs/cider-nrepl/issues/384
-  (setq cider-jack-in-auto-inject-clojure 'latest)
-
   ;; The CIDER welcome message often obscures any error messages that
   ;; the above code is supposed to be making visible. So, we need to
   ;; turn off the welcome message.
@@ -1972,6 +1962,17 @@ the first keyword in the `use-package' form."
   :dependencies (clojure-mode cider yasnippet)
   :init
 
+  ;; By default, clj-refactor enables the refactor-nrepl middleware in
+  ;; an *autoload*, meaning that it's already happened as soon as
+  ;; clj-refactor has loaded. But refactor-nrepl doesn't work outside
+  ;; a Clojure project, and signals a warning in that case. So we need
+  ;; to *selectively* inject refactor-nrepl, which means we need to
+  ;; disable it right away so we can do it buffer-locally later. See
+  ;; [1] for discussion of the problem.
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/refactor-nrepl/issues/177
+  (setq cljr-inject-dependencies-at-jack-in nil)
+
   ;; Enable clj-refactor in Clojure buffers. This is adapted from the
   ;; clj-refactor README [1].
   ;;
@@ -1983,6 +1984,19 @@ the first keyword in the `use-package' form."
     (cljr-add-keybindings-with-prefix "C-c RET"))
 
   (add-hook 'clojure-mode-hook #'radian--enable-clj-refactor-mode)
+
+  ;; Because we disabled injection of the clj-refactor middleware
+  ;; earlier, we have to do it buffer-locally now (but only if we're
+  ;; in a project).
+
+  (defun radian--inject-cljr-dependencies (&rest args)
+    (when (cljr--project-dir)
+      (setq-local cljr-inject-dependencies-at-jack-in t)
+      (make-local-variable 'cider-jack-in-lein-plugins)
+      (make-local-variable 'cider-jack-in-nrepl-middlewares)
+      (cljr--inject-jack-in-dependencies)))
+
+  (advice-add #'cider-jack-in :before #'radian--inject-cljr-dependencies)
 
   :diminish clj-refactor-mode)
 
