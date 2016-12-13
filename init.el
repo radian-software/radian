@@ -1874,10 +1874,9 @@ strings that are not docstrings."
 
   (add-hook 'cider-connected-hook #'radian--dump-nrepl-server-log)
 
-  ;; Make the REPL a lot more awesome. This injects a bunch of extra
-  ;; features specified by the :awesome vector in profiles.clj. Note
-  ;; that refactor-nrepl is *not* enabled by default.
-  (setq cider-lein-parameters "with-profile +awesome repl :headless")
+  ;; Use the :emacs profile defined in profiles.clj. This enables lots
+  ;; of cool extra features in the REPL.
+  (setq cider-lein-parameters "with-profile +emacs repl :headless")
 
   ;; The CIDER welcome message often obscures any error messages that
   ;; the above code is supposed to be making visible. So, we need to

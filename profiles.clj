@@ -157,16 +157,21 @@
 
  ;;; Composite profiles
 
- ;; This is an easy way to have a custom subset of the above modular profiles enabled in your
- ;; REPL. To start an awesome REPL use 'lein with-profiles +awesome repl'.
- :awesome [:cider
-           :cljs
+ ;; This profile includes useful profiles for a REPL in the terminal.
+ :awesome [:cljs
            :humane
            :inject
            :alembic
            :pretty
            :refactor
            :refresh]
+
+ ;; This profile is for use with Emacs.
+ :emacs [:cider
+         :cljs
+         :inject
+         :alembic
+         :refactor]
 
  ;; When running tests.
  :test [:humane]
