@@ -174,6 +174,9 @@ setopt histignorespace
 ################################################################################
 #### Filesystem navigation
 
+# FIXME: document
+setopt autocd
+
 # Default flags for ls:
 #   -a  show hidden files except for . and ..
 #   -l  display additional information
