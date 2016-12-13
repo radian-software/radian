@@ -1775,36 +1775,39 @@ the first keyword in the `use-package' form."
                   (:use 0)))
     (put-clojure-indent (car spec) (cdr spec)))
 
-  ;; clojure-mode does not correctly identify the docstrings of
-  ;; protocol methods as docstrings, and as such electric
-  ;; indentation does not work for them. Additionally, when you
-  ;; hack a clojure.core function, such as defonce or defrecord,
+  ;; `clojure-mode' does not correctly identify the docstrings of
+  ;; protocol methods as docstrings, and as such electric and
+  ;; aggressive indentation do not work for them. Additionally, when
+  ;; you hack a clojure.core function, such as defonce or defrecord,
   ;; to provide docstring functionality, those docstrings are
-  ;; (perhaps rightly, but annoyingly) not recognized as
-  ;; docstrings either. However, there is an easy way to get
-  ;; electric indentation working for all potential docstrings:
-  ;; simply tell clojure-mode that *all* strings are docstrings.
-  ;; This will not change the font locking, because for some weird
-  ;; reason clojure-mode determines whether you're in a docstring
-  ;; by the font color instead of the other way around. Note that
-  ;; this will cause electric indentation by two spaces in *all*
-  ;; multiline strings, but since there are not very many
-  ;; non-docstring multiline strings in Clojure this is not too
-  ;; inconvenient. (And, after all, it's only electric, not
+  ;; (perhaps rightly, but annoyingly) not recognized as docstrings
+  ;; either. However, there is an easy way to get electric indentation
+  ;; working for all potential docstrings: simply tell `clojure-mode'
+  ;; that *all* strings are docstrings. This will not change the font
+  ;; locking, because for some weird reason `clojure-mode' determines
+  ;; whether you're in a docstring by the font color instead of the
+  ;; other way around. Note that this will cause electric indentation
+  ;; by two spaces in *all* multiline strings, but since there are not
+  ;; very many non-docstring multiline strings in Clojure this is not
+  ;; too inconvenient. (And, after all, it's only electric, not
   ;; aggressive, indentation.)
 
-  ;; Unfortunately, clojure-in-docstring-p is defined as an inline function,
-  ;; so we can't override it. Instead, we replace clojure-indent-line.
+  ;; Unfortunately, `clojure-in-docstring-p' is defined as an inline
+  ;; function, so we can't override it. Instead, we replace
+  ;; `clojure-indent-line'. But inside a new minor mode, so that the
+  ;; user can toggle it if they need to use `aggressive-indent-mode'
+  ;; and multiline strings that are not docstrings at the same time.
 
-  (defun radian-clojure-in-docstring-p ()
+  (defun radian--clojure-in-docstring-p ()
     "Check whether point is in a docstring."
     (or
      (eq (get-text-property (point) 'face) 'font-lock-doc-face)
      (eq (get-text-property (point) 'face) 'font-lock-string-face)))
 
-  (defun clojure-indent-line ()
-    "Indent current line as Clojure code."
-    (if (radian-clojure-in-docstring-p)
+  (defun radian--indent-all-strings-as-docstrings ()
+    "Indent current line as Clojure code, treating all strings as
+docstrings."
+    (if (radian--clojure-in-docstring-p)
         (save-excursion
           (beginning-of-line)
           (when (and (looking-at "^\\s-*")
@@ -1812,6 +1815,19 @@ the first keyword in the `use-package' form."
                          (string-width (clojure-docstring-fill-prefix))))
             (replace-match (clojure-docstring-fill-prefix))))
       (lisp-indent-line)))
+
+  (define-minor-mode radian-clojure-strings-as-docstrings-mode
+    "Toggles whether or not all strings are treated as docstrings
+in Clojure. You want to turn this off if you have multiline
+strings that are not docstrings."
+    nil nil nil
+    (if radian-clojure-strings-as-docstrings-mode
+        (advice-add #'clojure-indent-line :override
+                    #'radian--indent-all-strings-as-docstrings)
+      (advice-remove #'clojure-indent-line
+                     #'radian--indent-all-strings-as-docstrings)))
+
+  (add-hook 'clojure-mode-hook #'radian-clojure-strings-as-docstrings-mode)
 
   :bind (;; Make sure electric indentation *always* works. For some
          ;; reason, if this is omitted, electric indentation works most
