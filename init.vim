@@ -28,10 +28,6 @@ nnoremap <leader>eei :edit ~/.emacs.d/init.el<cr>
 nnoremap <leader>eeb :edit ~/.emacs.d/init.before.local.el<cr>
 nnoremap <leader>eel :edit ~/.emacs.d/init.local.el<cr>
 
-"" Emacs (deprecated)
-nnoremap <leader>eepr :edit ~/.emacs.d/init.pre.local.el<cr>
-nnoremap <leader>eepo :edit ~/.emacs.d/init.post.local.el<cr>
-
 "" Git
 nnoremap <leader>egc :edit ~/.gitconfig<cr>
 nnoremap <leader>ege :edit ~/.gitexclude<cr>

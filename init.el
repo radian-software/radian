@@ -57,14 +57,6 @@
 (defvar radian-customize-completion-mechanism nil)
 (setq radian-customize-completion-mechanism 'ivy)
 
-;; Override package archives. If this is non-nil, then it is used as
-;; the value of `package-archives' instead of the Radian default (GNU
-;; plus MELPA).
-;;
-;; For manual configuration only.
-(defvar radian-customize-package-archives nil)
-(setq radian-customize-package-archives nil)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Optimization
 
@@ -226,50 +218,11 @@ via `use-package' by Radian."
   (assq-delete-all package radian-quelpa-overrides))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Deprecated API for user-specific package management
-
-;;; The following code is deprecated, and is provided for backwards
-;;; compatibility.
-
-(defvar radian-packages nil
-  "This variable is DEPRECATED. To add a package to Radian, call
-`use-package' in init.local.el. To remove a package, call
-`radian-disable-package' in init.before.local.el.
-
-The packages required by Radian.")
-(setq radian-packages ())
-
-(defun radian-add-package (package)
-  "This function is DEPRECATED. Call `use-package' in
-init.local.el instead.
-
-Adds the provided package to `radian-packages', if it is not
-already present. For use in init.before.local.el. Note that this
-function will not install the provided package."
-  ;; Passing `t' to `add-to-list' makes the addition happen at the end
-  ;; of the list.
-  (add-to-list 'radian-packages package t)
-  (radian-reenable-package package))
-
-(defun radian-remove-package (package)
-  "This function is DEPRECATED. Call `radian-disable-package' instead.
-
-Removes the provided package from `radian-packages', if it is
-present. For use in init.before.local.el. Note that this function
-will not uninstall the package; it will only prevent the package
-from being installed automatically. For now, you have to
-uninstall packages manually, by deleting their folders in
-~/.emacs.d/elpa."
-  (setq radian-packages (delete package radian-packages))
-  (radian-disable-package package))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Function for loading user-specific configuration files
 
-;;; The following function is used four times in init.el to load
+;;; The following function is used two times in init.el to load
 ;;; user-specific configuration files (init.before.local.el and
-;;; init.local.el, as well as the deprecated init.pre.local.el and
-;;; init.post.local.el).
+;;; init.local.el).
 
 (defun radian-load-user-config (filename)
   "If a file by the specified name exists in the ~/.emacs.d directory,
@@ -466,8 +419,6 @@ If additionally KEYBINDING is \"e i\" then
 ;; Emacs
 (radian-register-dotfile ".emacs.d/init.el" "e i")
 (radian-register-dotfile ".emacs.d/init.before.local.el" "e b")
-(radian-register-dotfile ".emacs.d/init.pre.local.el" "e p r") ; deprecated
-(radian-register-dotfile ".emacs.d/init.post.local.el" "e p o") ; deprecated
 (radian-register-dotfile ".emacs.d/init.local.el" "e l")
 
 ;; Git
@@ -1063,17 +1014,13 @@ Lisp function does not specify a special indentation."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Bootstrap use-package
 
-;; Load deprecated user-specific configuration file.
-(radian-load-user-config "init.pre.local.el")
-
 ;; Add package repositories. GNU is the default repository; MELPA is
 ;; necessary to get most of the packages we are interested in. Note
 ;; that `package-initialize' appears to use the value of
 ;; `package-archives', so we place this declaration first.
 (setq package-archives
-      (or radian-customize-package-archives
-          '(("gnu" . "http://elpa.gnu.org/packages/")
-            ("melpa" . "https://melpa.org/packages/"))))
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
 
 ;; Initialize package.el. We can't use anything from package.el until
 ;; we do this.
@@ -1188,9 +1135,6 @@ the first keyword in the `use-package' form."
   (advice-remove 'package-install 'radian--package-install-refresh-contents))
 
 (advice-add 'package-install :before 'radian--package-install-refresh-contents)
-
-;; Load deprecated user-specific configuration file.
-(radian-load-user-config "init.post.local.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Package management
@@ -2177,15 +2121,6 @@ the first keyword in the `use-package' form."
   ;;
   ;; [1]: http://chris.beams.io/posts/git-commit/
   (setq git-commit-summary-max-length 50))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Load packages added via deprecated API
-
-(unless (cl-every 'package-installed-p radian-packages)
-  (package-refresh-contents)
-  (dolist (package radian-packages)
-    (unless (package-installed-p package)
-      (package-install package))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Color themes
