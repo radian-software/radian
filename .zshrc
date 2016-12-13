@@ -21,7 +21,7 @@ bundles=(
 #
 # Adds a bundle to $bundles. Word splitting will be performed on
 # zplug-args to determine the arguments that will be passed to zplug.
-add_bundle() {
+function add_bundle() {
     if ! (( ${bundles[(I)$1]} )); then
         bundles+=($1)
     fi
@@ -31,7 +31,7 @@ add_bundle() {
 #
 # Removes a bundle from $bundles by name. The name should be exactly
 # the same as it appears in $bundles, with spaces if necessary.
-remove_bundle() {
+function remove_bundle() {
     bundles=("${(@)bundles:#$1}")
 }
 
@@ -221,7 +221,7 @@ alias ds='dirs -v | head -10'
 # filesystem.
 alias md='mkdir -p'
 alias rd='rmdir'
-mcd() {
+function mcd() {
     mkdir -p $@
     cd ${@[$#]}
 }
@@ -231,7 +231,7 @@ mcd() {
 # respectively. Just like a graphical filesystem manager. Each of the
 # latter three functions defaults to the current directory as the
 # destination.
-copy() {
+function copy() {
     RADIAN_COPY_TARGETS=()
     for target; do
         if [[ $target == /* ]]; then
@@ -241,19 +241,19 @@ copy() {
         fi
     done
 }
-paste() {
+function paste() {
     cp -R $RADIAN_COPY_TARGETS ${1:-.}
 }
-move() {
+function move() {
     mv $RADIAN_COPY_TARGETS ${1:-.}
 }
-pasteln() {
+function pasteln() {
     ln -s $RADIAN_COPY_TARGETS ${1:-.}
 }
 
 # This alias takes a symlink, resolves it, and replaces it with a copy
 # of whatever it points to.
-delink() {
+function delink() {
     if [[ -z $1 ]]; then
         echo "usage: delink <symlinks>"
         return 1
@@ -305,7 +305,7 @@ autoload -Uz run-help
 # looks at.) See [1].
 #
 # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/3ebbb40b31fa1ce9f10040742cdb06ea04fa7c41/plugins/colored-man-pages/colored-man-pages.plugin.zsh
-man() {
+function man() {
     env \
 	LESS_TERMCAP_mb=$(printf "\e[1;31m") \
 	LESS_TERMCAP_md=$(printf "\e[1;31m") \
@@ -354,7 +354,7 @@ alias gc='git commit --verbose'
 alias gca='git commit --verbose --amend'
 alias gcf='git commit -C HEAD --amend'
 alias gce='git commit --verbose --allow-empty'
-gcw() {
+function gcw() {
     # This logic is taken from [1]. I think it is designed to
     # correctly deal with the three kinds of changes that might need
     # to be added: changes to existing files, untracked files, and
@@ -395,7 +395,7 @@ alias gbl='git blame'
 alias gb='git branch'
 alias gbd='git branch --delete'
 alias gbdd='git branch --delete --force'
-gbu() {
+function gbu() {
     git branch --set-upstream-to=$@
 }
 
@@ -436,7 +436,19 @@ alias gum='git pull --no-rebase'
 
 alias gp='git push'
 alias gpf='git push --force'
-alias gpu='git push --set-upstream'
+function gpu() {
+    local branch_name
+    if (( $# == 1 )); then
+        if branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
+            git push --set-upstream $1 ${branch_name##refs/heads/}
+        else
+            echo "Can't push a detached HEAD."
+            return 1
+        fi
+    else
+        git push --set-upstream $@
+    fi
+}
 alias gpd='git push --delete'
 
 ################################################################################
@@ -464,7 +476,7 @@ alias mux=tmuxinator
 # in the first window and 'git checkup' in the second. If you provide
 # a second argument, runs it as a shell command (provide multiple
 # commands with '&&' or ';') in all four windows before anything else.
-proj() {
+function proj() {
     if ! type tmux &>/dev/null; then
         echo "You need tmux for this to work."
     fi
