@@ -1462,6 +1462,9 @@ the first keyword in the `use-package' form."
 ;; windows.
 (use-package transpose-frame)
 
+;; Provides simple commands to swap Emacs windows.
+(use-package buffer-move)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Text editing
 
