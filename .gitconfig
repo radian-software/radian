@@ -6,48 +6,15 @@
 [alias]
 	# git init
 	setup = !git init && git commit --allow-empty -m \"Initial commit\"
-	# git status
-	st = status
 	# git log
-	last = log --decorate -1
 	msg = log --format=%B -1
-	hist = log --color --graph --decorate
-	all = log --color --graph --decorate --all
-	tree = log --color --graph --pretty=format:'%C(bold cyan)%h%Creset -%C(bold green)%d%Creset %s %C(bold green)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
-	graph = log --color --graph --pretty=format:'%C(bold cyan)%h%Creset -%C(bold green)%d%Creset %s %C(bold green)(%cr)%Creset %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative --all
 	root = rev-list --max-parents=0 HEAD
-	# git add
-	review = add -p
-	# git reset
-	unstage = reset HEAD
-	split = reset HEAD~
-	unreview = reset -p
-	bback = "!_() { git reset --hard HEAD~$1; }; _"
-	rback = "!_() { git reset --hard \"origin/$(git rev-parse --abbrev-ref HEAD)\"; }; _"
-	# git branch
-	br = branch
-	db = branch -d
-	DB = branch -D
-	# git checkout
-	co = checkout
-	discard = checkout -p
-	nb = "!_() { git checkout -b \"$1\" || (printf \"Force? (y/n) \" && read answer && (echo \"$answer\" | egrep -qi \"^y\") && git checkout -B \"$1\"); }; _"
-	back = "!_() { git checkout HEAD~$1; }; _"
 	# git stash
 	stash-rename = "!_() { newmsg=\"$1\" && stash=${2:-\"stash@{0}\"} && newbranch=\"$3\" && sha=$(git rev-parse \"$stash\") && olddesc=\"$(git stash list --format=%gs -1 \"$stash\")\" && newdesc=\"$(if [[ \"$newbranch\" = \".\" ]]; then echo \"$newmsg\"; else if [[ -n \"$newbranch\" ]]; then echo \"On $newbranch: $newmsg\"; else if [[ \"$olddesc\" =~ \":\" ]]; then echo \"$(echo \"$olddesc\" | cut -f1 -d\":\"): $newmsg\"; else echo \"$newmsg\"; fi; fi; fi)\" && git stash drop \"$stash\" > /dev/null || exit 1; git stash store -m \"$newdesc\" \"$sha\" && git stash list; }; _"
 	# git commit
-	ci = commit
 	reword = "!_() { uuid=$(uuidgen) && (saved=\"$(git stash save $uuid | grep $uuid)\"; git commit --amend; (if [[ -n \"$saved\" ]]; then git stash pop > /dev/null; fi);) }; _"
-	fixup = commit -C HEAD --amend
-	amend = commit --amend
 	# git rebase
 	rework = "!_() { if [[ -n \"$1\" ]]; then git rebase -i HEAD~$1; else git rebase -i \"origin/$(git rev-parse --abbrev-ref HEAD)\"; fi; }; _"
-	# git remote
-	prb = "!_() { git remote prune \"${1:-origin}\"; }; _"
-	# git push
-	pushb = !git push -u origin $(git rev-parse --abbrev-ref HEAD)
-	drb = push -d origin
-	dbb = "!_() { git db \"$1\" && git drb \"$1\"; }; _"
 	# git config
 	alias = "!_() { git config --global alias.$1 \"$2\"; }; _"
 	unalias = "!_() { git config --global --unset alias.$1; }; _"
