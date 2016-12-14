@@ -2102,6 +2102,13 @@ strings that are not docstrings."
   (setq markdown-toc-header-toc-title ""))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages; YAML
+
+;; Provides syntax highlighting, indentation, and editing commands for
+;; YAML files.
+(use-package yaml-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Version control
 
 ;; Allows editing Git commit messages from the command line (i.e. with
