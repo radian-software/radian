@@ -1,7 +1,3 @@
-# FIXME: go through the options and completion settings and see if
-# there's anything else that should be added. We lost a few things
-# when we moved away from oh-my-zsh.
-
 ################################################################################
 #### Define default bundle list
 
@@ -12,6 +8,7 @@ bundles=(
     "plugins/tmuxinator, from:oh-my-zsh" # Completion for tmuxinator
     "plugins/wd, from:oh-my-zsh" # Quickly jump to directories
     "zsh-users/zsh-autosuggestions" # Autosuggestions from history
+    "zsh-users/zsh-history-substring-search" # Find previous commands
 )
 
 ################################################################################
@@ -65,7 +62,7 @@ fi
 #### Prompt
 
 # Enable parameter expansion and other substitutions in the $PROMPT.
-setopt promptsubst
+setopt prompt_subst
 
 # Here we define a prompt that displays the current directory and git
 # branch, and turns red on a nonzero exit code. Adapted heavily from
@@ -74,31 +71,6 @@ setopt promptsubst
 #
 # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/master/themes/mgutz.zsh-theme
 # [2]: https://github.com/robbyrussell/oh-my-zsh/blob/3705d47bb3f3229234cba992320eadc97a221caf/lib/git.zsh
-
-# Function that compares the provided version of git to the version
-# installed and on path Outputs -1, 0, or 1 if the installed version
-# is less than, equal to, or greater than the input version,
-# respectively.
-function git_compare_version() {
-    local INPUT_GIT_VERSION INSTALLED_GIT_VERSION
-    INPUT_GIT_VERSION=(${(s/./)1})
-    INSTALLED_GIT_VERSION=($(command git --version 2>/dev/null))
-    INSTALLED_GIT_VERSION=(${(s/./)INSTALLED_GIT_VERSION[3]})
-
-    for i in {1..3}; do
-        if [[ $INSTALLED_GIT_VERSION[$i] -gt $INPUT_GIT_VERSION[$i] ]]; then
-            echo 1
-            return 0
-        fi
-        if [[ $INSTALLED_GIT_VERSION[$i] -lt $INPUT_GIT_VERSION[$i] ]]; then
-            echo -1
-            return 0
-        fi
-    done
-    echo 0
-}
-POST_1_7_2_GIT=$(git_compare_version "1.7.2")
-unfunction git_compare_version
 
 # Function that prints the branch or revision of the current HEAD,
 # surrounded by square brackets and followed by an asterisk if the
@@ -116,10 +88,7 @@ function radian_prompt_git_info() {
 # files are not counted as dirty.
 function radian_prompt_git_dirty() {
     local FLAGS
-    FLAGS=('--porcelain')
-    if [[ $POST_1_7_2_GIT -gt 0 ]]; then
-        FLAGS+='--ignore-submodules=dirty'
-    fi
+    FLAGS=('--porcelain' '--ignore-submodules=dirty')
     if [[ $RADIAN_PROMPT_IGNORE_UNTRACKED_FILES == true ]]; then
         FLAGS+='--untracked-files=no'
     fi
@@ -132,12 +101,7 @@ function radian_prompt_git_dirty() {
 PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(radian_prompt_git_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
 
 ################################################################################
-#### Tab completion
-
-# FIXME
-
-################################################################################
-#### Magic aliases
+#### Input/output
 
 # When no arguments are provided to "." or "source", they default to
 # sourcing .zshrc. Based on [1], thanks @PythonNut!
@@ -153,29 +117,117 @@ function _accept-line() {
 }
 zle -N accept-line _accept-line
 
+# Allow comments even in the interactive shell (start with #).
+setopt interactive_comments
+
+# Allow escaping a single quote within a singly-quoted string by
+# prefixing it with an additional single quote: echo 'It''s me!'
+setopt rc_quotes
+
+# Turn off flow control (which makes it so that ctrl+s and ctrl+q
+# freeze and unfreeze command output, respectively).
+unsetopt flow_control
+
+################################################################################
+#### Completion
+
+# For ambiguous completions, use an interactive menu (which can be
+# escaped with C-g) instead of overwriting the current command.
+zstyle ':completion:*' menu select
+
+# Use fuzzy tab completion for files and directories. This is
+# extremely complicated. See [1], [2], [3] if you don't value your
+# sanity too much.
+#
+# [1]: http://zsh.sourceforge.net/Guide/zshguide06.html
+# [2]: http://zsh.sourceforge.net/Doc/Release/Completion-System.html
+# [3]: http://zsh.sourceforge.net/Doc/Release/Completion-Widgets.html#Completion-Matching-Control
+# zstyle ':completion:*:*:*:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*:*:*:*:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# smart case completion (abc => Abc)
+zstyle ':completion:*' matcher 'm:{a-z\-}={A-Z\_}'
+
+# full flex completion  (abc => ABraCadabra)
+zstyle ':completion:*:files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+zstyle ':completion:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+zstyle ':completion:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+zstyle ':completion:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+################################################################################
+#### Globbing
+
+# This makes globs case-insensitive.
+unsetopt case_glob
+
+# This makes globbing regexes case-insensitive.
+unsetopt case_match
+
+# This allows additional functionality of globbing, such as using ^
+# and ~ to exclude matches. For example, rm -rf ^.git
+setopt extended_glob
+
+# Allow globs to match dotfiles.
+setopt glob_dots
+
+# Sort numeric filenames numerically, instead of lexicographically.
+setopt numeric_glob_sort
+
 ################################################################################
 #### Command history
 
 # Never discard history within a session, or at least not before any
 # reasonable amount of time.
-export HISTSIZE=1000000
+HISTSIZE=1000000
 
 # Save history to disk. The value of this option is the default
 # installed by zsh-newuser-install.
-export HISTFILE=~/.zsh_history
+HISTFILE=~/.zsh_history
 
 # Never discard history in the file on disk, either.
-export SAVEHIST=1000000
+SAVEHIST=1000000
 
 # Don't save commands to the history if they start with a leading
-# space.
-setopt histignorespace
+# space. This is useful if you have to pass a password as a parameter
+# to a command.
+setopt hist_ignore_space
+
+# All zsh sessions share the same history file. Timestamps are also
+# recorded for each command.
+setopt share_history
+
+# Use OS-provided locking mechanisms for the history file, if
+# available. The manual says this might improve performance and
+# decrease the chance of corruption.
+setopt hist_fcntl_lock
+
+# Remove superfluous whitespace when saving commands to the history.
+setopt hist_reduce_blanks
+
+# When history expansion is used (e.g. sudo !!), do the expansion
+# instead of executing the command immediately. (Of course, the above
+# use case is better serviced by just pressing ESC twice.)
+setopt hist_verify
 
 ################################################################################
 #### Filesystem navigation
 
-# FIXME: document
+# You can cd to a directory just by typing its name; no need to
+# preface it with cd.
 setopt autocd
+
+# This makes it so that when you cd to a new directory, the old
+# directory is saved in the directory stack (view with dirs or ds).
+setopt autopushd
+
+# This makes it so that the working directory path is automatically
+# fully resolved. This means that symlink components will be followed,
+# and capitalization will be corrected if you are on a
+# case-insensitive filesystem.
+setopt chaselinks
 
 # Default flags for ls:
 #   -a  show hidden files except for . and ..
@@ -184,7 +236,7 @@ setopt autocd
 #   -F  display trailing / for directories
 # If GNU ls is available, we use that by default.
 if command -v gls &>/dev/null; then
-    alias l='gls -AlhF --color=auto'
+    alias l='command gls -AlhF --color=auto'
 else
     alias l='ls -AlhF'
 fi
@@ -254,8 +306,8 @@ function pasteln() {
     ln -s $RADIAN_COPY_TARGETS ${1:-.}
 }
 
-# This alias takes a symlink, resolves it, and replaces it with a copy
-# of whatever it points to.
+# This function takes a symlink, resolves it, and replaces it with a
+# copy of whatever it points to.
 function delink() {
     if [[ -z $1 ]]; then
         echo "usage: delink <symlinks>"
@@ -486,7 +538,7 @@ alias gpd='git push --delete'
 # more information.
 #
 # [1]: https://github.com/github/hub
-eval "$(hub alias -s)" 2>/dev/null || true
+alias git=hub
 
 ################################################################################
 #### Tmux
@@ -598,6 +650,19 @@ function proj() {
 # Turn off case sensitivity permanently in Fasd. This functionality is
 # only available in my fork of Fasd.
 export _FASD_NOCASE=1
+
+################################################################################
+#### zsh-history-substring-search
+
+# Set up key bindings as per README [1].
+#
+# [1]: https://github.com/zsh-users/zsh-history-substring-search
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+
+# Disable the highlighting.
+HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=
+HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND=
 
 ################################################################################
 #### Load user-specific configuration file (2 of 2)
