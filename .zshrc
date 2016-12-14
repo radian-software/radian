@@ -338,6 +338,7 @@ alias gi='git init'
 alias gst='git status'
 
 alias gsh='git show'
+alias gshs='git show --stat'
 
 alias gl= # FIXME
 
