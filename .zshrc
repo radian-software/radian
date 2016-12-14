@@ -380,7 +380,7 @@ function gcw() {
     # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/3477ff25274fa75bd9e6110f391f6ad98ca2af72/plugins/git/git.plugin.zsh#L240
     git add --all
     git rm $(git ls-files --deleted) 2>/dev/null
-    git commit --message="(wip) ${(j: :)@}"
+    git commit --message="(wip) ${(j: :)@}" --quiet && git show --stat
 }
 
 alias gcp='git cherry-pick'
