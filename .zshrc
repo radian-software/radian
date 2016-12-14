@@ -367,6 +367,9 @@ alias gc='git commit --verbose'
 alias gca='git commit --verbose --amend'
 alias gcf='git commit -C HEAD --amend'
 alias gce='git commit --verbose --allow-empty'
+alias gcm='git commit -m'
+alias gcam='git commit --amend -m'
+alias gcem='git commit --allow-empty -m'
 function gcw() {
     # This logic is taken from [1]. I think it is designed to
     # correctly deal with the three kinds of changes that might need
@@ -402,6 +405,7 @@ alias gstp='git stash pop'
 alias gstd='git stash drop'
 
 alias gd='git diff'
+alias gds='git diff --stat'
 
 alias gbl='git blame'
 
@@ -444,10 +448,7 @@ alias gcl='git clone --recursive'
 
 alias gre='git remote'
 alias grel='git remote list'
-alias gresh='git remote show'
-alias greren='git remote rename'
-alias grerem='git remote remove'
-alias greset='git remote set-url'
+alias gres='git remote show'
 
 alias gf='git fetch --prune'
 alias gfa='git fetch --all --prune'
