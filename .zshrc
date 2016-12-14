@@ -412,8 +412,8 @@ function gbu() {
 }
 
 alias gco='git checkout'
-alias gcp='git checkout --patch'
-alias gcb='git checkout -B'
+alias gcop='git checkout --patch'
+alias gcob='git checkout -B'
 
 alias gbs='git bisect'
 alias gbss='git bisect start'
