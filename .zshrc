@@ -382,6 +382,11 @@ function gcw() {
     git rm $(git ls-files --deleted) 2>/dev/null
     git commit --message="(wip) ${(j: :)@}" --quiet && git show --stat
 }
+function gcaw() {
+    git add --all
+    git rm $(git ls-files --deleted) 2>/dev/null
+    git commit --message="(wip) ${(j: :)@}" --quiet --amend && git show --stat
+}
 
 alias gcp='git cherry-pick'
 alias gcpc='git cherry-pick --continue'
@@ -592,11 +597,11 @@ function proj() {
 
 # Turn off case sensitivity permanently in Fasd. This functionality is
 # only available in my fork of Fasd.
-        export _FASD_NOCASE=1
+export _FASD_NOCASE=1
 
-        ################################################################################
-    #### Load user-specific configuration file (2 of 2)
+################################################################################
+#### Load user-specific configuration file (2 of 2)
 
-    if [[ -f ~/.zshrc.local ]]; then
-        source ~/.zshrc.local
-    fi
+if [[ -f ~/.zshrc.local ]]; then
+    source ~/.zshrc.local
+fi
