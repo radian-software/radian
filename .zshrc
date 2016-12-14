@@ -399,7 +399,16 @@ alias gb='git branch'
 alias gbd='git branch --delete'
 alias gbdd='git branch --delete --force'
 function gbu() {
-    git branch --set-upstream-to=$@
+    if (( $# == 1 )) && ! (echo $1 | fgrep -q /); then
+        if branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
+            git branch --set-upstream-to=$1/${branch_name##refs/heads/}
+        else
+            echo "There is no current branch."
+            return 1
+        fi
+    else
+        git branch --set-upstream-to=$@
+    fi
 }
 
 alias gco='git checkout'
@@ -445,7 +454,7 @@ function gpu() {
         if branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
             git push --set-upstream $1 ${branch_name##refs/heads/}
         else
-            echo "Can't push a detached HEAD."
+            echo "There is no current branch."
             return 1
         fi
     else
