@@ -340,7 +340,16 @@ alias gst='git status'
 alias gsh='git show'
 alias gshs='git show --stat'
 
-alias gl= # FIXME
+alias gl='git log --graph --decorate'
+alias gls='git log --graph --decorate --stat'
+alias glp='git log --graph --decorate --patch'
+alias glsp='git log --graph --decorate --stat --patch'
+alias gla='git log --graph --decorate --all'
+alias glas='git log --graph --decorate --all --stat'
+alias glap='git log --graph --decorate --all --patch'
+alias glasp='git log --graph --decorate --all --stat --patch'
+alias glo='git log --graph --decorate --oneline'
+alias glao='git log --graph --decorate --all --oneline'
 
 alias ga='git add'
 alias gap='git add --patch'
