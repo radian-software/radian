@@ -148,14 +148,18 @@ zstyle ':completion:*' menu select
 
 # zstyle ':completion:*:*:*:*:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
 
-# smart case completion (abc => Abc)
-zstyle ':completion:*' matcher 'm:{a-z\-}={A-Z\_}'
+# # smart case completion (abc => Abc)
+# zstyle ':completion:*' matcher 'm:{a-z\-}={A-Z\_}'
 
-# full flex completion  (abc => ABraCadabra)
-zstyle ':completion:*:files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
-zstyle ':completion:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
-zstyle ':completion:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
-zstyle ':completion:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# # full flex completion  (abc => ABraCadabra)
+# zstyle ':completion:*:files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+zstyle ':completion:*' matcher-list 'r:[[:ascii:]]||[[:ascii:]]=** r:|=* m:{a-z\-}={A-Z\_}'
 
 ################################################################################
 #### Globbing
