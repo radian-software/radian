@@ -715,6 +715,19 @@ function proj() {
 }
 
 ################################################################################
+#### Emacs
+
+alias emacs='emacs -nw'
+alias emacsw='emacs'
+alias emac='emacsclient -nw'
+alias emacw='emacsclient'
+
+alias e=emacs
+alias ew=emacsw
+alias ec=emac
+alias ecw=emacw
+
+################################################################################
 #### Leiningen
 
 # Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
@@ -722,6 +735,11 @@ function proj() {
 #
 # [1]: http://stackoverflow.com/q/24619300/3538165
 export LEIN_JVM_OPTS=-Dapple.awt.UIElement=true
+
+################################################################################
+#### Vim
+
+alias vim=nvim
 
 ################################################################################
 #### Fasd
