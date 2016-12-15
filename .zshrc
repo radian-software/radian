@@ -159,7 +159,9 @@ zstyle ':completion:*' menu select
 
 # zstyle ':completion:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
 
-zstyle ':completion:*' matcher-list 'r:[[:ascii:]]||[[:ascii:]]=** r:|=* m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*' matcher-list 'r:[[:ascii:]]||[[:ascii:]]=** r:|=* m:{a-z\-}={A-Z\_}'
+
+zstyle ':completion:*' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
 
 ################################################################################
 #### Globbing
