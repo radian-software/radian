@@ -715,6 +715,15 @@ function proj() {
 }
 
 ################################################################################
+#### Leiningen
+
+# Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
+# showing up in the Mac app switcher. See [1].
+#
+# [1]: http://stackoverflow.com/q/24619300/3538165
+export LEIN_JVM_OPTS=-Dapple.awt.UIElement=true
+
+################################################################################
 #### Fasd
 
 # Turn off case sensitivity permanently in Fasd. This functionality is
