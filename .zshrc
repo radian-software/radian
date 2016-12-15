@@ -168,6 +168,30 @@ bindkey '^[[Z' reverse-menu-complete
 
 # zstyle ':completion:*' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
 
+# from compinstall
+
+# zstyle ':completion:*' completer _complete _ignored
+# zstyle ':completion:*' insert-unambiguous false
+# zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]} l:|=* r:|=*'
+# zstyle ':completion:*' menu select=1
+# zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+# zstyle :compinstall filename '/Users/raxod502/.zshrc'
+
+# zstyle ':completion:*:*:*:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*' matcher-list \
+    #        'm:{a-z}={A-Z}' \
+    #        'r:|[._-]=* r:|=*' \
+    #        'l:|=* r:|=*'
+
+# autoload -Uz compinit
+# compinit
+# End of lines added by compinstall
+
+
+
 ################################################################################
 #### Globbing
 
@@ -681,15 +705,3 @@ HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND=
 if [[ -f ~/.zshrc.local ]]; then
     source ~/.zshrc.local
 fi
-# The following lines were added by compinstall
-
-zstyle ':completion:*' completer _complete _ignored
-zstyle ':completion:*' insert-unambiguous false
-zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]} l:|=* r:|=*'
-zstyle ':completion:*' menu select=1
-zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
-zstyle :compinstall filename '/Users/raxod502/.zshrc'
-
-autoload -Uz compinit
-compinit
-# End of lines added by compinstall
