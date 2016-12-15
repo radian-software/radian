@@ -147,6 +147,57 @@ bindkey '^[[Z' reverse-menu-complete
 # [1]: http://unix.stackexchange.com/q/330481/176805
 zstyle ':completion:*' matcher-list 'l:|=* r:|=* m:{a-z\-}={A-Z\_}'
 
+# Use fuzzy tab completion for files and directories. This is
+# extremely complicated. See [1], [2], [3] if you don't value your
+# sanity too much.
+#
+# [1]: http://zsh.sourceforge.net/Guide/zshguide06.html
+# [2]: http://zsh.sourceforge.net/Doc/Release/Completion-System.html
+# [3]: http://zsh.sourceforge.net/Doc/Release/Completion-Widgets.html#Completion-Matching-Control
+# zstyle ':completion:*:*:*:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*' insert-unambiguous false
+
+# zstyle ':completion:*:*:*:*:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# # smart case completion (abc => Abc)
+# zstyle ':completion:*' matcher 'm:{a-z\-}={A-Z\_}'
+
+# # full flex completion  (abc => ABraCadabra)
+# zstyle ':completion:*:files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*' matcher-list 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*' matcher-list 'r:[[:ascii:]]||[[:ascii:]]=** r:|=* m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# from compinstall
+
+# zstyle ':completion:*' completer _complete _ignored
+# zstyle ':completion:*' insert-unambiguous false
+# zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:]}={[:upper:]} l:|=* r:|=*'
+# zstyle ':completion:*' menu select=1
+# zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+# zstyle :compinstall filename '/Users/raxod502/.zshrc'
+
+# zstyle ':completion:*:*:*:*:globbed-files' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:local-directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+# zstyle ':completion:*:*:*:*:directories' matcher 'r:|?=** m:{a-z\-}={A-Z\_}'
+
+# zstyle ':completion:*' matcher-list \
+    #        'm:{a-z}={A-Z}' \
+    #        'r:|[._-]=* r:|=*' \
+    #        'l:|=* r:|=*'
+
+# autoload -Uz compinit
+# compinit
+# End of lines added by compinstall
+
 ################################################################################
 #### Globbing
 
