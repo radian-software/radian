@@ -386,12 +386,92 @@ alias gl='git log --graph --decorate'
 alias gls='git log --graph --decorate --stat'
 alias glp='git log --graph --decorate --patch'
 alias glps='git log --graph --decorate --patch --stat'
+alias glo='git log --graph --decorate --oneline'
 alias gla='git log --graph --decorate --all'
 alias glas='git log --graph --decorate --all --stat'
 alias glap='git log --graph --decorate --all --patch'
 alias glaps='git log --graph --decorate --all --patch --stat'
-alias glo='git log --graph --decorate --oneline'
 alias glao='git log --graph --decorate --all --oneline'
+glg() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgs() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgp() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --patch ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgps() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --patch --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgo() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --oneline ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glga() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --all ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgsa() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --all --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgpa() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --all --patch ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgpsa() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --all --patch --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glgoa() {
+    if (( $# >= 1 )); then
+        git log --grep=$1 --graph --decorate --all --oneline ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
 
 alias ga='git add'
 alias gap='git add --patch'
