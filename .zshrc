@@ -8,7 +8,6 @@ bundles=(
     "plugins/tmuxinator, from:oh-my-zsh" # Completion for tmuxinator
     "plugins/wd, from:oh-my-zsh" # Quickly jump to directories
     "zsh-users/zsh-autosuggestions" # Autosuggestions from history
-    "zsh-users/zsh-history-substring-search" # Find previous commands
 )
 
 ################################################################################
@@ -761,19 +760,6 @@ alias vim=nvim
 # Turn off case sensitivity permanently in Fasd. This functionality is
 # only available in my fork of Fasd.
 export _FASD_NOCASE=1
-
-################################################################################
-#### zsh-history-substring-search
-
-# Set up key bindings as per README [1].
-#
-# [1]: https://github.com/zsh-users/zsh-history-substring-search
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
-
-# Disable the highlighting.
-HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_FOUND=
-HISTORY_SUBSTRING_SEARCH_HIGHLIGHT_NOT_FOUND=
 
 ################################################################################
 #### Load user-specific configuration file (2 of 2)
