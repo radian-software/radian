@@ -484,6 +484,7 @@ alias gmv='git mv'
 alias gr='git reset'
 alias grs='git reset --soft'
 alias grh='git reset --hard'
+alias grp='git reset --patch'
 
 alias gc='git commit --verbose'
 alias gca='git commit --verbose --amend'
@@ -508,6 +509,14 @@ function gcaw() {
     git add --all
     git rm $(git ls-files --deleted) 2>/dev/null
     git commit --message="(wip) ${(j: :)@}" --quiet --amend && git show --stat
+}
+function gcwp() {
+    gcw $@
+    git push --force
+}
+function gcawp() {
+    gcaw $@
+    git push --force
 }
 
 alias gcp='git cherry-pick'
