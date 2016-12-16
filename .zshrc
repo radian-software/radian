@@ -219,16 +219,21 @@ setopt autopushd
 # case-insensitive filesystem.
 setopt chaselinks
 
-# Default flags for ls:
-#   -a  show hidden files except for . and ..
-#   -l  display additional information
-#   -h  display file size in human-readable format
-#   -F  display trailing / for directories
-# If GNU ls is available, we use that by default.
-if command -v gls &>/dev/null; then
-    alias l='command gls -AlhF --color=auto'
+# Better ls defaults.
+if command -v exa &>/dev/null; then
+    alias l='exa --all --git --grid --header --long'
+    alias lt='exa --all --git --header --long --tree'
+    alias ltl='exa --all --git --header --long --tree --level'
 else
-    alias l='ls -AlhF'
+    if command -v gls &>/dev/null; then
+        alias l='command gls -AlhF --color=auto'
+    else
+        alias l='ls -AlhF'
+    fi
+    if command -v tree &>/dev/null; then
+        alias lt=tree
+        alias ltl='tree -L'
+    fi
 fi
 
 # These are global aliases; you can use them anywhere in a command.
