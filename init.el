@@ -2178,7 +2178,7 @@ enabled or if the user is not in a Projectile project."
   (when (radian-package-enabled-p 'projectile)
     (let ((name (projectile-project-name)))
       (unless (equal name "-")
-        (concat " [" name "]")))))
+        (concat "  [" name "]")))))
 
 (setq-default mode-line-format
               (list
