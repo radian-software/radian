@@ -157,21 +157,18 @@
 
  ;;; Composite profiles
 
- ;; This profile includes useful profiles for a REPL in the terminal.
- :awesome [:cljs
-           :humane
-           :inject
-           :alembic
-           :pretty
-           :refactor
-           :refresh]
+ ;; This profile is for use at the terminal.
+ :terminal [:cljs
+            :humane
+            :inject
+            :alembic
+            :pretty
+            :refresh]
 
- ;; This profile is for use with Emacs.
- :emacs [:cider
-         :cljs
+ ;; This profile is for use from Emacs.
+ :emacs [:cljs
          :inject
-         :alembic
-         :refactor]
+         :alembic]
 
  ;; When running tests.
  :test [:humane]
