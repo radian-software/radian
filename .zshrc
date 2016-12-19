@@ -157,10 +157,6 @@ unsetopt case_glob
 # This makes globbing regexes case-insensitive.
 unsetopt case_match
 
-# This allows additional functionality of globbing, such as using ^
-# and ~ to exclude matches. For example, rm -rf ^.git
-setopt extended_glob
-
 # Allow globs to match dotfiles.
 setopt glob_dots
 
