@@ -2,6 +2,7 @@
 #### Define default bundle list
 
 bundles=(
+    "plugins/docker, from:oh-my-zsh" # Completion for docker
     "plugins/fasd, from:oh-my-zsh" # Quickly jump to directories
     "plugins/lein, from:oh-my-zsh" # Completion for lein
     "plugins/sudo, from:oh-my-zsh" # Quickly re-run commands with sudo
