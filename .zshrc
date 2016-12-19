@@ -220,7 +220,8 @@ setopt chaselinks
 
 # Better ls defaults.
 if command -v exa &>/dev/null; then
-    alias l='exa --all --git --grid --header --long'
+    alias l='exa --all --git --header --long'
+    alias lg='exa --all --git --grid --header --long'
     alias lt='exa --all --git --header --long --tree'
     alias ltl='exa --all --git --header --long --tree --level'
 else
