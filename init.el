@@ -1959,6 +1959,15 @@ strings that are not docstrings."
 
   (advice-add #'cider-jack-in :before #'radian--inject-cljr-dependencies)
 
+  :config
+
+  ;; We also need to tell clj-refactor not to check that
+  ;; refactor-nrepl is installed properly when we are not in a
+  ;; project.
+
+  (advice-add #'cljr--check-middleware-version
+              :before-while #'cljr--project-dir)
+
   :diminish clj-refactor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
