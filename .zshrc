@@ -731,8 +731,8 @@ function proj() {
 ################################################################################
 #### Emacs
 
-alias emacs='emacs -nw'
-alias emacsw='emacs'
+alias emacs='command emacs -nw'
+alias emacsw='command emacs'
 alias emac='emacsclient --alternate-editor="" -nw'
 alias emacw='emacsclient --alternate-editor=""'
 
