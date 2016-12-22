@@ -9,7 +9,7 @@
 ;;
 ;; * Perform configuration of native Emacs functionality.
 ;;
-;; * Bootstrap use-package.
+;; * Bootstrap package management libraries.
 ;;
 ;; * Load and configure packages.
 ;;
