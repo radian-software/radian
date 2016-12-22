@@ -757,11 +757,12 @@ def request_running_in_repo():
 
 
 def ensure_backup_folder_pruned():
-    for entry in os.listdir("backups"):
-        path = os.path.join("backups", entry)
-        if is_path_empty_directory(path):
-            call_require_success(["rmdir", path], verify=strict_verify,
-                                 capture=False)
+    if is_path_directory("backups"):
+        for entry in os.listdir("backups"):
+            path = os.path.join("backups", entry)
+            if is_path_empty_directory(path):
+                call_require_success(["rmdir", path], verify=strict_verify,
+                                     capture=False)
 
 
 ################################################################################
