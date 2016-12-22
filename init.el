@@ -281,6 +281,9 @@ loads it. Otherwise, fails silently."
 ;; Disable the menu bar.
 (menu-bar-mode -1)
 
+;; Disable the contextual menu that pops up when you right-click.
+(global-set-key (kbd "<C-down-mouse-1>") nil)
+
 ;; Disable the toolbar in windowed Emacs.
 (tool-bar-mode -1)
 
