@@ -1520,16 +1520,6 @@ the first keyword in the `use-package' form."
   ;; Enable Undo Tree everywhere.
   (global-undo-tree-mode 1)
 
-  ;; Make undo history persistent between Emacs sessions. Don't rely
-  ;; on this too much if your files tend to change outside of Emacs
-  ;; (e.g. if you use Git).
-  (setq undo-tree-auto-save-history t)
-
-  ;; Put all the undo information in a single directory, instead of in
-  ;; each file's directory.
-  (setq undo-tree-history-directory-alist
-	`(("." . ,(concat user-emacs-directory "undo-tree"))))
-
   ;; Don't show Undo Tree in the mode line.
   (setq undo-tree-mode-lighter nil)
 
