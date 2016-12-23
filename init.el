@@ -785,6 +785,57 @@ This filter de-installs itself after this call."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Navigation
 
+;; Make it so that if you provide a negative prefix argument to
+;; C-SPC (i.e. like M-- C-SPC), then it will step forwards in the mark
+;; ring (whereas C-u C-SPC steps backwards). Based on [1].
+;;
+;; [1]: http://stackoverflow.com/a/14539202/3538165
+
+(defun radian--allow-unpopping-mark (set-mark-command &optional arg)
+  (interactive "P")
+  (if (< (prefix-numeric-value arg) 0)
+      (when mark-ring
+        (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+        (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
+        (when (null (mark t)) (ding))
+        (setq mark-ring (nbutlast mark-ring))
+        (goto-char (marker-position (car (last mark-ring)))))
+    (funcall set-mark-command arg)))
+
+(advice-add #'set-mark-command :around #'radian--allow-unpopping-mark)
+
+;; Make it so that if you provide a prefix argument to C-x C-SPC, then
+;; it will step forwards in the global mark ring, instead of
+;; backwards. Tweaked from the implementation of `pop-global-mark'.
+
+(defun radian--allow-unpopping-global-mark (pop-global-mark &optional arg)
+  (interactive "P")
+  (if arg
+      (progn
+        (or global-mark-ring
+            (error "No global mark set"))
+        ;; We need to do this earlier than `pop-global-mark' does the
+        ;; corresponding action in order to properly undo its
+        ;; behavior.
+        (setq global-mark-ring (nconc (list (car (last global-mark-ring)))
+                                      (butlast global-mark-ring)))
+        (while (and global-mark-ring (not (marker-buffer (car (last global-mark-ring)))))
+          (setq global-mark-ring (butlast global-mark-ring)))
+        (let* ((marker (car (last global-mark-ring)))
+               (buffer (marker-buffer marker))
+               (position (marker-position marker)))
+          (set-buffer buffer)
+          (or (and (>= position (point-min))
+                   (<= position (point-max)))
+              (if widen-automatically
+                  (widen)
+                (error "Global mark position is outside accessible part of buffer")))
+          (goto-char position)
+          (switch-to-buffer buffer)))
+    (funcall pop-global-mark)))
+
+(advice-add #'pop-global-mark :around #'radian--allow-unpopping-global-mark)
+
 ;; When using M-. and friends, always prompt for the identifier (it
 ;; defaults to the identifier at point). This behavior is more
 ;; consistent and predictable than the default, which is to jump
