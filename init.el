@@ -378,9 +378,9 @@ loads it. Otherwise, fails silently."
 ;;;; Finding files
 
 ;; The following code adds keybindings for jumping to the various
-;; dotfiles set up by Radian. These all begin with M-RET and are
-;; designed to be mnemonic, as in <M-RET e p r> standing for "go to
-;; [e]macs init.[pr]e.local.el".
+;; dotfiles set up by Radian. These all begin with <M-RET e> and are
+;; designed to be mnemonic, as in <M-RET e e i> standing for "[e]dit
+;; [e]macs [i]nit.el".
 
 (defmacro radian-register-dotfile (filename &optional keybinding)
   "Tell Radian about a dotfile.
@@ -392,7 +392,7 @@ function will invoke `find-file' on ~/.emacs.d/init.el.
 
 If additionally KEYBINDING is \"e i\" then
 `radian-register-dotfile' will use `global-set-key' to bind
-`radian-find-init-el' to (kbd \"M-RET e i\")."
+`radian-find-init-el' to (kbd \"M-RET e e i\")."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (defun-name (make-symbol
                       (replace-regexp-in-string
@@ -411,7 +411,7 @@ If additionally KEYBINDING is \"e i\" then
                         (interactive)
                         (find-file ,full-filename))))
     (if keybinding
-        (let* ((full-keybinding (concat "M-RET " keybinding))
+        (let* ((full-keybinding (concat "M-RET e " keybinding))
                (set-key-form `(global-set-key (kbd ,full-keybinding)
                                               #',defun-name)))
           `(progn
@@ -467,9 +467,9 @@ If additionally KEYBINDING is \"e i\" then
   (setq ido-auto-merge-work-directories-length -1))
 
 ;; Follow symlinks when opening files. This has the concrete impact,
-;; for instance, that when you edit this file with M-RET e i and then
-;; later do C-x C-f, you will be in the Radian repository instead of
-;; your home directory.
+;; for instance, that when you edit this file with <M-RET e e i> and
+;; then later do C-x C-f, you will be in the Radian repository instead
+;; of your home directory.
 (setq find-file-visit-truename t)
 
 ;; Disable Emacs' built-in version control handling. This improves
@@ -1708,13 +1708,13 @@ the first keyword in the `use-package' form."
   ;; show the mode separately.)
   (setq projectile-mode-line nil))
 
-;; Allows you to jump to any particular occurrence of a character
-;; visible on-screen.
-(use-package ace-jump-mode
-  :bind (;; Create a keybinding for ace-jump-mode. Clojure mode already binds
-         ;; C-c SPC, the recommended keybinding, to `clojure-align', so use
-         ;; C-c C-SPC instead.
-         ("C-C C-SPC" . ace-jump-mode)))
+;; Allows you to jump to characters and words visible onscreen.
+(use-package avy
+  :bind (("M-RET g c" . avy-goto-char)
+         ("M-RET g t" . avy-goto-char-timer)
+         ("M-RET g l" . avy-goto-line)
+         ("M-RET g W" . avy-goto-word-1)
+         ("M-RET g w" . avy-goto-word-0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Clojure
