@@ -1967,7 +1967,7 @@ strings that are not docstrings."
   ;; refactor-nrepl is installed properly when we are not in a
   ;; project.
 
-  (advice-add #'cljr--check-middleware-version
+  (advice-add #'cljr--init-middleware
               :before-while #'cljr--project-dir)
 
   :diminish clj-refactor-mode)
