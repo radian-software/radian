@@ -1292,7 +1292,23 @@ def toggle_feature(feature, enable, interactive=True):
 
 def handle_cl_flag(flag):
     global verify, strict_verify, interactive
-    if flag == "all":
+    if flag == "help":
+        print("usage: ./setup.py <flags>")
+        print("  +<feature> = enable the feature and its dependencies")
+        print("  -<feature> = disable the feature and its dependencies")
+        print("  --all = enable all features")
+        print("  --none = disable all features")
+        print("  --reset = enable only those feature enabled by default")
+        print("  --show-hidden = show hidden features")
+        print("  --hide-hidden = hide hidden features (default)")
+        print("  --verify = confirm dangerous commands before running them (default)")
+        print("  --strict-verify = confirm all commands before running them")
+        print("  --no-verify = don't confirm commands before running them")
+        print("  --interactive = select features interactively (default)")
+        print("  --no-interactive = don't select features interactively")
+        print("  go = shorthand for --all --no-interactive")
+        sys.exit(0)
+    elif flag == "all":
         for feature in feature_list:
             toggle_feature(feature, enable=True, interactive=False)
     elif flag == "reset":
@@ -1353,6 +1369,7 @@ def setup():
     if interactive:
         show_hint = True
         show_features = True
+        history = []
         while True:
             if show_features:
                 user_message("Features (shown with (*) if enabled):")
@@ -1384,6 +1401,7 @@ def setup():
                 if cmd[1] not in features:
                     user_message("That is not the name of a valid feature.")
                     continue
+                history.append(("+" if enable else "-") + cmd[1])
                 toggle_feature(features[cmd[1]], enable=enable, interactive=True)
             elif cmd[0] == "go":
                 if sum(feature["enabled"] for feature in feature_list) == 0:
@@ -1416,9 +1434,12 @@ def setup():
                 elif not handle_cl_flag(cmd[0]):
                     user_message("That is not a valid command.")
                     continue
+                history.append("--" + cmd[0])
             show_hint = False
             show_features = True
             print()
+        user_message("You can replicate this configuration with: ./setup.py {}"
+                     .format(" ".join(history)))
     if verify:
         if strict_verify:
             user_message("You will be asked to confirm all commands "
@@ -1427,6 +1448,7 @@ def setup():
             user_message("You will be asked to confirm all potentially "
                          "dangerous commands before they are run.")
         user_message("When a command prompt appears, press RET.")
+    if verify or interactive:
         wait_for_user("Press RET to continue.")
     for feature in feature_list:
         if feature["enabled"]:

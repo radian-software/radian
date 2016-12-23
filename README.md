@@ -23,17 +23,14 @@ configurations should:
 - Information on how to contribute to Radian
   (see [`CONTRIBUTING.md`](CONTRIBUTING.md))
 
-## Setup on OS X
+## Setup on macOS
 
 Radian includes a setup script that will take you 95% of the way from
-a fresh install of OS X to a fully working setup. Simply download or
-clone this repository and run `scripts/setup.sh`. By default, this
-will set up everything: Emacs, Zsh, Tmux, Leiningen, Git, and other
-miscellaneous tools. If you are not interested in one or more of these
-items, you can run the setup script as—for instance—`scripts/setup.sh
-exclude leiningen git`. Alternatively, if you are only interested in a
-few of the items, you can include only a few of them: for instance,
-`scripts/setup.sh only emacs tmux`.
+a fresh install of macOS to a fully working setup. Simply download or
+clone this repository and run `./setup.py`. If you're skeptical about
+running an automatic script—great! The script allows you to
+interactively select exactly what you want to set up, and will ask to
+confirm every command it runs.
 
 Depending on your system, the setup script may take a while to do its
 thing the first time you run it. (For instance, it may have to
@@ -42,7 +39,7 @@ things that need to be done. In other words, it will not attempt to
 install a tool if an appropriate version of the tool is already
 available. This means that, to some extent, you can use the setup
 script as an "arbitrary problem fixer"—if you have accidentally
-deleted a program or broken a symlink, you can run `setup.sh` to
+deleted a program or broken a symlink, you can run `setup.py` to
 automatically detect and fix what is wrong.
 
 Depending on your system and what tools you want to use, you may—for
@@ -77,9 +74,10 @@ your system might be in, there are a few things to watch out for:
   are configured oddly, they will stay that way and you will have to
   open a new shell if you want them to be cleared.
 - If you already have Emacs packages installed, the setup script has
-  no way of checking if they are outdated. You might want to run `M-x
-  list-packages` to check if there are any updates available. To be
-  extra safe, just `rm -rf ~/.emacs.d/elpa` and restart Emacs.
+  no way of checking if they are the correct versions. You might want
+  to run `M-x list-packages` to check if there are any updates
+  available. To be extra safe, just `rm -rf ~/.emacs.d/elpa` and
+  restart Emacs.
 
 ## Setup on Linux
 
