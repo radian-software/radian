@@ -1710,7 +1710,8 @@ the first keyword in the `use-package' form."
 
 ;; Allows you to jump to characters and words visible onscreen.
 (use-package avy
-  :bind (("M-RET g c" . avy-goto-char)
+  :bind (;; Bind common avy commands to the <M-RET g> prefix.
+         ("M-RET g c" . avy-goto-char)
          ("M-RET g t" . avy-goto-char-timer)
          ("M-RET g l" . avy-goto-line)
          ("M-RET g W" . avy-goto-word-1)
