@@ -1525,6 +1525,32 @@ the first keyword in the `use-package' form."
 ;; Provides simple commands to swap Emacs windows.
 (use-package buffer-move)
 
+;; Provides more intuitive behavior for C-x <left> and C-x <right>.
+(use-package iflipb
+  :config
+
+  ;; Don't skip buffers that start with an asterisk.
+  (setq iflipb-ignore-buffers nil)
+
+  ;; Allow the use of C-x <right> as an "undo" operation even after
+  ;; breaking the C-x <arrow> chain and running another command.
+  (setq iflipb-permissive-flip-back t)
+
+  ;; Don't show the state of the buffer switching in the minibuffer,
+  ;; because the buffers are shown from left to right. (This means
+  ;; that C-x <left> moves right and C-x <right> moves left, which is
+  ;; confusing.) This means that `iflipb' is no longer an alt-tab
+  ;; emulator, but just a silent improvement on C-x <left> and C-x
+  ;; <right>.
+
+  (defun iflipb-format-buffers (&rest args))
+  (advice-add #'iflipb-message :before-while #'identity)
+
+  :bind (;; Replace the standard C-x <left> and C-x <right> bindings
+         ;; with subtly improved versions.
+         ("C-x <left>" . iflipb-next-buffer)
+         ("C-x <right>" . iflipb-previous-buffer)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Text editing
 
