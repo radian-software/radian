@@ -301,6 +301,11 @@ loads it. Otherwise, fails silently."
 (setq show-paren-delay 0)
 (show-paren-mode 1)
 
+;; Change the highlight color used by various things from yellow to
+;; blue.
+(when radian-customize-tweak-colors
+  (set-face-background 'highlight "#B1EAFC"))
+
 ;; Get rid of the underline for the currently highlighted match in an
 ;; Isearch or query replace.
 (when radian-customize-tweak-colors
@@ -1710,6 +1715,13 @@ the first keyword in the `use-package' form."
 
 ;; Allows you to jump to characters and words visible onscreen.
 (use-package avy
+  :config
+
+  ;; Use De Bruijn sequences for jump sequences. This allows you to
+  ;; fixate on a particular place you want to jump to, and jump type
+  ;; whatever shows up there.
+  (setq avy-style 'de-bruijn)
+
   :bind (;; Bind common avy commands to the <M-RET g> prefix.
          ("M-RET g c" . avy-goto-char)
          ("M-RET g t" . avy-goto-char-timer)
