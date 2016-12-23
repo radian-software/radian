@@ -380,6 +380,12 @@ loads it. Otherwise, fails silently."
 (setq save-interprogram-paste-before-kill t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Commands
+
+;; Enable all disabled commands.
+(setq disabled-command-function nil)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Finding files
 
 ;; The following code adds keybindings for jumping to the various
