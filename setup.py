@@ -1008,6 +1008,18 @@ feature_list = [
          ensure_path_is_directory(home(".config/nvim"), request_unversioned=True),
          ensure_symlinked(home(".config/nvim/init.vim"), "init.vim"))},
 
+    ### Java ###
+
+    {"name": "java",
+     "pretty_name": "Java",
+     "description": "The programming language. Clojure runs on the Java Virtual Machine.",
+     "group": "java",
+     "required": ["homebrew"],
+     "action": lambda: (
+         ensure_homebrew_package_installed("java", cask=True, command=["javac", "-version"],
+                                           minimum_version=Version("1.6"),
+                                           hooks={"after_is_installed_false": warn_about_java_popup}))},
+
     ### Clojure ###
 
     {"name": "leiningen",
@@ -1025,18 +1037,6 @@ feature_list = [
      "required": ["radian-local", "leiningen"],
      "action": lambda: (ensure_path_is_directory(home(".lein"), request_unversioned=True),
                         ensure_symlinked(home(".lein/profiles.clj"), "profiles.clj"))},
-
-    ### Java ###
-
-    {"name": "java",
-     "pretty_name": "Java",
-     "description": "The programming language. Clojure runs on the Java Virtual Machine.",
-     "group": "java",
-     "required": ["homebrew"],
-     "action": lambda: (
-         ensure_homebrew_package_installed("java", cask=True, command=["javac", "-version"],
-                                           minimum_version=Version("1.6"),
-                                           hooks={"after_is_installed_false": warn_about_java_popup}))},
 
     ### C++ ###
 
