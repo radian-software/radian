@@ -866,7 +866,6 @@ feature_list = [
      "pretty_name": "Homebrew",
      "description": "The missing package manager for macOS. Can install almost everything.",
      "group": "basic",
-     "disables": ["xcode-cl-tools"],
      "action": lambda: ensure_homebrew_installed()},
 
     ### Git ###
@@ -1198,8 +1197,6 @@ for feature in feature_list:
         feature["required"] = []
     if "recommended" not in feature:
         feature["recommended"] = []
-    if "disables" not in feature:
-        feature["disables"] = []
     feature["required_by"] = []
     assert "action" in feature
     feature["enabled"] = feature["default"]
@@ -1452,8 +1449,6 @@ def setup():
         wait_for_user("Press RET to continue.")
     for feature in feature_list:
         if feature["enabled"]:
-            for disabled_feature_name in feature["disables"]:
-                features[disabled_feature_name]["enabled"] = False
             feature["action"]()
 
 
