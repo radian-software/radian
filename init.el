@@ -1694,14 +1694,40 @@ the first keyword in the `use-package' form."
                                (when (company-explicit-action-p)
                                  cmd))))
 
-  ;; Make RET trigger a completion if and only if the user
-  ;; has explicitly interacted with Company. Note that
-  ;; <return> is for windowed Emacs and RET is for
-  ;; terminal Emacs.
+  ;; Make RET trigger a completion if and only if the user has
+  ;; explicitly interacted with Company. Note that <return> is for
+  ;; windowed Emacs and RET is for terminal Emacs. Also note that
+  ;; since we are mapping the keys to extended menu items, we can't
+  ;; use the `:bind' keyword provided by `use-package'.
   (define-key company-active-map (kbd "<return>")
     radian--company-complete-if-explicit)
   (define-key company-active-map (kbd "RET")
     radian--company-complete-if-explicit)
+
+  ;; We then do the same for the up and down arrows. Note that we use
+  ;; `company-select-previous' instead of
+  ;; `company-select-previous-or-abort'. I think the former makes more
+  ;; sense since the general idea of this `company' configuration is
+  ;; to decide whether or not to steal keypresses based on whether the
+  ;; user has explicitly interacted with `company', not based on the
+  ;; number of candidates.
+
+  (setq radian--company-select-previous-if-explicit
+        `(menu-item nil company-select-previous
+                    :filter ,(lambda (cmd)
+                               (when (company-explicit-action-p)
+                                 cmd))))
+
+  (setq radian--company-select-next-if-explicit
+        `(menu-item nil company-select-next
+                    :filter ,(lambda (cmd)
+                               (when (company-explicit-action-p)
+                                 cmd))))
+
+  (define-key company-active-map (kbd "<up>")
+    radian--company-select-previous-if-explicit)
+  (define-key company-active-map (kbd "<down>")
+    radian--company-select-next-if-explicit)
 
   :bind (:map company-active-map
          ;; Make TAB always complete the current selection. Note
