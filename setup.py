@@ -187,7 +187,7 @@ def call_require_success(args, verify, display_args=None, capture=True):
     output, return_code = call(args, verify=verify, display_args=display_args,
                                capture=capture)
     if return_code != 0:
-        raise CommandUnsuccessfulError(args, output, return_code)
+        raise CommandUnsuccessfulError(display_args or args, output, return_code)
     return output
 
 
