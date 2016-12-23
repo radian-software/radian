@@ -2109,7 +2109,7 @@ strings that are not docstrings."
   (setq markdown-toc-header-toc-title ""))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Packages; YAML
+;;;; Packages: YAML
 
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; YAML files.
