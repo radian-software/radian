@@ -19,7 +19,7 @@
 	alias = "!_() { git config --global alias.$1 \"$2\"; }; _"
 	unalias = "!_() { git config --global --unset alias.$1; }; _"
 	aliases = config --get-regexp ^alias\\.
-	checkup = !git log -1 && (git fetch 2>/dev/null || true) && git status
+	checkup = !git log -1 && (git fetch --all 2>/dev/null || true) && git status
 [push]
 	default = simple
 [color]
