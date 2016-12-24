@@ -785,6 +785,9 @@ This filter de-installs itself after this call."
 ;; immediately if there is a valid symbol at point.
 (setq xref-prompt-for-identifier t)
 
+;; Default to Elisp for M-. and friends, not etags.
+(add-hook 'xref-backend-functions #'elisp--xref-backend)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Searching
 
@@ -963,15 +966,24 @@ Lisp function does not specify a special indentation."
 
 ;; Add keybindings (C-h C-f and C-h C-v) for jumping to the source of
 ;; Elisp functions and variables. Also, add a keybinding (C-h C-o)
-;; that duplicates the functionality of M-., because the latter
-;; command is often rebound by other major modes. Note that this
-;; overrides the default bindings of C-h C-f to `view-emacs-FAQ' and
-;; C-h C-o to `describe-distribution', but I think this is not very
-;; important.
+;; that performs the functionality of M-. only for Elisp, because the
+;; latter command is often rebound by other major modes. Note that
+;; this overrides the default bindings of C-h C-f to `view-emacs-FAQ'
+;; and C-h C-o to `describe-distribution', but I think this is not
+;; very important.
 
 (global-set-key (kbd "C-h C-f") #'find-function)
 (global-set-key (kbd "C-h C-v") #'find-variable)
-(global-set-key (kbd "C-h C-o") #'xref-find-definitions)
+
+(defun find-symbol (&optional symbol)
+  "Same as `xref-find-definitions' but only for Elisp symbols."
+  (interactive)
+  (let ((xref-backend-functions '(elisp--xref-backend)))
+    (if symbol
+        (xref-find-definitions symbol)
+      (call-interactively 'xref-find-definitions))))
+
+(global-set-key (kbd "C-h C-o") #'find-symbol)
 
 ;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
 ;; Interaction" in the mode line.
