@@ -959,8 +959,14 @@ Lisp function does not specify a special indentation."
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
 ;; and Geiser.
 
+(defun radian--eval-buffer ()
+  (interactive)
+  (message "Evaluating %s..." (buffer-name))
+  (eval-buffer)
+  (message "Evaluating %s... done." (buffer-name)))
+
 (defun radian--bind-eval-buffer ()
-  (local-set-key (kbd "C-c C-k") #'eval-buffer))
+  (local-set-key (kbd "C-c C-k") #'radian--eval-buffer))
 
 (add-hook 'emacs-lisp-mode-hook #'radian--bind-eval-buffer)
 
