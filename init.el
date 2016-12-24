@@ -1726,6 +1726,12 @@ the first keyword in the `use-package' form."
          ("M-RET g W" . avy-goto-word-1)
          ("M-RET g w" . avy-goto-word-0)))
 
+;; Highlights matches and previews replacements in query replace.
+(use-package visual-regexp-steroids
+  :bind (;; Replace the regular query replace with the regexp query
+         ;; replace provided by this package.
+         ("M-%" . vr/query-replace)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Clojure
 
