@@ -1602,7 +1602,7 @@ the first keyword in the `use-package' form."
   ;;
   ;; [1]: https://github.com/company-mode/company-mode/issues/530#issuecomment-226566961
   ;; [2]: http://stackoverflow.com/a/22863701/3538165
-  ;; [3]: http://stackoverflow.com/a/22863701/3538165
+  ;; [3]: http://emacs.stackexchange.com/a/27482/12534
   (setq radian--company-complete-if-explicit
         `(menu-item nil company-complete
                     :filter ,(lambda (cmd)
