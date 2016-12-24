@@ -46,17 +46,6 @@
 (defvar radian-customize-tweak-colors nil)
 (setq radian-customize-tweak-colors t)
 
-;; Control completion mechanisms. If this is `helm-ido', then Helm is
-;; used for most completions and IDO is used for finding files. If it
-;; is `ivy', then Ivy and Counsel are used for most completions. By
-;; default, this also enables Swiper for Isearches. You can disable
-;; this functionality by placing (radian-disable-package 'swiper) in
-;; your init.before.local.el. Note that selecting `helm-ido' or `ivy'
-;; automatically disables the packages for the other completion
-;; system.
-(defvar radian-customize-completion-mechanism nil)
-(setq radian-customize-completion-mechanism 'ivy)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Optimization
 
@@ -235,33 +224,6 @@ loads it. Otherwise, fails silently."
 ;;;; Load user-specific configuration file (1 of 2)
 
 (radian-load-user-config "init.before.local.el")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Process user-specific configuration
-
-;; Normalize configuration variables.
-
-(unless (member radian-customize-completion-mechanism
-                '(helm-ido ivy))
-  (lwarn
-   '(radian) :error
-   "%s is not a valid setting for radian-customize-completion-mechanism, setting to helm-ido"
-   radian-customize-completion-mechanism)
-  (setq radian-customize-completion-mechanism 'helm-ido))
-
-;; If the user has selected `helm-ido' as their completion framework,
-;; then we should disable Ivy and friends. If the user has selected
-;; `ivy', then we should disable Helm and friends. Note that this is
-;; just for convenience, and the user can override it by using
-;; `radian-reenable-package' in their init.before.local.el (because
-;; `radian-disable-package' and `radian-reenable-package' are
-;; commutative).
-
-(when (equal radian-customize-completion-mechanism 'helm-ido)
-  (radian-disable-package 'flx 'ivy 'counsel 'counsel-projectile 'swiper))
-
-(when (equal radian-customize-completion-mechanism 'ivy)
-  (radian-disable-package 'helm 'helm-projectile 'helm-smex))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
@@ -454,28 +416,6 @@ If additionally KEYBINDING is \"e i\" then
 (radian-register-dotfile ".zshrc" "z r")
 (radian-register-dotfile ".zshrc.before.local" "z b")
 (radian-register-dotfile ".zshrc.local" "z l")
-
-(when (equal radian-customize-completion-mechanism 'helm-ido)
-  ;; Use IDO ("interactive do") for C-x C-f and other file-finding
-  ;; operations. There is a known issue (#41) that sometimes causes C-x
-  ;; b (which is not a file-finding operation, and should be using
-  ;; Helm) to switch back to IDO. Unfortunately, a consistently
-  ;; reproducible test case has not been forthcoming.
-  (ido-mode 'files)
-
-  ;; Use fuzzy matching for IDO.
-  (setq ido-enable-flex-matching 1)
-
-  ;; By default, if you type in a filename that does not exist in the
-  ;; current directory, IDO will wait 0.7 seconds and then whisk you off
-  ;; to some totally unrelated directory that happens to already have a
-  ;; file by that filename. Here we turn off that "feature".
-  ;;
-  ;; If you want to quickly get to a file somewhere else on the
-  ;; filesystem, helm-projectile offers a much better user experience.
-  ;; IDO is better for navigating in the traditional directory-based
-  ;; system.
-  (setq ido-auto-merge-work-directories-length -1))
 
 ;; Follow symlinks when opening files. This has the concrete impact,
 ;; for instance, that when you edit this file with <M-RET e e i> and
@@ -696,17 +636,14 @@ This filter de-installs itself after this call."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Dired
 
-;; Make C-x C-j jump to the current file in Dired. This binding is
-;; provided automatically by dired-x.el, which is automatically loaded
-;; by Helm. But if Helm is not enabled, then we have to bind the key
-;; manually. For some reason, the autoload for `dired-jump' does not
-;; appear to work correctly, so we have to autoload the functions
-;; explicitly.
-(when (radian-package-disabled-p 'helm)
-  (autoload 'dired-jump "dired-x")
-  (autoload 'dired-jump-other-window "dired-x")
-  (global-set-key (kbd "C-x C-j") #'dired-jump)
-  (global-set-key (kbd "C-x 4 C-j") #'dired-jump-other-window))
+;; Make C-x C-j jump to the current file in Dired. For some reason,
+;; the autoload for `dired-jump' does not appear to work correctly, so
+;; we have to autoload the functions explicitly.
+
+(autoload 'dired-jump "dired-x")
+(autoload 'dired-jump-other-window "dired-x")
+(global-set-key (kbd "C-x C-j") #'dired-jump)
+(global-set-key (kbd "C-x 4 C-j") #'dired-jump-other-window)
 
 ;; Suppress the 'ls does not support --dired' warning. Doing this instead
 ;; of installing a dired-compatibile ls is much easier, although it may
@@ -1297,58 +1234,6 @@ the first keyword in the `use-package' form."
   :bind (;; Use smex for M-x.
          ("M-x" . smex)))
 
-;; Provides a general-purpose completion and narrowing mechanism, and
-;; enhanced versions of many standard Emacs commands that use it.
-(use-package helm
-  :demand t
-  :config
-
-  ;; Use Helm mode for many standard Emacs commands.
-  (helm-mode 1)
-
-  ;; Fix the unreadable default color for the prefix argument in the
-  ;; Helm M-x buffer.
-  (when radian-customize-tweak-colors
-    (set-face-foreground 'helm-prefarg "#FFFF66"))
-
-  ;; Use fuzzy matching for Helm.
-  (setq helm-mode-fuzzy-match t)
-
-  ;; Get rid of the awful background color for buffers corresponding to files
-  ;; modified outside of Emacs.
-  (when radian-customize-tweak-colors
-    (set-face-background 'helm-buffer-saved-out nil))
-
-  :bind (;; Use Helm mode for M-x.
-         ("M-x" . helm-M-x))
-  ;; Note that Helm has `helm-mode-line-string', but this only affects
-  ;; what is shown in the mode line for a Helm buffer.
-  :diminish helm-mode)
-
-;; Provides enhanced versions of the Projectile commands that use
-;; Helm.
-(use-package helm-projectile
-  :dependencies (helm)
-  :demand t
-  :config
-
-  ;; Use Helm mode for Projectile commands. Using helm-projectile-toggle
-  ;; instead of helm-projectile-on means we don't get a useless "Turn on
-  ;; helm-projectile key bindings" message in the minibuffer during startup.
-  ;;
-  ;; The local binding of ad-redefinition works around a warning message
-  ;; "ad-handle-definition: `tramp-read-passwd' got redefined", as per [1].
-  ;;
-  ;; [1]: https://github.com/emacs-helm/helm/issues/1498#issuecomment-218249480
-  (let ((ad-redefinition-action 'accept))
-    (helm-projectile-toggle 1)))
-
-;; Provides an enhanced version of smex that uses Helm for completion.
-(use-package helm-smex
-  :dependencies (helm smex)
-  :bind (;; Use helm-smex for M-x.
-         ("M-x" . helm-smex)))
-
 ;; Provides intelligent fuzzy matching and sorting mechanisms that
 ;; can be used by various other packages, including Ivy.
 (use-package flx)
@@ -1802,8 +1687,7 @@ the first keyword in the `use-package' form."
   ;; `fasd-find-file', instead of just prompting for an input.
   (setq fasd-enable-initial-prompt nil)
 
-  ;; Use Ivy (or Helm, if `radian-customize-completion-mechanism' is
-  ;; set to `helm-ido') for completion, instead of `grizzl'.
+  ;; Use Ivy for completion, instead of `grizzl'.
   (setq fasd-completing-read-function nil)
 
   ;; Make it so that Emacs file-finding updates the fasd database.
