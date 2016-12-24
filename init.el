@@ -2100,7 +2100,11 @@ strings that are not docstrings."
 
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; Markdown files.
-(use-package markdown-mode)
+(use-package markdown-mode
+  :config
+
+  ;; Automatically wrap text when editing Markdown files.
+  (add-hook 'markdown-mode-hook #'auto-fill-mode))
 
 ;; Provides the `markdown-toc-generate-toc' command to generate a
 ;; table of contents for a Markdown file.
