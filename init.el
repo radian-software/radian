@@ -1571,22 +1571,6 @@ the first keyword in the `use-package' form."
   ;; comments and strings in Clojure.
   (setq company-dabbrev-downcase nil)
 
-  ;; Company mode overrides standard REPL bindings for M-p and M-n
-  ;; when the completions menu is visible. Prevent this, but only in
-  ;; REPL modes.
-
-  (defun radian--unbind-company-navigation-keys ()
-    (make-local-variable 'company-active-map)
-    (setq company-active-map (copy-tree company-active-map))
-    (define-key company-active-map (kbd "M-p") nil)
-    (define-key company-active-map (kbd "M-n") nil))
-
-  (when (radian-package-enabled-p 'cider)
-    (add-hook 'cider-repl-mode-hook #'radian--unbind-company-navigation-keys))
-
-  (when (radian-package-enabled-p 'geiser)
-    (add-hook 'geiser-repl-mode-hook #'radian--unbind-company-navigation-keys))
-
   ;; We want pressing RET to trigger a Company completion only if the
   ;; user has interacted explicitly with Company. The only way I can
   ;; find to do this is to define what is called an "extended menu
