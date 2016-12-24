@@ -1420,6 +1420,10 @@ the first keyword in the `use-package' form."
          ("C-c j" . counsel-git-grep)
          ("C-c k" . counsel-ag)
 
+         ;; Interactively select a kill to yank using ivy, when using
+         ;; `yank-pop'.
+         ("M-y" . counsel-yank-pop)
+
          ;; After you have pressed M-:, you can use C-r to select a
          ;; previous entry using Counsel.
          :map read-expression-map
