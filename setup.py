@@ -649,7 +649,7 @@ def create_symlink(symlink_path, target_path):
 
 def back_up_path(path, strict_verify_only=False):
     filename = os.path.split(path)[1]
-    ensure_backup_folder_exists(strict_verify_only=strict_verify_only)
+    ensure_backup_folder_exists()
     call_require_success(["mv", path, os.path.join(backup_folder, filename)],
                          verify=strict_verify if strict_verify_only else verify,
                          capture=False)
@@ -710,12 +710,12 @@ def ensure_path_is_directory(path, request_unversioned=False, strict_verify_only
     return False
 
 
-def ensure_backup_folder_exists(strict_verify_only=False):
+def ensure_backup_folder_exists():
     global backup_folder
     if not backup_folder:
         uuid = str(datetime.datetime.now().utcnow())
         backup_folder = os.path.join("backups", uuid)
-    return ensure_path_is_directory(backup_folder, strict_verify_only=strict_verify_only)
+    return ensure_path_is_directory(backup_folder, strict_verify_only=True)
 
 
 def ensure_path_backed_up(path, strict_verify_only=False):
