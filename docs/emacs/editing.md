@@ -4,7 +4,7 @@ As in all text editors, you can insert text at the cursor simply by
 typing, and you can delete text before the cursor using `DEL`. In
 Emacs, you can also delete text after the cursor using `C-d`.
 
-## Copy and paste
+## Selecting text, copy and paste
 
 Emacs refers to these operations by somewhat more violent names than
 most other editors. For users coming from Vim, the situation is even
