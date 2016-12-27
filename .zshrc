@@ -552,6 +552,8 @@ alias gstd='git stash drop'
 
 alias gd='git diff'
 alias gds='git diff --stat'
+alias gdc='git diff --cached'
+alias gdcs='git diff --cached --stat'
 
 alias gbl='git blame'
 
