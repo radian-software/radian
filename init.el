@@ -1420,7 +1420,11 @@ the first keyword in the `use-package' form."
   :config
 
   ;; Don't show `abbrev-mode' in the mode line.
-  (diminish 'abbrev-mode))
+  (diminish 'abbrev-mode)
+
+  ;; Don't show `smerge-mode' in the mode line.
+  (eval-after-load 'smerge-mode
+    '(diminish 'smerge-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Window management
