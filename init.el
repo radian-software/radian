@@ -1780,6 +1780,9 @@ the first keyword in the `use-package' form."
                   (:use 0)))
     (put-clojure-indent (car spec) (cdr spec)))
 
+  ;; Automatically line-wrap docstrings.
+  (add-hook 'clojure-mode-hook #'auto-fill-mode)
+
   ;; `clojure-mode' does not correctly identify the docstrings of
   ;; protocol methods as docstrings, and as such electric and
   ;; aggressive indentation do not work for them. Additionally, when
