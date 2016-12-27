@@ -212,6 +212,11 @@ setopt autocd
 # directory is saved in the directory stack (view with dirs or ds).
 setopt autopushd
 
+# This makes it so that "cd -n" gives you the directory you were in n
+# cd's ago, instead of the nth directory you have visited in the shell
+# session. (You can use "cd +n" to recover the latter behavior.)
+setopt pushdminus
+
 # This makes it so that the working directory path is automatically
 # fully resolved. This means that symlink components will be followed,
 # and capitalization will be corrected if you are on a
