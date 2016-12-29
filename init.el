@@ -1648,7 +1648,12 @@ the first keyword in the `use-package' form."
   (define-key company-active-map (kbd "<down>")
     radian--company-select-next-if-explicit)
 
-  :bind (:map company-active-map
+  :bind (;; Replace `completion-at-point' and `complete-symbol' with
+         ;; `company-manual-begin'.
+         ([remap completion-at-point] . company-manual-begin)
+         ([remap complete-symbol] . company-manual-begin)
+
+         :map company-active-map
          ;; Make TAB always complete the current selection. Note
          ;; that <tab> is for windowed Emacs and TAB is for
          ;; terminal Emacs.
@@ -1924,6 +1929,18 @@ strings that are not docstrings."
 
   ;; Don't show CIDER in the mode line.
   (setq cider-mode-line nil)
+
+  ;; Increase delays and minimum prefixes when CIDER is running,
+  ;; because the backend CIDER uses to retrieve completions is slow
+  ;; and can't handle being called too many times without lagging
+  ;; Emacs.
+
+  (defun radian--reduce-cider-lag ()
+    (setq-local company-idle-delay 1)
+    (setq-local company-minimum-prefix-length 3)
+    (setq-local eldoc-idle-delay 1))
+
+  (add-hook 'cider-mode-hook #'radian--reduce-cider-lag)
 
   :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
          ("C-c M-j" . cider-jack-in)
