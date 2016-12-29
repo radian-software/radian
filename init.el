@@ -1274,14 +1274,12 @@ the first keyword in the `use-package' form."
           (t . ivy--regex-fuzzy)))
 
   ;; Increase the maximum number of candidates that will be sorted
-  ;; using `flx'. (If there are more candidates, they will be sorted
-  ;; alphabetically.) The default is 200, which means `flx' is almost
+  ;; using `flx'. The default is 200, which means `flx' is almost
   ;; never used. Setting it too high (e.g. 10000) causes lag. This
   ;; seems to be a good compromise (for example, @PythonNut uses it,
-  ;; see [1]). A better solution based on the code in [2] is pending.
+  ;; see [1]).
   ;;
   ;; [1]: https://github.com/PythonNut/emacs-config/blob/c8bff5cce293006ec5cdc39a86982431a758a9a0/modules/config-ivy.el#L68
-  ;; [2]: https://github.com/abo-abo/swiper/issues/207#issuecomment-140439385
   (setq ivy-flx-limit 2000)
 
   ;; Don't automatically insert a "^" character when starting an Ivy
