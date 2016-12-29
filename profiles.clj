@@ -104,6 +104,9 @@
                           ;; in vinyasa. See https://github.com/zcaudate/vinyasa/pull/31
                           (inject '[[clojure.tools.namespace.repl refresh refresh-all]]))]}
 
+ :whidbey {:plugins [;; Colorize and pretty-print all evaluation results
+                     [mvxcvi/whidbey "1.3.1"]]}
+
  ;; END profiles with optional injections
 
  :lint {:plugins [;; Miscellaneous linting
@@ -163,7 +166,8 @@
             :inject
             :alembic
             :pretty
-            :refresh]
+            :refresh
+            :whidbey]
 
  ;; This profile is for use from Emacs.
  :emacs [:cljs
