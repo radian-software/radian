@@ -1930,15 +1930,17 @@ strings that are not docstrings."
   ;; Don't show CIDER in the mode line.
   (setq cider-mode-line nil)
 
-  ;; Increase delays and minimum prefixes when CIDER is running,
-  ;; because the backend CIDER uses to retrieve completions is slow
-  ;; and can't handle being called too many times without lagging
-  ;; Emacs.
+  ;; Make some modes perform their actions less often in buffers where
+  ;; CIDER is active. This is helpful because CIDER is slow, and will
+  ;; lag Emacs if its logic is called too often.
 
   (defun radian--reduce-cider-lag ()
-    (setq-local company-idle-delay 1)
-    (setq-local company-minimum-prefix-length 3)
-    (setq-local eldoc-idle-delay 1))
+    (setq-local company-idle-delay 1) ; increased from 0
+    (setq-local company-minimum-prefix-length 3) ; increased from 0
+    (setq-local eldoc-idle-delay 1) ; increased from 0
+    (remove-hook 'before-save-hook
+                 #'aggressive-indent--proccess-changed-list-and-indent
+                 'local))
 
   (add-hook 'cider-mode-hook #'radian--reduce-cider-lag)
 
