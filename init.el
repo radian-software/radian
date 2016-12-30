@@ -717,6 +717,9 @@ This filter de-installs itself after this call."
 ;; everywhere (e.g. when editing .gitignore files).
 (setq require-final-newline t)
 
+;; Automatically wrap lines when editing plain text files.
+(add-hook 'text-mode-hook #'auto-fill-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Killing and yanking
 
