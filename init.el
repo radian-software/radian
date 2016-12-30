@@ -1943,6 +1943,7 @@ strings that are not docstrings."
                  'local))
 
   (add-hook 'cider-mode-hook #'radian--reduce-cider-lag)
+  (add-hook 'cider-repl-mode-hook #'radian--reduce-cider-lag)
 
   :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
          ("C-c M-j" . cider-jack-in)
