@@ -367,7 +367,7 @@ If additionally KEYBINDING is \"e i\" then
 `radian-register-dotfile' will use `global-set-key' to bind
 `radian-find-init-el' to (kbd \"M-RET e e i\")."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
-         (defun-name (make-symbol
+         (defun-name (intern
                       (replace-regexp-in-string
                        "-+"
                        "-"
