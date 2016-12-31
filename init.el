@@ -1685,6 +1685,75 @@ the first keyword in the `use-package' form."
 ;; templates. This is used by clj-refactor for some of its
 ;; refactorings.
 (use-package yasnippet
+  :config
+
+  ;; Make it so that Company's keymap overrides Yasnippet's keymap
+  ;; when a snippet is active. This way, you can TAB to complete a
+  ;; suggestion for the current field in a snippet, and then TAB to
+  ;; move to the next field. Plus, C-g will dismiss the Company
+  ;; completions menu rather than cancelling the snippet and moving
+  ;; the cursor while leaving the completions menu on-screen in the
+  ;; same location.
+
+  (when (radian-package-enabled-p 'company)
+    (eval-after-load 'company
+      (lambda ()
+
+        ;; This function translates the "event types" I get from
+        ;; `map-keymap' into things that I can pass to `lookup-key'
+        ;; and `define-key'. It's a hack, and I'd like to find a
+        ;; built-in function that accomplishes the same thing while
+        ;; taking care of any edge cases I might have missed in this
+        ;; ad-hoc solution.
+        (defun radian--normalize-event (event)
+          (if (vectorp event)
+              event
+            (vector event)))
+
+        ;; Here we define a hybrid keymap that delegates first to
+        ;; `company-active-map' and then to `yas-keymap'.
+        (setq radian--yas-company-keymap
+              ;; It starts out as a copy of `yas-keymap', and then we
+              ;; merge in all of the bindings from
+              ;; `company-active-map'.
+              (let ((keymap (copy-keymap yas-keymap)))
+                (map-keymap
+                 (lambda (event company-cmd)
+                   (let* ((event (radian--normalize-event event))
+                          (yas-cmd (lookup-key yas-keymap event)))
+                     ;; Here we use an extended menu item with the
+                     ;; `:filter' option, which allows us to
+                     ;; dynamically decide which command we want to
+                     ;; run when a key is pressed.
+                     (define-key keymap event
+                       `(menu-item
+                         nil ,company-cmd :filter
+                         (lambda (cmd)
+                           ;; There doesn't seem to be any obvious
+                           ;; function from Company to tell whether or
+                           ;; not a completion is in progress (à la
+                           ;; `company-explicit-action-p'), so I just
+                           ;; check whether or not `company-my-keymap'
+                           ;; is defined, which seems to be good
+                           ;; enough.
+                           (if company-my-keymap
+                               ',company-cmd
+                             ',yas-cmd))))))
+                 company-active-map)
+                keymap))
+
+        ;; The function `yas--make-control-overlay' uses the current
+        ;; value of `yas-keymap' to build the Yasnippet overlay, so to
+        ;; override the Yasnippet keymap we only need to dynamically
+        ;; rebind `yas-keymap' for the duration of that function.
+        (defun radian--company-overrides-yasnippet
+            (yas--make-control-overlay &rest args)
+          (let ((yas-keymap radian--yas-company-keymap))
+            (apply yas--make-control-overlay args)))
+
+        (advice-add #'yas--make-control-overlay :around
+                    #'radian--company-overrides-yasnippet))))
+
   :diminish yas-minor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
