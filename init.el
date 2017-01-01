@@ -410,11 +410,25 @@ the first keyword in the `use-package' form."
 (quelpa-use-package-activate-advice)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Emacs Lisp
+
+;; Future-proof your Emacs Lisp customizations.
+(use-package el-patch
+  :demand t
+  :quelpa (el-patch :fetcher github :repo "raxod502/el-patch")
+  :config
+
+  ;; Don't perform validation during Emacs startup. See [1].
+  ;;
+  ;; [1]: https://github.com/raxod502/el-patch
+  (el-patch-disable-validation-during-init))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
 
 ;; Disable the "For information about GNU Emacs..." message at startup,
 ;; for *all* users.
-(defun display-startup-echo-area-message ())
+(advice-add #'display-startup-echo-area-message :override #'ignore)
 
 ;; Disable the *About GNU Emacs* buffer at startup, and go straight for
 ;; the scratch buffer. This is especially useful because Projectile won't
@@ -1056,75 +1070,91 @@ This filter de-installs itself after this call."
 ;;
 ;; [1]: https://github.com/Fuco1/.emacs.d/blob/af82072196564fa57726bdbabf97f1d35c43b7f7/site-lisp/redef.el#L12-L94
 ;; [2]: http://emacs.stackexchange.com/q/10230/12534
-(defun lisp-indent-function (indent-point state)
+
+(el-patch-defun lisp-indent-function (indent-point state)
   "This function is the normal value of the variable `lisp-indent-function'.
 The function `calculate-lisp-indent' calls this to determine
 if the arguments of a Lisp function call should be indented specially.
+
 INDENT-POINT is the position at which the line being indented begins.
 Point is located at the point to indent under (for default indentation);
 STATE is the `parse-partial-sexp' state for that position.
+
 If the current line is in a call to a Lisp function that has a non-nil
 property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
 it specifies how to indent.  The property value can be:
+
 * `defun', meaning indent `defun'-style
-  \(this is also the case if there is no property and the function
+  (this is also the case if there is no property and the function
   has a name that begins with \"def\", and three or more arguments);
+
 * an integer N, meaning indent the first N arguments specially
   (like ordinary function arguments), and then indent any further
   arguments like a body;
+
 * a function to call that returns the indentation (or nil).
   `lisp-indent-function' calls this function with the same two arguments
   that it itself received.
+
 This function returns either the indentation to use, or nil if the
 Lisp function does not specify a special indentation."
-  (let ((normal-indent (current-column))
-        (orig-point (point)))
-    (goto-char (1+ (elt state 1)))
-    (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-    (cond
-     ;; car of form doesn't seem to be a symbol, or is a keyword
-     ((and (elt state 2)
-           (or (not (looking-at "\\sw\\|\\s_"))
-               (looking-at ":")))
-      (if (not (> (save-excursion (forward-line 1) (point))
-                  calculate-lisp-indent-last-sexp))
-          (progn (goto-char calculate-lisp-indent-last-sexp)
-                 (beginning-of-line)
-                 (parse-partial-sexp (point)
-                                     calculate-lisp-indent-last-sexp 0 t)))
-      ;; Indent under the list or under the first sexp on the same
-      ;; line as calculate-lisp-indent-last-sexp.  Note that first
-      ;; thing on that line has to be complete sexp since we are
-      ;; inside the innermost containing sexp.
-      (backward-prefix-chars)
-      (current-column))
-     ((and (save-excursion
-             (goto-char indent-point)
-             (skip-syntax-forward " ")
-             (not (looking-at ":")))
-           (save-excursion
-             (goto-char orig-point)
-             (looking-at ":")))
-      (save-excursion
-        (goto-char (+ 2 (elt state 1)))
-        (current-column)))
-     (t
-      (let ((function (buffer-substring (point)
-                                        (progn (forward-sexp 1) (point))))
-            method)
-        (setq method (or (function-get (intern-soft function)
-                                       'lisp-indent-function)
-                         (get (intern-soft function) 'lisp-indent-hook)))
-        (cond ((or (eq method 'defun)
-                   (and (null method)
-                        (> (length function) 3)
-                        (string-match "\\`def" function)))
-               (lisp-indent-defform state indent-point))
-              ((integerp method)
-               (lisp-indent-specform method state
-                                     indent-point normal-indent))
-              (method
-               (funcall method indent-point state))))))))
+  (el-patch-let (($cond (and (elt state 2)
+                             (el-patch-wrap 1 1
+                               (or (not (looking-at "\\sw\\|\\s_"))
+                                   (looking-at ":")))))
+                 ($then (progn
+                          (if (not (> (save-excursion (forward-line 1) (point))
+                                      calculate-lisp-indent-last-sexp))
+                              (progn (goto-char calculate-lisp-indent-last-sexp)
+                                     (beginning-of-line)
+                                     (parse-partial-sexp (point)
+                                                         calculate-lisp-indent-last-sexp 0 t)))
+                          ;; Indent under the list or under the first sexp on the same
+                          ;; line as calculate-lisp-indent-last-sexp.  Note that first
+                          ;; thing on that line has to be complete sexp since we are
+                          ;; inside the innermost containing sexp.
+                          (backward-prefix-chars)
+                          (current-column)))
+                 ($else (let ((function (buffer-substring (point)
+                                                          (progn (forward-sexp 1) (point))))
+                              method)
+                          (setq method (or (function-get (intern-soft function)
+                                                         'lisp-indent-function)
+                                           (get (intern-soft function) 'lisp-indent-hook)))
+                          (cond ((or (eq method 'defun)
+                                     (and (null method)
+                                          (> (length function) 3)
+                                          (string-match "\\`def" function)))
+                                 (lisp-indent-defform state indent-point))
+                                ((integerp method)
+                                 (lisp-indent-specform method state
+                                                       indent-point normal-indent))
+                                (method
+                                 (funcall method indent-point state))))))
+    (let ((normal-indent (current-column))
+          (el-patch-add
+            (orig-point (point))))
+      (goto-char (1+ (elt state 1)))
+      (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+      (el-patch-swap
+        (if $cond
+            ;; car of form doesn't seem to be a symbol
+            $then
+          $else)
+        (cond
+         ;; car of form doesn't seem to be a symbol, or is a keyword
+         ($cond $then)
+         ((and (save-excursion
+                 (goto-char indent-point)
+                 (skip-syntax-forward " ")
+                 (not (looking-at ":")))
+               (save-excursion
+                 (goto-char orig-point)
+                 (looking-at ":")))
+          (save-excursion
+            (goto-char (+ 2 (elt state 1)))
+            (current-column)))
+         (t $else))))))
 
 ;; Add a keybinding (M-RET r) for reloading this file (init.el). This
 ;; is useful for when you have several instances of Emacs open and you
@@ -1137,7 +1167,8 @@ Lisp function does not specify a special indentation."
   (interactive "P")
   (message "Reloading init.el...")
   (setq radian--inhibit-loading-quelpa (not upgrade))
-  (radian-load-user-config "init.el")
+  (let ((el-patch-validation nil))
+    (radian-load-user-config "init.el"))
   (message "Reloading init.el... done."))
 
 (global-set-key (kbd "M-RET r") #'radian-reload-init)
@@ -1194,7 +1225,8 @@ Lisp function does not specify a special indentation."
 ;; provided by `cc-mode', which is not initially loaded, we have to
 ;; make sure to do so *after* it is loaded and not before.
 (eval-after-load 'cc-mode
-  '(defun c-update-modeline ()))
+  (lambda ()
+    (advice-add #'c-update-modeline :override #'ignore)))
 
 ;; Switch to a better indentation-and-braces style. This turns the
 ;; following code:
@@ -1350,7 +1382,8 @@ Lisp function does not specify a special indentation."
   ;;
   ;; [1]: https://github.com/jwiegley/use-package/issues/413
 
-  (defun radian--counsel-projectile-commander-bindings ()
+  (el-patch-defun counsel-projectile-commander-bindings ()
+    (el-patch-feature counsel-projectile)
     (def-projectile-commander-method ?f
       "Find file in project."
       (counsel-projectile-find-file))
@@ -1367,22 +1400,32 @@ Lisp function does not specify a special indentation."
       "Switch project."
       (counsel-projectile-switch-project)))
 
-  (defun radian--counsel-projectile-on ()
-    (when (eq projectile-switch-project-action #'projectile-find-file)
-      (setq projectile-switch-project-action #'counsel-projectile))
-    (define-key projectile-mode-map [remap projectile-find-file]
-      #'counsel-projectile-find-file)
-    (define-key projectile-mode-map [remap projectile-find-dir]
-      #'counsel-projectile-find-dir)
-    (define-key projectile-mode-map [remap projectile-switch-project]
-      #'counsel-projectile-switch-project)
-    (define-key projectile-mode-map [remap projectile-ag]
-      #'counsel-projectile-ag)
-    (define-key projectile-mode-map [remap projectile-switch-to-buffer]
-      #'counsel-projectile-switch-to-buffer)
-    (radian--counsel-projectile-commander-bindings))
+  (el-patch-defun counsel-projectile-toggle (toggle)
+    "Toggle Ivy version of Projectile commands."
+    (el-patch-feature counsel-projectile)
+    (if (> toggle 0)
+        (progn
+          (when (eq projectile-switch-project-action #'projectile-find-file)
+            (setq projectile-switch-project-action #'counsel-projectile))
+          (define-key projectile-mode-map [remap projectile-find-file] #'counsel-projectile-find-file)
+          (define-key projectile-mode-map [remap projectile-find-dir] #'counsel-projectile-find-dir)
+          (define-key projectile-mode-map [remap projectile-switch-project] #'counsel-projectile-switch-project)
+          (define-key projectile-mode-map [remap projectile-ag] #'counsel-projectile-ag)
+          (define-key projectile-mode-map [remap projectile-switch-to-buffer] #'counsel-projectile-switch-to-buffer)
+          (counsel-projectile-commander-bindings))
+      (progn
+        (when (eq projectile-switch-project-action #'counsel-projectile)
+          (setq projectile-switch-project-action #'projectile-find-file))
+        (define-key projectile-mode-map [remap projectile-find-file] nil)
+        (define-key projectile-mode-map [remap projectile-find-dir] nil)
+        (define-key projectile-mode-map [remap projectile-switch-project] nil)
+        (define-key projectile-mode-map [remap projectile-ag] nil)
+        (define-key projectile-mode-map [remap projectile-switch-to-buffer] nil)
+        (projectile-commander-bindings))))
 
-  (eval-after-load 'projectile '(radian--counsel-projectile-on)))
+  (eval-after-load 'projectile
+    (lambda ()
+      (counsel-projectile-toggle 1))))
 
 ;; Provides an enhanced version of Isearch that uses Ivy to display
 ;; a preview of the results.
@@ -1435,7 +1478,7 @@ Lisp function does not specify a special indentation."
   ;; emulator, but just a silent improvement on C-x <left> and C-x
   ;; <right>.
 
-  (defun iflipb-format-buffers (&rest args))
+  (advice-add #'iflipb-format-buffers :override #'ignore)
   (advice-add #'iflipb-message :before-while #'identity)
 
   :bind (;; Replace the standard C-x <left> and C-x <right> bindings
@@ -1509,6 +1552,9 @@ Lisp function does not specify a special indentation."
       (undo-tree-save-history &rest args)
     (let ((inhibit-message t))
       (apply undo-tree-save-history args)))
+
+  (advice-add #'undo-tree-save-history :around
+              #'radian--undo-tree-suppress-undo-history-saved-message)
 
   ;; Suppress the message saying that the undo history could not be
   ;; loaded because the file changed outside of Emacs.
@@ -1655,8 +1701,11 @@ Lisp function does not specify a special indentation."
 
   ;; Disable the message that is normally printed when Company
   ;; Statistics loads its statistics file from disk.
-  (defun company-statistics--load ()
-    (load company-statistics-file 'noerror 'nomessage 'nosuffix))
+  (el-patch-defun company-statistics--load ()
+    "Restore statistics."
+    (load company-statistics-file 'noerror
+          (el-patch-swap nil 'nomessage)
+          'nosuffix))
 
   ;; Enable Company Statistics.
   (company-statistics-mode 1))
@@ -1862,34 +1911,33 @@ Lisp function does not specify a special indentation."
   ;; user can toggle it if they need to use `aggressive-indent-mode'
   ;; and multiline strings that are not docstrings at the same time.
 
-  (defun radian--clojure-in-docstring-p ()
-    "Check whether point is in a docstring."
-    (or
-     (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-     (eq (get-text-property (point) 'face) 'font-lock-string-face)))
-
-  (defun radian--indent-all-strings-as-docstrings ()
-    "Indent current line as Clojure code, treating all strings as
-docstrings."
-    (if (radian--clojure-in-docstring-p)
-        (save-excursion
-          (beginning-of-line)
-          (when (and (looking-at "^\\s-*")
-                     (<= (string-width (match-string-no-properties 0))
-                         (string-width (clojure-docstring-fill-prefix))))
-            (replace-match (clojure-docstring-fill-prefix))))
-      (lisp-indent-line)))
-
   (define-minor-mode radian-clojure-strings-as-docstrings-mode
     "Toggles whether or not all strings are treated as docstrings
 in Clojure. You want to turn this off if you have multiline
 strings that are not docstrings."
     nil nil nil
     (if radian-clojure-strings-as-docstrings-mode
-        (advice-add #'clojure-indent-line :override
-                    #'radian--indent-all-strings-as-docstrings)
-      (advice-remove #'clojure-indent-line
-                     #'radian--indent-all-strings-as-docstrings)))
+        (progn
+          (el-patch-defsubst clojure-in-docstring-p ()
+            "Check whether point is in a docstring."
+            (el-patch-feature clojure-mode)
+            (el-patch-wrap 1 1
+              (or
+               (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+               (eq (get-text-property (point) 'face) 'font-lock-string-face))))
+          (el-patch-defun clojure-indent-line ()
+            "Indent current line as Clojure code."
+            (el-patch-feature clojure-mode)
+            (if (clojure-in-docstring-p)
+                (save-excursion
+                  (beginning-of-line)
+                  (when (and (looking-at "^\\s-*")
+                             (<= (string-width (match-string-no-properties 0))
+                                 (string-width (clojure-docstring-fill-prefix))))
+                    (replace-match (clojure-docstring-fill-prefix))))
+              (lisp-indent-line))))
+      (el-patch-unpatch 'clojure-in-docstring-p)
+      (el-patch-unpatch 'clojure-indent-function)))
 
   (add-hook 'clojure-mode-hook #'radian-clojure-strings-as-docstrings-mode)
 
