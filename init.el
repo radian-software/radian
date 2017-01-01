@@ -1,22 +1,5 @@
-;; The general outline of this file is as follows:
-;;
-;; * Set up variables and functions for managing user-specific
-;;   configuration. This needs to be done first because the
-;;   user-specific options could affect the behavior of anything else
-;;   in the file.
-;;
-;; * Run the user-specific configuration file init.before.local.el.
-;;
-;; * Perform configuration of native Emacs functionality.
-;;
-;; * Bootstrap package management libraries.
-;;
-;; * Load and configure packages.
-;;
-;; * Load color schemes and perform other appearance tweaks that look
-;;   odd unless they are done at the very end of initialization.
-;;
-;; * Run the user-specific configuration file init.local.el.
+;; To see the outline of this file, run M-x occur with a query of four
+;; semicolons followed by a space.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific configuration variables
@@ -224,6 +207,207 @@ loads it. Otherwise, fails silently."
 ;;;; Load user-specific configuration file (1 of 2)
 
 (radian-load-user-config "init.before.local.el")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Bootstrap package management system
+
+;; Add package repositories. GNU is the default repository; MELPA is
+;; necessary to get most of the packages we are interested in. Note
+;; that `package-initialize' appears to use the value of
+;; `package-archives', so we place this declaration first.
+(setq package-archives
+      '(("gnu" . "http://elpa.gnu.org/packages/")
+        ("melpa" . "https://melpa.org/packages/")))
+
+;; Initialize package.el. We can't use anything from package.el until
+;; we do this.
+(package-initialize)
+
+;; If use-package is not installed, then make sure we know what the
+;; latest version is, and install it.
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+;; Tell use-package to always install missing packages if necessary.
+(setq use-package-always-ensure t)
+
+;; Tell use-package to always load packages lazily unless told
+;; otherwise.
+(setq use-package-always-defer t)
+
+;; Add an advice to `use-package' to make it so that
+;; `radian-quelpa-overrides' has an effect.
+
+(defun radian--use-package-allow-quelpa-overrides (use-package name &rest args)
+  "Allow the value of `radian-quelpa-overrides' to have an effect
+on the `:quelpa' keyword.
+
+Note that this advice is not implemented very intelligently, so
+it will only work correctly if `:quelpa' is specified as the
+first keyword in the `use-package' form (except that it can be
+after `:dependencies')."
+  ;; First we want to check if there's an entry for the package in
+  ;; `radian-quelpa-overrides'.
+  (let ((association (assoc name radian-quelpa-overrides)))
+    (if association
+        ;; If there is an association, we'll extract the recipe.
+        (let ((recipe (cdr association)))
+          (if recipe
+              ;; If the recipe is non-nil it means the user wants to
+              ;; use quelpa for the package.
+              (if (equal (car args) :quelpa)
+                  (if (keywordp (cadr args))
+                      ;; This happens for (use-package name :quelpa
+                      ;; :config ...).
+                      (apply use-package name :quelpa recipe (cdr args))
+                    ;; This happens for (use-package name
+                    ;; :quelpa (recipe) :config ...).
+                    (apply use-package name :quelpa recipe (cddr args)))
+                ;; This happens for (use-package name :config ...).
+                (apply use-package name :quelpa recipe args))
+            ;; If the recipe is nil it means the user doesn't want to
+            ;; use quelpa for the package.
+            (if (equal (car args) :quelpa)
+                (if (keywordp (cadr args))
+                    ;; This happens for (use-package name :quelpa
+                    ;; :config ...).
+                    (apply use-package name (cdr args))
+                  ;; This happens for (use-package name
+                  ;; :quelpa (recipe) :config ...).
+                  (apply use-package name (cddr args)))
+              ;; This happens for (use-package name :config ...), in
+              ;; which case there's nothing that needs to be changed.
+              (apply use-package name args))))
+      ;; If there's no special behavior requested, we can just pass
+      ;; control to `use-package'.
+      (apply use-package name args))))
+
+(advice-add 'use-package
+            :around 'radian--use-package-allow-quelpa-overrides
+            '((:depth . -1)))
+
+;; Add an advice to `use-package' to make it so that disabled packages
+;; are not loaded. See the docstring for more information.
+
+(defun radian--use-package-add-dependencies (use-package name &rest args)
+  "Only initialize and load a package if it is enabled (according
+to `radian-package-enabled-p'). If the first argument specified
+after the package name is :dependencies, then also require any
+packages specified in the list of symbols immediately
+following :dependencies to be enabled.
+
+Note that this advice is not implemented very intelligently, so
+it will only work correctly if `:dependencies' is specified as
+the first keyword in the `use-package' form."
+  (when (radian-package-enabled-p name)
+    (if (equal (car args) :dependencies)
+        (when (cl-every 'radian-package-enabled-p (cadr args))
+          (apply use-package name (cddr args)))
+      (apply use-package name args))))
+
+(advice-add 'use-package
+            :around 'radian--use-package-add-dependencies
+            '((:depth . -2)))
+
+;; Add an advice to automatically refresh the package list before
+;; installing a package (but only once). This has an effect because
+;; `use-package' eventually calls through to `package-install'.
+;;
+;; If we don't do this, then we might get errors when you try to
+;; install a package with `use-package' without first manually running
+;; `package-refresh-contents'. Specifically, this will happen if the
+;; package you are trying to install has been updated since the last
+;; time `package-refresh-contents' was run (or, by default, the first
+;; time you ever tried to install a package).
+;;
+;; The issue is discussed at [1], but the solution used here is
+;; modified so that it does not require `cl' (currently, Radian only
+;; loads `cl-lib').
+;;
+;; [1]: https://github.com/jwiegley/use-package/issues/256
+
+(defun radian--package-install-refresh-contents (&rest args)
+  (package-refresh-contents)
+  (advice-remove 'package-install 'radian--package-install-refresh-contents))
+
+(advice-add 'package-install :before 'radian--package-install-refresh-contents)
+
+;; Library for fetching Elisp packages in many different ways and
+;; building them from source (client-side MELPA).
+(use-package quelpa
+  :config
+
+  ;; Tell quelpa not to update MELPA every time Emacs is started.
+  (setq quelpa-update-melpa-p nil)
+
+  ;; Automatically upgrade packages. This does not actually take
+  ;; effect if the call to quelpa comes from a `:quelpa' keyword in a
+  ;; `use-package' form and
+  ;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (as it is
+  ;; by default in Radian). It only affects what happens when
+  ;; `radian-reload-init' is called with a prefix argument; in that
+  ;; case it allows packages to be upgraded, as desired.
+  (setq quelpa-upgrade-p t))
+
+;; Add a :quelpa keyword to `use-package', which allows installing
+;; packages with quelpa. We have a bit of a chicken and egg problem
+;; here. We don't want to load quelpa during startup, because that's
+;; slow. But quelpa-use-package loads quelpa eagerly. So we have to
+;; use my fork of quelpa-use-package, which fixes that. But installing
+;; from a fork requires quelpa. But we don't want to load it eagerly.
+;; So we have to use my fork of quelpa-use-package...
+;;
+;; The solution here is to use two separate code paths. On first
+;; install, quelpa will be loaded eagerly and used to install
+;; quelpa-use-package. But after that, quelpa-use-package can install
+;; itself, thus solving the problem of quelpa being loaded eagerly.
+;;
+;; (Note that, as long as we are using my fork, loading
+;; quelpa-use-package eagerly is not a problem. In fact, it's required
+;; because we need to activate its advice before processing
+;; use-package forms that might contain `:quelpa' keywords.)
+;;
+;; To maintain reverse compatibility, my fork of quelpa-use-package
+;; only lazily loads quelpa if the variable
+;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (it is nil
+;; by default). So we have to set it here. But we also want to allow
+;; for disabling that optimization in the case that
+;; `radian-reload-init' is called with a prefix argument. To solve
+;; this problem we use `defvar', which will only set
+;; `radian--inhibit-loading-quelpa' to `t' if that variable has not
+;; already been defined. That way, we can override the value of
+;; `radian--inhibit-loading-quelpa' in `radian-reload-init' and have
+;; that value be transferred to
+;; `quelpa-use-package-inhibit-loading-quelpa' below, while
+;; maintaining a default value of `t' when Emacs is first started.
+
+(defvar radian--inhibit-loading-quelpa t)
+(setq quelpa-use-package-inhibit-loading-quelpa
+      radian--inhibit-loading-quelpa)
+
+(if (require 'quelpa-use-package nil 'noerror)
+    (progn
+      ;; If I don't include this then I get an error about eager
+      ;; macro-expansion because the `:quelpa' keyword in the next
+      ;; use-package form is not defined for the compiler.
+      (eval-when-compile
+        (require 'quelpa-use-package))
+      (use-package quelpa-use-package
+        :quelpa (quelpa-use-package
+                 :fetcher github
+                 :repo "raxod502/quelpa-use-package")
+        :demand t))
+  (quelpa '(quelpa-use-package
+            :fetcher github
+            :repo "raxod502/quelpa-use-package"))
+  (require 'quelpa-use-package))
+
+;; Allow the :quelpa keyword to work even when
+;; `use-package-always-ensure' is enabled. See [1].
+;;
+;; [1]: https://github.com/quelpa/quelpa-use-package
+(quelpa-use-package-activate-advice)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
@@ -1032,210 +1216,6 @@ Lisp function does not specify a special indentation."
                  "k&r")
        (push '(other . "k&r") c-default-style))
      (setq-default c-basic-offset 2)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Bootstrap use-package
-
-;; Add package repositories. GNU is the default repository; MELPA is
-;; necessary to get most of the packages we are interested in. Note
-;; that `package-initialize' appears to use the value of
-;; `package-archives', so we place this declaration first.
-(setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")))
-
-;; Initialize package.el. We can't use anything from package.el until
-;; we do this.
-(package-initialize)
-
-;; If use-package is not installed, then make sure we know what the
-;; latest version is, and install it.
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Tell use-package to always install missing packages if necessary.
-(setq use-package-always-ensure t)
-
-;; Tell use-package to always load packages lazily unless told
-;; otherwise.
-(setq use-package-always-defer t)
-
-;; Add an advice to `use-package' to make it so that
-;; `radian-quelpa-overrides' has an effect.
-
-(defun radian--use-package-allow-quelpa-overrides (use-package name &rest args)
-  "Allow the value of `radian-quelpa-overrides' to have an effect
-on the `:quelpa' keyword.
-
-Note that this advice is not implemented very intelligently, so
-it will only work correctly if `:quelpa' is specified as the
-first keyword in the `use-package' form (except that it can be
-after `:dependencies')."
-  ;; First we want to check if there's an entry for the package in
-  ;; `radian-quelpa-overrides'.
-  (let ((association (assoc name radian-quelpa-overrides)))
-    (if association
-        ;; If there is an association, we'll extract the recipe.
-        (let ((recipe (cdr association)))
-          (if recipe
-              ;; If the recipe is non-nil it means the user wants to
-              ;; use quelpa for the package.
-              (if (equal (car args) :quelpa)
-                  (if (keywordp (cadr args))
-                      ;; This happens for (use-package name :quelpa
-                      ;; :config ...).
-                      (apply use-package name :quelpa recipe (cdr args))
-                    ;; This happens for (use-package name
-                    ;; :quelpa (recipe) :config ...).
-                    (apply use-package name :quelpa recipe (cddr args)))
-                ;; This happens for (use-package name :config ...).
-                (apply use-package name :quelpa recipe args))
-            ;; If the recipe is nil it means the user doesn't want to
-            ;; use quelpa for the package.
-            (if (equal (car args) :quelpa)
-                (if (keywordp (cadr args))
-                    ;; This happens for (use-package name :quelpa
-                    ;; :config ...).
-                    (apply use-package name (cdr args))
-                  ;; This happens for (use-package name
-                  ;; :quelpa (recipe) :config ...).
-                  (apply use-package name (cddr args)))
-              ;; This happens for (use-package name :config ...), in
-              ;; which case there's nothing that needs to be changed.
-              (apply use-package name args))))
-      ;; If there's no special behavior requested, we can just pass
-      ;; control to `use-package'.
-      (apply use-package name args))))
-
-(advice-add 'use-package
-            :around 'radian--use-package-allow-quelpa-overrides
-  '((:depth . -1)))
-
-;; Add an advice to `use-package' to make it so that disabled packages
-;; are not loaded. See the docstring for more information.
-
-(defun radian--use-package-add-dependencies (use-package name &rest args)
-  "Only initialize and load a package if it is enabled (according
-to `radian-package-enabled-p'). If the first argument specified
-after the package name is :dependencies, then also require any
-packages specified in the list of symbols immediately
-following :dependencies to be enabled.
-
-Note that this advice is not implemented very intelligently, so
-it will only work correctly if `:dependencies' is specified as
-the first keyword in the `use-package' form."
-  (when (radian-package-enabled-p name)
-    (if (equal (car args) :dependencies)
-        (when (cl-every 'radian-package-enabled-p (cadr args))
-          (apply use-package name (cddr args)))
-      (apply use-package name args))))
-
-(advice-add 'use-package
-            :around 'radian--use-package-add-dependencies
-  '((:depth . -2)))
-
-;; Add an advice to automatically refresh the package list before
-;; installing a package (but only once). This has an effect because
-;; `use-package' eventually calls through to `package-install'.
-;;
-;; If we don't do this, then we might get errors when you try to
-;; install a package with `use-package' without first manually running
-;; `package-refresh-contents'. Specifically, this will happen if the
-;; package you are trying to install has been updated since the last
-;; time `package-refresh-contents' was run (or, by default, the first
-;; time you ever tried to install a package).
-;;
-;; The issue is discussed at [1], but the solution used here is
-;; modified so that it does not require `cl' (currently, Radian only
-;; loads `cl-lib').
-;;
-;; [1]: https://github.com/jwiegley/use-package/issues/256
-
-(defun radian--package-install-refresh-contents (&rest args)
-  (package-refresh-contents)
-  (advice-remove 'package-install 'radian--package-install-refresh-contents))
-
-(advice-add 'package-install :before 'radian--package-install-refresh-contents)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Packages: Package management
-
-;; Library for fetching Elisp packages in many different ways and
-;; building them from source (client-side MELPA).
-(use-package quelpa
-  :config
-
-  ;; Tell quelpa not to update MELPA every time Emacs is started.
-  (setq quelpa-update-melpa-p nil)
-
-  ;; Automatically upgrade packages. This does not actually take
-  ;; effect if the call to quelpa comes from a `:quelpa' keyword in a
-  ;; `use-package' form and
-  ;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (as it is
-  ;; by default in Radian). It only affects what happens when
-  ;; `radian-reload-init' is called with a prefix argument; in that
-  ;; case it allows packages to be upgraded, as desired.
-  (setq quelpa-upgrade-p t))
-
-;; Add a :quelpa keyword to `use-package', which allows installing
-;; packages with quelpa. We have a bit of a chicken and egg problem
-;; here. We don't want to load quelpa during startup, because that's
-;; slow. But quelpa-use-package loads quelpa eagerly. So we have to
-;; use my fork of quelpa-use-package, which fixes that. But installing
-;; from a fork requires quelpa. But we don't want to load it eagerly.
-;; So we have to use my fork of quelpa-use-package...
-;;
-;; The solution here is to use two separate code paths. On first
-;; install, quelpa will be loaded eagerly and used to install
-;; quelpa-use-package. But after that, quelpa-use-package can install
-;; itself, thus solving the problem of quelpa being loaded eagerly.
-;;
-;; (Note that, as long as we are using my fork, loading
-;; quelpa-use-package eagerly is not a problem. In fact, it's required
-;; because we need to activate its advice before processing
-;; use-package forms that might contain `:quelpa' keywords.)
-;;
-;; To maintain reverse compatibility, my fork of quelpa-use-package
-;; only lazily loads quelpa if the variable
-;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (it is nil
-;; by default). So we have to set it here. But we also want to allow
-;; for disabling that optimization in the case that
-;; `radian-reload-init' is called with a prefix argument. To solve
-;; this problem we use `defvar', which will only set
-;; `radian--inhibit-loading-quelpa' to `t' if that variable has not
-;; already been defined. That way, we can override the value of
-;; `radian--inhibit-loading-quelpa' in `radian-reload-init' and have
-;; that value be transferred to
-;; `quelpa-use-package-inhibit-loading-quelpa' below, while
-;; maintaining a default value of `t' when Emacs is first started.
-
-(defvar radian--inhibit-loading-quelpa t)
-(setq quelpa-use-package-inhibit-loading-quelpa
-      radian--inhibit-loading-quelpa)
-
-(if (require 'quelpa-use-package nil 'noerror)
-    (progn
-      ;; If I don't include this then I get an error about eager
-      ;; macro-expansion because the `:quelpa' keyword in the next
-      ;; use-package form is not defined for the compiler.
-      (eval-when-compile
-        (require 'quelpa-use-package))
-      (use-package quelpa-use-package
-        :quelpa (quelpa-use-package
-                 :fetcher github
-                 :repo "raxod502/quelpa-use-package")
-        :demand t))
-  (quelpa '(quelpa-use-package
-            :fetcher github
-            :repo "raxod502/quelpa-use-package"))
-  (require 'quelpa-use-package))
-
-;; Allow the :quelpa keyword to work even when
-;; `use-package-always-ensure' is enabled. See [1].
-;;
-;; [1]: https://github.com/quelpa/quelpa-use-package
-(quelpa-use-package-activate-advice)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Managing Emacs
