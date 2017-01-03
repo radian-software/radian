@@ -415,13 +415,7 @@ the first keyword in the `use-package' form."
 ;; Future-proof your Emacs Lisp customizations.
 (use-package el-patch
   :demand t
-  :quelpa (el-patch :fetcher github :repo "raxod502/el-patch")
-  :config
-
-  ;; Don't perform validation during Emacs startup. See [1].
-  ;;
-  ;; [1]: https://github.com/raxod502/el-patch
-  (el-patch-disable-validation-during-init))
+  :quelpa (el-patch :fetcher github :repo "raxod502/el-patch"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
@@ -1167,8 +1161,7 @@ Lisp function does not specify a special indentation."
   (interactive "P")
   (message "Reloading init.el...")
   (setq radian--inhibit-loading-quelpa (not upgrade))
-  (let ((el-patch-validation nil))
-    (radian-load-user-config "init.el"))
+  (radian-load-user-config "init.el")
   (message "Reloading init.el... done."))
 
 (global-set-key (kbd "M-RET r") #'radian-reload-init)
