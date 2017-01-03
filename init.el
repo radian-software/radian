@@ -2024,13 +2024,20 @@ strings that are not docstrings."
   ;; CIDER is active. This is helpful because CIDER is slow, and will
   ;; lag Emacs if its logic is called too often.
 
+  (defun radian--disable-aggressive-indent-on-save ()
+    (message "Removing aggressive-indent hook in buffer %S." (current-buffer))
+    (remove-hook 'before-save-hook
+                 #'aggressive-indent--proccess-changed-list-and-indent
+                 'local))
+
   (defun radian--reduce-cider-lag ()
     (setq-local company-idle-delay 1) ; increased from 0
     (setq-local company-minimum-prefix-length 3) ; increased from 0
     (setq-local eldoc-idle-delay 1) ; increased from 0
-    (remove-hook 'before-save-hook
-                 #'aggressive-indent--proccess-changed-list-and-indent
-                 'local))
+    (when cider-mode
+      (radian--disable-aggressive-indent-on-save)
+      (add-hook 'aggressive-indent-mode-hook
+                #'radian--disable-aggressive-indent-on-save)))
 
   (add-hook 'cider-mode-hook #'radian--reduce-cider-lag)
   (add-hook 'cider-repl-mode-hook #'radian--reduce-cider-lag)
