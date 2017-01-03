@@ -2025,7 +2025,6 @@ strings that are not docstrings."
   ;; lag Emacs if its logic is called too often.
 
   (defun radian--disable-aggressive-indent-on-save ()
-    (message "Removing aggressive-indent hook in buffer %S." (current-buffer))
     (remove-hook 'before-save-hook
                  #'aggressive-indent--proccess-changed-list-and-indent
                  'local))
