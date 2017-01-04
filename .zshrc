@@ -541,6 +541,7 @@ alias gtd='git tag -d'
 
 alias gn='git notes'
 alias gna='git notes add'
+alias gne='git notes edit'
 alias gnr='git notes remove'
 
 alias gsta='git stash save'
