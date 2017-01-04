@@ -2076,6 +2076,48 @@ Return nil if not inside a project."
   (add-hook 'cider-mode-hook #'radian--reduce-cider-lag)
   (add-hook 'cider-repl-mode-hook #'radian--reduce-cider-lag)
 
+  ;; Suppress the "Starting a custom ClojureScript REPL" message,
+  ;; because it provides no useful information.
+
+  (el-patch-defun cider-create-sibling-cljs-repl (client-buffer)
+    "Create a ClojureScript REPL with the same server as CLIENT-BUFFER.
+The new buffer will correspond to the same project as CLIENT-BUFFER, which
+should be the regular Clojure REPL started by the server process filter."
+    (interactive (list (cider-current-connection)))
+    (el-patch-feature cider)
+    (let* ((nrepl-repl-buffer-name-template "*cider-repl CLJS%s*")
+           (nrepl-create-client-buffer-function #'cider-repl-create)
+           (nrepl-use-this-as-repl-buffer 'new)
+           (client-process-args (with-current-buffer client-buffer
+                                  (unless (or nrepl-server-buffer nrepl-endpoint)
+                                    (error "This is not a REPL buffer, is there a REPL active?"))
+                                  (list (car nrepl-endpoint)
+                                        (elt nrepl-endpoint 1)
+                                        (when (buffer-live-p nrepl-server-buffer)
+                                          (get-buffer-process nrepl-server-buffer)))))
+           (cljs-proc (apply #'nrepl-start-client-process client-process-args))
+           (cljs-buffer (process-buffer cljs-proc)))
+      (with-current-buffer cljs-buffer
+        ;; The new connection has now been bumped to the top, but it's still a
+        ;; Clojure REPL!  Additionally, some ClojureScript REPLs can actually take
+        ;; a while to start (some even depend on the user opening a browser).
+        ;; Meanwhile, this REPL will gladly receive requests in place of the
+        ;; original Clojure REPL.  Our solution is to bump the original REPL back
+        ;; up the list, so it takes priority on Clojure requests.
+        (cider-make-connection-default client-buffer)
+        (el-patch-remove
+          (pcase (assoc cider-cljs-lein-repl cider--cljs-repl-types)
+            (`(,_ ,name ,info)
+             (message "Starting a %s REPL%s" name (or info "")))
+            (_ (message "Starting a custom ClojureScript REPL"))))
+        (cider-nrepl-send-request
+         (list "op" "eval"
+               "ns" (cider-current-ns)
+               "session" nrepl-session
+               "code" cider-cljs-lein-repl)
+         (cider-repl-handler (current-buffer)))
+        (cider--offer-to-open-app-in-browser nrepl-server-buffer))))
+
   :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
          ("C-c M-j" . cider-jack-in)
          ("C-c M-J" . cider-jack-in-clojurescript)))
