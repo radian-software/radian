@@ -230,6 +230,9 @@ if command -v exa &>/dev/null; then
     alias lt='exa --all --git --header --long --tree'
     alias ltl='exa --all --git --header --long --tree --level'
 else
+    # We alias gls to a git command elsewhere, so we use "command"
+    # here to prevent it from being interpreted as said git command.
+    # If you want to run coreutils ls, use "\gls".
     if command -v gls &>/dev/null; then
         alias l='command gls -AlhF --color=auto'
     else
