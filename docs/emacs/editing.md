@@ -25,6 +25,10 @@ Selecting the entire buffer can be done with `C-x h` or `C-x C-p`.
 (Technically, `C-x C-p` selects the current *page*, but people rarely
 use pages anymore.)
 
+Emacs also supports rectangular selection. To activate that, use `C-x
+SPC`. Then `C-x C-x` will alternate between the four corners of the
+rectangle.
+
 To yank the most recent kill (or copy), press `C-y`. However, since
 Emacs saves all of your kills, you can also press `M-y` to
 interactively select which one you want to yank.
