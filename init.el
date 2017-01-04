@@ -47,8 +47,8 @@
   (setq gc-cons-threshold most-positive-fixnum))
 
 (defun radian--reset-gc-cons-threshold ()
-  "Reset `gc-cons-threshold' to its default value."
-  (setq gc-cons-threshold 800000)
+  "Reset `gc-cons-threshold' to a higher value than the default."
+  (setq gc-cons-threshold (* 10 1024 1024))
   (setq radian--disable-garbage-collection nil))
 
 (add-hook 'emacs-startup-hook #'radian--reset-gc-cons-threshold)
