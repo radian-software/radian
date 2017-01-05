@@ -1297,6 +1297,44 @@ Lisp function does not specify a special indentation."
   ;; [1]: https://github.com/PythonNut/emacs-config/blob/c8bff5cce293006ec5cdc39a86982431a758a9a0/modules/config-ivy.el#L68
   (setq ivy-flx-limit 2000)
 
+  ;; A recent (at the time of this writing) patch to Ivy improved the
+  ;; default sorting of candidates in many cases, but broke smex. This
+  ;; hopefully temporary hack restores the functionality of smex by
+  ;; reverting to the old sorting function in `counsel-M-x'.
+
+  (defun ivy--dumb-flx-sort (name cands)
+    "Sort according to closeness to string NAME the string list CANDS."
+    (condition-case nil
+        (if (and cands
+                 (< (length cands) ivy-flx-limit))
+            (let* ((flx-name (if (string-match "^\\^" name)
+                                 (substring name 1)
+                               name))
+                   (cands-with-score
+                    (delq nil
+                          (mapcar
+                           (lambda (x)
+                             (let ((score (flx-score x flx-name ivy--flx-cache)))
+                               (and score
+                                    (cons score x))))
+                           cands))))
+              (if cands-with-score
+                  (mapcar #'cdr
+                          (sort cands-with-score
+                                (lambda (x y)
+                                  (> (caar x) (caar y)))))
+                cands))
+          cands)
+      (error
+       cands)))
+
+  (defun radian--preserve-smex-sorting (counsel-M-x &optional initial-input)
+    (cl-letf (((symbol-function #'ivy--flx-sort)
+               (symbol-function #'ivy--dumb-flx-sort)))
+      (funcall counsel-M-x initial-input)))
+
+  (advice-add #'counsel-M-x :around #'radian--preserve-smex-sorting)
+
   ;; Don't automatically insert a "^" character when starting an Ivy
   ;; completion. This has the effect of making it so that matches
   ;; are not required to start at the beginning of the symbol being
