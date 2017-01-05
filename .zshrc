@@ -656,8 +656,7 @@ function proj() {
         echo "You need tmux for this to work."
     fi
     if echo "$1" | egrep -q "^\s*$"; then
-        echo "Please provide a project name."
-        return 1
+        1=${PWD##*/}
     fi
     # Check if the session already exists.
     if tmux list-sessions -F "#{session_name}" 2>/dev/null | egrep -q "^$1$"; then
