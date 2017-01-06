@@ -11,10 +11,6 @@
          :plugins [;; REPL-side support for CIDER and other editor tools
                    [cider/cider-nrepl "0.15.0-SNAPSHOT"]]}
 
- :cljs {:dependencies [;; ClojureScript REPL in Emacs
-                       [com.cemerick/piggieback "0.2.1"]
-                       [figwheel-sidecar "0.5.4-7"]]}
-
  :hide-app {;; Prevent the Clojure REPL from showing in the Mac app switcher.
             ;; See http://stackoverflow.com/questions/24619300/hide-clojure-repl-from-command-tab-application-switcher-via-lein-command-line
             :jvm-opts ["-Dapple.awt.UIElement=true"]}
@@ -161,8 +157,7 @@
  ;;; Composite profiles
 
  ;; This profile is for use at the terminal.
- :terminal [:cljs
-            :humane
+ :terminal [:humane
             :inject
             :alembic
             :pretty
@@ -170,8 +165,7 @@
             :whidbey]
 
  ;; This profile is for use from Emacs.
- :emacs [:cljs
-         :inject
+ :emacs [:inject
          :alembic]
 
  ;; When running tests.
