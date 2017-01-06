@@ -79,6 +79,12 @@ class UserError(SetupError):
 #### General utility functions
 
 
+def first(obj):
+    if isinstance(obj, (list, tuple)) and obj:
+        return obj[0]
+    return obj
+
+
 def require(fact, reason):
     if not fact:
         raise AssertionFailedError(reason)
@@ -780,17 +786,17 @@ def text(filename_or_iterable):
 
 
 def gitconfig_local():
-    name = (call_with_success(["git", "config", "--global",
-                               "--includes", "user.name"],
-                              verify=strict_verify) or
-            get_user_input("Please enter your full name for Git"))
-    email = (call_with_success(["git", "config", "--global",
-                                "--includes", "user.email"],
-                               verify=strict_verify) or
-             get_user_input("Please enter your email address for Git"))
-    editor = call_with_success(["git", "config", "--global",
-                                "--includes", "core.editor"],
-                               verify=strict_verify)
+    name = first(call_with_success(["git", "config", "--global",
+                                    "--includes", "user.name"],
+                                   verify=strict_verify) or
+                 get_user_input("Please enter your full name for Git"))
+    email = first(call_with_success(["git", "config", "--global",
+                                     "--includes", "user.email"],
+                                    verify=strict_verify) or
+                  get_user_input("Please enter your email address for Git"))
+    editor = first(call_with_success(["git", "config", "--global",
+                                      "--includes", "core.editor"],
+                                     verify=strict_verify))
     yield "[user]"
     yield "\tname = {}".format(name)
     yield "\temail = {}".format(email)
