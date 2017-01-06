@@ -38,15 +38,12 @@ nil."
 ;;
 ;; [1]: http://emacs.stackexchange.com/a/16595/12534
 
-(defvar radian--disable-garbage-collection t)
-
-(when radian--disable-garbage-collection
+(unless after-init-time
   (setq gc-cons-threshold most-positive-fixnum))
 
 (defun radian--reset-gc-cons-threshold ()
   "Reset `gc-cons-threshold' to a higher value than the default."
-  (setq gc-cons-threshold (* 10 1024 1024))
-  (setq radian--disable-garbage-collection nil))
+  (setq gc-cons-threshold (* 10 1024 1024)))
 
 (add-hook 'emacs-startup-hook #'radian--reset-gc-cons-threshold)
 
