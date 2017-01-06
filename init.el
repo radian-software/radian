@@ -224,6 +224,20 @@ loads it. Otherwise, fails silently."
 ;; we do this.
 (package-initialize)
 
+;; Since upgrading to Emacs 25, package.el dumps a bunch of junk into
+;; the custom file every time you install packages. That's nonsense,
+;; so we suppress the behavior here.
+
+(el-patch-defun package--save-selected-packages (&optional value)
+  "Set and save `package-selected-packages' to VALUE."
+  (when value
+    (setq package-selected-packages value))
+  (el-patch-remove
+    (if after-init-time
+        (let ((save-silently inhibit-message))
+          (customize-save-variable 'package-selected-packages package-selected-packages))
+      (add-hook 'after-init-hook #'package--save-selected-packages))))
+
 ;; If use-package is not installed, then make sure we know what the
 ;; latest version is, and install it.
 (unless (package-installed-p 'use-package)
