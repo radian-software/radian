@@ -4,30 +4,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; User-specific configuration variables
 
-;;; The following are user-specific configuration options that can be
-;;; overridden in init.before.local.el. They parsed by
-;;; create-init-before-local-el.sh so the user can set them up
-;;; interactively. Configuration variables marked with "For manual
-;;; configuration only" are placed in the created init.before.local.el
-;;; file, but the user is not offered the option to change their
-;;; values interactively.
-;;;
 ;;; Here we are using the defvar-nil-setq pattern described in [1],
 ;;; which makes it so that changes to these declarations will be
 ;;; picked up by a reload of init.el (M-RET r).
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
-;; Control color customizations. If you want to use the default
-;; Radian color scheme (Solarized Light + Leuven), which is
-;; guaranteed to work in terminal Emacs, set this to `t' (default)
-;; and make sure to set your terminal emulator to use the Solarized
-;; Light color scheme. This will also turn on various tweaks designed
-;; to make various parts of the Leuven theme look better. If you want
-;; to set up your own color scheme, or use the Emacs default, set
-;; this to `nil'.
-(defvar radian-customize-tweak-colors nil)
-(setq radian-customize-tweak-colors t)
+(defgroup radian nil
+  "Customize your Radian Emacs experience"
+  :group 'emacs)
+
+(defcustom radian-color-theme 'leuven
+  "Specifies the color theme used by Radian.
+
+You can use anything listed by `custom-available-themes'.
+Specifying `doom-one' or `doom-molokai' will cause the
+appropriate package to be installed automatically.
+
+If you wish to use your own color theme, you can set this to
+nil."
+  :group 'radian
+  :type 'symbol)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Optimization
@@ -464,18 +461,18 @@ the first keyword in the `use-package' form."
 
 ;; Change the highlight color used by various things from yellow to
 ;; blue.
-(when radian-customize-tweak-colors
+(when (equal radian-color-theme 'leuven)
   (set-face-background 'highlight "#B1EAFC"))
 
 ;; Get rid of the underline for the currently highlighted match in an
 ;; Isearch or query replace.
-(when radian-customize-tweak-colors
+(when (equal radian-color-theme 'leuven)
   (set-face-underline 'isearch nil))
 
 ;; The default highlight color for Isearches is quite dark and makes
 ;; it hard to read the highlighted text. Change it to a nice light
 ;; blue, and get rid of the distracting underline.
-(when radian-customize-tweak-colors
+(when (equal radian-color-theme 'leuven)
   (set-face-background 'lazy-highlight "#B1EAFC")
   (set-face-underline 'lazy-highlight nil))
 
@@ -1022,7 +1019,7 @@ This filter de-installs itself after this call."
 
 ;; Store customizations made by custom.el into ~/.emacs.d/init.local.el
 ;; instead of this file.
-(setq custom-file (concat user-emacs-directory "init.local.el"))
+(setq custom-file (concat user-emacs-directory "init.before.local.el"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; ElDoc
@@ -2401,10 +2398,27 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Color themes
 
-;; Load the official Radian color scheme.
-(when radian-customize-tweak-colors
-  ;; Passing `t' to `load-theme' suppresses the confirmation message.
-  (load-theme 'leuven t))
+;; Handle color themes that require installing packages or other
+;; additional configuration.
+
+(pcase radian-color-theme
+  ((or 'doom-one 'doom-molokai)
+   (use-package doom-themes
+     :demand t
+     :config
+
+     ;; Comments are invisible if I don't do the following.
+     (setq doom-enable-brighter-comments t)
+
+     ;; It's impossible to tell which window is active if I don't do
+     ;; this.
+     (add-hook 'minibuffer-setup-hook 'doom-brighten-minibuffer))))
+
+;; Load the appropriate color scheme as specified in
+;; `radian-color-theme'.
+
+(when radian-color-theme
+  (load-theme radian-color-theme 'no-confirm))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Mode line
