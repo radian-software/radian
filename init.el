@@ -450,6 +450,9 @@ the first keyword in the `use-package' form."
 ;; Disable the menu bar.
 (menu-bar-mode -1)
 
+;; Disable the scroll bars.
+(scroll-bar-mode -1)
+
 ;; Disable the contextual menu that pops up when you right-click.
 (global-set-key (kbd "<C-down-mouse-1>") nil)
 
