@@ -2113,7 +2113,7 @@ Return nil if not inside a project."
   (defun radian--reduce-cider-lag ()
     (setq-local company-idle-delay 1) ; increased from 0
     (setq-local company-minimum-prefix-length 3) ; increased from 0
-    (setq-local eldoc-idle-delay 1) ; increased from 0
+    (setq-local eldoc-idle-delay 0.5) ; increased from 0
     (when cider-mode
       (radian--disable-aggressive-indent-on-save)
       (add-hook 'aggressive-indent-mode-hook
