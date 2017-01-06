@@ -226,17 +226,13 @@ loads it. Otherwise, fails silently."
 
 ;; Since upgrading to Emacs 25, package.el dumps a bunch of junk into
 ;; the custom file every time you install packages. That's nonsense,
-;; so we suppress the behavior here.
+;; so we suppress the behavior here. Unfortunately, el-patch isn't
+;; loaded yet, so we can't use that here.
 
-(el-patch-defun package--save-selected-packages (&optional value)
+(defun package--save-selected-packages (&optional value)
   "Set and save `package-selected-packages' to VALUE."
   (when value
-    (setq package-selected-packages value))
-  (el-patch-remove
-    (if after-init-time
-        (let ((save-silently inhibit-message))
-          (customize-save-variable 'package-selected-packages package-selected-packages))
-      (add-hook 'after-init-hook #'package--save-selected-packages))))
+    (setq package-selected-packages value)))
 
 ;; If use-package is not installed, then make sure we know what the
 ;; latest version is, and install it.
