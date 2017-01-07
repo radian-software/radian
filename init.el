@@ -531,7 +531,7 @@ the first keyword in the `use-package' form."
 
   (defun paste-to-osx (text &optional push)
     (let ((process-connection-type nil))
-      (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+      (let ((proc (start-process "pbcopy" nil "pbcopy")))
         (process-send-string proc text)
         (process-send-eof proc)))
     (setq radian--last-paste text))
