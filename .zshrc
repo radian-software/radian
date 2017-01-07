@@ -755,10 +755,12 @@ alias ecw=emacw
 #### Leiningen
 
 # Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
-# showing up in the Mac app switcher. See [1].
+# showing up in the Mac app switcher. See [1]. Also, attempt to reduce
+# the incidence of exceptions with missing traces in Clojure. See [2].
 #
 # [1]: http://stackoverflow.com/q/24619300/3538165
-export LEIN_JVM_OPTS=-Dapple.awt.UIElement=true
+# [2]: https://dzone.com/articles/clojurejava-prevent-exceptions
+export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
 
 ################################################################################
 #### Vim
