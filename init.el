@@ -1342,13 +1342,6 @@ Lisp function does not specify a special indentation."
 
   (advice-add #'counsel-M-x :around #'radian--preserve-smex-sorting)
 
-  ;; Don't automatically insert a "^" character when starting an Ivy
-  ;; completion. This has the effect of making it so that matches
-  ;; are not required to start at the beginning of the symbol being
-  ;; matched, by default.
-  (setq ivy-initial-inputs-alist
-        '((t . "")))
-
   :bind (;; Add a keybinding for resuming the last completion session.
          ;; The keybinding C-c C-r is suggested in the README for ivy,
          ;; but it's overridden by `sh-mode' and `clojure-mode'.
