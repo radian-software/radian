@@ -979,7 +979,7 @@ feature_list = [
 
     {"name": "emacs-config",
      "pretty_name": "Emacs configuration",
-     "description": "Radian's Emacs configuration: (init.el, init.before.local.el, and init.local.el).",
+     "description": "Radian's Emacs configuration (init.el, init.before.local.el, and init.local.el).",
      "group": "emacs",
      "required": ["radian-local", "emacs"],
      "recommended": ["ag", "fasd", "leiningen", "cmake", "libclang", "racket"],
