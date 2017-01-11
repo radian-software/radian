@@ -1365,7 +1365,7 @@ def setup():
                 raise UserError("'{}' must be followed by a feature name"
                                 .format(arg[0]))
             if feature_name not in features:
-                raise UserError("'{}' is not a valid feature name")
+                raise UserError("'{}' is not a valid feature name".format(feature_name))
             toggle_feature(features[feature_name], enable=enable, interactive=False)
         else:
             raise UserError("'{}' is not a valid argument".format(arg))
