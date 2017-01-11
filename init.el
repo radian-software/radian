@@ -2374,7 +2374,15 @@ should be the regular Clojure REPL started by the server process filter."
 
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; YAML files.
-(use-package yaml-mode)
+(use-package yaml-mode
+  :config
+
+  ;; Don't automatically wrap text when editing YAML files.
+
+  (defun radian--disable-auto-fill-mode ()
+    (auto-fill-mode -1))
+
+  (add-hook 'yaml-mode-hook #'radian--disable-auto-fill-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Version control
