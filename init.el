@@ -2075,12 +2075,16 @@ Return nil if not inside a project."
 
   ;; Use figwheel-sidecar for launching ClojureScript REPLs. This
   ;; supports a fully integrated ClojureScript development experience
-  ;; in Emacs. For more information about how to use such a setup,
-  ;; see [1].
+  ;; in Emacs, for use with e.g. [1]. The last three forms are from
+  ;; the definition of `cider--cljs-repl-types'; the first two work
+  ;; around [2].
   ;;
-  ;; [1]: https://github.com/raxod502/minimal-webapp
+  ;; [1]: https://github.com/reagent-project/reagent-template
+  ;; [2]: https://github.com/reagent-project/reagent-template/issues/132
   (setq cider-cljs-lein-repl
         "(do
+  (require 'clojure.java.shell)
+  (clojure.java.shell/sh \"lein\" \"clean\")
   (require 'figwheel-sidecar.repl-api)
   (figwheel-sidecar.repl-api/start-figwheel!)
   (figwheel-sidecar.repl-api/cljs-repl))")
