@@ -2217,6 +2217,10 @@ should be the regular Clojure REPL started by the server process filter."
   (advice-add #'cljr--init-middleware
               :before-while #'cljr--project-dir)
 
+  ;; Make clj-refactor show its messages right away, instead of
+  ;; waiting for you to do another command.
+  (advice-add #'cljr--post-command-message :override #'message)
+
   :diminish clj-refactor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
