@@ -2172,6 +2172,10 @@ should be the regular Clojure REPL started by the server process filter."
   :dependencies (clojure-mode cider yasnippet)
   :init
 
+  ;; Make clj-refactor show its messages right away, instead of
+  ;; waiting for you to do another command.
+  (advice-add #'cljr--post-command-message :override #'message)
+
   ;; By default, clj-refactor enables the refactor-nrepl middleware in
   ;; an *autoload*, meaning that it's already happened as soon as
   ;; clj-refactor has loaded. But refactor-nrepl doesn't work outside
