@@ -1653,6 +1653,12 @@ Lisp function does not specify a special indentation."
   ;; comments and strings in Clojure.
   (setq company-dabbrev-downcase nil)
 
+  ;; Only search the current buffer to get suggestions for
+  ;; company-dabbrev (a backend that creates suggestions from text
+  ;; found in your buffers). This prevents Company from causing lag
+  ;; once you have a lot of buffers open.
+  (setq company-dabbrev-other-buffers nil)
+
   ;; We want pressing RET to trigger a Company completion only if the
   ;; user has interacted explicitly with Company. The only way I can
   ;; find to do this is to define what is called an "extended menu
