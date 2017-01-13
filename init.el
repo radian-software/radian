@@ -2098,6 +2098,7 @@ Return nil if not inside a project."
 
   (defun radian--disable-aggressive-indent-on-save ()
     (remove-hook 'before-save-hook
+                 ;; Yes, this is a typo in `aggressive-indent'.
                  #'aggressive-indent--proccess-changed-list-and-indent
                  'local))
 
