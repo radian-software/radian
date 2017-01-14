@@ -485,6 +485,86 @@ glgoa() {
         return 1
     fi
 }
+glS() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSs() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSp() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --patch ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSps() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --patch --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSo() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --oneline ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSsa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSpa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --patch ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSpsa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --patch --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSoa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --oneline ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
 
 alias ga='git add'
 alias gap='git add --patch'
@@ -595,6 +675,15 @@ alias grbi='git rebase --interactive'
 alias grbc='git rebase --continue'
 alias grbs='git rebase --skip'
 alias grba='git rebase --abort'
+
+alias gsm='git submodule'
+alias gsma='git submodule add'
+alias gsms='git submodule status'
+alias gsmi='git submodule init'
+alias gsmd='git submodule deinit'
+alias gsmu='git submodule update'
+alias gsmf='git submodule foreach'
+alias gsmy='git submodule sync'
 
 alias gcl='git clone --recursive'
 
