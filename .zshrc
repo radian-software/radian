@@ -581,10 +581,14 @@ alias grp='git reset --patch'
 
 alias gc='git commit --verbose'
 alias gca='git commit --verbose --amend'
+alias gcaa='git commit --verbose --amend --all'
 alias gcf='git commit -C HEAD --amend'
+alias gcfa='git commit -C HEAD --amend --all'
 alias gce='git commit --verbose --allow-empty'
 alias gcm='git commit -m'
+alias gcma='git commit --all -m'
 alias gcam='git commit --amend -m'
+alias gcama='git commit --amend --all -m'
 alias gcem='git commit --allow-empty -m'
 function gcw() {
     # This logic is taken from [1]. I think it is designed to
