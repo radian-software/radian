@@ -2262,11 +2262,12 @@ should be the regular Clojure REPL started by the server process filter."
                    "Documentation/magit.texi"
                    "Documentation/AUTHORS.md"
                    "COPYING" (:exclude "lisp/magit-popup.el")))
-  :bind (;; Add the most important keybinding for Magit as described
-         ;; in the manual [1].
+  :bind (;; Add important keybindings for Magit as described in the
+         ;; manual [1].
          ;;
          ;; [1]: https://magit.vc/manual/magit.html#Getting-Started
-         ("C-x g" . magit-status)))
+         ("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch-popup)))
 
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
