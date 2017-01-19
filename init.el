@@ -6,7 +6,7 @@
 
 ;;; Here we are using the defvar-nil-setq pattern described in [1],
 ;;; which makes it so that changes to these declarations will be
-;;; picked up by a reload of init.el (M-RET r).
+;;; picked up by a reload of init.el (M-P r).
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
@@ -43,7 +43,7 @@ nil."
 ;;;
 ;;; Here we are using the defvar-nil-setq pattern described in [1],
 ;;; which makes it so that changes to this declaration will be picked
-;;; up by a reload of init.el (M-RET r).
+;;; up by a reload of init.el (M-P r).
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
@@ -342,8 +342,8 @@ the first keyword in the `use-package' form."
 ;;;; Finding files
 
 ;; The following code adds keybindings for jumping to the various
-;; dotfiles set up by Radian. These all begin with <M-RET e> and are
-;; designed to be mnemonic, as in <M-RET e e i> standing for "[e]dit
+;; dotfiles set up by Radian. These all begin with <M-P e> and are
+;; designed to be mnemonic, as in <M-P e e i> standing for "[e]dit
 ;; [e]macs [i]nit.el".
 
 (defmacro radian-register-dotfile (filename &optional keybinding)
@@ -356,7 +356,7 @@ function will invoke `find-file' on ~/.emacs.d/init.el.
 
 If additionally KEYBINDING is \"e i\" then
 `radian-register-dotfile' will use `global-set-key' to bind
-`radian-find-init-el' to (kbd \"M-RET e e i\")."
+`radian-find-init-el' to (kbd \"M-P e e i\")."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (defun-name (intern
                       (replace-regexp-in-string
@@ -375,7 +375,7 @@ If additionally KEYBINDING is \"e i\" then
                         (interactive)
                         (find-file ,full-filename))))
     (if keybinding
-        (let* ((full-keybinding (concat "M-RET e " keybinding))
+        (let* ((full-keybinding (concat "M-P e " keybinding))
                (set-key-form `(global-set-key (kbd ,full-keybinding)
                                               #',defun-name)))
           `(progn
@@ -409,7 +409,7 @@ If additionally KEYBINDING is \"e i\" then
 (radian-register-dotfile ".zshrc.local" "z l")
 
 ;; Follow symlinks when opening files. This has the concrete impact,
-;; for instance, that when you edit this file with <M-RET e e i> and
+;; for instance, that when you edit this file with <M-P e e i> and
 ;; then later do C-x C-f, you will be in the Radian repository instead
 ;; of your home directory.
 (setq find-file-visit-truename t)
@@ -994,11 +994,11 @@ Lisp function does not specify a special indentation."
             (current-column)))
          (t $else))))))
 
-;; Add a keybinding (M-RET r) for reloading this file (init.el). This
+;; Add a keybinding (M-P r) for reloading this file (init.el). This
 ;; is useful for when you have several instances of Emacs open and you
 ;; change something in your configuration, then later come back to an
 ;; old Emacs that was opened before you made the change. You can then
-;; just press M-RET r to get the change into that instance.
+;; just press M-P r to get the change into that instance.
 
 (defun radian-reload-init (&optional upgrade)
   "Reload init.el. With prefix argument, upgrades packages."
@@ -1007,7 +1007,7 @@ Lisp function does not specify a special indentation."
   (radian-load-user-config "init.el")
   (message "Reloading init.el... done."))
 
-(global-set-key (kbd "M-RET r") #'radian-reload-init)
+(global-set-key (kbd "M-P r") #'radian-reload-init)
 
 ;; Add a keybinding (C-c C-k) for evaluating a buffer of Elisp. This
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
@@ -1765,12 +1765,12 @@ Lisp function does not specify a special indentation."
   ;; whatever shows up there.
   (setq avy-style 'de-bruijn)
 
-  :bind (;; Bind common avy commands to the <M-RET g> prefix.
-         ("M-RET g c" . avy-goto-char)
-         ("M-RET g t" . avy-goto-char-timer)
-         ("M-RET g l" . avy-goto-line)
-         ("M-RET g W" . avy-goto-word-1)
-         ("M-RET g w" . avy-goto-word-0)))
+  :bind (;; Bind common avy commands to the <M-P g> prefix.
+         ("M-P g c" . avy-goto-char)
+         ("M-P g t" . avy-goto-char-timer)
+         ("M-P g l" . avy-goto-line)
+         ("M-P g W" . avy-goto-word-1)
+         ("M-P g w" . avy-goto-word-0)))
 
 ;; Highlights matches and previews replacements in query replace.
 (use-package visual-regexp-steroids
