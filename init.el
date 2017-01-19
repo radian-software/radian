@@ -835,6 +835,9 @@ This filter de-installs itself after this call."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Org
 
+;; Add a global keybinding for accessing the Org Agenda.
+(global-set-key (kbd "C-c a") #'org-agenda)
+
 (with-eval-after-load 'org
 
   ;; Prevent Org from overriding the bindings for windmove.
