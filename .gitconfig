@@ -28,8 +28,6 @@
 	conflictstyle = diff3
 [pull]
 	rebase = true
-[commit]
-	verbose = true
 [rebase]
 	autosquash = true
 [rerere]

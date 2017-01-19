@@ -2252,6 +2252,22 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Version control
 
+;; A Git Porcelain inside Emacs.
+(use-package magit
+  :recipe (:fetcher github
+           :repo "raxod502/magit"
+           :branch "magit-version-symlinks"
+           :files ("lisp/magit*.el"
+                   "lisp/git-rebase.el"
+                   "Documentation/magit.texi"
+                   "Documentation/AUTHORS.md"
+                   "COPYING" (:exclude "lisp/magit-popup.el")))
+  :bind (;; Add the most important keybinding for Magit as described
+         ;; in the manual [1].
+         ;;
+         ;; [1]: https://magit.vc/manual/magit.html#Getting-Started
+         ("C-x g" . magit-status)))
+
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
 (use-package git-commit
