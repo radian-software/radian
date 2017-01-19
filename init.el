@@ -833,6 +833,24 @@ This filter de-installs itself after this call."
 (setq custom-file (concat user-emacs-directory "init.before.local.el"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Org
+
+(with-eval-after-load 'org
+
+  ;; Prevent Org from overriding the bindings for windmove.
+  (define-key org-mode-map (kbd "S-<left>") nil)
+  (define-key org-mode-map (kbd "S-<right>") nil)
+  (define-key org-mode-map (kbd "S-<up>") nil)
+  (define-key org-mode-map (kbd "S-<down>") nil)
+
+  ;; Add replacements for the some of keybindings we just removed. It
+  ;; looks like Org already binds C-up and C-down separately from M-{
+  ;; and M-}, so we can't use those. Users will just have to make do
+  ;; with C-c <up> and C-c <down> for now.
+  (define-key org-mode-map (kbd "C-<left>") #'org-shiftleft)
+  (define-key org-mode-map (kbd "C-<right>") #'org-shiftright))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; ElDoc
 
 ;; Disable ElDoc globally. This prevents it from being enabled in the
