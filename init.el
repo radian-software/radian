@@ -560,6 +560,12 @@ from `kill-buffer-hook', and also remove this function from
                #'radian--remove-kill-buffer-delete-directory-hook
                'local))
 
+;; When you open a file, position the cursor at the same place as the
+;; last time you edited the file. See [1].
+;;
+;; [1]: https://www.emacswiki.org/emacs/SavePlace
+(save-place-mode 1)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Auto revert
 
