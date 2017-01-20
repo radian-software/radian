@@ -1797,6 +1797,23 @@ Lisp function does not specify a special indentation."
 
 ;; Provides indentation and syntax highlighting for Clojure code.
 (use-package clojure-mode
+  :init
+
+  ;; We define some patches after clojure-mode is loaded. We need to
+  ;; make sure el-patch knows how to find these patches.
+
+  (defun radian--enable-clojure-mode-patches ()
+    (require 'clojure-mode)
+    (radian-clojure-strings-as-docstrings-mode 1))
+
+  (defun radian--disable-clojure-mode-patches ()
+    (radian-clojure-strings-as-docstrings-mode -1))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-clojure-mode-patches)
+  (add-hook 'el-patch-post-validate-hook
+            #'radian--disable-clojure-mode-patches)
+
   :config
 
   ;;; Customize indentation like this:
@@ -1935,6 +1952,17 @@ Return nil if not inside a project."
 ;; documentation and source lookups, among many other features.
 (use-package cider
   :dependencies (clojure-mode)
+  :init
+
+  ;; We define some patches after CIDER is loaded. We need to make
+  ;; sure el-patch knows how to find these patches.
+
+  (defun radian--enable-cider-patches ()
+    (require 'cider))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-cider-patches)
+
   :config
 
   ;; By default, any error messages that occur when CIDER is starting
