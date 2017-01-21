@@ -2469,7 +2469,7 @@ reasons.")
                 (branch-name (when git
                                (or (vc-git--symbolic-ref default-directory)
                                    (substring (vc-git-working-revision
-                                               default-directory 'Git)
+                                               default-directory)
                                               0 7))))
                 (dirty (when git
                          (with-temp-buffer
