@@ -350,6 +350,31 @@ the first keyword in the `use-package' form."
 ;; by doing C-y M-y.
 (setq save-interprogram-paste-before-kill t)
 
+;;; PATH
+;; On macOS, the $PATH is not set correctly for GUI applications. So
+;; we have to set it ourselves.
+(radian-with-operating-system macos
+  ;; This conditional is from the README [1] of exec-path-from-shell,
+  ;; which we are not using for performance reasons.
+  ;;
+  ;; [1]: https://github.com/purcell/exec-path-from-shell
+  (when (memq window-system '(mac ns))
+    (with-temp-buffer
+      ;; See "man path_helper".
+      (call-process "/usr/libexec/path_helper" nil t nil "-s")
+      (goto-char (point-min))
+      (search-forward-regexp "PATH=\"\\(.+\\)\"; export PATH;")
+      (let ((path (match-string 1)))
+        (setenv "PATH" path)
+        ;; These two setq's are from the code of exec-path-from-shell.
+        (setq eshell-path-env path)
+        (setq exec-path (append (parse-colon-path path) (list exec-directory))))
+      ;; For some reason, path_helper doesn't always seem to report a
+      ;; MANPATH, so we won't insist on getting one.
+      (when (search-forward-regexp "MANPATH=\"\\(.+\\)\"; export MANPATH;"
+                                   nil 'noerror)
+        (setenv "MANPATH" (match-string 1))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Commands
 
