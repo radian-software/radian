@@ -885,8 +885,9 @@ use windmove to switch to a different window.")
   "Run `radian-switch-buffer-hook' if necessary.
 The hook is run if `current-buffer' has changed. This function
 should be placed on `post-command-hook'."
-  (unless (eq (current-buffer)
-              radian--last-buffer)
+  (unless (or (eq (current-buffer)
+                  radian--last-buffer)
+              (window-minibuffer-p))
     (setq radian--last-buffer (current-buffer))
     (run-hooks 'radian-switch-buffer-hook)))
 
