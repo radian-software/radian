@@ -2495,7 +2495,28 @@ reasons.")
 
 ;; We will make sure this information is updated after one second of
 ;; inactivity, for the current buffer.
-(run-with-idle-timer 1 'repeat #'radian--compute-mode-line-project-and-branch)
+
+(defvar radian--mode-line-timer-primary nil)
+(defvar radian--mode-line-timer-secondary nil)
+
+(defun radian--compute-mode-line-and-reschedule ()
+  (when radian--mode-line-timer-secondary
+    (cancel-timer radian--mode-line-timer-secondary))
+  (radian--compute-mode-line-project-and-branch)
+  (setq radian--mode-line-timer-secondary
+        (run-with-idle-timer
+         (time-add 1 (current-idle-time)) nil
+         #'radian--compute-mode-line-and-reschedule)))
+
+(when radian--mode-line-timer-primary
+  (cancel-timer radian--mode-line-timer-primary))
+
+(when radian--mode-line-timer-secondary
+  (cancel-timer radian--mode-line-timer-secondary))
+
+(setq radian--mode-line-timer-primary
+      (run-with-idle-timer
+       1 'repeat #'radian--compute-mode-line-and-reschedule))
 
 ;; We will also update it instantly when you switch buffers.
 (add-hook 'radian-switch-buffer-hook
