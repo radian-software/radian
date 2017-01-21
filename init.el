@@ -26,6 +26,23 @@ nil."
   :group 'radian
   :type 'symbol)
 
+(defcustom radian-operating-system
+  (pcase system-type
+    ('darwin 'macos)
+    ((or 'ms-dos 'windows-nt 'cygwin) 'windows)
+    (_ 'linux))
+  "Specifies the operating system.
+This can be `macos', `linux', or `windows'. Normally this is
+automatically detected and does not need to be changed.")
+
+(defmacro radian-with-operating-system (os &rest body)
+  "If the operating system is OS, eval BODY.
+See `radian-operating-system' for the possible values of OS,
+which should not be quoted."
+  (declare (indent 1))
+  `(when (eq radian-operating-system ',os)
+     ,@body))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Libraries
 
@@ -305,24 +322,25 @@ the first keyword in the `use-package' form."
 ;; Based on https://gist.github.com/the-kenny/267162
 ;; Modified based on http://emacs.stackexchange.com/q/26471/12534
 
-(unless (display-graphic-p)
+(radian-with-operating-system macos
+  (unless (display-graphic-p)
 
-  (setq radian--last-paste nil)
+    (setq radian--last-paste nil)
 
-  (defun copy-from-osx ()
-    (let ((copied-text (shell-command-to-string "pbpaste")))
-      (unless (string= copied-text radian--last-paste)
-        copied-text)))
+    (defun copy-from-osx ()
+      (let ((copied-text (shell-command-to-string "pbpaste")))
+        (unless (string= copied-text radian--last-paste)
+          copied-text)))
 
-  (defun paste-to-osx (text &optional push)
-    (let ((process-connection-type nil))
-      (let ((proc (start-process "pbcopy" nil "pbcopy")))
-        (process-send-string proc text)
-        (process-send-eof proc)))
-    (setq radian--last-paste text))
+    (defun paste-to-osx (text &optional push)
+      (let ((process-connection-type nil))
+        (let ((proc (start-process "pbcopy" nil "pbcopy")))
+          (process-send-string proc text)
+          (process-send-eof proc)))
+      (setq radian--last-paste text))
 
-  (setq interprogram-cut-function 'paste-to-osx)
-  (setq interprogram-paste-function 'copy-from-osx))
+    (setq interprogram-cut-function 'paste-to-osx)
+    (setq interprogram-paste-function 'copy-from-osx)))
 
 ;; If you have something on the system clipboard, and then kill something in
 ;; Emacs, then by default whatever you had on the system clipboard is gone
