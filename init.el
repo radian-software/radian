@@ -1074,9 +1074,8 @@ Lisp function does not specify a special indentation."
 ;; e.g. "C++/l" into "C++". Since we are overriding a function
 ;; provided by `cc-mode', which is not initially loaded, we have to
 ;; make sure to do so *after* it is loaded and not before.
-(eval-after-load 'cc-mode
-  (lambda ()
-    (advice-add #'c-update-modeline :override #'ignore)))
+(with-eval-after-load 'cc-mode
+  (advice-add #'c-update-modeline :override #'ignore))
 
 ;; Switch to a better indentation-and-braces style. This turns the
 ;; following code:
@@ -1091,13 +1090,12 @@ Lisp function does not specify a special indentation."
 ;; if (condition) {
 ;;   statement;
 ;; }
-(eval-after-load 'cc-mode
-  '(progn
-     (if (assoc 'other c-default-style)
-         (setcdr (assoc 'other c-default-style)
-                 "k&r")
-       (push '(other . "k&r") c-default-style))
-     (setq-default c-basic-offset 2)))
+(with-eval-after-load 'cc-mode
+  (if (assoc 'other c-default-style)
+      (setcdr (assoc 'other c-default-style)
+              "k&r")
+    (push '(other . "k&r") c-default-style))
+  (setq-default c-basic-offset 2))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Managing Emacs
@@ -1304,9 +1302,8 @@ Lisp function does not specify a special indentation."
         (define-key projectile-mode-map [remap projectile-switch-to-buffer] nil)
         (projectile-commander-bindings))))
 
-  (eval-after-load 'projectile
-    (lambda ()
-      (counsel-projectile-toggle 1))))
+  (with-eval-after-load 'projectile
+    (counsel-projectile-toggle 1)))
 
 ;; Provides an enhanced version of Isearch that uses Ivy to display
 ;; a preview of the results.
@@ -1348,8 +1345,8 @@ Lisp function does not specify a special indentation."
   (diminish 'abbrev-mode)
 
   ;; Don't show `smerge-mode' in the mode line.
-  (eval-after-load 'smerge-mode
-    '(diminish 'smerge-mode)))
+  (with-eval-after-load 'smerge-mode
+    (diminish 'smerge-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Window management
@@ -1633,63 +1630,62 @@ Lisp function does not specify a special indentation."
   ;; same location.
 
   (when (radian-package-enabled-p 'company)
-    (eval-after-load 'company
-      (lambda ()
+    (with-eval-after-load 'company
 
-        ;; This function translates the "event types" I get from
-        ;; `map-keymap' into things that I can pass to `lookup-key'
-        ;; and `define-key'. It's a hack, and I'd like to find a
-        ;; built-in function that accomplishes the same thing while
-        ;; taking care of any edge cases I might have missed in this
-        ;; ad-hoc solution.
-        (defun radian--normalize-event (event)
-          (if (vectorp event)
-              event
-            (vector event)))
+      ;; This function translates the "event types" I get from
+      ;; `map-keymap' into things that I can pass to `lookup-key'
+      ;; and `define-key'. It's a hack, and I'd like to find a
+      ;; built-in function that accomplishes the same thing while
+      ;; taking care of any edge cases I might have missed in this
+      ;; ad-hoc solution.
+      (defun radian--normalize-event (event)
+        (if (vectorp event)
+            event
+          (vector event)))
 
-        ;; Here we define a hybrid keymap that delegates first to
-        ;; `company-active-map' and then to `yas-keymap'.
-        (setq radian--yas-company-keymap
-              ;; It starts out as a copy of `yas-keymap', and then we
-              ;; merge in all of the bindings from
-              ;; `company-active-map'.
-              (let ((keymap (copy-keymap yas-keymap)))
-                (map-keymap
-                 (lambda (event company-cmd)
-                   (let* ((event (radian--normalize-event event))
-                          (yas-cmd (lookup-key yas-keymap event)))
-                     ;; Here we use an extended menu item with the
-                     ;; `:filter' option, which allows us to
-                     ;; dynamically decide which command we want to
-                     ;; run when a key is pressed.
-                     (define-key keymap event
-                       `(menu-item
-                         nil ,company-cmd :filter
-                         (lambda (cmd)
-                           ;; There doesn't seem to be any obvious
-                           ;; function from Company to tell whether or
-                           ;; not a completion is in progress (à la
-                           ;; `company-explicit-action-p'), so I just
-                           ;; check whether or not `company-my-keymap'
-                           ;; is defined, which seems to be good
-                           ;; enough.
-                           (if company-my-keymap
-                               ',company-cmd
-                             ',yas-cmd))))))
-                 company-active-map)
-                keymap))
+      ;; Here we define a hybrid keymap that delegates first to
+      ;; `company-active-map' and then to `yas-keymap'.
+      (setq radian--yas-company-keymap
+            ;; It starts out as a copy of `yas-keymap', and then we
+            ;; merge in all of the bindings from
+            ;; `company-active-map'.
+            (let ((keymap (copy-keymap yas-keymap)))
+              (map-keymap
+               (lambda (event company-cmd)
+                 (let* ((event (radian--normalize-event event))
+                        (yas-cmd (lookup-key yas-keymap event)))
+                   ;; Here we use an extended menu item with the
+                   ;; `:filter' option, which allows us to
+                   ;; dynamically decide which command we want to
+                   ;; run when a key is pressed.
+                   (define-key keymap event
+                     `(menu-item
+                       nil ,company-cmd :filter
+                       (lambda (cmd)
+                         ;; There doesn't seem to be any obvious
+                         ;; function from Company to tell whether or
+                         ;; not a completion is in progress (à la
+                         ;; `company-explicit-action-p'), so I just
+                         ;; check whether or not `company-my-keymap'
+                         ;; is defined, which seems to be good
+                         ;; enough.
+                         (if company-my-keymap
+                             ',company-cmd
+                           ',yas-cmd))))))
+               company-active-map)
+              keymap))
 
-        ;; The function `yas--make-control-overlay' uses the current
-        ;; value of `yas-keymap' to build the Yasnippet overlay, so to
-        ;; override the Yasnippet keymap we only need to dynamically
-        ;; rebind `yas-keymap' for the duration of that function.
-        (defun radian--company-overrides-yasnippet
-            (yas--make-control-overlay &rest args)
-          (let ((yas-keymap radian--yas-company-keymap))
-            (apply yas--make-control-overlay args)))
+      ;; The function `yas--make-control-overlay' uses the current
+      ;; value of `yas-keymap' to build the Yasnippet overlay, so to
+      ;; override the Yasnippet keymap we only need to dynamically
+      ;; rebind `yas-keymap' for the duration of that function.
+      (defun radian--company-overrides-yasnippet
+          (yas--make-control-overlay &rest args)
+        (let ((yas-keymap radian--yas-company-keymap))
+          (apply yas--make-control-overlay args)))
 
-        (advice-add #'yas--make-control-overlay :around
-                    #'radian--company-overrides-yasnippet))))
+      (advice-add #'yas--make-control-overlay :around
+                  #'radian--company-overrides-yasnippet)))
 
   :diminish yas-minor-mode)
 
