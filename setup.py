@@ -872,6 +872,7 @@ feature_list = [
      "pretty_name": "Homebrew",
      "description": "The missing package manager for macOS. Can install almost everything.",
      "group": "basic",
+     "required": ["xcode-cl-tools"],
      "action": lambda: ensure_homebrew_installed()},
 
     ### Git ###
