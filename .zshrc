@@ -719,6 +719,10 @@ function gpu() {
 }
 alias gpd='git push --delete'
 
+alias gcr='git create'
+alias gfk='git fork'
+alias gpr='git pull-request'
+
 ################################################################################
 #### Hub
 
