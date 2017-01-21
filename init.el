@@ -2407,45 +2407,85 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;; Mode line
 
 ;;; The following code customizes the mode bar to something like:
-;;; [*] init.el        72% (389,30)  [radian]  (Emacs-Lisp Paredit AggrIndent)
+;;; [*] init.el        96% (2410,30)  [radian:master*]  (Emacs-Lisp Paredit AggrIndent)
 
-(defvar mode-line-modified-radian
-  '(:eval (propertize (if (and (buffer-modified-p)
-                               (buffer-file-name))
-                          "[*]" "   ")
-                      ;; make sure to show it in the same color as the
-                      ;; buffer name
-                      'face 'mode-line-buffer-id))
-  "Construct for the mode line that shows [*] if the buffer
-has been modified, and whitespace otherwise.")
+(defun radian--mode-line-buffer-modified ()
+  "Returns a construct for the mode line that shows [*] if the
+buffer has been modified, and whitespace otherwise."
+  (propertize (if (and (buffer-modified-p)
+                       (buffer-file-name))
+                  "[*]" "   ")
+              ;; make sure to show it in the same color as the
+              ;; buffer name
+              'face 'mode-line-buffer-id))
 
-(defun radian--mode-line-projectile-project ()
-  "Returns a construct for the mode line that shows the current
-Projectile project between brackets, with the appropriate spacing
-on the left. Returns the empty string if Projectile is not
-enabled or if the user is not in a Projectile project."
-  (when (radian-package-enabled-p 'projectile)
-    (let ((name (projectile-project-name)))
-      (unless (equal name "-")
-        (concat "  [" name "]")))))
+;; To display information about the current Git status in the mode
+;; line, we need to load this library.
+(require 'vc-git)
+
+(defvar-local radian--mode-line-project-and-branch nil
+  "Construct for the mode line that shows the current Projectile
+project (if Projectile is enabled and the user is within a
+project), the current Git branch (if the user is within a Git
+repo), and whether the working directory is dirty.
+
+Computed and cached in this variable by
+`radian--compute-mode-line-project-and-branch' for performance
+reasons.")
+
+(defun radian--compute-mode-line-project-and-branch ()
+  (let ((old radian--mode-line-project-and-branch)
+        (new
+         (let* ((project-name (when (featurep 'projectile)
+                                (projectile-project-name)))
+                (project-name (unless (equal project-name "-")
+                                project-name))
+                (git (locate-dominating-file default-directory ".git"))
+                (branch-name (when git
+                               (or (vc-git--symbolic-ref default-directory)
+                                   (substring (vc-git-working-revision
+                                               default-directory 'Git)
+                                              0 7))))
+                (dirty (when git
+                         (with-temp-buffer
+                           (call-process "git" nil t nil
+                                         "status" "--porcelain"
+                                         "--ignore-submodules=dirty")
+                           (if (> (buffer-size) 0)
+                               "*" "")))))
+           (cond
+            ((and project-name git)
+             (format "  [%s:%s%s]" project-name branch-name dirty))
+            (project-name
+             (format "  [%s]" project-name))
+            ;; This should never happen unless you do something
+            ;; perverse like create a version-controlled Projectile
+            ;; project whose name is a hyphen, but we want to handle
+            ;; it anyway.
+            (git
+             (format "  [%s%s]" branch-name dirty))))))
+    (unless (equal old new)
+      (setq radian--mode-line-project-and-branch new)
+      (force-mode-line-update))))
+
+(run-with-idle-timer 1 'repeat #'radian--compute-mode-line-project-and-branch)
 
 (setq-default mode-line-format
-              (list
-               ;; Show a warning if Emacs is low on memory.
-               "%e"
-               ;; Show [*] if the buffer is modified.
-               mode-line-modified-radian
-               " "
-               ;; Show the name of the current buffer.
-               mode-line-buffer-identification
-               "   "
-               ;; Show the row and column of point.
-               mode-line-position
-               ;; Show the current Projectile project.
-               '(:eval (radian--mode-line-projectile-project))
-               ;; Show the active major and minor modes.
-               "  "
-               mode-line-modes))
+              '(;; Show a warning if Emacs is low on memory.
+                "%e"
+                ;; Show [*] if the buffer is modified.
+                (:eval (radian--mode-line-buffer-modified))
+                " "
+                ;; Show the name of the current buffer.
+                mode-line-buffer-identification
+                "   "
+                ;; Show the row and column of point.
+                mode-line-position
+                ;; Show the current Projectile project.
+                radian--mode-line-project-and-branch
+                ;; Show the active major and minor modes.
+                "  "
+                mode-line-modes))
 
 ;; Make `mode-line-position' show the column, not just the row.
 (column-number-mode 1)
