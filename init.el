@@ -14,7 +14,7 @@
   "Customize your Radian Emacs experience"
   :group 'emacs)
 
-(defcustom radian-color-theme 'leuven
+(defcustom radian-color-theme 'wombat
   "Specifies the color theme used by Radian.
 
 You can use anything listed by `custom-available-themes'.
