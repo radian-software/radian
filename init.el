@@ -867,6 +867,31 @@ This filter de-installs itself after this call."
 ;; previous layout with C-c left.
 (winner-mode 1)
 
+;; Create a hook that is run whenever the current buffer changes (that
+;; is, a new buffer is the current buffer). Some of this code is
+;; inspired by [1].
+;;
+;; [1]: https://github.com/10sr/switch-buffer-functions-el
+
+(defvar radian-switch-buffer-hook nil
+  "Hook run when there is a new current buffer.
+This could happen when you switch buffers with C-x b, or when you
+use windmove to switch to a different window.")
+
+(defvar radian--last-buffer nil
+  "The last current buffer, or nil if none.")
+
+(defun radian--maybe-run-switch-buffer-hook ()
+  "Run `radian-switch-buffer-hook' if necessary.
+The hook is run if `current-buffer' has changed. This function
+should be placed on `post-command-hook'."
+  (unless (eq (current-buffer)
+              radian--last-buffer)
+    (setq radian--last-buffer (current-buffer))
+    (run-hooks 'radian-switch-buffer-hook)))
+
+(add-hook 'post-command-hook #'radian--maybe-run-switch-buffer-hook)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Customization
 
@@ -2468,7 +2493,13 @@ reasons.")
       (setq radian--mode-line-project-and-branch new)
       (force-mode-line-update))))
 
+;; We will make sure this information is updated after one second of
+;; inactivity, for the current buffer.
 (run-with-idle-timer 1 'repeat #'radian--compute-mode-line-project-and-branch)
+
+;; We will also update it instantly when you switch buffers.
+(add-hook 'radian-switch-buffer-hook
+          #'radian--compute-mode-line-project-and-branch)
 
 (setq-default mode-line-format
               '(;; Show a warning if Emacs is low on memory.
