@@ -669,8 +669,8 @@ This filter de-installs itself after this call."
 (advice-add #'auto-revert-buffers :around #'auto-revert-some-buffers-advice)
 
 ;; Since we automatically revert all visible buffers after one second,
-;; there's no point in asking the user whether or not they want to it
-;; when they find a file. This disables that prompt.
+;; there's no point in asking the user whether or not they want to do
+;; it when they find a file. This disables that prompt.
 (setq revert-without-query '(".*"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
