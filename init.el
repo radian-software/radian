@@ -1117,8 +1117,8 @@ Lisp function does not specify a special indentation."
   :bind (;; Use smex for M-x.
          ("M-x" . smex)))
 
-;; Provides intelligent fuzzy matching and sorting mechanisms that
-;; can be used by various other packages, including Ivy.
+;; Provides intelligent fuzzy matching and sorting mechanisms that can
+;; be used by various other packages, including Ivy and historian.el.
 (use-package flx)
 
 ;; Provides a general-purpose completion mechanism.
@@ -1316,66 +1316,24 @@ Lisp function does not specify a special indentation."
          ("C-r" . swiper)))
 
 ;; Remembers your choices in completion menus.
-(with-eval-after-load 'ivy
-  (use-package historian
-    :recipe (:fetcher github
-             :repo "PythonNut/historian.el")
-    :demand t
-    :config
+(use-package historian
+  :recipe (:fetcher github
+           :repo "PythonNut/historian.el")
+  :demand t
+  :config
 
-    ;; Sort Ivy completions according to usage.
+  ;; Enable the functionality of historian.el.
+  (historian-mode 1))
 
-    (historian-mode 1)
+;; Uses Historian to sort Ivy candidates by frecency+flx.
+(use-package historian-ivy
+  :recipe (:fetcher github
+           :repo "PythonNut/historian.el")
+  :demand t
+  :config
 
-    (eval-after-load 'ivy
-      (lambda ()
-        (setq historian-ivy-freq-boost-factor 100)
-        (setq historian-ivy-recent-boost 100)
-        (setq historian-ivy-recent-decrement 5)
-
-        (defun historian--nadvice/ivy-read2 (old-fun &rest args)
-          (let ((saved-this-command this-command))
-            (apply old-fun args)))
-
-        (advice-add 'ivy-read :around #'historian--nadvice/ivy-read2)
-
-        (defun historian--nadvice/ivy--flx-sort (old-fun name cands)
-          (if (not (bound-and-true-p historian-mode))
-              (funcall old-fun name cands)
-            (require 'flx)
-            (cl-letf*
-                ((old-flx-score (symbol-function #'flx-score))
-                 ((symbol-function #'flx-score)
-                  (lambda (str query &optional cache)
-                    (let* ((orig-score
-                            (funcall old-flx-score str query cache))
-                           (history (gethash (bound-and-true-p
-                                              saved-this-command)
-                                             historian--history-table
-                                             (cons (list)
-                                                   (make-hash-table))))
-                           (freq (if (gethash str (cdr history))
-                                     (/ (float (gethash str (cdr history) 0))
-                                        (let ((total 0))
-                                          (maphash
-                                           (lambda (key value)
-                                             (cl-incf total value))
-                                           (cdr history))
-                                          total))
-                                   0))
-                           (freq-boost (* freq historian-ivy-freq-boost-factor))
-                           (recent-index (cl-position str (car history)))
-                           (recent-boost (if recent-index
-                                             (- historian-ivy-recent-boost
-                                                (* historian-ivy-recent-decrement
-                                                   recent-index))
-                                           0)))
-                      (cons
-                       (+ (car orig-score) freq-boost recent-boost)
-                       (cdr orig-score))))))
-              (funcall old-fun name cands))))
-
-        (advice-add 'ivy--flx-sort :around #'historian--nadvice/ivy--flx-sort)))))
+  ;; Enable the functionality of historian-ivy.
+  (historian-ivy-mode 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: User interface
