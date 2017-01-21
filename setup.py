@@ -1119,7 +1119,7 @@ feature_list = [
      "required": ["homebrew"],
      "action": lambda: (
      ensure_homebrew_package_installed("hub", command=["hub", "--version"],
-                                       prefix="git version .+"))},
+                                       prefix="git version .+", flags=["--HEAD"]))},
 
     {"name": "tmuxinator",
      "pretty_name": "tmuxinator",
