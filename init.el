@@ -2192,24 +2192,30 @@ should be the regular Clojure REPL started by the server process filter."
 
   ;; Automatically install irony-server if it is missing. irony-server
   ;; is necessary for Irony to work at all!
-  (unless (irony--locate-server-executable)
-    ;; The following `let' is copied from the definition of
-    ;; `irony-install-server'. A better solution would be to
-    ;; dynamically bind `irony--install-server-read-command' to
-    ;; `identity' and then just use `call-interactively' to invoke
-    ;; `irony-install-server' with no arguments, but I don't know how
-    ;; to do this.
-    (let ((command
-           (format
-            (concat "%s %s %s && %s --build . "
-                    "--use-stderr --config Release --target install")
-            (shell-quote-argument irony-cmake-executable)
-            (shell-quote-argument (concat "-DCMAKE_INSTALL_PREFIX="
-                                          (expand-file-name
-                                           irony-server-install-prefix)))
-            (shell-quote-argument irony-server-source-dir)
-            (shell-quote-argument irony-cmake-executable))))
-      (irony-install-server command)))
+
+  (defun radian--install-irony-server-if-missing ()
+    (unless (irony--locate-server-executable)
+      (if (yes-or-no-p "Install irony-server? ")
+          ;; The following `let' is copied from the definition of
+          ;; `irony-install-server'. A better solution would be to
+          ;; dynamically bind `irony--install-server-read-command' to
+          ;; `identity' and then just use `call-interactively' to invoke
+          ;; `irony-install-server' with no arguments, but I don't know how
+          ;; to do this.
+          (let ((command
+                 (format
+                  (concat "%s %s %s && %s --build . "
+                          "--use-stderr --config Release --target install")
+                  (shell-quote-argument irony-cmake-executable)
+                  (shell-quote-argument (concat "-DCMAKE_INSTALL_PREFIX="
+                                                (expand-file-name
+                                                 irony-server-install-prefix)))
+                  (shell-quote-argument irony-server-source-dir)
+                  (shell-quote-argument irony-cmake-executable))))
+            (irony-install-server command))
+        (message "irony-mode will not work until you M-x irony-install-server"))))
+
+  (add-hook 'irony-mode-hook #'radian--install-irony-server-if-missing)
 
   :diminish irony-mode)
 
