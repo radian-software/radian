@@ -1406,7 +1406,7 @@ Minibuffer bindings:
 (use-package historian-ivy
   :recipe (:fetcher github
            :repo "PythonNut/historian.el")
-  :demand t
+  :after ivy
   :config
 
   ;; Enable the functionality of historian-ivy.
