@@ -1164,11 +1164,48 @@ Lisp function does not specify a special indentation."
 
 ;; Provides a general-purpose completion mechanism.
 (use-package ivy
-  :demand t
-  :config
+  :init
+
+  ;; Lazy-load Ivy.
+
+  (defvar ivy-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map [remap switch-to-buffer]
+        'ivy-switch-buffer)
+      (define-key map [remap switch-to-buffer-other-window]
+        'ivy-switch-buffer-other-window)
+      map)
+    "Keymap for `ivy-mode'.")
+
+  (el-patch-define-minor-mode ivy-mode
+    "Toggle Ivy mode on or off.
+Turn Ivy mode on if ARG is positive, off otherwise.
+Turning on Ivy mode sets `completing-read-function' to
+`ivy-completing-read'.
+
+Global bindings:
+\\{ivy-mode-map}
+
+Minibuffer bindings:
+\\{ivy-minibuffer-map}"
+    :group 'ivy
+    :global t
+    :keymap ivy-mode-map
+    :lighter " ivy"
+    (el-patch-feature ivy)
+    (if ivy-mode
+        (progn
+          (setq completing-read-function 'ivy-completing-read)
+          (el-patch-splice 2
+            (when ivy-do-completion-in-region
+              (setq completion-in-region-function 'ivy-completion-in-region))))
+      (setq completing-read-function 'completing-read-default)
+      (setq completion-in-region-function 'completion--in-region)))
 
   ;; Use Ivy for `completing-read'.
   (ivy-mode 1)
+
+  :config
 
   ;; Use fuzzy matching for Ivy, powered by flx, but not for Swiper
   ;; (because fuzzy matching is typically not desired in grep-style
