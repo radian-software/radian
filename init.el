@@ -1205,6 +1205,10 @@ Minibuffer bindings:
   ;; Use Ivy for `completing-read'.
   (ivy-mode 1)
 
+  ;; Don't show it in the mode line (the `:diminish' below only takes
+  ;; effect after the lazy-load is triggered).
+  (diminish 'ivy-mode)
+
   :config
 
   ;; Use fuzzy matching for Ivy, powered by flx, but not for Swiper
