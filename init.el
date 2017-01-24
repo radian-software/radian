@@ -1196,7 +1196,6 @@ Minibuffer bindings:
     :global t
     :keymap ivy-mode-map
     :lighter " ivy"
-    (el-patch-feature ivy)
     (if ivy-mode
         (progn
           (setq completing-read-function 'ivy-completing-read)
@@ -1350,7 +1349,6 @@ Minibuffer bindings:
   ;; [1]: https://github.com/jwiegley/use-package/issues/413
 
   (el-patch-defun counsel-projectile-commander-bindings ()
-    (el-patch-feature counsel-projectile)
     (def-projectile-commander-method ?f
       "Find file in project."
       (counsel-projectile-find-file))
@@ -1369,7 +1367,6 @@ Minibuffer bindings:
 
   (el-patch-defun counsel-projectile-toggle (toggle)
     "Toggle Ivy version of Projectile commands."
-    (el-patch-feature counsel-projectile)
     (if (> toggle 0)
         (progn
           (when (eq projectile-switch-project-action #'projectile-find-file)
@@ -1929,14 +1926,12 @@ strings that are not docstrings."
         (progn
           (el-patch-defsubst clojure-in-docstring-p ()
             "Check whether point is in a docstring."
-            (el-patch-feature clojure-mode)
             (el-patch-wrap 1 1
               (or
                (eq (get-text-property (point) 'face) 'font-lock-doc-face)
                (eq (get-text-property (point) 'face) 'font-lock-string-face))))
           (el-patch-defun clojure-indent-line ()
             "Indent current line as Clojure code."
-            (el-patch-feature clojure-mode)
             (if (clojure-in-docstring-p)
                 (save-excursion
                   (beginning-of-line)
@@ -1945,8 +1940,8 @@ strings that are not docstrings."
                                  (string-width (clojure-docstring-fill-prefix))))
                     (replace-match (clojure-docstring-fill-prefix))))
               (lisp-indent-line))))
-      (el-patch-unpatch 'clojure-in-docstring-p)
-      (el-patch-unpatch 'clojure-indent-function)))
+      (el-patch-unpatch 'clojure-in-docstring-p 'defsubst)
+      (el-patch-unpatch 'clojure-indent-function 'defun)))
 
   (add-hook 'clojure-mode-hook #'radian-clojure-strings-as-docstrings-mode)
 
@@ -2109,7 +2104,6 @@ Return nil if not inside a project."
 The new buffer will correspond to the same project as CLIENT-BUFFER, which
 should be the regular Clojure REPL started by the server process filter."
     (interactive (list (cider-current-connection)))
-    (el-patch-feature cider)
     (let* ((nrepl-repl-buffer-name-template "*cider-repl CLJS%s*")
            (nrepl-create-client-buffer-function #'cider-repl-create)
            (nrepl-use-this-as-repl-buffer 'new)
