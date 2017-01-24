@@ -916,7 +916,11 @@ This filter de-installs itself after this call."
   ;; think it's best to take the same approach as before, for
   ;; consistency.
   (define-key org-agenda-mode-map (kbd "C-<left>") #'org-agenda-do-date-earlier)
-  (define-key org-agenda-mode-map (kbd "C-<right>") #'org-agenda-do-date-later))
+  (define-key org-agenda-mode-map (kbd "C-<right>") #'org-agenda-do-date-later)
+
+  ;; Don't show items that have deadlines in the global TODO list in
+  ;; org-agenda.
+  (setq org-agenda-todo-ignore-deadlines 'all))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; ElDoc
