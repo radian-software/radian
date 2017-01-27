@@ -2206,6 +2206,43 @@ should be the regular Clojure REPL started by the server process filter."
 (use-package geiser)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Python
+
+;; Integrated development environment for Python.
+(use-package anaconda-mode
+  :init
+
+  ;; Enable the functionality of anaconda-mode in Python buffers, as
+  ;; suggested in the README [1].
+  ;;
+  ;; [1]: https://github.com/proofit404/anaconda-mode
+  (add-hook 'python-mode-hook #'anaconda-mode)
+
+  ;; Prevent anaconda-mode from overriding our binding for M-TAB,
+  ;; which we want to trigger Company.
+  (with-eval-after-load 'company
+    (define-key anaconda-mode-map (kbd "C-M-i") nil))
+
+  :diminish anaconda-mode)
+
+;; Company integration for anaconda-mode.
+(use-package company-anaconda
+
+  :init
+
+  ;; Enable the functionality of company-anaconda in Python buffers,
+  ;; as suggested in the README [1].
+  ;;
+  ;; [1]: https://github.com/proofit404/company-anaconda
+
+  (with-eval-after-load 'company
+
+    (defun radian--enable-company-anaconda ()
+      (add-to-list 'company-backends #'company-anaconda))
+
+    (add-hook 'python-mode-hook #'radian--enable-company-anaconda)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: C-like languages
 
 ;; General support for C, C++, and Objective-C based on libclang.
