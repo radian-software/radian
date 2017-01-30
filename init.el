@@ -1823,6 +1823,7 @@ Minibuffer bindings:
 
 ;; Highlights matches and previews replacements in query replace.
 (use-package visual-regexp-steroids
+  :demand t
   :bind (;; Replace the regular query replace with the regexp query
          ;; replace provided by this package.
          ("M-%" . vr/query-replace)))
