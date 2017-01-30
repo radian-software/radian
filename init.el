@@ -1822,11 +1822,14 @@ Minibuffer bindings:
          ("M-P g w" . avy-goto-word-0)))
 
 ;; Highlights matches and previews replacements in query replace.
-(use-package visual-regexp-steroids
-  :demand t
+(use-package visual-regexp
   :bind (;; Replace the regular query replace with the regexp query
          ;; replace provided by this package.
          ("M-%" . vr/query-replace)))
+
+;; Use other regexp engines for visual-regexp.
+(use-package visual-regexp-steroids
+  :after visual-regexp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Clojure
