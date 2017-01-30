@@ -1829,7 +1829,11 @@ Minibuffer bindings:
 
 ;; Use other regexp engines for visual-regexp.
 (use-package visual-regexp-steroids
-  :after visual-regexp)
+  :after visual-regexp
+  :config
+
+  ;; Use Emacs-style regular expressions by default.
+  (setq vr/engine 'emacs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Clojure
