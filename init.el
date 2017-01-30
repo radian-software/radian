@@ -2218,6 +2218,8 @@ should be the regular Clojure REPL started by the server process filter."
   ;; [1]: https://github.com/proofit404/anaconda-mode
   (add-hook 'python-mode-hook #'anaconda-mode)
 
+  :config
+
   ;; Prevent anaconda-mode from overriding our binding for M-TAB,
   ;; which we want to trigger Company.
   (with-eval-after-load 'company
