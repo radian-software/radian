@@ -1810,7 +1810,7 @@ Minibuffer bindings:
   :config
 
   ;; Use De Bruijn sequences for jump sequences. This allows you to
-  ;; fixate on a particular place you want to jump to, and jump type
+  ;; fixate on a particular place you want to jump to, and just type
   ;; whatever shows up there.
   (setq avy-style 'de-bruijn)
 
