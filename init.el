@@ -844,9 +844,6 @@ This filter de-installs itself after this call."
 ;; immediately if there is a valid symbol at point.
 (setq xref-prompt-for-identifier t)
 
-;; Default to Elisp for M-. and friends, not etags.
-(add-hook 'xref-backend-functions #'elisp--xref-backend)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Searching
 
