@@ -1165,7 +1165,12 @@ Lisp function does not specify a special indentation."
 
   ;; Lazy-load Ivy.
 
-  (defvar ivy-mode-map
+  (defun radian--enable-ivy-patches ()
+    (require 'ivy))
+
+  (add-hook 'el-patch-pre-validate-hook #'radian--enable-ivy-patches)
+
+  (el-patch-defvar ivy-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map [remap switch-to-buffer]
         'ivy-switch-buffer)
@@ -1340,6 +1345,12 @@ Minibuffer bindings:
   ;; getting use-package's `:bind' to work correctly, see [1].
   ;;
   ;; [1]: https://github.com/jwiegley/use-package/issues/413
+
+  (defun radian--enable-counsel-projectile-patches ()
+    (require 'counsel-projectile))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-counsel-projectile-patches)
 
   (el-patch-defun counsel-projectile-commander-bindings ()
     (def-projectile-commander-method ?f
@@ -1682,6 +1693,15 @@ Minibuffer bindings:
   :demand t
   :config
 
+  ;; Let's future-proof our patching here just in case we ever decide
+  ;; to lazy-load company-statistics.
+
+  (defun radian--enable-company-statistics-patches ()
+    (require 'company-statistics))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-company-statistics-patches)
+
   ;; Disable the message that is normally printed when Company
   ;; Statistics loads its statistics file from disk.
   (el-patch-defun company-statistics--load ()
@@ -1942,7 +1962,7 @@ strings that are not docstrings."
                     (replace-match (clojure-docstring-fill-prefix))))
               (lisp-indent-line))))
       (el-patch-unpatch 'clojure-in-docstring-p 'defsubst)
-      (el-patch-unpatch 'clojure-indent-function 'defun)))
+      (el-patch-unpatch 'clojure-indent-line 'defun)))
 
   (add-hook 'clojure-mode-hook #'radian-clojure-strings-as-docstrings-mode)
 
