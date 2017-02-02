@@ -870,12 +870,12 @@ This filter de-installs itself after this call."
 ;;; Radian does not use custom.el. However, people using Radian might
 ;;; want to. It is the Radian way to put user-specific customizations
 ;;; into the user-specific configuration files, so we'll tell
-;;; custom.el to put its customizations into init.local.el. We don't
-;;; need to call `load', since this is done later by
+;;; custom.el to put its customizations into init.before.local.el. We
+;;; don't need to call `load', since this is done later by
 ;;; `radian-load-user-config'.
 
-;; Store customizations made by custom.el into ~/.emacs.d/init.local.el
-;; instead of this file.
+;; Store customizations made by custom.el into
+;; ~/.emacs.d/init.before.local.el instead of this file.
 (setq custom-file (concat user-emacs-directory "init.before.local.el"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
