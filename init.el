@@ -230,6 +230,10 @@ the first keyword in the `use-package' form."
            :repo "raxod502/el-patch")
   :demand t)
 
+;; Makes .emacs.d more organized.
+(use-package no-littering
+  :demand t)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
 
@@ -710,10 +714,6 @@ This filter de-installs itself after this call."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Saving files
-
-;; Put backup files in $HOME/.emacs-backups, rather than in the
-;; current directory.
-(setq backup-directory-alist '(("." . "~/.emacs-backups")))
 
 ;; Always use copying to make backup files. This prevents hard links
 ;; from being made to point at the backup file rather than the
