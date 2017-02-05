@@ -1802,9 +1802,6 @@ Minibuffer bindings:
   ;; Use Ivy for completion, instead of `grizzl'.
   (setq fasd-completing-read-function nil)
 
-  ;; Make it so that Emacs file-finding updates the fasd database.
-  (global-fasd-mode 1)
-
   :bind (;; Add a keybinding for using the functionality of `fasd'.
          ("C-c f" . fasd-find-file)))
 
