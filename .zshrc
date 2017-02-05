@@ -225,10 +225,10 @@ setopt chaselinks
 
 # Better ls defaults.
 if command -v exa &>/dev/null; then
-    alias l='exa --all --git --header --long --color-scale'
-    alias lg='exa --all --git --grid --header --long --color-scale'
-    alias lt='exa --all --git --header --long --tree --color-scale --ignore-glob .git'
-    alias ltl='exa --all --git --header --long --tree --color-scale --ignore-glob .git --level'
+    alias l='exa --all --header --long --color-scale'
+    alias lg='exa --all --grid --header --long --color-scale'
+    alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
+    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
 else
     # We alias gls to a git command elsewhere, so we use "command"
     # here to prevent it from being interpreted as said git command.
