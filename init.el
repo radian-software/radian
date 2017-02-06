@@ -232,6 +232,9 @@ the first keyword in the `use-package' form."
 
 ;; Makes .emacs.d more organized.
 (use-package no-littering
+  :recipe (:fetcher github
+           :repo "raxod502/no-littering"
+           :branch "radian-1")
   :demand t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
