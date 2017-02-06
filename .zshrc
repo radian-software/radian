@@ -862,6 +862,7 @@ export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
 ################################################################################
 #### Vim
 
+alias vi=vim
 alias vim=nvim
 
 ################################################################################
