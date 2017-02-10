@@ -2254,6 +2254,9 @@ should be the regular Clojure REPL started by the server process filter."
 
 ;; Company integration for anaconda-mode.
 (use-package company-anaconda
+  :recipe (:fetcher github
+           :repo "raxod502/company-anaconda"
+           :branch "radian-1")
 
   :init
 
