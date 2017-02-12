@@ -2389,6 +2389,13 @@ should be the regular Clojure REPL started by the server process filter."
   (add-hook 'vimrc-mode-hook #'radian--fix-vimrc-indentation))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: LaTeX
+
+(use-package auctex
+  :recipe (:fetcher git
+           :url "git://git.sv.gnu.org/auctex.git"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
 
 ;; Provides syntax highlighting, indentation, and editing commands for
