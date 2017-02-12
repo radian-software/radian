@@ -2394,7 +2394,14 @@ should be the regular Clojure REPL started by the server process filter."
 ;; Integrated development environment for LaTeX and friends.
 (use-package auctex
   :recipe (:fetcher git
-           :url "git://git.sv.gnu.org/auctex.git"))
+           :url "git://git.sv.gnu.org/auctex.git")
+  :config
+
+  ;; The following configuration is recommended in the manual [1].
+  ;;
+  ;; [1]: https://www.gnu.org/software/auctex/manual/auctex/Quick-Start.html
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
