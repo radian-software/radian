@@ -2393,8 +2393,9 @@ should be the regular Clojure REPL started by the server process filter."
 
 ;; Integrated development environment for LaTeX and friends.
 (use-package auctex
-  :recipe (:fetcher git
-           :url "git://git.sv.gnu.org/auctex.git")
+  :recipe (:fetcher github
+           :repo "emacsmirror/auctex"
+           :files (:defaults (:exclude "*.el.in")))
   :config
 
   ;; The following configuration is recommended in the manual [1].
