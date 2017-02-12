@@ -2414,24 +2414,23 @@ should be the regular Clojure REPL started by the server process filter."
   (setq TeX-parse-self t)
 
   (radian-with-operating-system macos
-    ;; Use TeXShop for previewing LaTeX, rather than Preview.
-    (setf (alist-get 'output-pdf TeX-view-program-selection)
-          '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+    ;; Use TeXShop for previewing LaTeX, rather than Preview. This
+    ;; means we have to define the command to run TeXShop as a "viewer
+    ;; program", and then tell AUCTeX to use the TeXShop viewer when
+    ;; opening PDFs.
 
-    ;; Use TeXShop for previewing LaTeX, rather than Preview.
-    ;; (add-to-list 'TeX-view-program-list
-    ;;              '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-    ))
+    (add-to-list 'TeX-view-program-list
+                 '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+    (setf (alist-get 'output-pdf TeX-view-program-selection)
+          '("TeXShop"))))
 
 ;; Company integration for AUCTeX.
-(with-eval-after-load 'tex
-  (with-eval-after-load 'company
-    (use-package company-auctex
-      :demand t
-      :config
+(use-package company-auctex
+  :after tex
+  :config
 
-      ;; Enable the functionality of `company-auctex'.
-      (company-auctex-init))))
+  ;; Enable the functionality of `company-auctex'.
+  (company-auctex-init))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
