@@ -2391,21 +2391,40 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: LaTeX
 
-;; Integrated development environment for LaTeX and friends.
-(use-package auctex
-  :recipe (:fetcher github
-           :repo "emacsmirror/auctex"
-           :files (:defaults (:exclude "*.el.in")))
+;; AUCTeX, integrated development environment for LaTeX and friends.
+;; Unfortunately because AUCTeX is weird, we need to do a little dance
+;; with the `use-package' declarations, see [1].
+;;
+;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
+
+(use-package tex-site
+  :recipe (auctex :fetcher github
+                  :repo "emacsmirror/auctex"
+                  :files (:defaults (:exclude "*.el.in")))
+  :demand t)
+
+(use-package tex
+  :recipe auctex
   :config
 
   ;; The following configuration is recommended in the manual [1].
   ;;
   ;; [1]: https://www.gnu.org/software/auctex/manual/auctex/Quick-Start.html
   (setq TeX-auto-save t)
-  (setq TeX-parse-self t))
+  (setq TeX-parse-self t)
+
+  (radian-with-operating-system macos
+    ;; Use TeXShop for previewing LaTeX, rather than Preview.
+    (setf (alist-get 'output-pdf TeX-view-program-selection)
+          '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+
+    ;; Use TeXShop for previewing LaTeX, rather than Preview.
+    ;; (add-to-list 'TeX-view-program-list
+    ;;              '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+    ))
 
 ;; Company integration for AUCTeX.
-(with-eval-after-load 'auctex
+(with-eval-after-load 'tex
   (with-eval-after-load 'company
     (use-package company-auctex
       :demand t
