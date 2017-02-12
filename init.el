@@ -2524,6 +2524,9 @@ should be the regular Clojure REPL started by the server process filter."
   ;; [1]: http://chris.beams.io/posts/git-commit/
   (setq git-commit-summary-max-length 50))
 
+;; Edit .gitignore files.
+(use-package gitignore-mode)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: The Internets
 
