@@ -2481,6 +2481,12 @@ should be the regular Clojure REPL started by the server process filter."
   (setq git-commit-summary-max-length 50))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: The Internets
+
+;; Browse Stack Overflow from Emacs!
+(use-package sx)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Color themes
 
 ;; Handle color themes that require installing packages or other
