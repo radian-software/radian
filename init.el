@@ -2404,6 +2404,16 @@ should be the regular Clojure REPL started by the server process filter."
   (setq TeX-auto-save t)
   (setq TeX-parse-self t))
 
+;; Company integration for AUCTeX.
+(with-eval-after-load 'auctex
+  (with-eval-after-load 'company
+    (use-package company-auctex
+      :demand t
+      :config
+
+      ;; Enable the functionality of `company-auctex'.
+      (company-auctex-init))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
 
