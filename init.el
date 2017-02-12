@@ -2391,6 +2391,7 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: LaTeX
 
+;; Integrated development environment for LaTeX and friends.
 (use-package auctex
   :recipe (:fetcher git
            :url "git://git.sv.gnu.org/auctex.git"))
