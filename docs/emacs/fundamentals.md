@@ -112,7 +112,7 @@ tokens. (You can match a literal space with two spaces.)
 
 Most of the standard Emacs [navigation] and [text editing] commands
 also work while selecting from a list, in the way that you would
-expcet. In particular, you can use the arrow keys to select a
+expect. In particular, you can use the arrow keys to select a
 candidate.
 
 [navigation]: navigation.md
