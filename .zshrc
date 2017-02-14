@@ -646,6 +646,8 @@ alias gdcs='git diff --cached --stat'
 alias gbl='git blame'
 
 alias gb='git branch'
+alias gbsu='git branch --set-upstream-to'
+alias gbusu='git branch --unset-upstream'
 alias gbd='git branch --delete'
 alias gbdd='git branch --delete --force'
 function gbu() {
