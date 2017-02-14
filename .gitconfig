@@ -21,22 +21,32 @@
 	aliases = config --get-regexp ^alias\\.
 	checkup = !git log -1 && (git fetch --all 2>/dev/null || true) && git status
 [push]
-	default = simple
+	default = tracking
 [color]
-	ui = true
+	ui = auto
 [merge]
 	conflictstyle = diff3
+	stat = true
 [pull]
 	rebase = true
-[commit]
-	verbose = true
 [rebase]
 	autosquash = true
 [rerere]
 	enabled = true
+[status]
+	submodulesummary = true
+[diff]
+	submodule = log
+	renames = copies
+	mnemonicprefix = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	required = true
 [include]
 	path = ~/.gitconfig.local
+[advice]
+	statusHints = false
+	pushNonFastForward = false
+[branch]
+	autosetupmerge = true

@@ -225,10 +225,10 @@ setopt chaselinks
 
 # Better ls defaults.
 if command -v exa &>/dev/null; then
-    alias l='exa --all --git --header --long --color-scale'
-    alias lg='exa --all --git --grid --header --long --color-scale'
-    alias lt='exa --all --git --header --long --tree --color-scale --ignore-glob .git'
-    alias ltl='exa --all --git --header --long --tree --color-scale --ignore-glob .git --level'
+    alias l='exa --all --header --long --color-scale'
+    alias lg='exa --all --grid --header --long --color-scale'
+    alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
+    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
 else
     # We alias gls to a git command elsewhere, so we use "command"
     # here to prevent it from being interpreted as said git command.
@@ -485,6 +485,86 @@ glgoa() {
         return 1
     fi
 }
+glS() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSs() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSp() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --patch ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSps() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --patch --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSo() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --oneline ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSsa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSpa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --patch ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSpsa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --patch --stat ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
+glSoa() {
+    if (( $# >= 1 )); then
+        git log -S $1 --graph --decorate --all --oneline ${@:2}
+    else
+        echo "No query provided."
+        return 1
+    fi
+}
 
 alias ga='git add'
 alias gap='git add --patch'
@@ -501,10 +581,14 @@ alias grp='git reset --patch'
 
 alias gc='git commit --verbose'
 alias gca='git commit --verbose --amend'
+alias gcaa='git commit --verbose --amend --all'
 alias gcf='git commit -C HEAD --amend'
+alias gcfa='git commit -C HEAD --amend --all'
 alias gce='git commit --verbose --allow-empty'
 alias gcm='git commit -m'
+alias gcma='git commit --all -m'
 alias gcam='git commit --amend -m'
+alias gcama='git commit --amend --all -m'
 alias gcem='git commit --allow-empty -m'
 function gcw() {
     # This logic is taken from [1]. I think it is designed to
@@ -562,6 +646,8 @@ alias gdcs='git diff --cached --stat'
 alias gbl='git blame'
 
 alias gb='git branch'
+alias gbsu='git branch --set-upstream-to'
+alias gbusu='git branch --unset-upstream'
 alias gbd='git branch --delete'
 alias gbdd='git branch --delete --force'
 function gbu() {
@@ -596,6 +682,15 @@ alias grbc='git rebase --continue'
 alias grbs='git rebase --skip'
 alias grba='git rebase --abort'
 
+alias gsm='git submodule'
+alias gsma='git submodule add'
+alias gsms='git submodule status'
+alias gsmi='git submodule init'
+alias gsmd='git submodule deinit'
+alias gsmu='git submodule update'
+alias gsmf='git submodule foreach'
+alias gsmy='git submodule sync'
+
 alias gcl='git clone --recursive'
 
 alias gre='git remote'
@@ -625,6 +720,10 @@ function gpu() {
     fi
 }
 alias gpd='git push --delete'
+
+alias gcr='git create'
+alias gfk='git fork'
+alias gpr='git pull-request'
 
 ################################################################################
 #### Hub
@@ -765,6 +864,7 @@ export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
 ################################################################################
 #### Vim
 
+alias vi=vim
 alias vim=nvim
 
 ################################################################################

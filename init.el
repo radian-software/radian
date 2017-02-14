@@ -6,7 +6,7 @@
 
 ;;; Here we are using the defvar-nil-setq pattern described in [1],
 ;;; which makes it so that changes to these declarations will be
-;;; picked up by a reload of init.el (M-RET r).
+;;; picked up by a reload of init.el (M-P r).
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
@@ -14,7 +14,7 @@
   "Customize your Radian Emacs experience"
   :group 'emacs)
 
-(defcustom radian-color-theme 'leuven
+(defcustom radian-color-theme 'wombat
   "Specifies the color theme used by Radian.
 
 You can use anything listed by `custom-available-themes'.
@@ -25,6 +25,23 @@ If you wish to use your own color theme, you can set this to
 nil."
   :group 'radian
   :type 'symbol)
+
+(defcustom radian-operating-system
+  (pcase system-type
+    ('darwin 'macos)
+    ((or 'ms-dos 'windows-nt 'cygwin) 'windows)
+    (_ 'linux))
+  "Specifies the operating system.
+This can be `macos', `linux', or `windows'. Normally this is
+automatically detected and does not need to be changed.")
+
+(defmacro radian-with-operating-system (os &rest body)
+  "If the operating system is OS, eval BODY.
+See `radian-operating-system' for the possible values of OS,
+which should not be quoted."
+  (declare (indent 1))
+  `(when (eq radian-operating-system ',os)
+     ,@body))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Libraries
@@ -43,7 +60,7 @@ nil."
 ;;;
 ;;; Here we are using the defvar-nil-setq pattern described in [1],
 ;;; which makes it so that changes to this declaration will be picked
-;;; up by a reload of init.el (M-RET r).
+;;; up by a reload of init.el (M-P r).
 ;;;
 ;;; [1]: http://ergoemacs.org/emacs/elisp_defvar_problem.html
 
@@ -131,44 +148,6 @@ See also `radian-disabled-packages'."
                      (> (cdr association) 0))))
             packages))
 
-(defvar radian-quelpa-overrides nil
-  "Association list from packages to quelpa forms. This alist
-allows you to override where packages are loaded from. If the
-entry for a package is nil (as distinct from a package not being
-in the alist), then quelpa is not used to load the package even
-if `:quelpa' is specified in the `use-package' form. If a package
-has a non-nil entry, the package is loaded using quelpa no matter
-what, and the entry is used as the recipe to pass to the
-`:quelpa' keyword.
-
-You can manipulate this list using `radian-override-quelpa' and
-`radian-disable-quelpa-override'.
-
-Note that this variable only affects the loading of packages that
-are normally loaded automatically by Radian. If you want to load
-your own package from quelpa, just put a `:quelpa' keyword in
-your `use-package' form for that package.
-
-Also note that you must make any modifications to this list
-*before* packages are loaded, in order for your changes to have
-an effect. This means your modifications should be done in
-init.before.local.el.")
-(setq radian-quelpa-overrides ())
-
-(defun radian-override-quelpa (package &optional recipe)
-  "Force PACKAGE to be loaded using quelpa with the provided
-RECIPE, or using the default recipe from MELPA if RECIPE is not
-provided. This only has an effect for packages that are loaded
-via `use-package' by Radian."
-  (let ((association (assoc package radian-quelpa-overrides)))
-    (if association
-        (setcdr association recipe)
-      (push (cons package recipe) radian-quelpa-overrides))))
-
-(defun radian-disable-quelpa-override (package)
-  "Undo the effects of `radian-override-quelpa'."
-  (assq-delete-all package radian-quelpa-overrides))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Function for loading user-specific configuration files
 
@@ -191,91 +170,33 @@ loads it. Otherwise, fails silently."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Bootstrap package management system
 
-;; Add package repositories. GNU is the default repository; MELPA is
-;; necessary to get most of the packages we are interested in. Note
-;; that `package-initialize' appears to use the value of
-;; `package-archives', so we place this declaration first.
-(setq package-archives
-      '(("gnu" . "http://elpa.gnu.org/packages/")
-        ("melpa" . "https://melpa.org/packages/")))
+;; We aren't using package.el, but Emacs will initialize it for us if
+;; we don't tell it not to.
+(setq package-enable-at-startup nil)
 
-;; Initialize package.el. We can't use anything from package.el until
-;; we do this.
-(package-initialize)
+(let ((repos-dir (concat user-emacs-directory "straight/repos/")))
+  (unless (file-exists-p (concat repos-dir "straight.el"))
+    (make-directory repos-dir 'parents)
+    (message "Cloning repository \"straight.el\"...")
+    (unless (= 0 (call-process
+                  "git" nil nil nil "clone" "--recursive"
+                  "https://github.com/raxod502/straight.el.git"
+                  (expand-file-name
+                   (concat repos-dir "straight.el"))))
+      (error "Could not clone straight.el"))
+    (message "Cloning repository \"straight.el\"...done"))
+  (load (concat repos-dir "straight.el/bootstrap.el")
+        nil 'nomessage))
 
-;; Since upgrading to Emacs 25, package.el dumps a bunch of junk into
-;; the custom file every time you install packages. That's nonsense,
-;; so we suppress the behavior here. Unfortunately, el-patch isn't
-;; loaded yet, so we can't use that here.
-
-(defun package--save-selected-packages (&optional value)
-  "Set and save `package-selected-packages' to VALUE."
-  (when value
-    (setq package-selected-packages value)))
-
-;; If use-package is not installed, then make sure we know what the
-;; latest version is, and install it.
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-;; Tell use-package to always install missing packages if necessary.
-(setq use-package-always-ensure t)
+(straight-use-package '(use-package
+                         :fetcher github
+                         :repo "raxod502/use-package"
+                         :branch "wip"
+                         :files ("use-package.el")))
 
 ;; Tell use-package to always load packages lazily unless told
 ;; otherwise.
 (setq use-package-always-defer t)
-
-;; Add an advice to `use-package' to make it so that
-;; `radian-quelpa-overrides' has an effect.
-
-(defun radian--use-package-allow-quelpa-overrides (use-package name &rest args)
-  "Allow the value of `radian-quelpa-overrides' to have an effect
-on the `:quelpa' keyword.
-
-Note that this advice is not implemented very intelligently, so
-it will only work correctly if `:quelpa' is specified as the
-first keyword in the `use-package' form (except that it can be
-after `:dependencies')."
-  ;; First we want to check if there's an entry for the package in
-  ;; `radian-quelpa-overrides'.
-  (let ((association (assoc name radian-quelpa-overrides)))
-    (if association
-        ;; If there is an association, we'll extract the recipe.
-        (let ((recipe (cdr association)))
-          (if recipe
-              ;; If the recipe is non-nil it means the user wants to
-              ;; use quelpa for the package.
-              (if (equal (car args) :quelpa)
-                  (if (keywordp (cadr args))
-                      ;; This happens for (use-package name :quelpa
-                      ;; :config ...).
-                      (apply use-package name :quelpa recipe (cdr args))
-                    ;; This happens for (use-package name
-                    ;; :quelpa (recipe) :config ...).
-                    (apply use-package name :quelpa recipe (cddr args)))
-                ;; This happens for (use-package name :config ...).
-                (apply use-package name :quelpa recipe args))
-            ;; If the recipe is nil it means the user doesn't want to
-            ;; use quelpa for the package.
-            (if (equal (car args) :quelpa)
-                (if (keywordp (cadr args))
-                    ;; This happens for (use-package name :quelpa
-                    ;; :config ...).
-                    (apply use-package name (cdr args))
-                  ;; This happens for (use-package name
-                  ;; :quelpa (recipe) :config ...).
-                  (apply use-package name (cddr args)))
-              ;; This happens for (use-package name :config ...), in
-              ;; which case there's nothing that needs to be changed.
-              (apply use-package name args))))
-      ;; If there's no special behavior requested, we can just pass
-      ;; control to `use-package'.
-      (apply use-package name args))))
-
-(advice-add 'use-package
-            :around 'radian--use-package-allow-quelpa-overrides
-            '((:depth . -1)))
 
 ;; Add an advice to `use-package' to make it so that disabled packages
 ;; are not loaded. See the docstring for more information.
@@ -298,114 +219,23 @@ the first keyword in the `use-package' form."
 
 (advice-add 'use-package
             :around 'radian--use-package-add-dependencies
-            '((:depth . -2)))
-
-;; Add an advice to automatically refresh the package list before
-;; installing a package (but only once). This has an effect because
-;; `use-package' eventually calls through to `package-install'.
-;;
-;; If we don't do this, then we might get errors when you try to
-;; install a package with `use-package' without first manually running
-;; `package-refresh-contents'. Specifically, this will happen if the
-;; package you are trying to install has been updated since the last
-;; time `package-refresh-contents' was run (or, by default, the first
-;; time you ever tried to install a package).
-;;
-;; The issue is discussed at [1], but the solution used here is
-;; modified so that it does not require `cl' (currently, Radian only
-;; loads `cl-lib').
-;;
-;; [1]: https://github.com/jwiegley/use-package/issues/256
-
-(defun radian--package-install-refresh-contents (&rest args)
-  (package-refresh-contents)
-  (advice-remove 'package-install 'radian--package-install-refresh-contents))
-
-(advice-add 'package-install :before 'radian--package-install-refresh-contents)
-
-;; Library for fetching Elisp packages in many different ways and
-;; building them from source (client-side MELPA).
-(use-package quelpa
-  :config
-
-  ;; Tell quelpa not to update MELPA every time Emacs is started.
-  (setq quelpa-update-melpa-p nil)
-
-  ;; Automatically upgrade packages. This does not actually take
-  ;; effect if the call to quelpa comes from a `:quelpa' keyword in a
-  ;; `use-package' form and
-  ;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (as it is
-  ;; by default in Radian). It only affects what happens when
-  ;; `radian-reload-init' is called with a prefix argument; in that
-  ;; case it allows packages to be upgraded, as desired.
-  (setq quelpa-upgrade-p t))
-
-;; Add a :quelpa keyword to `use-package', which allows installing
-;; packages with quelpa. We have a bit of a chicken and egg problem
-;; here. We don't want to load quelpa during startup, because that's
-;; slow. But quelpa-use-package loads quelpa eagerly. So we have to
-;; use my fork of quelpa-use-package, which fixes that. But installing
-;; from a fork requires quelpa. But we don't want to load it eagerly.
-;; So we have to use my fork of quelpa-use-package...
-;;
-;; The solution here is to use two separate code paths. On first
-;; install, quelpa will be loaded eagerly and used to install
-;; quelpa-use-package. But after that, quelpa-use-package can install
-;; itself, thus solving the problem of quelpa being loaded eagerly.
-;;
-;; (Note that, as long as we are using my fork, loading
-;; quelpa-use-package eagerly is not a problem. In fact, it's required
-;; because we need to activate its advice before processing
-;; use-package forms that might contain `:quelpa' keywords.)
-;;
-;; To maintain reverse compatibility, my fork of quelpa-use-package
-;; only lazily loads quelpa if the variable
-;; `quelpa-use-package-inhibit-loading-quelpa' is non-nil (it is nil
-;; by default). So we have to set it here. But we also want to allow
-;; for disabling that optimization in the case that
-;; `radian-reload-init' is called with a prefix argument. To solve
-;; this problem we use `defvar', which will only set
-;; `radian--inhibit-loading-quelpa' to `t' if that variable has not
-;; already been defined. That way, we can override the value of
-;; `radian--inhibit-loading-quelpa' in `radian-reload-init' and have
-;; that value be transferred to
-;; `quelpa-use-package-inhibit-loading-quelpa' below, while
-;; maintaining a default value of `t' when Emacs is first started.
-
-(defvar radian--inhibit-loading-quelpa t)
-(setq quelpa-use-package-inhibit-loading-quelpa
-      radian--inhibit-loading-quelpa)
-
-(if (require 'quelpa-use-package nil 'noerror)
-    (progn
-      ;; If I don't include this then I get an error about eager
-      ;; macro-expansion because the `:quelpa' keyword in the next
-      ;; use-package form is not defined for the compiler.
-      (eval-when-compile
-        (require 'quelpa-use-package))
-      (use-package quelpa-use-package
-        :quelpa (quelpa-use-package
-                 :fetcher github
-                 :repo "raxod502/quelpa-use-package")
-        :demand t))
-  (quelpa '(quelpa-use-package
-            :fetcher github
-            :repo "raxod502/quelpa-use-package"))
-  (require 'quelpa-use-package))
-
-;; Allow the :quelpa keyword to work even when
-;; `use-package-always-ensure' is enabled. See [1].
-;;
-;; [1]: https://github.com/quelpa/quelpa-use-package
-(quelpa-use-package-activate-advice)
+  '((:depth . -2)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Packages: Emacs Lisp
+;;;; Packages: Libraries
 
 ;; Future-proof your Emacs Lisp customizations.
 (use-package el-patch
-  :demand t
-  :quelpa (el-patch :fetcher github :repo "raxod502/el-patch"))
+  :recipe (:fetcher github
+           :repo "raxod502/el-patch")
+  :demand t)
+
+;; Makes .emacs.d more organized.
+(use-package no-littering
+  :recipe (:fetcher github
+           :repo "raxod502/no-littering"
+           :branch "radian-1")
+  :demand t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Startup
@@ -499,24 +329,25 @@ the first keyword in the `use-package' form."
 ;; Based on https://gist.github.com/the-kenny/267162
 ;; Modified based on http://emacs.stackexchange.com/q/26471/12534
 
-(unless (display-graphic-p)
+(radian-with-operating-system macos
+  (unless (display-graphic-p)
 
-  (setq radian--last-paste nil)
+    (setq radian--last-paste nil)
 
-  (defun copy-from-osx ()
-    (let ((copied-text (shell-command-to-string "pbpaste")))
-      (unless (string= copied-text radian--last-paste)
-        copied-text)))
+    (defun copy-from-osx ()
+      (let ((copied-text (shell-command-to-string "pbpaste")))
+        (unless (string= copied-text radian--last-paste)
+          copied-text)))
 
-  (defun paste-to-osx (text &optional push)
-    (let ((process-connection-type nil))
-      (let ((proc (start-process "pbcopy" nil "pbcopy")))
-        (process-send-string proc text)
-        (process-send-eof proc)))
-    (setq radian--last-paste text))
+    (defun paste-to-osx (text &optional push)
+      (let ((process-connection-type nil))
+        (let ((proc (start-process "pbcopy" nil "pbcopy")))
+          (process-send-string proc text)
+          (process-send-eof proc)))
+      (setq radian--last-paste text))
 
-  (setq interprogram-cut-function 'paste-to-osx)
-  (setq interprogram-paste-function 'copy-from-osx))
+    (setq interprogram-cut-function 'paste-to-osx)
+    (setq interprogram-paste-function 'copy-from-osx)))
 
 ;; If you have something on the system clipboard, and then kill something in
 ;; Emacs, then by default whatever you had on the system clipboard is gone
@@ -525,6 +356,31 @@ the first keyword in the `use-package' form."
 ;; system clipboard is pushed into the kill ring. This way, you can paste it
 ;; by doing C-y M-y.
 (setq save-interprogram-paste-before-kill t)
+
+;;; PATH
+;; On macOS, the $PATH is not set correctly for GUI applications. So
+;; we have to set it ourselves.
+(radian-with-operating-system macos
+  ;; This conditional is from the README [1] of exec-path-from-shell,
+  ;; which we are not using for performance reasons.
+  ;;
+  ;; [1]: https://github.com/purcell/exec-path-from-shell
+  (when (memq window-system '(mac ns))
+    (with-temp-buffer
+      ;; See "man path_helper".
+      (call-process "/usr/libexec/path_helper" nil t nil "-s")
+      (goto-char (point-min))
+      (search-forward-regexp "PATH=\"\\(.+\\)\"; export PATH;")
+      (let ((path (match-string 1)))
+        (setenv "PATH" path)
+        ;; These two setq's are from the code of exec-path-from-shell.
+        (setq eshell-path-env path)
+        (setq exec-path (append (parse-colon-path path) (list exec-directory))))
+      ;; For some reason, path_helper doesn't always seem to report a
+      ;; MANPATH, so we won't insist on getting one.
+      (when (search-forward-regexp "MANPATH=\"\\(.+\\)\"; export MANPATH;"
+                                   nil 'noerror)
+        (setenv "MANPATH" (match-string 1))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Commands
@@ -536,8 +392,8 @@ the first keyword in the `use-package' form."
 ;;;; Finding files
 
 ;; The following code adds keybindings for jumping to the various
-;; dotfiles set up by Radian. These all begin with <M-RET e> and are
-;; designed to be mnemonic, as in <M-RET e e i> standing for "[e]dit
+;; dotfiles set up by Radian. These all begin with <M-P e> and are
+;; designed to be mnemonic, as in <M-P e e i> standing for "[e]dit
 ;; [e]macs [i]nit.el".
 
 (defmacro radian-register-dotfile (filename &optional keybinding)
@@ -550,7 +406,7 @@ function will invoke `find-file' on ~/.emacs.d/init.el.
 
 If additionally KEYBINDING is \"e i\" then
 `radian-register-dotfile' will use `global-set-key' to bind
-`radian-find-init-el' to (kbd \"M-RET e e i\")."
+`radian-find-init-el' to (kbd \"M-P e e i\")."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (defun-name (intern
                       (replace-regexp-in-string
@@ -569,7 +425,7 @@ If additionally KEYBINDING is \"e i\" then
                         (interactive)
                         (find-file ,full-filename))))
     (if keybinding
-        (let* ((full-keybinding (concat "M-RET e " keybinding))
+        (let* ((full-keybinding (concat "M-P e " keybinding))
                (set-key-form `(global-set-key (kbd ,full-keybinding)
                                               #',defun-name)))
           `(progn
@@ -603,7 +459,7 @@ If additionally KEYBINDING is \"e i\" then
 (radian-register-dotfile ".zshrc.local" "z l")
 
 ;; Follow symlinks when opening files. This has the concrete impact,
-;; for instance, that when you edit this file with <M-RET e e i> and
+;; for instance, that when you edit this file with <M-P e e i> and
 ;; then later do C-x C-f, you will be in the Radian repository instead
 ;; of your home directory.
 (setq find-file-visit-truename t)
@@ -754,6 +610,12 @@ from `kill-buffer-hook', and also remove this function from
                #'radian--remove-kill-buffer-delete-directory-hook
                'local))
 
+;; When you open a file, position the cursor at the same place as the
+;; last time you edited the file. See [1].
+;;
+;; [1]: https://www.emacswiki.org/emacs/SavePlace
+(save-place-mode 1)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Auto revert
 
@@ -814,8 +676,8 @@ This filter de-installs itself after this call."
 (advice-add #'auto-revert-buffers :around #'auto-revert-some-buffers-advice)
 
 ;; Since we automatically revert all visible buffers after one second,
-;; there's no point in asking the user whether or not they want to it
-;; when they find a file. This disables that prompt.
+;; there's no point in asking the user whether or not they want to do
+;; it when they find a file. This disables that prompt.
 (setq revert-without-query '(".*"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -855,10 +717,6 @@ This filter de-installs itself after this call."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Saving files
-
-;; Put backup files in $HOME/.emacs-backups, rather than in the
-;; current directory.
-(setq backup-directory-alist '(("." . "~/.emacs-backups")))
 
 ;; Always use copying to make backup files. This prevents hard links
 ;; from being made to point at the backup file rather than the
@@ -989,9 +847,6 @@ This filter de-installs itself after this call."
 ;; immediately if there is a valid symbol at point.
 (setq xref-prompt-for-identifier t)
 
-;; Default to Elisp for M-. and friends, not etags.
-(add-hook 'xref-backend-functions #'elisp--xref-backend)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Searching
 
@@ -1018,13 +873,50 @@ This filter de-installs itself after this call."
 ;;; Radian does not use custom.el. However, people using Radian might
 ;;; want to. It is the Radian way to put user-specific customizations
 ;;; into the user-specific configuration files, so we'll tell
-;;; custom.el to put its customizations into init.local.el. We don't
-;;; need to call `load', since this is done later by
+;;; custom.el to put its customizations into init.before.local.el. We
+;;; don't need to call `load', since this is done later by
 ;;; `radian-load-user-config'.
 
-;; Store customizations made by custom.el into ~/.emacs.d/init.local.el
-;; instead of this file.
+;; Store customizations made by custom.el into
+;; ~/.emacs.d/init.before.local.el instead of this file.
 (setq custom-file (concat user-emacs-directory "init.before.local.el"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Org
+
+;; Add a global keybinding for accessing the Org Agenda.
+(global-set-key (kbd "C-c a") #'org-agenda)
+
+(with-eval-after-load 'org
+
+  ;; Prevent Org from overriding the bindings for windmove.
+  (define-key org-mode-map (kbd "S-<left>") nil)
+  (define-key org-mode-map (kbd "S-<right>") nil)
+  (define-key org-mode-map (kbd "S-<up>") nil)
+  (define-key org-mode-map (kbd "S-<down>") nil)
+
+  ;; Add replacements for the some of keybindings we just removed. It
+  ;; looks like Org already binds C-up and C-down separately from M-{
+  ;; and M-}, so we can't use those. Users will just have to make do
+  ;; with C-c <up> and C-c <down> for now.
+  ;;
+  (define-key org-mode-map (kbd "C-<left>") #'org-shiftleft)
+  (define-key org-mode-map (kbd "C-<right>") #'org-shiftright))
+
+(with-eval-after-load 'org-agenda
+
+  ;; Prevent Org Agenda from overriding the bindings for windmove.
+  (define-key org-agenda-mode-map (kbd "S-<up>") nil)
+  (define-key org-agenda-mode-map (kbd "S-<down>") nil)
+  (define-key org-agenda-mode-map (kbd "S-<left>") nil)
+  (define-key org-agenda-mode-map (kbd "S-<right>") nil)
+
+  ;; Same routine as above. Now for Org Agenda, we could use C-up and
+  ;; C-down because M-{ and M-} are bound to the same commands. But I
+  ;; think it's best to take the same approach as before, for
+  ;; consistency.
+  (define-key org-agenda-mode-map (kbd "C-<left>") #'org-agenda-do-date-earlier)
+  (define-key org-agenda-mode-map (kbd "C-<right>") #'org-agenda-do-date-later))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; ElDoc
@@ -1159,21 +1051,20 @@ Lisp function does not specify a special indentation."
             (current-column)))
          (t $else))))))
 
-;; Add a keybinding (M-RET r) for reloading this file (init.el). This
+;; Add a keybinding (M-P r) for reloading this file (init.el). This
 ;; is useful for when you have several instances of Emacs open and you
 ;; change something in your configuration, then later come back to an
 ;; old Emacs that was opened before you made the change. You can then
-;; just press M-RET r to get the change into that instance.
+;; just press M-P r to get the change into that instance.
 
 (defun radian-reload-init (&optional upgrade)
   "Reload init.el. With prefix argument, upgrades packages."
   (interactive "P")
   (message "Reloading init.el...")
-  (setq radian--inhibit-loading-quelpa (not upgrade))
   (radian-load-user-config "init.el")
   (message "Reloading init.el... done."))
 
-(global-set-key (kbd "M-RET r") #'radian-reload-init)
+(global-set-key (kbd "M-P r") #'radian-reload-init)
 
 ;; Add a keybinding (C-c C-k) for evaluating a buffer of Elisp. This
 ;; is consistent with the keybindings for evaluating a buffer in CIDER
@@ -1226,9 +1117,8 @@ Lisp function does not specify a special indentation."
 ;; e.g. "C++/l" into "C++". Since we are overriding a function
 ;; provided by `cc-mode', which is not initially loaded, we have to
 ;; make sure to do so *after* it is loaded and not before.
-(eval-after-load 'cc-mode
-  (lambda ()
-    (advice-add #'c-update-modeline :override #'ignore)))
+(with-eval-after-load 'cc-mode
+  (advice-add #'c-update-modeline :override #'ignore))
 
 ;; Switch to a better indentation-and-braces style. This turns the
 ;; following code:
@@ -1243,13 +1133,12 @@ Lisp function does not specify a special indentation."
 ;; if (condition) {
 ;;   statement;
 ;; }
-(eval-after-load 'cc-mode
-  '(progn
-     (if (assoc 'other c-default-style)
-         (setcdr (assoc 'other c-default-style)
-                 "k&r")
-       (push '(other . "k&r") c-default-style))
-     (setq-default c-basic-offset 2)))
+(with-eval-after-load 'cc-mode
+  (if (assoc 'other c-default-style)
+      (setcdr (assoc 'other c-default-style)
+              "k&r")
+    (push '(other . "k&r") c-default-style))
+  (setq-default c-basic-offset 2))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Managing Emacs
@@ -1269,17 +1158,62 @@ Lisp function does not specify a special indentation."
   :bind (;; Use smex for M-x.
          ("M-x" . smex)))
 
-;; Provides intelligent fuzzy matching and sorting mechanisms that
-;; can be used by various other packages, including Ivy.
+;; Provides intelligent fuzzy matching and sorting mechanisms that can
+;; be used by various other packages, including Ivy and historian.el.
 (use-package flx)
 
 ;; Provides a general-purpose completion mechanism.
 (use-package ivy
-  :demand t
-  :config
+  :init
+
+  ;; Lazy-load Ivy.
+
+  (defun radian--enable-ivy-patches ()
+    (require 'ivy))
+
+  (add-hook 'el-patch-pre-validate-hook #'radian--enable-ivy-patches)
+
+  (el-patch-defvar ivy-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map [remap switch-to-buffer]
+        'ivy-switch-buffer)
+      (define-key map [remap switch-to-buffer-other-window]
+        'ivy-switch-buffer-other-window)
+      map)
+    "Keymap for `ivy-mode'.")
+
+  (el-patch-define-minor-mode ivy-mode
+    "Toggle Ivy mode on or off.
+Turn Ivy mode on if ARG is positive, off otherwise.
+Turning on Ivy mode sets `completing-read-function' to
+`ivy-completing-read'.
+
+Global bindings:
+\\{ivy-mode-map}
+
+Minibuffer bindings:
+\\{ivy-minibuffer-map}"
+    :group 'ivy
+    :global t
+    :keymap ivy-mode-map
+    :lighter " ivy"
+    (if ivy-mode
+        (progn
+          (setq completing-read-function 'ivy-completing-read)
+          (el-patch-splice 2
+            (when ivy-do-completion-in-region
+              (setq completion-in-region-function 'ivy-completion-in-region))))
+      (setq completing-read-function 'completing-read-default)
+      (setq completion-in-region-function 'completion--in-region)))
 
   ;; Use Ivy for `completing-read'.
   (ivy-mode 1)
+
+  ;; Don't show it in the mode line (the `:diminish' below only takes
+  ;; effect after the lazy-load is triggered).
+  (diminish 'ivy-mode)
+
+  :config
 
   ;; Use fuzzy matching for Ivy, powered by flx, but not for Swiper
   ;; (because fuzzy matching is typically not desired in grep-style
@@ -1340,7 +1274,30 @@ Lisp function does not specify a special indentation."
   :bind (;; Add a keybinding for resuming the last completion session.
          ;; The keybinding C-c C-r is suggested in the README for ivy,
          ;; but it's overridden by `sh-mode' and `clojure-mode'.
-         ("C-x C-r" . ivy-resume))
+         ("C-x C-r" . ivy-resume)
+
+         ;; Improve the Ivy keybindings, making them more predictable.
+         ;;
+         ;; There are essentially three "accept" actions in Ivy: RET,
+         ;; TAB, and C-j. Sometimes two or even all three of them do
+         ;; the same thing, but there is one situation when there are
+         ;; three different behaviors that might be desirable. This is
+         ;; when you are in `counsel-find-file', and you have typed in
+         ;; "foo", and there is a folder called "foobar" in the same
+         ;; directory.
+         ;;
+         ;; In this situation, RET will `dired' the folder "foobar",
+         ;; TAB will move Ivy into the "foobar" folder, and C-j will
+         ;; create a new file called "foo". But only with the
+         ;; keybindings below! The default behavior is different, and
+         ;; weird. I think this is the most intuitive and useful.
+         ;;
+         ;; As always, TAB is for terminal Emacs and <tab> is for
+         ;; windowed Emacs.
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("<tab>" . ivy-alt-done)
+         ("C-j" . ivy-immediate-done))
   :diminish ivy-mode)
 
 ;; Provides enhanced versions of many command Emacs commands that
@@ -1376,30 +1333,7 @@ Lisp function does not specify a special indentation."
          ;; After you have pressed M-:, you can use C-r to select a
          ;; previous entry using Counsel.
          :map read-expression-map
-         ("C-r" . counsel-expression-history)
-
-         ;; Improve the Ivy keybindings, making them more predictable.
-         ;;
-         ;; There are essentially three "accept" actions in Ivy: RET,
-         ;; TAB, and C-j. Sometimes two or even all three of them do
-         ;; the same thing, but there is one situation when there are
-         ;; three different behaviors that might be desirable. This is
-         ;; when you are in `counsel-find-file', and you have typed in
-         ;; "foo", and there is a folder called "foobar" in the same
-         ;; directory.
-         ;;
-         ;; In this situation, RET will `dired' the folder "foobar",
-         ;; TAB will move Ivy into the "foobar" folder, and C-j will
-         ;; create a new file called "foo". But only with the
-         ;; keybindings below! The default behavior is different, and
-         ;; weird. I think this is the most intuitive and useful.
-         ;;
-         ;; As always, TAB is for terminal Emacs and <tab> is for
-         ;; windowed Emacs.
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)
-         ("<tab>" . ivy-alt-done)
-         ("C-j" . ivy-immediate-done)))
+         ("C-r" . counsel-expression-history)))
 
 ;; Provides enhanced versions of the Projectile commands that use Ivy.
 (use-package counsel-projectile
@@ -1415,8 +1349,13 @@ Lisp function does not specify a special indentation."
   ;;
   ;; [1]: https://github.com/jwiegley/use-package/issues/413
 
+  (defun radian--enable-counsel-projectile-patches ()
+    (require 'counsel-projectile))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-counsel-projectile-patches)
+
   (el-patch-defun counsel-projectile-commander-bindings ()
-    (el-patch-feature counsel-projectile)
     (def-projectile-commander-method ?f
       "Find file in project."
       (counsel-projectile-find-file))
@@ -1435,7 +1374,6 @@ Lisp function does not specify a special indentation."
 
   (el-patch-defun counsel-projectile-toggle (toggle)
     "Toggle Ivy version of Projectile commands."
-    (el-patch-feature counsel-projectile)
     (if (> toggle 0)
         (progn
           (when (eq projectile-switch-project-action #'projectile-find-file)
@@ -1456,9 +1394,8 @@ Lisp function does not specify a special indentation."
         (define-key projectile-mode-map [remap projectile-switch-to-buffer] nil)
         (projectile-commander-bindings))))
 
-  (eval-after-load 'projectile
-    (lambda ()
-      (counsel-projectile-toggle 1))))
+  (with-eval-after-load 'projectile
+    (counsel-projectile-toggle 1)))
 
 ;; Provides an enhanced version of Isearch that uses Ivy to display
 ;; a preview of the results.
@@ -1466,6 +1403,26 @@ Lisp function does not specify a special indentation."
   :bind (;; Use Swiper for Isearches.
          ("C-s" . swiper)
          ("C-r" . swiper)))
+
+;; Remembers your choices in completion menus.
+(use-package historian
+  :recipe (:fetcher github
+           :repo "PythonNut/historian.el")
+  :demand t
+  :config
+
+  ;; Enable the functionality of historian.el.
+  (historian-mode 1))
+
+;; Uses Historian to sort Ivy candidates by frecency+flx.
+(use-package historian-ivy
+  :recipe (:fetcher github
+           :repo "PythonNut/historian.el")
+  :after ivy
+  :config
+
+  ;; Enable the functionality of historian-ivy.
+  (historian-ivy-mode 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: User interface
@@ -1480,8 +1437,8 @@ Lisp function does not specify a special indentation."
   (diminish 'abbrev-mode)
 
   ;; Don't show `smerge-mode' in the mode line.
-  (eval-after-load 'smerge-mode
-    '(diminish 'smerge-mode)))
+  (with-eval-after-load 'smerge-mode
+    (diminish 'smerge-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Window management
@@ -1608,6 +1565,7 @@ Lisp function does not specify a special indentation."
 
 ;; Provides a powerful autocomplete mechanism that integrates with
 ;; many different sources of completions.
+
 (use-package company
   :demand t
   :config
@@ -1738,6 +1696,15 @@ Lisp function does not specify a special indentation."
   :demand t
   :config
 
+  ;; Let's future-proof our patching here just in case we ever decide
+  ;; to lazy-load company-statistics.
+
+  (defun radian--enable-company-statistics-patches ()
+    (require 'company-statistics))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-company-statistics-patches)
+
   ;; Disable the message that is normally printed when Company
   ;; Statistics loads its statistics file from disk.
   (el-patch-defun company-statistics--load ()
@@ -1764,63 +1731,62 @@ Lisp function does not specify a special indentation."
   ;; same location.
 
   (when (radian-package-enabled-p 'company)
-    (eval-after-load 'company
-      (lambda ()
+    (with-eval-after-load 'company
 
-        ;; This function translates the "event types" I get from
-        ;; `map-keymap' into things that I can pass to `lookup-key'
-        ;; and `define-key'. It's a hack, and I'd like to find a
-        ;; built-in function that accomplishes the same thing while
-        ;; taking care of any edge cases I might have missed in this
-        ;; ad-hoc solution.
-        (defun radian--normalize-event (event)
-          (if (vectorp event)
-              event
-            (vector event)))
+      ;; This function translates the "event types" I get from
+      ;; `map-keymap' into things that I can pass to `lookup-key'
+      ;; and `define-key'. It's a hack, and I'd like to find a
+      ;; built-in function that accomplishes the same thing while
+      ;; taking care of any edge cases I might have missed in this
+      ;; ad-hoc solution.
+      (defun radian--normalize-event (event)
+        (if (vectorp event)
+            event
+          (vector event)))
 
-        ;; Here we define a hybrid keymap that delegates first to
-        ;; `company-active-map' and then to `yas-keymap'.
-        (setq radian--yas-company-keymap
-              ;; It starts out as a copy of `yas-keymap', and then we
-              ;; merge in all of the bindings from
-              ;; `company-active-map'.
-              (let ((keymap (copy-keymap yas-keymap)))
-                (map-keymap
-                 (lambda (event company-cmd)
-                   (let* ((event (radian--normalize-event event))
-                          (yas-cmd (lookup-key yas-keymap event)))
-                     ;; Here we use an extended menu item with the
-                     ;; `:filter' option, which allows us to
-                     ;; dynamically decide which command we want to
-                     ;; run when a key is pressed.
-                     (define-key keymap event
-                       `(menu-item
-                         nil ,company-cmd :filter
-                         (lambda (cmd)
-                           ;; There doesn't seem to be any obvious
-                           ;; function from Company to tell whether or
-                           ;; not a completion is in progress (à la
-                           ;; `company-explicit-action-p'), so I just
-                           ;; check whether or not `company-my-keymap'
-                           ;; is defined, which seems to be good
-                           ;; enough.
-                           (if company-my-keymap
-                               ',company-cmd
-                             ',yas-cmd))))))
-                 company-active-map)
-                keymap))
+      ;; Here we define a hybrid keymap that delegates first to
+      ;; `company-active-map' and then to `yas-keymap'.
+      (setq radian--yas-company-keymap
+            ;; It starts out as a copy of `yas-keymap', and then we
+            ;; merge in all of the bindings from
+            ;; `company-active-map'.
+            (let ((keymap (copy-keymap yas-keymap)))
+              (map-keymap
+               (lambda (event company-cmd)
+                 (let* ((event (radian--normalize-event event))
+                        (yas-cmd (lookup-key yas-keymap event)))
+                   ;; Here we use an extended menu item with the
+                   ;; `:filter' option, which allows us to
+                   ;; dynamically decide which command we want to
+                   ;; run when a key is pressed.
+                   (define-key keymap event
+                     `(menu-item
+                       nil ,company-cmd :filter
+                       (lambda (cmd)
+                         ;; There doesn't seem to be any obvious
+                         ;; function from Company to tell whether or
+                         ;; not a completion is in progress (à la
+                         ;; `company-explicit-action-p'), so I just
+                         ;; check whether or not `company-my-keymap'
+                         ;; is defined, which seems to be good
+                         ;; enough.
+                         (if company-my-keymap
+                             ',company-cmd
+                           ',yas-cmd))))))
+               company-active-map)
+              keymap))
 
-        ;; The function `yas--make-control-overlay' uses the current
-        ;; value of `yas-keymap' to build the Yasnippet overlay, so to
-        ;; override the Yasnippet keymap we only need to dynamically
-        ;; rebind `yas-keymap' for the duration of that function.
-        (defun radian--company-overrides-yasnippet
-            (yas--make-control-overlay &rest args)
-          (let ((yas-keymap radian--yas-company-keymap))
-            (apply yas--make-control-overlay args)))
+      ;; The function `yas--make-control-overlay' uses the current
+      ;; value of `yas-keymap' to build the Yasnippet overlay, so to
+      ;; override the Yasnippet keymap we only need to dynamically
+      ;; rebind `yas-keymap' for the duration of that function.
+      (defun radian--company-overrides-yasnippet
+          (yas--make-control-overlay &rest args)
+        (let ((yas-keymap radian--yas-company-keymap))
+          (apply yas--make-control-overlay args)))
 
-        (advice-add #'yas--make-control-overlay :around
-                    #'radian--company-overrides-yasnippet))))
+      (advice-add #'yas--make-control-overlay :around
+                  #'radian--company-overrides-yasnippet)))
 
   :diminish yas-minor-mode)
 
@@ -1838,9 +1804,6 @@ Lisp function does not specify a special indentation."
 
   ;; Use Ivy for completion, instead of `grizzl'.
   (setq fasd-completing-read-function nil)
-
-  ;; Make it so that Emacs file-finding updates the fasd database.
-  (global-fasd-mode 1)
 
   :bind (;; Add a keybinding for using the functionality of `fasd'.
          ("C-c f" . fasd-find-file)))
@@ -1864,28 +1827,53 @@ Lisp function does not specify a special indentation."
   :config
 
   ;; Use De Bruijn sequences for jump sequences. This allows you to
-  ;; fixate on a particular place you want to jump to, and jump type
+  ;; fixate on a particular place you want to jump to, and just type
   ;; whatever shows up there.
   (setq avy-style 'de-bruijn)
 
-  :bind (;; Bind common avy commands to the <M-RET g> prefix.
-         ("M-RET g c" . avy-goto-char)
-         ("M-RET g t" . avy-goto-char-timer)
-         ("M-RET g l" . avy-goto-line)
-         ("M-RET g W" . avy-goto-word-1)
-         ("M-RET g w" . avy-goto-word-0)))
+  :bind (;; Bind common avy commands to the <M-P g> prefix.
+         ("M-P g c" . avy-goto-char)
+         ("M-P g t" . avy-goto-char-timer)
+         ("M-P g l" . avy-goto-line)
+         ("M-P g W" . avy-goto-word-1)
+         ("M-P g w" . avy-goto-word-0)))
 
 ;; Highlights matches and previews replacements in query replace.
-(use-package visual-regexp-steroids
+(use-package visual-regexp
   :bind (;; Replace the regular query replace with the regexp query
          ;; replace provided by this package.
          ("M-%" . vr/query-replace)))
+
+;; Use other regexp engines for visual-regexp.
+(use-package visual-regexp-steroids
+  :after visual-regexp
+  :config
+
+  ;; Use Emacs-style regular expressions by default.
+  (setq vr/engine 'emacs))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Clojure
 
 ;; Provides indentation and syntax highlighting for Clojure code.
 (use-package clojure-mode
+  :init
+
+  ;; We define some patches after clojure-mode is loaded. We need to
+  ;; make sure el-patch knows how to find these patches.
+
+  (defun radian--enable-clojure-mode-patches ()
+    (require 'clojure-mode)
+    (radian-clojure-strings-as-docstrings-mode 1))
+
+  (defun radian--disable-clojure-mode-patches ()
+    (radian-clojure-strings-as-docstrings-mode -1))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-clojure-mode-patches)
+  (add-hook 'el-patch-post-validate-hook
+            #'radian--disable-clojure-mode-patches)
+
   :config
 
   ;;; Customize indentation like this:
@@ -1959,14 +1947,12 @@ strings that are not docstrings."
         (progn
           (el-patch-defsubst clojure-in-docstring-p ()
             "Check whether point is in a docstring."
-            (el-patch-feature clojure-mode)
             (el-patch-wrap 1 1
               (or
                (eq (get-text-property (point) 'face) 'font-lock-doc-face)
                (eq (get-text-property (point) 'face) 'font-lock-string-face))))
           (el-patch-defun clojure-indent-line ()
             "Indent current line as Clojure code."
-            (el-patch-feature clojure-mode)
             (if (clojure-in-docstring-p)
                 (save-excursion
                   (beginning-of-line)
@@ -1975,8 +1961,8 @@ strings that are not docstrings."
                                  (string-width (clojure-docstring-fill-prefix))))
                     (replace-match (clojure-docstring-fill-prefix))))
               (lisp-indent-line))))
-      (el-patch-unpatch 'clojure-in-docstring-p)
-      (el-patch-unpatch 'clojure-indent-function)))
+      (el-patch-unpatch 'clojure-in-docstring-p 'defsubst)
+      (el-patch-unpatch 'clojure-indent-line 'defun)))
 
   (add-hook 'clojure-mode-hook #'radian-clojure-strings-as-docstrings-mode)
 
@@ -2024,6 +2010,17 @@ Return nil if not inside a project."
 ;; documentation and source lookups, among many other features.
 (use-package cider
   :dependencies (clojure-mode)
+  :init
+
+  ;; We define some patches after CIDER is loaded. We need to make
+  ;; sure el-patch knows how to find these patches.
+
+  (defun radian--enable-cider-patches ()
+    (require 'cider))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-cider-patches)
+
   :config
 
   ;; By default, any error messages that occur when CIDER is starting
@@ -2128,7 +2125,6 @@ Return nil if not inside a project."
 The new buffer will correspond to the same project as CLIENT-BUFFER, which
 should be the regular Clojure REPL started by the server process filter."
     (interactive (list (cider-current-connection)))
-    (el-patch-feature cider)
     (let* ((nrepl-repl-buffer-name-template "*cider-repl CLJS%s*")
            (nrepl-create-client-buffer-function #'cider-repl-create)
            (nrepl-use-this-as-repl-buffer 'new)
@@ -2171,6 +2167,10 @@ should be the regular Clojure REPL started by the server process filter."
 (use-package clj-refactor
   :dependencies (clojure-mode cider yasnippet)
   :init
+
+  ;; Make clj-refactor show its messages right away, instead of
+  ;; waiting for you to do another command.
+  (advice-add #'cljr--post-command-message :override #'message)
 
   ;; By default, clj-refactor enables the refactor-nrepl middleware in
   ;; an *autoload*, meaning that it's already happened as soon as
@@ -2217,6 +2217,10 @@ should be the regular Clojure REPL started by the server process filter."
   (advice-add #'cljr--init-middleware
               :before-while #'cljr--project-dir)
 
+  ;; Make clj-refactor show its messages right away, instead of
+  ;; waiting for you to do another command.
+  (advice-add #'cljr--post-command-message :override #'message)
+
   :diminish clj-refactor-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2225,6 +2229,48 @@ should be the regular Clojure REPL started by the server process filter."
 ;; Provides Racket REPL integration, including documentation and
 ;; source lookups. Basically CIDER for Racket.
 (use-package geiser)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: Python
+
+;; Integrated development environment for Python.
+(use-package anaconda-mode
+  :init
+
+  ;; Enable the functionality of anaconda-mode in Python buffers, as
+  ;; suggested in the README [1].
+  ;;
+  ;; [1]: https://github.com/proofit404/anaconda-mode
+  (add-hook 'python-mode-hook #'anaconda-mode)
+
+  :config
+
+  ;; Prevent anaconda-mode from overriding our binding for M-TAB,
+  ;; which we want to trigger Company.
+  (with-eval-after-load 'company
+    (define-key anaconda-mode-map (kbd "C-M-i") nil))
+
+  :diminish anaconda-mode)
+
+;; Company integration for anaconda-mode.
+(use-package company-anaconda
+  :recipe (:fetcher github
+           :repo "raxod502/company-anaconda"
+           :branch "radian-1")
+
+  :init
+
+  ;; Enable the functionality of company-anaconda in Python buffers,
+  ;; as suggested in the README [1].
+  ;;
+  ;; [1]: https://github.com/proofit404/company-anaconda
+
+  (with-eval-after-load 'company
+
+    (defun radian--enable-company-anaconda ()
+      (add-to-list 'company-backends #'company-anaconda))
+
+    (add-hook 'python-mode-hook #'radian--enable-company-anaconda)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: C-like languages
@@ -2248,24 +2294,30 @@ should be the regular Clojure REPL started by the server process filter."
 
   ;; Automatically install irony-server if it is missing. irony-server
   ;; is necessary for Irony to work at all!
-  (unless (irony--locate-server-executable)
-    ;; The following `let' is copied from the definition of
-    ;; `irony-install-server'. A better solution would be to
-    ;; dynamically bind `irony--install-server-read-command' to
-    ;; `identity' and then just use `call-interactively' to invoke
-    ;; `irony-install-server' with no arguments, but I don't know how
-    ;; to do this.
-    (let ((command
-           (format
-            (concat "%s %s %s && %s --build . "
-                    "--use-stderr --config Release --target install")
-            (shell-quote-argument irony-cmake-executable)
-            (shell-quote-argument (concat "-DCMAKE_INSTALL_PREFIX="
-                                          (expand-file-name
-                                           irony-server-install-prefix)))
-            (shell-quote-argument irony-server-source-dir)
-            (shell-quote-argument irony-cmake-executable))))
-      (irony-install-server command)))
+
+  (defun radian--install-irony-server-if-missing ()
+    (unless (irony--locate-server-executable)
+      (if (yes-or-no-p "Install irony-server? ")
+          ;; The following `let' is copied from the definition of
+          ;; `irony-install-server'. A better solution would be to
+          ;; dynamically bind `irony--install-server-read-command' to
+          ;; `identity' and then just use `call-interactively' to invoke
+          ;; `irony-install-server' with no arguments, but I don't know how
+          ;; to do this.
+          (let ((command
+                 (format
+                  (concat "%s %s %s && %s --build . "
+                          "--use-stderr --config Release --target install")
+                  (shell-quote-argument irony-cmake-executable)
+                  (shell-quote-argument (concat "-DCMAKE_INSTALL_PREFIX="
+                                                (expand-file-name
+                                                 irony-server-install-prefix)))
+                  (shell-quote-argument irony-server-source-dir)
+                  (shell-quote-argument irony-cmake-executable))))
+            (irony-install-server command))
+        (message "irony-mode will not work until you M-x irony-install-server"))))
+
+  (add-hook 'irony-mode-hook #'radian--install-irony-server-if-missing)
 
   :diminish irony-mode)
 
@@ -2311,8 +2363,7 @@ should be the regular Clojure REPL started by the server process filter."
 ;; ElDoc integration for Irony.
 (use-package irony-eldoc
   :dependencies (irony)
-  :quelpa (irony-eldoc
-           :fetcher github
+  :recipe (:fetcher github
            :repo "raxod502/irony-eldoc")
   :init
 
@@ -2336,6 +2387,50 @@ should be the regular Clojure REPL started by the server process filter."
     (setq-local indent-line-function 'insert-tab))
 
   (add-hook 'vimrc-mode-hook #'radian--fix-vimrc-indentation))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: LaTeX
+
+;; AUCTeX, integrated development environment for LaTeX and friends.
+;; Unfortunately because AUCTeX is weird, we need to do a little dance
+;; with the `use-package' declarations, see [1].
+;;
+;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
+
+(use-package tex-site
+  :recipe (auctex :fetcher github
+                  :repo "emacsmirror/auctex"
+                  :files (:defaults (:exclude "*.el.in")))
+  :demand t)
+
+(use-package tex
+  :recipe auctex
+  :config
+
+  ;; The following configuration is recommended in the manual [1].
+  ;;
+  ;; [1]: https://www.gnu.org/software/auctex/manual/auctex/Quick-Start.html
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+
+  (radian-with-operating-system macos
+    ;; Use TeXShop for previewing LaTeX, rather than Preview. This
+    ;; means we have to define the command to run TeXShop as a "viewer
+    ;; program", and then tell AUCTeX to use the TeXShop viewer when
+    ;; opening PDFs.
+
+    (add-to-list 'TeX-view-program-list
+                 '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+    (setf (alist-get 'output-pdf TeX-view-program-selection)
+          '("TeXShop"))))
+
+;; Company integration for AUCTeX.
+(use-package company-auctex
+  :after tex
+  :config
+
+  ;; Enable the functionality of `company-auctex'.
+  (company-auctex-init))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Markdown
@@ -2377,6 +2472,23 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Version control
 
+;; A Git Porcelain inside Emacs.
+(use-package magit
+  :recipe (:fetcher github
+           :repo "raxod502/magit"
+           :branch "magit-version-symlinks"
+           :files ("lisp/magit*.el"
+                   "lisp/git-rebase.el"
+                   "Documentation/magit.texi"
+                   "Documentation/AUTHORS.md"
+                   "COPYING" (:exclude "lisp/magit-popup.el")))
+  :bind (;; Add important keybindings for Magit as described in the
+         ;; manual [1].
+         ;;
+         ;; [1]: https://magit.vc/manual/magit.html#Getting-Started
+         ("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch-popup)))
+
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
 (use-package git-commit
@@ -2412,6 +2524,15 @@ should be the regular Clojure REPL started by the server process filter."
   ;; [1]: http://chris.beams.io/posts/git-commit/
   (setq git-commit-summary-max-length 50))
 
+;; Edit .gitignore files.
+(use-package gitignore-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: The Internets
+
+;; Browse Stack Overflow from Emacs!
+(use-package sx)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Color themes
 
@@ -2441,45 +2562,108 @@ should be the regular Clojure REPL started by the server process filter."
 ;;;; Mode line
 
 ;;; The following code customizes the mode bar to something like:
-;;; [*] init.el        72% (389,30)  [radian]  (Emacs-Lisp Paredit AggrIndent)
+;;; [*] init.el        96% (2410,30)  [radian:master*]  (Emacs-Lisp Paredit AggrIndent)
 
-(defvar mode-line-modified-radian
-  '(:eval (propertize (if (and (buffer-modified-p)
-                               (buffer-file-name))
-                          "[*]" "   ")
-                      ;; make sure to show it in the same color as the
-                      ;; buffer name
-                      'face 'mode-line-buffer-id))
-  "Construct for the mode line that shows [*] if the buffer
-has been modified, and whitespace otherwise.")
+(defun radian--mode-line-buffer-modified ()
+  "Returns a construct for the mode line that shows [*] if the
+buffer has been modified, and whitespace otherwise."
+  (propertize (if (and (buffer-modified-p)
+                       (buffer-file-name))
+                  "[*]" "   ")
+              ;; make sure to show it in the same color as the
+              ;; buffer name
+              'face 'mode-line-buffer-id))
 
-(defun radian--mode-line-projectile-project ()
-  "Returns a construct for the mode line that shows the current
-Projectile project between brackets, with the appropriate spacing
-on the left. Returns the empty string if Projectile is not
-enabled or if the user is not in a Projectile project."
-  (when (radian-package-enabled-p 'projectile)
-    (let ((name (projectile-project-name)))
-      (unless (equal name "-")
-        (concat "  [" name "]")))))
+;; To display information about the current Git status in the mode
+;; line, we need to load this library.
+(require 'vc-git)
+
+(defvar-local radian--mode-line-project-and-branch nil
+  "Construct for the mode line that shows the current Projectile
+project (if Projectile is enabled and the user is within a
+project), the current Git branch (if the user is within a Git
+repo), and whether the working directory is dirty.
+
+Computed and cached in this variable by
+`radian--compute-mode-line-project-and-branch' for performance
+reasons.")
+
+(defun radian--compute-mode-line-project-and-branch ()
+  (let ((old radian--mode-line-project-and-branch)
+        (new
+         (let* ((project-name (when (featurep 'projectile)
+                                (projectile-project-name)))
+                (project-name (unless (equal project-name "-")
+                                project-name))
+                (git (locate-dominating-file default-directory ".git"))
+                (branch-name (when git
+                               (or (vc-git--symbolic-ref default-directory)
+                                   (substring (vc-git-working-revision
+                                               default-directory)
+                                              0 7))))
+                (dirty (when git
+                         (with-temp-buffer
+                           (call-process "git" nil t nil
+                                         "status" "--porcelain"
+                                         "--ignore-submodules=dirty")
+                           (if (> (buffer-size) 0)
+                               "*" "")))))
+           (cond
+            ((and project-name git)
+             (format "  [%s:%s%s]" project-name branch-name dirty))
+            (project-name
+             (format "  [%s]" project-name))
+            ;; This should never happen unless you do something
+            ;; perverse like create a version-controlled Projectile
+            ;; project whose name is a hyphen, but we want to handle
+            ;; it anyway.
+            (git
+             (format "  [%s%s]" branch-name dirty))))))
+    (unless (equal old new)
+      (setq radian--mode-line-project-and-branch new)
+      (force-mode-line-update))))
+
+;; We will make sure this information is updated after one second of
+;; inactivity, for the current buffer.
+
+(defvar radian--mode-line-timer-primary nil)
+(defvar radian--mode-line-timer-secondary nil)
+
+(defun radian--compute-mode-line-and-reschedule ()
+  (when radian--mode-line-timer-secondary
+    (cancel-timer radian--mode-line-timer-secondary))
+  (radian--compute-mode-line-project-and-branch)
+  (setq radian--mode-line-timer-secondary
+        (run-with-idle-timer
+         (time-add 1 (current-idle-time)) nil
+         #'radian--compute-mode-line-and-reschedule)))
+
+(when radian--mode-line-timer-primary
+  (cancel-timer radian--mode-line-timer-primary))
+
+(when radian--mode-line-timer-secondary
+  (cancel-timer radian--mode-line-timer-secondary))
+
+(setq radian--mode-line-timer-primary
+      (run-with-idle-timer
+       1 'repeat #'radian--compute-mode-line-and-reschedule))
 
 (setq-default mode-line-format
-              (list
-               ;; Show a warning if Emacs is low on memory.
-               "%e"
-               ;; Show [*] if the buffer is modified.
-               mode-line-modified-radian
-               " "
-               ;; Show the name of the current buffer.
-               mode-line-buffer-identification
-               "   "
-               ;; Show the row and column of point.
-               mode-line-position
-               ;; Show the current Projectile project.
-               '(:eval (radian--mode-line-projectile-project))
-               ;; Show the active major and minor modes.
-               "  "
-               mode-line-modes))
+              '(;; Show a warning if Emacs is low on memory.
+                "%e"
+                ;; Show [*] if the buffer is modified.
+                (:eval (radian--mode-line-buffer-modified))
+                " "
+                ;; Show the name of the current buffer.
+                mode-line-buffer-identification
+                "   "
+                ;; Show the row and column of point.
+                mode-line-position
+                ;; Show the current Projectile project.
+                radian--mode-line-project-and-branch
+                ;; Show the active major and minor modes.
+                "  "
+                mode-line-modes))
 
 ;; Make `mode-line-position' show the column, not just the row.
 (column-number-mode 1)
