@@ -2479,6 +2479,12 @@ should be the regular Clojure REPL started by the server process filter."
   (add-hook 'yaml-mode-hook #'radian--disable-auto-fill-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Packages: TOML
+
+;; Editing for TOML files.
+(use-package toml-mode)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Packages: Version control
 
 ;; A Git Porcelain inside Emacs.
