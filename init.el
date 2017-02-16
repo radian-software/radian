@@ -477,7 +477,7 @@ If additionally KEYBINDING is \"e i\" then
 ;; directories.
 
 (defun radian--find-file-automatically-create-directory
-    (find-file filename &optional wildcards)
+    (original-function filename &rest args)
   "Advice for `find-file' that automatically creates the parent
 directory (or directories) of the file being visited, if
 necessary. It also sets a buffer-local variable so that the user
@@ -526,7 +526,7 @@ kill the buffer without saving it."
     ;; containing the file to found exists. We make sure to preserve
     ;; the return value, so as not to mess up any commands relying on
     ;; it.
-    (prog1 (funcall find-file filename wildcards)
+    (prog1 (apply original-function filename args)
       ;; If there are directories we want to offer to delete later, we
       ;; have more to do.
       (when dirs-to-delete
@@ -558,6 +558,14 @@ kill the buffer without saving it."
 (advice-add #'find-file :around
             #'radian--find-file-automatically-create-directory)
 
+;; Also enable it for `find-alternate-file' (C-x C-v).
+(advice-add #'find-alternate-file :around
+            #'radian--find-file-automatically-create-directory)
+
+;; Also enable it for `write-file' (C-x C-w).
+(advice-add #'write-file :around
+            #'radian--find-file-automatically-create-directory)
+
 (defun radian--kill-buffer-delete-directory-if-appropriate ()
   "If `radian--find-file-automatically-create-directory' created
 the directory containing the file for the current buffer
@@ -575,7 +583,8 @@ Also clean up related hooks."
          buffer-file-name
          ;; Stop if the buffer has been saved, so that the file
          ;; actually exists now. This might happen if the buffer were
-         ;; saved without `after-save-hook' running.
+         ;; saved without `after-save-hook' running, or if the
+         ;; `find-file'-like function called was `write-file'.
          (not (file-exists-p buffer-file-name)))
     (cl-dolist (dir-to-delete radian--dirs-to-delete)
       ;; Ignore any directories that no longer exist or are malformed.
