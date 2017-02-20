@@ -2433,6 +2433,13 @@ should be the regular Clojure REPL started by the server process filter."
     (setf (alist-get 'output-pdf TeX-view-program-selection)
           '("TeXShop"))))
 
+(use-package latex
+  :recipe auctex
+  :config
+
+  ;; Don't be afraid to break inline math between lines.
+  (setq LaTeX-fill-break-at-separators nil))
+
 ;; Company integration for AUCTeX.
 (use-package company-auctex
   :after tex
