@@ -228,7 +228,13 @@ if command -v exa &>/dev/null; then
     alias l='exa --all --header --long --color-scale'
     alias lg='exa --all --grid --header --long --color-scale'
     alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
+    function lti() {
+        exa --all --header --long --tree --color-scale --ignore-glob ".git|$1" ${@:2}
+    }
     alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
+    function ltli() {
+        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|$2" ${@:3}
+    }
 else
     # We alias gls to a git command elsewhere, so we use "command"
     # here to prevent it from being interpreted as said git command.
