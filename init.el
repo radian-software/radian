@@ -1684,7 +1684,9 @@ Minibuffer bindings:
     radian--company-select-next-if-explicit)
 
   :bind (;; Replace `completion-at-point' and `complete-symbol' with
-         ;; `company-manual-begin'.
+         ;; `company-manual-begin'. You might think this could be put
+         ;; in the `:bind*' declaration below, but it seems that
+         ;; `bind-key*' does not work with remappings.
          ([remap completion-at-point] . company-manual-begin)
          ([remap complete-symbol] . company-manual-begin)
 
@@ -1697,6 +1699,7 @@ Minibuffer bindings:
 
          ;; Prevent SPC from ever triggering a completion.
          ("SPC" . nil))
+  :bind* (("M-TAB" . company-manual-begin))
   :diminish company-mode)
 
 ;; Sorts Company suggestions by usage, persistent between sessions.
@@ -2251,13 +2254,6 @@ should be the regular Clojure REPL started by the server process filter."
   ;;
   ;; [1]: https://github.com/proofit404/anaconda-mode
   (add-hook 'python-mode-hook #'anaconda-mode)
-
-  :config
-
-  ;; Prevent anaconda-mode from overriding our binding for M-TAB,
-  ;; which we want to trigger Company.
-  (with-eval-after-load 'company
-    (define-key anaconda-mode-map (kbd "C-M-i") nil))
 
   :diminish anaconda-mode)
 
