@@ -626,8 +626,8 @@ alias gcp='git cherry-pick'
 alias gcpc='git cherry-pick --continue'
 alias gcpa='git cherry-pick --abort'
 
-alias gv='git revert'
-alias gvm='git revert -m'
+alias grv='git revert'
+alias grvm='git revert -m'
 
 alias gt='git tag'
 alias gtd='git tag -d'
