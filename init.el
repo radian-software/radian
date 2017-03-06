@@ -2616,6 +2616,10 @@ Computed and cached in this variable by
 `radian--compute-mode-line-project-and-branch' for performance
 reasons.")
 
+;; Don't clear the cache when switching major modes (or using M-x
+;; normal-mode).
+(put 'radian--mode-line-project-and-branch 'permanent-local t)
+
 (defun radian--compute-mode-line-project-and-branch ()
   (let ((old radian--mode-line-project-and-branch)
         (new
