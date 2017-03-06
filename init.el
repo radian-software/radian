@@ -759,10 +759,27 @@ This filter de-installs itself after this call."
 ;; after the period when it is wrapped to the next line.
 (setq sentence-end-double-space nil)
 
-;; Trim trailing whitespace on save. This will get rid of end-of-line
-;; whitespace, and reduce the number of blank lines at the end of the
-;; file to one.
-(add-hook 'before-save-hook #'delete-trailing-whitespace)
+;;; Trim trailing whitespace on save. This will get rid of end-of-line
+;;; whitespace, and reduce the number of blank lines at the end of the
+;;; file to one.
+
+;; Make a user variable to control whether trailing whitespace is
+;; actually removed.
+(defvar delete-trailing-whitespace t
+  "If non-nil, delete trailing whitespace on save.")
+
+;; Allow setting `delete-trailing-whitespace' from a file-local or
+;; directory-local variable list.
+(put 'delete-trailing-whitespace 'safe-local-variable #'booleanp)
+
+;; Make a function to replace `delete-trailing-whitespace' that
+;; respects variable `delete-trailing-whitespace'.
+(defun maybe-delete-trailing-whitespace ()
+  (when delete-trailing-whitespace
+    (delete-trailing-whitespace)))
+
+;; Call `maybe-delete-trailing-whitespace' before saving a file.
+(add-hook 'before-save-hook #'maybe-delete-trailing-whitespace)
 
 ;; Add a trailing newline if there is not one already, when saving.
 ;; This is enabled for default for certain modes, but we want it
@@ -1511,6 +1528,12 @@ Minibuffer bindings:
 ;; Keeps indentation correct at all times.
 (use-package aggressive-indent
   :demand t
+  :init
+
+  ;; Allow disabling/enabling `aggressive-indent-mode' from a
+  ;; file-local or directory-local variable list.
+  (put 'aggressive-indent-mode 'safe-local-variable #'booleanp)
+
   :config
 
   ;; Enable Aggressive Indent everywhere, except the modes in
