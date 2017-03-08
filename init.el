@@ -1403,7 +1403,10 @@ Minibuffer bindings:
     (if (> toggle 0)
         (progn
           (when (eq projectile-switch-project-action #'projectile-find-file)
-            (setq projectile-switch-project-action #'counsel-projectile))
+            (setq projectile-switch-project-action
+                  (el-patch-swap
+                    #'counsel-projectile
+                    #'counsel-projectile-find-file)))
           (define-key projectile-mode-map [remap projectile-find-file] #'counsel-projectile-find-file)
           (define-key projectile-mode-map [remap projectile-find-dir] #'counsel-projectile-find-dir)
           (define-key projectile-mode-map [remap projectile-switch-project] #'counsel-projectile-switch-project)
@@ -1411,7 +1414,10 @@ Minibuffer bindings:
           (define-key projectile-mode-map [remap projectile-switch-to-buffer] #'counsel-projectile-switch-to-buffer)
           (counsel-projectile-commander-bindings))
       (progn
-        (when (eq projectile-switch-project-action #'counsel-projectile)
+        (when (eq projectile-switch-project-action
+                  (el-patch-swap
+                    #'counsel-projectile
+                    #'counsel-projectile-find-file))
           (setq projectile-switch-project-action #'projectile-find-file))
         (define-key projectile-mode-map [remap projectile-find-file] nil)
         (define-key projectile-mode-map [remap projectile-find-dir] nil)
