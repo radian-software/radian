@@ -2625,10 +2625,6 @@ buffer has been modified, and whitespace otherwise."
               ;; buffer name
               'face 'mode-line-buffer-id))
 
-;; To display information about the current Git status in the mode
-;; line, we need to load this library.
-(require 'vc-git)
-
 (defvar-local radian--mode-line-project-and-branch nil
   "Construct for the mode line that shows the current Projectile
 project (if Projectile is enabled and the user is within a
@@ -2651,11 +2647,39 @@ reasons.")
                 (project-name (unless (equal project-name "-")
                                 project-name))
                 (git (locate-dominating-file default-directory ".git"))
-                (branch-name (when git
-                               (or (vc-git--symbolic-ref default-directory)
-                                   (substring (vc-git-working-revision
-                                               default-directory)
-                                              0 7))))
+                (branch-name
+                 (when git
+                   ;; Determine a reasonable string to show for the
+                   ;; current branch. This is actually more or less
+                   ;; the same logic as we use for the Radian zsh
+                   ;; prompt.
+                   (with-temp-buffer
+                     ;; First attempt uses symbolic-ref, which returns
+                     ;; the branch name if it exists.
+                     (call-process "git" nil '(t nil) nil
+                                   "symbolic-ref" "HEAD")
+                     (if (> (buffer-size) 0)
+                         ;; It actually returns something like
+                         ;; refs/heads/master, though, so let's try to
+                         ;; trim it if possible.
+                         (let ((regex "^\\(refs/heads/\\)?\\(.+\\)$")
+                               (str (string-trim (buffer-string))))
+                           (if (string-match regex str)
+                               (match-string 2 str)
+                             ;; If it's something weird then just show
+                             ;; it literally.
+                             str))
+                       ;; If symbolic-ref didn't return anything on
+                       ;; stdout (we discarded stderr), we probably
+                       ;; have a detached head and we should show the
+                       ;; abbreviated commit hash (e.g. b007692).
+                       (erase-buffer)
+                       (call-process "git" nil '(t nil) nil
+                                     "rev-parse" "--short" "HEAD")
+                       (if (> (buffer-size) 0)
+                           (string-trim (buffer-string))
+                         ;; We shouldn't get here.
+                         "???")))))
                 (dirty (when git
                          (with-temp-buffer
                            (call-process "git" nil t nil
