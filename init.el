@@ -191,8 +191,11 @@ loads it. Otherwise, fails silently."
 (straight-use-package '(use-package
                          :fetcher github
                          :repo "raxod502/use-package"
-                         :branch "wip"
                          :files ("use-package.el")))
+
+;; Tell use-package to automatically install packages if they are
+;; missing.
+(setq use-package-always-ensure t)
 
 ;; Tell use-package to always load packages lazily unless told
 ;; otherwise.
