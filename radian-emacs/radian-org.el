@@ -7,10 +7,10 @@
 
 (with-eval-after-load 'org
   ;; Prevent Org from overriding the bindings for windmove.
-  (unbind-key "S-<left>" #'org-mode-map)
-  (unbind-key "S-<right>" #'org-mode-map)
-  (unbind-key "S-<up>" #'org-mode-map)
-  (unbind-key "S-<down>" #'org-mode-map)
+  (unbind-key "S-<left>" org-mode-map)
+  (unbind-key "S-<right>" org-mode-map)
+  (unbind-key "S-<up>" org-mode-map)
+  (unbind-key "S-<down>" org-mode-map)
 
   ;; Add replacements for the some of keybindings we just removed.
   ;; It looks like Org already binds C-up and C-down separately from
@@ -22,10 +22,10 @@
 
 (with-eval-after-load 'org-agenda
   ;; Prevent Org Agenda from overriding the bindings for windmove.
-  (unbind-key "S-<up>" #'org-agenda-mode-map)
-  (unbind-key "S-<down>" #'org-agenda-mode-map)
-  (unbind-key "S-<left>" #'org-agenda-mode-map)
-  (unbind-key "S-<right>" #'org-agenda-mode-map)
+  (unbind-key "S-<up>" org-agenda-mode-map)
+  (unbind-key "S-<down>" org-agenda-mode-map)
+  (unbind-key "S-<left>" org-agenda-mode-map)
+  (unbind-key "S-<right>" org-agenda-mode-map)
 
   ;; Same routine as above. Now for Org Agenda, we could use C-up
   ;; and C-down because M-{ and M-} are bound to the same commands.
