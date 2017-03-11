@@ -44,7 +44,7 @@ This is best demonstrated by example. Suppose FILENAME is
 \".emacs.d/init.el\", KEYBINDING is \"e i\", and
 `radian-find-dotfile-prefix' is at its default value of \"M-P
 e\", and `radian-find-dotfile-other-window-prefix' is at its
-default avlue of \"M-P o\". Then `radian-register-dotfile' will
+default value of \"M-P o\". Then `radian-register-dotfile' will
 create the interactive functions `radian-find-init-el' and
 `radian-find-init-el-other-window', and it will bind them to the
 key sequences \"M-P e e i\" and \"M-P o e i\" respectively."
