@@ -38,7 +38,7 @@
       (add-to-list 'load-path radian-directory)
 
       ;; Load the Radian libraries.
-      (dolist (file (directory-files radian-directory nil "\\.el$" 'nosort))
+      (dolist (file (directory-files radian-directory nil "^[a-z-]+\\.el$" 'nosort))
         (let ((feature (intern (string-remove-suffix ".el" file))))
           (condition-case-unless-debug error-data
               (require feature)
