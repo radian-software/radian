@@ -38,12 +38,23 @@
       (add-to-list 'load-path radian-directory)
 
       ;; Load the Radian libraries.
-      (dolist (file (directory-files radian-directory nil "^[a-z-]+\\.el$" 'nosort))
-        (let ((feature (intern (string-remove-suffix ".el" file))))
+
+      (let ((preloaded-features
+             '(;; no-littering changes lots of paths and needs to be
+               ;; loaded as soon as possible.
+               radian-emacsd)))
+        (dolist (feature preloaded-features)
           (condition-case-unless-debug error-data
               (require feature)
             (error (warn "Could not load `%S': %s" feature
-                         (error-message-string error-data))))))
+                         (error-message-string error-data)))))
+        (dolist (file (directory-files radian-directory nil "^[a-z-]+\\.el$" 'nosort))
+          (let ((feature (intern (string-remove-suffix ".el" file))))
+            (unless (member feature preloaded-features)
+              (condition-case-unless-debug error-data
+                  (require feature)
+                (error (warn "Could not load `%S': %s" feature
+                             (error-message-string error-data))))))))
 
       ;; Run local customizations that are supposed to be run after
       ;; init.
