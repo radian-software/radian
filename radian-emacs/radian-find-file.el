@@ -310,7 +310,7 @@ This is a function for `after-save-hook'. Remove
   :config
 
   ;; Enable Projectile everywhere.
-  (projectile-global-mode 1)
+  (projectile-mode 1)
 
   ;; Don't show Projectile in the mode line. (Radian already adds a
   ;; custom indicator for the current project, so there's no need to
