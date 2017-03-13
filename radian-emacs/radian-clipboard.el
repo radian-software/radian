@@ -35,7 +35,7 @@
              ;; because we want this command to be asynchronous.
              (proc (start-process "pbcopy" nil "pbcopy")))
         (process-send-string proc text)
-        (process-send-eof text))
+        (process-send-eof proc))
       (setq radian--last-copy-to-macOS text))
     (setq interprogram-paste-function #'radian--paste-from-macOS)
     (setq interprogram-cut-function #'radian--copy-to-macOS)))
