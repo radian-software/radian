@@ -36,7 +36,9 @@
              (proc (start-process "pbcopy" nil "pbcopy")))
         (process-send-string proc text)
         (process-send-eof text))
-      (setq radian--last-copy-to-macOS text))))
+      (setq radian--last-copy-to-macOS text))
+    (setq interprogram-paste-function #'radian--paste-from-macOS)
+    (setq interprogram-cut-function #'radian--copy-to-macOS)))
 
 ;; If you have something on the system clipboard, and then kill
 ;; something in Emacs, then by default whatever you had on the system
