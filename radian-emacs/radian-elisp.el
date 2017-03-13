@@ -129,6 +129,7 @@ Nil means no keybinding is established."
 
 (defun radian-reload-init ()
   "Reload init.el."
+  (interactive)
   (message "Reloading init.el...")
   (if (load user-init-file 'noerror 'nomessage)
       (message "Reloading init.el... done.")
