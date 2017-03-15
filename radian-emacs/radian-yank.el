@@ -16,6 +16,10 @@
   (put 'paredit-backward-delete 'delete-selection 'supersede)
   (put 'paredit-newline 'delete-selection t))
 
+;; Make delete-selection-mode work properly with AUCTeX.
+(with-eval-after-load 'latex
+  (put 'LaTeX-insert-left-brace 'delete-selection t))
+
 ;; Eliminate duplicates in the kill ring. That is, if you kill the
 ;; same thing twice, you won't have to use M-y twice to get past it to
 ;; older entries in the kill ring.
