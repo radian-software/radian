@@ -22,7 +22,6 @@
   ;; Show `toml-mode' as "TOML" instead of "Toml" in the mode line.
 
   (defun radian--rename-toml-mode ()
-    (message "Setting mode lighter. Current value is: %S" mode-name)
     (setq mode-name "TOML"))
 
   (add-hook 'toml-mode-hook #'radian--rename-toml-mode))
