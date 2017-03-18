@@ -22,7 +22,11 @@
     (defalias 'radian--advice-descriptive-name #'ignore)
 
   This means that only Radian functions should be added as advice
-  functions. Never every add a lambda as an advice function.
+  functions. Never add a lambda as an advice function.
+
+### Hooks
+
+* Only add named functions to hooks. Never add a lambda to a hook.
 
 ### use-package
 
