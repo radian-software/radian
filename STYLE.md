@@ -36,7 +36,8 @@
 * Don't use `:pin`; this is not relevant since Radian uses
   `straight.el` instead of `package.el`.
 * If you are using `:demand`, use `:config` instead of `:init`.
-* Load
+* Load packages lazily (this is the default) unless this is impossible
+  or silly. For partial lazy-loading, use `el-patch`.
 * Order `use-package` keywords as follows, so that they are in the
   rough order of execution:
     * `:recipe`
@@ -49,7 +50,7 @@
     * `:bind*`
     * `:bind-keymap`
     * `:bind-keymap*`
-    * `:diminish`
     * `:demand`
     * `:after`
     * `:config`
+    * `:diminish`
