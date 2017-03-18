@@ -42,19 +42,29 @@
       (let ((preloaded-features
              '(;; no-littering changes lots of paths and needs to be
                ;; loaded as soon as possible.
-               radian-emacsd)))
+               radian-emacsd))
+            (features (mapcar
+                       (lambda (file)
+                         (intern (string-remove-suffix ".el" file)))
+                       (directory-files
+                        radian-directory nil
+                        "^[a-z-]+\\.el$"
+                        'nosort))))
+        ;; First we need to unload all the features, so that the
+        ;; init-file can be reloaded to pick up changes.
+        (dolist (feature features)
+          (setq features (remove feature features)))
         (dolist (feature preloaded-features)
           (condition-case-unless-debug error-data
               (require feature)
             (error (warn "Could not load `%S': %s" feature
                          (error-message-string error-data)))))
-        (dolist (file (directory-files radian-directory nil "^[a-z-]+\\.el$" 'nosort))
-          (let ((feature (intern (string-remove-suffix ".el" file))))
-            (unless (member feature preloaded-features)
-              (condition-case-unless-debug error-data
-                  (require feature)
-                (error (warn "Could not load `%S': %s" feature
-                             (error-message-string error-data))))))))
+        (dolist (feature features)
+          (unless (member feature preloaded-features)
+            (condition-case-unless-debug error-data
+                (require feature)
+              (error (warn "Could not load `%S': %s" feature
+                           (error-message-string error-data)))))))
 
       ;; Run local customizations that are supposed to be run after
       ;; init.
