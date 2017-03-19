@@ -43,23 +43,23 @@
              '(;; no-littering changes lots of paths and needs to be
                ;; loaded as soon as possible.
                radian-emacsd))
-            (features (mapcar
-                       (lambda (file)
-                         (intern (string-remove-suffix ".el" file)))
-                       (directory-files
-                        radian-directory nil
-                        "^[a-z-]+\\.el$"
-                        'nosort))))
+            (radian-features (mapcar
+                              (lambda (file)
+                                (intern (string-remove-suffix ".el" file)))
+                              (directory-files
+                               radian-directory nil
+                               "^[a-z-]+\\.el$"
+                               'nosort))))
         ;; First we need to unload all the features, so that the
         ;; init-file can be reloaded to pick up changes.
-        (dolist (feature features)
+        (dolist (feature radian-features)
           (setq features (remove feature features)))
         (dolist (feature preloaded-features)
           (condition-case-unless-debug error-data
               (require feature)
             (error (warn "Could not load `%S': %s" feature
                          (error-message-string error-data)))))
-        (dolist (feature features)
+        (dolist (feature radian-features)
           (unless (member feature preloaded-features)
             (condition-case-unless-debug error-data
                 (require feature)

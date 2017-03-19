@@ -5,6 +5,8 @@
 
 ;; Integrated development environment for Python.
 (use-package anaconda-mode
+  :defer-install t
+  :commands (anaconda-mode)
   :init
 
   ;; Enable the functionality of anaconda-mode in Python buffers, as
@@ -20,7 +22,8 @@
   :recipe (:fetcher github
            :repo "raxod502/company-anaconda"
            :branch "radian-1")
-
+  :defer-install t
+  :commands (company-anaconda)
   :init
 
   (with-eval-after-load 'company

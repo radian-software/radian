@@ -390,6 +390,9 @@ This is a function for `after-save-hook'. Remove
   ;; and so temporarily disabled. With that feature disabled there is
   ;; no need to have fasd loaded eagerly.
 
+  :defer-install t
+  :bind (;; Add a keybinding for using the functionality of `fasd'.
+         ("C-c f" . fasd-find-file))
   :config
 
   ;; Use completion from a list of fasd candidates for
@@ -397,10 +400,7 @@ This is a function for `after-save-hook'. Remove
   (setq fasd-enable-initial-prompt nil)
 
   ;; Use Ivy for completion, instead of `grizzl'.
-  (setq fasd-completing-read-function nil)
-
-  :bind (;; Add a keybinding for using the functionality of `fasd'.
-         ("C-c f" . fasd-find-file)))
+  (setq fasd-completing-read-function nil))
 
 (provide 'radian-find-file)
 

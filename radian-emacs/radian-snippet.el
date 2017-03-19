@@ -11,6 +11,8 @@
 ;; fillable templates. It is also used by `clj-refactor' for some of
 ;; its refactorings.
 (use-package yasnippet
+  :defer-install t
+  :commands (yas-minor-mode)
   :diminish yas-minor-mode)
 
 (provide 'radian-snippet)

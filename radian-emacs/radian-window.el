@@ -24,6 +24,8 @@
 
 ;; Provides more intuitive behavior for C-x <left> and C-x <right>.
 (use-package iflipb
+  :bind (("C-x <left>" . iflipb-next-buffer)
+         ("C-x <right>" . iflipb-previous-buffer))
   :config
 
   ;; Don't skip buffers that start with an asterisk.
@@ -54,10 +56,7 @@ This is a `:before-while' advice for `iflipb-message'. See also
 `radian--advice-inhibit-iflipb-format-buffers'.")
 
   (advice-add #'iflipb-format-buffers :override #'ignore)
-  (advice-add #'iflipb-message :before-while #'identity)
-
-  :bind (("C-x <left>" . iflipb-next-buffer)
-         ("C-x <right>" . iflipb-previous-buffer)))
+  (advice-add #'iflipb-message :before-while #'identity))
 
 (provide 'radian-window)
 

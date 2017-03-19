@@ -10,10 +10,10 @@
 
 ;; Enable Paredit when editing Lisps other than Emacs Lisp. See also
 ;; `radian-elisp', though.
-(add-hook 'lisp-mode #'paredit-mode)
+(add-hook 'lisp-mode-hook #'paredit-mode)
 
 ;; Enable Aggressive Indent when editing Lisps other than Emacs Lisp.
-(add-hook 'lisp-mode #'aggressive-indent-mode)
+(add-hook 'lisp-mode-hook #'aggressive-indent-mode)
 
 (provide 'radian-lisp)
 

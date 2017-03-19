@@ -9,6 +9,9 @@
 
 ;; Provides indentation and syntax highlighting for Clojure code.
 (use-package clojure-mode
+  :defer-install t
+  :mode (("\\.\\(clj\\|dtm\\|edn\\)\\'" . clojure-mode)
+         ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
   :init
 
   ;; We define some patches after clojure-mode is loaded. We need to
@@ -26,6 +29,19 @@
   (add-hook 'el-patch-post-validate-hook
             #'radian--disable-clojure-mode-patches)
 
+  :bind (;; Make sure electric indentation *always* works. For some
+         ;; reason, if this is omitted, electric indentation works most
+         ;; of the time, but it fails inside Clojure docstrings. (TAB
+         ;; will add the requisite two spaces, but you shouldn't have to
+         ;; do this manually after pressing RET.) I'd like to find a more
+         ;; elegant solution to this problem. See [1].
+         ;;
+         ;; <return> is for windowed Emacs; RET is for terminal Emacs.
+         ;;
+         ;; [1]: https://github.com/raxod502/radian/issues/2
+         :map clojure-mode-map
+         ("<return>" . newline-and-indent)
+         ("RET" . newline-and-indent))
   :config
 
   ;; Enable Paredit, ElDoc, and Aggressive Indent in Clojure mode.
@@ -150,43 +166,32 @@ Return nil if not inside a project."
           (or (gethash dir-name clojure-project-dir-cache)
               (puthash dir-name
                        (let ($choices) $body)
-                       clojure-project-dir-cache))))))
-
-  :bind (;; Make sure electric indentation *always* works. For some
-         ;; reason, if this is omitted, electric indentation works most
-         ;; of the time, but it fails inside Clojure docstrings. (TAB
-         ;; will add the requisite two spaces, but you shouldn't have to
-         ;; do this manually after pressing RET.) I'd like to find a more
-         ;; elegant solution to this problem. See [1].
-         ;;
-         ;; <return> is for windowed Emacs; RET is for terminal Emacs.
-         ;;
-         ;; [1]: https://github.com/raxod502/radian/issues/2
-         :map clojure-mode-map
-         ("<return>" . newline-and-indent)
-         ("RET" . newline-and-indent)))
+                       clojure-project-dir-cache)))))))
 
 ;; Provides Clojure and ClojureScript REPL integration, including
 ;; documentation and source lookups, among many other features.
 (use-package cider
+  :defer-install t
   :init
 
   ;; We define some patches after CIDER is loaded. We need to make
   ;; sure el-patch knows how to find these patches.
 
   (defun radian--enable-cider-patches ()
+    (use-package-install-deferred-package 'cider :el-patch)
     (require 'cider))
 
   (add-hook 'el-patch-pre-validate-hook
             #'radian--enable-cider-patches)
 
+  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
+         ("C-c M-j" . cider-jack-in)
+         ("C-c M-J" . cider-jack-in-clojurescript))
   :config
 
-  ;; Enable Paredit in the CIDER REPL.
-  (add-hook 'cider-repl-mode #'paredit-mode)
-
-  ;; Enable ElDoc in the CIDER REPL.
-  (add-hook 'cider-repl-mode #'eldoc-mode)
+  ;; Enable Paredit and ElDoc in the CIDER REPL.
+  (add-hook 'cider-repl-mode-hook #'paredit-mode)
+  (add-hook 'cider-repl-mode-hook #'eldoc-mode)
 
   ;; By default, any error messages that occur when CIDER is starting
   ;; up are placed in the *nrepl-server* buffer and not in the
@@ -321,15 +326,12 @@ should be the regular Clojure REPL started by the server process filter."
                "session" nrepl-session
                "code" cider-cljs-lein-repl)
          (cider-repl-handler (current-buffer)))
-        (cider--offer-to-open-app-in-browser nrepl-server-buffer))))
-
-  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
-         ("C-c M-j" . cider-jack-in)
-         ("C-c M-J" . cider-jack-in-clojurescript)))
+        (cider--offer-to-open-app-in-browser nrepl-server-buffer)))))
 
 ;; Makes Emacs into a real Clojure IDE by providing a mountain of
 ;; automated refactoring tools.
 (use-package clj-refactor
+  :defer-install t
   :init
 
   ;; By default, clj-refactor enables the refactor-nrepl middleware in
@@ -353,9 +355,11 @@ should be the regular Clojure REPL started by the server process filter."
       "Enable `clj-refactor' mode properly.
 This means that `yas-minor-mode' also needs to be enabled, and
 the `clj-refactor' keybindings need to be installed."
-      (clj-refactor-mode 1)
-      (yas-minor-mode 1)
-      (cljr-add-keybindings-with-prefix "C-c RET"))
+      (when (and (use-package-install-deferred-package 'clj-refactor :after)
+                 (use-package-install-deferred-package 'yasnippet :after))
+        (clj-refactor-mode 1)
+        (yas-minor-mode 1)
+        (cljr-add-keybindings-with-prefix "C-c RET")))
 
     (add-hook 'clojure-mode-hook #'radian--enable-clj-refactor-mode))
 
@@ -367,7 +371,9 @@ the `clj-refactor' keybindings need to be installed."
     (defun radian--advice-inject-cljr-dependencies (&rest args)
       "Re-enable injection of `clj-refactor' middleware.
 This is a `:before' advice for `cider-jack-in'."
-      (when (cljr--project-dir)
+      (when (and (use-package-install-deferred-package
+                  'clj-refactor :after)
+                 (cljr--project-dir))
         (setq-local cljr-inject-dependencies-at-jack-in t)
         (make-local-variable 'cider-jack-in-lein-plugins)
         (make-local-variable 'cider-jack-in-nrepl-middlewares)

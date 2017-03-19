@@ -15,10 +15,18 @@
 ;; Provides Racket REPL integration, including documentation and
 ;; source lookups. Basically CIDER for Racket.
 (use-package geiser
+  :defer-install t
+  :commands (run-chez
+             run-chibi
+             run-chicken
+             run-geiser
+             run-guile
+             run-mit
+             run-racket)
   :config
 
   ;; Enable Paredit in the Geiser REPL.
-  (add-hook 'geiser-repl-mode #'paredit-mode))
+  (add-hook 'geiser-repl-mode-hook #'paredit-mode))
 
 (provide 'radian-scheme)
 

@@ -8,6 +8,12 @@
 ;; to ensure that you can never lose changes.
 (use-package undo-tree
   :demand t
+  :bind (;; By default, `undo' (and by extension `undo-tree-undo') is bound
+         ;; to C-_ and C-/, and `undo-tree-redo' is bound to M-_. It's
+         ;; logical to also bind M-/ to `undo-tree-redo'. This overrides the
+         ;; default binding of M-/, which is to `dabbrev-expand'.
+         :map undo-tree-map
+         ("M-/" . undo-tree-redo))
   :config
 
   ;; Enable Undo Tree everywhere.
@@ -44,14 +50,7 @@ loaded since the file was changed outside of Emacs."
       (apply undo-tree-load-history args)))
 
   (advice-add #'undo-tree-load-history :around
-              #'radian--advice-suppress-undo-tree-buffer-modified-message)
-
-  :bind (;; By default, `undo' (and by extension `undo-tree-undo') is bound
-         ;; to C-_ and C-/, and `undo-tree-redo' is bound to M-_. It's
-         ;; logical to also bind M-/ to `undo-tree-redo'. This overrides the
-         ;; default binding of M-/, which is to `dabbrev-expand'.
-         :map undo-tree-map
-         ("M-/" . undo-tree-redo)))
+              #'radian--advice-suppress-undo-tree-buffer-modified-message))
 
 (provide 'radian-undo)
 

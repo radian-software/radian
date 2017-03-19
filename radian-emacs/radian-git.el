@@ -1,5 +1,6 @@
 ;;; radian-git.el --- Interfacing with Git
 
+(require 'radian-appearance)
 (require 'radian-package)
 (require 'radian-patch)
 
@@ -17,6 +18,7 @@
                    "Documentation/magit.texi"
                    "Documentation/AUTHORS.md"
                    "COPYING" (:exclude "lisp/magit-popup.el")))
+  :defer-install t
   :bind (;; Add important keybindings for Magit as described in the
          ;; manual [1].
          ;;
@@ -27,6 +29,8 @@
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
 (use-package git-commit
+  :defer-install t
+  :commands (git-commit-setup)
   :init
 
   ;; Lazy-load `git-commit'.
@@ -38,10 +42,6 @@
   (el-patch-defun git-commit-setup-check-buffer ()
     (and buffer-file-name
          (string-match-p git-commit-filename-regexp buffer-file-name)
-         ;; The `git-commit-setup' function is not autoloaded, so we have
-         ;; to `require' the package manually.
-         (el-patch-add
-           (require 'git-commit))
          (git-commit-setup)))
 
   (el-patch-define-minor-mode global-git-commit-mode

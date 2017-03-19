@@ -46,6 +46,7 @@
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex
+  :defer-install t
   :after tex
   :config
 

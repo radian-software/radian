@@ -7,6 +7,57 @@
 ;; you're wondering, Company stands for Complete Anything.
 (use-package company
   :demand t
+  :bind (;; Replace `completion-at-point' and `complete-symbol' with
+         ;; `company-manual-begin'. You might think this could be put
+         ;; in the `:bind*' declaration below, but it seems that
+         ;; `bind-key*' does not work with remappings.
+         ([remap completion-at-point] . company-manual-begin)
+         ([remap complete-symbol] . company-manual-begin)
+
+         ;; The following are keybindings that take effect whenever
+         ;; the completions menu is visible, even if the user has not
+         ;; explicitly interacted with Company.
+
+         :map company-active-map
+
+         ;; Make TAB always complete the current selection. Note that
+         ;; <tab> is for windowed Emacs and TAB is for terminal Emacs.
+         ("<tab>" . company-complete-selection)
+         ("TAB" . company-complete-selection)
+
+         ;; Prevent SPC from ever triggering a completion.
+         ("SPC" . nil)
+
+         ;; The following are keybindings that only take effect if the
+         ;; user has explicitly interacted with Company.
+
+         :map company-active-map
+         :filter company-explicit-action-p
+
+         ;; Make RET trigger a completion if and only if the user has
+         ;; explicitly interacted with Company. Note that <return> is
+         ;; for windowed Emacs and RET is for terminal Emacs.
+         ("<return>" . company-complete-selection)
+         ("RET" . company-complete-selection)
+
+         ;; We then do the same for the up and down arrows. Note that
+         ;; we use `company-select-previous' instead of
+         ;; `company-select-previous-or-abort'. I think the former
+         ;; makes more sense since the general idea of this `company'
+         ;; configuration is to decide whether or not to steal
+         ;; keypresses based on whether the user has explicitly
+         ;; interacted with `company', not based on the number of
+         ;; candidates.
+
+         ("<up>" . company-select-previous)
+         ("<down>" . company-select-next))
+
+  :bind* (;; The default keybinding for `completion-at-point' and
+          ;; `complete-symbol' is M-TAB or equivalently C-M-i. Here we
+          ;; make sure that no minor modes override this keybinding.
+          ("M-TAB" . company-manual-begin))
+
+  :diminish company-mode
   :config
 
   ;; Turn on Company everywhere.
@@ -123,59 +174,7 @@ This is an `:around' advice for `yas--make-control-overlay'."
         (apply yas--make-control-overlay args)))
 
     (advice-add #'yas--make-control-overlay :around
-                #'radian--advice-company-overrides-yasnippet))
-
-  :bind (;; Replace `completion-at-point' and `complete-symbol' with
-         ;; `company-manual-begin'. You might think this could be put
-         ;; in the `:bind*' declaration below, but it seems that
-         ;; `bind-key*' does not work with remappings.
-         ([remap completion-at-point] . company-manual-begin)
-         ([remap complete-symbol] . company-manual-begin)
-
-         ;; The following are keybindings that take effect whenever
-         ;; the completions menu is visible, even if the user has not
-         ;; explicitly interacted with Company.
-
-         :map company-active-map
-
-         ;; Make TAB always complete the current selection. Note that
-         ;; <tab> is for windowed Emacs and TAB is for terminal Emacs.
-         ("<tab>" . company-complete-selection)
-         ("TAB" . company-complete-selection)
-
-         ;; Prevent SPC from ever triggering a completion.
-         ("SPC" . nil)
-
-         ;; The following are keybindings that only take effect if the
-         ;; user has explicitly interacted with Company.
-
-         :map company-active-map
-         :filter company-explicit-action-p
-
-         ;; Make RET trigger a completion if and only if the user has
-         ;; explicitly interacted with Company. Note that <return> is
-         ;; for windowed Emacs and RET is for terminal Emacs.
-         ("<return>" . company-complete-selection)
-         ("RET" . company-complete-selection)
-
-         ;; We then do the same for the up and down arrows. Note that
-         ;; we use `company-select-previous' instead of
-         ;; `company-select-previous-or-abort'. I think the former
-         ;; makes more sense since the general idea of this `company'
-         ;; configuration is to decide whether or not to steal
-         ;; keypresses based on whether the user has explicitly
-         ;; interacted with `company', not based on the number of
-         ;; candidates.
-
-         ("<up>" . company-select-previous)
-         ("<down>" . company-select-next))
-
-  :bind* (;; The default keybinding for `completion-at-point' and
-          ;; `complete-symbol' is M-TAB or equivalently C-M-i. Here we
-          ;; make sure that no minor modes override this keybinding.
-          ("M-TAB" . company-manual-begin))
-
-  :diminish company-mode)
+                #'radian--advice-company-overrides-yasnippet)))
 
 ;; This package adds usage-based sorting to Company
 ;; completions. (Perhaps it too can be replaced by `historian' one

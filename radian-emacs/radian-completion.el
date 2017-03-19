@@ -1,6 +1,7 @@
 ;;; radian-completion.el --- Completion systems
 
 (require 'cl-lib)
+(require 'radian-appearance)
 (require 'radian-package)
 (require 'radian-patch)
 
@@ -79,6 +80,33 @@ Minibuffer bindings:
   ;; effect after the lazy-load is triggered).
   (diminish 'ivy-mode)
 
+  :bind (;; Add a keybinding for resuming the last completion session.
+         ;; The keybinding C-c C-r is suggested in the README for Ivy,
+         ;; but it's overridden by `sh-mode' and `clojure-mode'.
+         ("C-x C-r" . ivy-resume)
+
+         ;; Improve the Ivy keybindings, making them more predictable.
+         ;;
+         ;; There are essentially three "accept" actions in Ivy: RET,
+         ;; TAB, and C-j. Sometimes two or even all three of them do
+         ;; the same thing, but there is one situation when there are
+         ;; three different behaviors that might be desirable. This is
+         ;; when you are in `counsel-find-file', and you have typed in
+         ;; "foo", and there is a folder called "foobar" in the same
+         ;; directory.
+         ;;
+         ;; In this situation, RET will `dired' the folder "foobar",
+         ;; TAB will move Ivy into the "foobar" folder, and C-j will
+         ;; create a new file called "foo". But only with the
+         ;; keybindings below! The default behavior is different, and
+         ;; weird. I think this is the most intuitive and useful.
+         ;;
+         ;; As always, TAB is for terminal Emacs and <tab> is for
+         ;; windowed Emacs.
+         :map ivy-minibuffer-map
+         ("TAB" . ivy-alt-done)
+         ("<tab>" . ivy-alt-done)
+         ("C-j" . ivy-immediate-done))
   :config
 
   ;; Use fuzzy matching for Ivy, powered by flx, but not for Swiper
@@ -141,33 +169,6 @@ This is an `:around' advice for `counsel-M-x'."
   (advice-add #'counsel-M-x :around
               #'radian--advice-preserve-smex-sorting)
 
-  :bind (;; Add a keybinding for resuming the last completion session.
-         ;; The keybinding C-c C-r is suggested in the README for Ivy,
-         ;; but it's overridden by `sh-mode' and `clojure-mode'.
-         ("C-x C-r" . ivy-resume)
-
-         ;; Improve the Ivy keybindings, making them more predictable.
-         ;;
-         ;; There are essentially three "accept" actions in Ivy: RET,
-         ;; TAB, and C-j. Sometimes two or even all three of them do
-         ;; the same thing, but there is one situation when there are
-         ;; three different behaviors that might be desirable. This is
-         ;; when you are in `counsel-find-file', and you have typed in
-         ;; "foo", and there is a folder called "foobar" in the same
-         ;; directory.
-         ;;
-         ;; In this situation, RET will `dired' the folder "foobar",
-         ;; TAB will move Ivy into the "foobar" folder, and C-j will
-         ;; create a new file called "foo". But only with the
-         ;; keybindings below! The default behavior is different, and
-         ;; weird. I think this is the most intuitive and useful.
-         ;;
-         ;; As always, TAB is for terminal Emacs and <tab> is for
-         ;; windowed Emacs.
-         :map ivy-minibuffer-map
-         ("TAB" . ivy-alt-done)
-         ("<tab>" . ivy-alt-done)
-         ("C-j" . ivy-immediate-done))
   :diminish ivy-mode)
 
 ;; Ivy is just a general-purpose completion framework. It can be used
@@ -175,11 +176,6 @@ This is an `:around' advice for `counsel-M-x'."
 ;; done by the Counsel library. (It also adds a few new commands, such
 ;; as `counsel-git-ag'.)
 (use-package counsel
-  :config
-
-  ;; If there is a valid file at point, pre-select in C-x C-f.
-  (setq counsel-find-file-at-point t)
-
   :bind (;; Use Counsel for common Emacs commands.
          ("M-x" . counsel-M-x)
          ("C-x C-f" . counsel-find-file)
@@ -204,7 +200,11 @@ This is an `:around' advice for `counsel-M-x'."
          ;; After you have pressed M-:, you can use C-r to select a
          ;; previous entry using Counsel.
          :map read-expression-map
-         ("C-r" . counsel-expression-history)))
+         ("C-r" . counsel-expression-history))
+  :config
+
+  ;; If there is a valid file at point, pre-select in C-x C-f.
+  (setq counsel-find-file-at-point t))
 
 ;; Remembers your choices in completion menus.
 (use-package historian

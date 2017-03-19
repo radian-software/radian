@@ -5,6 +5,8 @@
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; YAML files.
 (use-package yaml-mode
+  :defer-install t
+  :mode "\\.\\(e?ya?\\|ra\\)ml\\'"
   :config
 
   ;; Don't automatically wrap text when editing YAML files.
@@ -16,7 +18,8 @@
 
 ;; Editing for TOML files.
 (use-package toml-mode
-
+  :defer-install t
+  :mode "\\.toml\\'"
   :config
 
   ;; Show `toml-mode' as "TOML" instead of "Toml" in the mode line.
@@ -27,10 +30,18 @@
   (add-hook 'toml-mode-hook #'radian--rename-toml-mode))
 
 ;; Edit .gitignore files.
-(use-package gitignore-mode)
+(use-package gitignore-mode
+  :defer-install t
+  :mode (("/git/ignore\\'" . gitignore-mode)
+         ("/info/exclude\\'" . gitignore-mode)
+         ("/\\.gitignore\\'" . gitignore-mode)))
 
 ;; Provides syntax highlighting for VimScript files.
 (use-package vimrc-mode
+  :defer-install t
+  :mode (("\\.exrc\\'" . vimrc-mode)
+         ("[._]?g?vimrc\\'" . vimrc-mode)
+         ("\\.vim\\'" . vimrc-mode))
   :config
 
   ;; Indent by two spaces in `vimrc-mode' rather than eight spaces.

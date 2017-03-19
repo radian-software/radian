@@ -7,8 +7,7 @@
 ;; clear, and robust way of doing so. See the README [1].
 ;;
 ;; [1]: https://github.com/raxod502/el-patch
-(use-package el-patch
-  :demand t)
+(use-package el-patch)
 
 (provide 'radian-patch)
 

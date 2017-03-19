@@ -39,6 +39,8 @@ This is an `:override' advice for `c-update-modeline'.")
 
 ;; General support for C, C++, and Objective-C based on libclang.
 (use-package irony
+  :defer-install t
+  :commands (irony-mode)
   :init
 
   ;; Enable Irony for C, C++, and Objective-C files.
@@ -85,6 +87,8 @@ This is an `:override' advice for `c-update-modeline'.")
 
 ;; Company integration for Irony.
 (use-package company-irony
+  :defer-install t
+  :commands (company-irony)
   :init
 
   ;; Tell Company about company-irony. For some reason, this appears
@@ -107,6 +111,8 @@ This is an `:override' advice for `c-update-modeline'.")
 
 ;; Extends company-irony to work for completing #includes.
 (use-package company-irony-c-headers
+  :defer-install t
+  :commands (company-irony-c-headers)
   :init
 
   ;; Tell Company about company-irony-c-headers. As per the README
@@ -124,6 +130,8 @@ This is an `:override' advice for `c-update-modeline'.")
 (use-package irony-eldoc
   :recipe (:fetcher github
            :repo "raxod502/irony-eldoc")
+  :defer-install t
+  :commands (irony-eldoc)
   :init
 
   ;; Enable irony-eldoc. See `irony-eldoc' function documentation.
