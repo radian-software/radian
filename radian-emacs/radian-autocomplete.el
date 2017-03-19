@@ -32,7 +32,7 @@
          ;; user has explicitly interacted with Company.
 
          :map company-active-map
-         :filter company-explicit-action-p
+         :filter (company-explicit-action-p)
 
          ;; Make RET trigger a completion if and only if the user has
          ;; explicitly interacted with Company. Note that <return> is
