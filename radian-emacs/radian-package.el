@@ -15,7 +15,7 @@
     (make-directory repos-dir 'parents)
     (message "Cloning repository \"straight.el\"...")
     (unless (= 0 (call-process
-                  "git" nil nil nil "clone" "--recursive"
+                  "git" nil nil nil "clone" "--recursive" "-b" "develop"
                   "https://github.com/raxod502/straight.el.git"
                   (expand-file-name
                    (concat repos-dir "straight.el"))))
