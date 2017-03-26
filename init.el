@@ -17,6 +17,12 @@
 ;; user can override it in that same file if they want.
 (setq custom-file radian-local-init-file)
 
+;; Tell straight.el about the profiles we are going to be using.
+(setq straight-profiles
+      '((radian . "radian.el")
+        (radian-local . "radian-local.el")
+        (nil . "default.el")))
+
 (condition-case-unless-debug error-data
     (progn
       ;; Make sure we are running a modern enough Emacs, otherwise
