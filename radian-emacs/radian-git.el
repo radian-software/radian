@@ -10,14 +10,6 @@
 
 ;; A Git Porcelain inside Emacs.
 (use-package magit
-  :recipe (:fetcher github
-           :repo "raxod502/magit"
-           :branch "magit-version-symlinks"
-           :files ("lisp/magit*.el"
-                   "lisp/git-rebase.el"
-                   "Documentation/magit.texi"
-                   "Documentation/AUTHORS.md"
-                   "COPYING" (:exclude "lisp/magit-popup.el")))
   :defer-install t
   :bind (;; Add important keybindings for Magit as described in the
          ;; manual [1].
