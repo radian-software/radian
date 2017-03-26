@@ -38,7 +38,6 @@
       (add-to-list 'load-path radian-directory)
 
       ;; Load the Radian libraries.
-
       (let ((preloaded-features
              '(;; no-littering changes lots of paths and needs to be
                ;; loaded as soon as possible.
@@ -49,7 +48,9 @@
                               (directory-files
                                radian-directory nil
                                "^[a-z-]+\\.el$"
-                               'nosort))))
+                               'nosort)))
+            ;; Any packages installed here are official Radian packages.
+            (straight-current-profile 'radian))
         ;; First we need to unload all the features, so that the
         ;; init-file can be reloaded to pick up changes.
         (dolist (feature radian-features)
@@ -67,9 +68,21 @@
                            (error-message-string error-data)))))))
 
       ;; Run local customizations that are supposed to be run after
-      ;; init.
-      (when (fboundp 'radian-after-init)
-        (radian-after-init)))
+      ;; init. Any packages installed here are user-local
+      ;; packages. (Packages installed interactively do not belong to
+      ;; either `radian' or `radian-local', and should not be written
+      ;; to either lockfile.)
+      (let ((straight-current-profile 'radian-local))
+        (when (fboundp 'radian-after-init)
+          (radian-after-init)))
+
+      ;; This helps out the package management system. See the
+      ;; documentation on `straight-declare-init-succeeded'.
+      (straight-declare-init-succeeded))
 
   ;; Report errors as warnings.
-  (error (warn "%s" (error-message-string error-data))))
+  (error (warn "%s" (error-message-string error-data))
+         ;; This helps out the package management system. See the
+         ;; documentation on `straight-declare-init-finished'.
+         (when (fboundp 'straight-declare-init-finished)
+           (straight-declare-init-finished))))
