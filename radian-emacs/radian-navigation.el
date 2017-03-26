@@ -115,8 +115,6 @@ nil means no keybinding is established."
                     (bind-key ,custom-name #',command-name))))))
           specs)))
 
-  ;; FIXME this doesn't work at all
-
   (radian--establish-avy-bindings
    ("c" . avy-goto-char)
    ("t" . avy-goto-char-timer)
