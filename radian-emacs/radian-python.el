@@ -19,9 +19,6 @@
 
 ;; Company integration for anaconda-mode.
 (use-package company-anaconda
-  :recipe (:fetcher github
-           :repo "raxod502/company-anaconda"
-           :branch "radian-1")
   :defer-install t
   :commands (company-anaconda)
   :init
