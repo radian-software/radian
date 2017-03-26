@@ -320,6 +320,8 @@ This is a function for `after-save-hook'. Remove
 ;; This package provides enhanced versions of the Projectile commands
 ;; that use Ivy.
 (use-package counsel-projectile
+  :recipe (:fetcher github
+           :repo "raxod502/counsel-projectile")
   :init
 
   ;; Lazy-load `counsel-projectile'.
