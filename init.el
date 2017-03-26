@@ -4,7 +4,7 @@
 (defvar radian-local-init-file "~/.emacs.d/init.local.el"
   "File for local customizations of Radian.")
 
-(defvar radian-directory "~/.emacs.d/radian/"
+(defvar radian-directory (expand-file-name "~/.emacs.d/radian/")
   "Path to Radian libraries.")
 
 ;; Prevent package.el from modifying this file if the rest of
