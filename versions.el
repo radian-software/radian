@@ -43,7 +43,7 @@
  ("restart-emacs" . "38603b019b703f6e78f640478ee6412ba743f7b1")
  ("s.el" . "fc395c8d5e6c14d5e0920ab80d4d5df007eed14a")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
- ("straight.el" . "6b6926af4fc2ba35371a1dea2ac9c45394d8399e")
+ ("straight.el" . "44925b618634f8f81e677db1ce1fc967727d6dbe")
  ("swiper" . "bf8dc5f778cbac27629162e07f798032310552cf")
  ("sx.el" . "de73e993930f910862698727b5c0d93a1f656deb")
  ("toml-mode.el" . "f6c61817b00f9c4a3cab1bae9c309e0fc45cdd06")
