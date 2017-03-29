@@ -12,7 +12,7 @@
  ("company-irony-c-headers" . "ba304fe7eebdff90bbc7dea063b45b82638427fa")
  ("company-mode" . "e19e53eacca9624981068939b00b8d630c987d53")
  ("company-statistics" . "e62157d43b2c874d2edbd547c3bdfb05d0a7ae5c")
- ("counsel-projectile" . "ad8cf53b7ab14961667dd7a55b410c142441f534")
+ ("counsel-projectile" . "60bdbf382f02cdf3a1f5a94867167030cbdd2a17")
  ("dash.el" . "98e819e407bbc35478cde30a74be15f077bd6d4b")
  ("diminish.el" . "826e19186bef91d2241739cb8b48b8cfba14c17a")
  ("edn.el" . "be9e32d1b49e35247b263b0243df7cfdc8d413ab")
