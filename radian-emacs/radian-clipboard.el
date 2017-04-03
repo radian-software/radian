@@ -16,7 +16,14 @@
     (defvar radian--last-copy-to-macOS nil
       "The last text that was copied to the system clipboard.")
     (defun radian--paste-from-macOS ()
-      (let ((text (shell-command-to-string "pbpaste")))
+      (let* (;; Setting `default-directory' to a directory that is
+             ;; sure to exist means that this code won't error out
+             ;; when the directory for the current buffer does not
+             ;; exist.
+             (default-directory "/")
+             ;; Command pbpaste returns the clipboard contents as a
+             ;; string.
+             (text (shell-command-to-string "pbpaste")))
         ;; If this function returns nil then the system clipboard is
         ;; ignored and the first element in the yank ring (which, if
         ;; the system clipboard has not been modified since the last
@@ -26,13 +33,21 @@
         (unless (string= text radian--last-copy-to-macOS)
           text)))
     (defun radian--copy-to-macOS (text)
-      ;; Setting `process-connection-type' makes Emacs use a pipe to
-      ;; communicate with pbcopy, rather than a pty (which is
-      ;; overkill).
-      (let* ((process-connection-type nil)
+      (let* (;; Setting `default-directory' to a directory that is
+             ;; sure to exist means that this code won't error out
+             ;; when the directory for the current buffer does not
+             ;; exist.
+             (default-directory "/")
+             ;; Setting `process-connection-type' makes Emacs use a pipe to
+             ;; communicate with pbcopy, rather than a pty (which is
+             ;; overkill).
+             (process-connection-type nil)
              ;; The nil argument tells Emacs to discard stdout and
              ;; stderr. Note, we aren't using `call-process' here
              ;; because we want this command to be asynchronous.
+             ;;
+             ;; Command pbcopy writes stdin to the clipboard until it
+             ;; receives EOF.
              (proc (start-process "pbcopy" nil "pbcopy")))
         (process-send-string proc text)
         (process-send-eof proc))
