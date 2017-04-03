@@ -225,10 +225,16 @@ setopt chaselinks
 
 # Better ls defaults.
 if command -v exa &>/dev/null; then
-    alias l='exa --all --git --header --long --color-scale'
-    alias lg='exa --all --git --grid --header --long --color-scale'
-    alias lt='exa --all --git --header --long --tree --color-scale --ignore-glob .git'
-    alias ltl='exa --all --git --header --long --tree --color-scale --ignore-glob .git --level'
+    alias l='exa --all --header --long --color-scale'
+    alias lg='exa --all --grid --header --long --color-scale'
+    alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
+    function lti() {
+        exa --all --header --long --tree --color-scale --ignore-glob ".git|$1" ${@:2}
+    }
+    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
+    function ltli() {
+        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|$2" ${@:3}
+    }
 else
     # We alias gls to a git command elsewhere, so we use "command"
     # here to prevent it from being interpreted as said git command.
@@ -620,6 +626,9 @@ alias gcp='git cherry-pick'
 alias gcpc='git cherry-pick --continue'
 alias gcpa='git cherry-pick --abort'
 
+alias grv='git revert'
+alias grvm='git revert -m'
+
 alias gt='git tag'
 alias gtd='git tag -d'
 
@@ -646,6 +655,8 @@ alias gdcs='git diff --cached --stat'
 alias gbl='git blame'
 
 alias gb='git branch'
+alias gbsu='git branch --set-upstream-to'
+alias gbusu='git branch --unset-upstream'
 alias gbd='git branch --delete'
 alias gbdd='git branch --delete --force'
 function gbu() {
@@ -718,6 +729,10 @@ function gpu() {
     fi
 }
 alias gpd='git push --delete'
+
+alias gcr='git create'
+alias gfk='git fork'
+alias gpr='git pull-request'
 
 ################################################################################
 #### Hub
@@ -858,6 +873,7 @@ export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
 ################################################################################
 #### Vim
 
+alias vi=vim
 alias vim=nvim
 
 ################################################################################

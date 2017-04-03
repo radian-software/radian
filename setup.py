@@ -872,6 +872,7 @@ feature_list = [
      "pretty_name": "Homebrew",
      "description": "The missing package manager for macOS. Can install almost everything.",
      "group": "basic",
+     "required": ["xcode-cl-tools"],
      "action": lambda: ensure_homebrew_installed()},
 
     ### Git ###
@@ -1118,7 +1119,7 @@ feature_list = [
      "required": ["homebrew"],
      "action": lambda: (
      ensure_homebrew_package_installed("hub", command=["hub", "--version"],
-                                       prefix="git version .+"))},
+                                       prefix="git version .+", flags=["--HEAD"]))},
 
     {"name": "tmuxinator",
      "pretty_name": "tmuxinator",
