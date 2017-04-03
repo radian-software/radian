@@ -28,14 +28,11 @@
 ;; we use a library called `use-package', which provides a macro by
 ;; the same name. This macro automates many common tasks, like
 ;; autoloading functions, binding keys, registering major modes, and
-;; lazy-loading, through the use of keyword arguments. Here we install
-;; it from my fork. See the README [1].
+;; lazy-loading, through the use of keyword arguments. See the README
+;; [1].
 ;;
-;; [1]: https://github.com/raxod502/use-package
-(straight-use-package '(use-package
-                         :fetcher github
-                         :repo "raxod502/use-package"
-                         :files ("use-package.el")))
+;; [1]: https://github.com/jwiegley/use-package
+(straight-use-package 'use-package)
 
 ;; Tell use-package to automatically install packages if they are
 ;; missing. By default, packages are installed via straight.el [1],
@@ -58,7 +55,7 @@
 ;; if `:demand' is present, the loading is eager; otherwise, the
 ;; loading is lazy. See [1].
 ;;
-;; [1]: https://github.com/raxod502/use-package#notes-about-lazy-loading
+;; [1]: https://github.com/jwiegley/use-package#notes-about-lazy-loading
 (setq use-package-always-defer t)
 
 (provide 'radian-package)
