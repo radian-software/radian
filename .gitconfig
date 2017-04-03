@@ -27,8 +27,6 @@
 [merge]
 	conflictstyle = diff3
 	stat = true
-[pull]
-	rebase = true
 [rebase]
 	autosquash = true
 [rerere]
