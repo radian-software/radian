@@ -81,7 +81,7 @@ your system might be in, there are a few things to watch out for:
 
 A setup script for Linux is coming soon. In the meantime, you can
 symlink any of the dotfiles you want into your home directory. Simply
-look at `setup.sh` to see what versions of what programs are expected
+look at `setup.py` to see what versions of what programs are expected
 to be installed, and where symlinks are created.
 
 ## Setup on Windows
