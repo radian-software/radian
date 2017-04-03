@@ -297,6 +297,9 @@ Return nil if not inside a project."
 The new buffer will correspond to the same project as CLIENT-BUFFER, which
 should be the regular Clojure REPL started by the server process filter."
     (interactive (list (cider-current-connection)))
+    ;; Load variables in .dir-locals.el into the server process buffer, so
+    ;; cider-cljs-*-repl can be set for each project individually.
+    (hack-local-variables)
     (let* ((nrepl-repl-buffer-name-template "*cider-repl CLJS%s*")
            (nrepl-create-client-buffer-function #'cider-repl-create)
            (nrepl-use-this-as-repl-buffer 'new)
@@ -308,7 +311,8 @@ should be the regular Clojure REPL started by the server process filter."
                                         (when (buffer-live-p nrepl-server-buffer)
                                           (get-buffer-process nrepl-server-buffer)))))
            (cljs-proc (apply #'nrepl-start-client-process client-process-args))
-           (cljs-buffer (process-buffer cljs-proc)))
+           (cljs-buffer (process-buffer cljs-proc))
+           (cljs-repl-form (cider-cljs-repl-form (cider-project-type))))
       (with-current-buffer cljs-buffer
         ;; The new connection has now been bumped to the top, but it's still a
         ;; Clojure REPL!  Additionally, some ClojureScript REPLs can actually take
@@ -318,15 +322,14 @@ should be the regular Clojure REPL started by the server process filter."
         ;; up the list, so it takes priority on Clojure requests.
         (cider-make-connection-default client-buffer)
         (el-patch-remove
-          (pcase (assoc cider-cljs-lein-repl cider--cljs-repl-types)
+          (pcase (assoc cljs-repl-form cider--cljs-repl-types)
             (`(,_ ,name ,info)
              (message "Starting a %s REPL%s" name (or info "")))
             (_ (message "Starting a custom ClojureScript REPL"))))
         (cider-nrepl-send-request
-         (list "op" "eval"
-               "ns" (cider-current-ns)
-               "session" nrepl-session
-               "code" cider-cljs-lein-repl)
+         `("op" "eval"
+           "ns" ,(cider-current-ns)
+           "code" ,cljs-repl-form)
          (cider-repl-handler (current-buffer)))
         (cider--offer-to-open-app-in-browser nrepl-server-buffer)))))
 
