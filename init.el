@@ -56,7 +56,8 @@
                                "^[a-z-]+\\.el$"
                                'nosort)))
             ;; Any packages installed here are official Radian packages.
-            (straight-current-profile 'radian))
+            (straight-current-profile 'radian)
+            (init-successful t))
         ;; First we need to unload all the features, so that the
         ;; init-file can be reloaded to pick up changes.
         (dolist (feature radian-features)
@@ -65,26 +66,29 @@
           (condition-case-unless-debug error-data
               (require feature)
             (error (warn "Could not load `%S': %s" feature
-                         (error-message-string error-data)))))
+                         (error-message-string error-data))
+                   (setq init-successful nil))))
         (dolist (feature radian-features)
           (unless (member feature preloaded-features)
             (condition-case-unless-debug error-data
                 (require feature)
               (error (warn "Could not load `%S': %s" feature
-                           (error-message-string error-data)))))))
+                           (error-message-string error-data))
+                     (setq init-successful nil)))))
 
-      ;; Run local customizations that are supposed to be run after
-      ;; init. Any packages installed here are user-local
-      ;; packages. (Packages installed interactively do not belong to
-      ;; either `radian' or `radian-local', and should not be written
-      ;; to either lockfile.)
-      (let ((straight-current-profile 'radian-local))
-        (when (fboundp 'radian-after-init)
-          (radian-after-init)))
+        ;; Run local customizations that are supposed to be run after
+        ;; init. Any packages installed here are user-local
+        ;; packages. (Packages installed interactively do not belong to
+        ;; either `radian' or `radian-local', and should not be written
+        ;; to either lockfile.)
+        (let ((straight-current-profile 'radian-local))
+          (when (fboundp 'radian-after-init)
+            (radian-after-init)))
 
-      ;; This helps out the package management system. See the
-      ;; documentation on `straight-declare-init-succeeded'.
-      (straight-declare-init-succeeded))
+        ;; This helps out the package management system. See the
+        ;; documentation on `straight-declare-init-succeeded'.
+        (when init-successful
+          (straight-declare-init-succeeded))))
 
   ;; Report errors as warnings.
   (error (warn "%s" (error-message-string error-data))
