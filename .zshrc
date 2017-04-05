@@ -2,13 +2,13 @@
 #### Define default bundle list
 
 bundles=(
+    "mfaerevaag/wd, as:command, rename-to:wd" # Quickly jump to directories
     "plugins/docker, from:oh-my-zsh" # Completion for docker
     "plugins/fasd, from:oh-my-zsh" # Quickly jump to directories
     "plugins/lein, from:oh-my-zsh" # Completion for lein
     "plugins/sudo, from:oh-my-zsh" # Quickly re-run commands with sudo
     "plugins/tmuxinator, from:oh-my-zsh" # Completion for tmuxinator
     "plugins/vault, from:oh-my-zsh" # Completion for vault
-    "plugins/wd, from:oh-my-zsh" # Quickly jump to directories
     "zsh-users/zsh-autosuggestions" # Autosuggestions from history
 )
 
