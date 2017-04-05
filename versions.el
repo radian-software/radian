@@ -49,7 +49,7 @@
  ("toml-mode.el" . "f6c61817b00f9c4a3cab1bae9c309e0fc45cdd06")
  ("transpose-frame" . "011f420c3496b69fc22d789f64cb8091834feba7")
  ("undo-tree" . "4cba00bb049cfaa2ee6821a9e347209a88a740b5")
- ("use-package" . "8830c3e453c8403c511245a50c3acba091c63972")
+ ("use-package" . "103b6518e66d9acb990832f02dca093a7425ca84")
  ("vimrc-mode" . "fae7604e5ea6eef104d8c68598c3bbf9d798aa74")
  ("visual-regexp-steroids.el" . "a6420b25ec0fbba43bf57875827092e1196d8a9e")
  ("visual-regexp.el" . "b3096c2d391ff4e28a2a4e8cd82efbf11071ea85")

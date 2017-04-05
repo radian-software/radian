@@ -32,9 +32,7 @@
 ;; [1].
 ;;
 ;; [1]: https://github.com/jwiegley/use-package
-(straight-use-package '(use-package
-                         :fetcher github
-                         :repo "raxod502/use-package"))
+(straight-use-package 'use-package)
 
 ;; Tell use-package to automatically install packages if they are
 ;; missing. By default, packages are installed via straight.el [1],
