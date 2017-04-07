@@ -2,7 +2,7 @@
 #### Define default bundle list
 
 bundles=(
-    "mfaerevaag/wd, as:command, rename-to:wd" # Quickly jump to directories
+    "mfaerevaag/wd, use:wd.sh, rename-to:wd" # Quickly jump to directories
     "plugins/docker, from:oh-my-zsh" # Completion for docker
     "plugins/fasd, from:oh-my-zsh" # Quickly jump to directories
     "plugins/lein, from:oh-my-zsh" # Completion for lein
@@ -37,7 +37,7 @@ function remove_bundle() {
 #### Load user-specific configuration file (1 of 2)
 
 if [[ -f ~/.zshrc.before.local ]]; then
-    source ~/.zshrc.before.local
+    . ~/.zshrc.before.local
 fi
 
 ################################################################################
@@ -48,7 +48,7 @@ export ZSH=$ZPLUG_HOME/repos/robbyrussell/oh-my-zsh
 export ZSH_CACHE_DIR=$ZSH/cache
 
 if [[ -f $ZPLUG_HOME/init.zsh ]]; then
-    source $ZPLUG_HOME/init.zsh
+    . $ZPLUG_HOME/init.zsh
 
     for bundle in $bundles; do
         zplug $=bundle
@@ -273,6 +273,11 @@ alias 6='cd -6'
 alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
+
+# Enable wd.
+wd() {
+    . wd
+}
 
 # To complement the previous set of aliases, here is a convenient way
 # to list the last few directories visited, with their numbers. The
@@ -887,5 +892,5 @@ export _FASD_NOCASE=1
 #### Load user-specific configuration file (2 of 2)
 
 if [[ -f ~/.zshrc.local ]]; then
-    source ~/.zshrc.local
+    . ~/.zshrc.local
 fi
