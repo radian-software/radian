@@ -107,6 +107,11 @@
   ;; once you have a lot of buffers open.
   (setq company-dabbrev-other-buffers nil)
 
+  ;; Make company-dabbrev case-sensitive. Case insensitivity seems
+  ;; like a great idea, but it turns out to look really bad when you
+  ;; have domain-specific words that have particular casing.
+  (setq company-dabbrev-ignore-case nil)
+
   ;; Make it so that Company's keymap overrides Yasnippet's keymap
   ;; when a snippet is active. This way, you can TAB to complete a
   ;; suggestion for the current field in a snippet, and then TAB to
