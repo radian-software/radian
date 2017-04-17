@@ -32,7 +32,17 @@
     (defun radian--enable-company-anaconda ()
       (add-to-list 'company-backends #'company-anaconda))
 
-    (add-hook 'python-mode-hook #'radian--enable-company-anaconda)))
+    (add-hook 'python-mode-hook #'radian--enable-company-anaconda)
+
+    ;; Add a space between the completion candidates and the
+    ;; chevron-enclosed description, so the completions menu doesn't
+    ;; look so crowded.
+    (setq company-anaconda-annotation-function
+          (lambda (candidate)
+            (concat
+             " "
+             (company-anaconda-description-in-chevrons
+              candidate))))))
 
 (provide 'radian-python)
 
