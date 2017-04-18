@@ -746,7 +746,9 @@ alias gpr='git pull-request'
 # more information.
 #
 # [1]: https://github.com/github/hub
-alias git=hub
+if command -v hub &>/dev/null; then
+    alias git=hub
+fi
 
 ################################################################################
 #### Tmux
