@@ -224,7 +224,7 @@ setopt pushdminus
 setopt chaselinks
 
 # Better ls defaults.
-if command -v exa &>/dev/null; then
+if (( $+commands[exa] )); then
     alias l='exa --all --header --long --color-scale'
     alias lg='exa --all --grid --header --long --color-scale'
     alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
@@ -239,12 +239,12 @@ else
     # We alias gls to a git command elsewhere, so we use "command"
     # here to prevent it from being interpreted as said git command.
     # If you want to run coreutils ls, use "\gls".
-    if command -v gls &>/dev/null; then
+    if (( $+commands[gls] )); then
         alias l='command gls -AlhF --color=auto'
     else
         alias l='ls -AlhF'
     fi
-    if command -v tree &>/dev/null; then
+    if (( $+commands[tree] )); then
         alias lt=tree
         alias ltl='tree -L'
     fi
@@ -746,7 +746,7 @@ alias gpr='git pull-request'
 # more information.
 #
 # [1]: https://github.com/github/hub
-if command -v hub &>/dev/null; then
+if (( $+commands[hub] )); then
     alias git=hub
 fi
 
@@ -880,10 +880,10 @@ export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
 ################################################################################
 #### Vim
 
-if command -v nvim &>/dev/null; then
+if (( $+commands[nvim] )); then
     alias vi=nvim
     alias vim=nvim
-elif command -v vim &>/dev/null; then
+elif (( $+commands[vim] )); then
     alias vi=vim
 fi
 
