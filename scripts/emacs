@@ -1,3 +1,8 @@
 #!/bin/sh
 
+# What's the script doing here? Well, it turns out that if you just
+# symlink the Emacs binary from Emacs.app to /usr/local/bin, it screws
+# up some kind of operating system detection, and causes Emacs to fail
+# to launch. The easiest way around it is just to create a wrapper
+# script. This one is POSIX compliant because it can be!
 /Applications/Emacs.app/Contents/MacOS/Emacs "$@"
