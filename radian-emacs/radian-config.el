@@ -55,6 +55,15 @@
 
   (add-hook 'vimrc-mode-hook #'radian--fix-vimrc-indentation))
 
+;; Edit .htaccess and friends.
+(use-package apache-mode
+  :defer-install t
+  :mode (("\\.htaccess\\'"   . apache-mode)
+         ("httpd\\.conf\\'"  . apache-mode)
+         ("srm\\.conf\\'"    . apache-mode)
+         ("access\\.conf\\'" . apache-mode)
+         ("sites-\\(available\\|enabled\\)/" . apache-mode)))
+
 (provide 'radian-config)
 
 ;;; radian-config.el ends here
