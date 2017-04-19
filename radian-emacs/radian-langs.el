@@ -81,6 +81,17 @@
   ;; Indent aggressively in Ruby.
   (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
 
+;; Autocompletion for Ruby.
+(use-package robe
+  :defer-install t
+  :commands (robe-mode)
+  :init
+
+  ;; Enable Robe in Ruby files.
+  (add-hook 'ruby-mode-hook #'robe-mode)
+
+  :diminish robe-mode)
+
 ;; Rust, see https://www.rust-lang.org/
 (use-package rust-mode
   :defer-install t
