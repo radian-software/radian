@@ -108,7 +108,6 @@ key sequences \"M-P e e i\" and \"M-P o e i\" respectively."
 
 ;; Emacs
 (radian-register-dotfile ".emacs.d/init.el" "e i")
-(radian-register-dotfile ".emacs.d/init.before.local.el" "e b")
 (radian-register-dotfile ".emacs.d/init.local.el" "e l")
 
 ;; Git
