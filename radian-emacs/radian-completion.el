@@ -182,6 +182,7 @@ This is an `:around' advice for `counsel-M-x'."
          ("C-h f" . counsel-describe-function)
          ("C-h v" . counsel-describe-variable)
          ("C-h l" . counsel-load-library)
+         ("C-h C-l" . counsel-find-library)
          ("C-h S" . counsel-info-lookup-symbol)
          ("C-x 8 RET" . counsel-unicode-char)
 
