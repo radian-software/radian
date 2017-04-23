@@ -111,6 +111,12 @@
   (with-eval-after-load 'company
     (setq-local company-tooltip-align-annotations t))
 
+  (defun radian--reduce-racer-lag ()
+    ;; increased from 0:
+    (setq-local eldoc-idle-delay 0.5))
+
+  (add-hook 'racer-mode-hook #'radian--reduce-racer-lag)
+
   :diminish racer-mode)
 
 ;; Swift, see https://developer.apple.com/swift/
