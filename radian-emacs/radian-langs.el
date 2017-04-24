@@ -113,6 +113,8 @@
 
   (defun radian--reduce-racer-lag ()
     ;; increased from 0:
+    (setq-local company-idle-delay 0.5)
+    ;; increased from 0:
     (setq-local eldoc-idle-delay 0.5))
 
   (add-hook 'racer-mode-hook #'radian--reduce-racer-lag)
