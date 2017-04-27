@@ -189,7 +189,10 @@
   :config
 
   ;; Indent by two spaces by default.
-  (setq web-mode-markup-indent-offset 2))
+  (setq web-mode-markup-indent-offset 2)
+
+  ;; Autocomplete </ instantly.
+  (setq web-mode-enable-auto-closing t))
 
 (provide 'radian-langs)
 
