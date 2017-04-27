@@ -8,7 +8,10 @@
 ;; that for us.)
 (use-package help-fns+
   :defer-install t
-  :bind (("C-h M-k" . describe-keymap)))
+  :bind (("C-h M-k" . describe-keymap)
+         ;; Prevent help-fns+ from overriding this built-in
+         ;; keybinding:
+         ("C-h o" . describe-symbol)))
 
 (provide 'radian-help)
 
