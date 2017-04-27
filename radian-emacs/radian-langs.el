@@ -15,6 +15,34 @@
   :defer-install t
   :mode "\\.go\\'")
 
+;; Improved JavaScript support.
+(use-package js2-mode
+  :defer-install t
+  :commands (js2-minor-mode)
+  ;; This is slightly different than what is recommended in the README
+  ;; [1]. It seems to make the most sense though. See also [2].
+  ;;
+  ;; [1]: http://elpa.gnu.org/packages/js2-mode.html
+  ;; [2]: https://github.com/PythonNut/emacs-config/blob/41c132ed89d85b96c3cd5267cb86b6bb30ac45f3/modules/config-modes.el#L220-L222
+  :mode (("\\.js\\'" . js2-mode)
+         ("\\.jsx\\'" . js2-jsx-mode))
+  :interpreter ("node" . js2-mode)
+  :config
+
+  ;; Change the mode lighters. (They are originally Javascript-IDE and
+  ;; JSX-IDE, which are wordy.)
+
+  (defun radian--set-js2-mode-lighter ()
+    "Change the `js2-mode' lighter from Javascript-IDE to JavaScript."
+    (setq-local mode-name "JavaScript"))
+
+  (defun radian--set-js2-jsx-mode-lighter ()
+    "Change the `js2-jsx-mode' lighter from JSX-IDE to JSX."
+    (setq-local mode-name "JSX"))
+
+  (add-hook 'js2-mode-hook #'radian--set-js2-mode-lighter)
+  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter))
+
 ;; Markdown, see https://daringfireball.net/projects/markdown/syntax
 (use-package markdown-mode
   :defer-install t
