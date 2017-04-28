@@ -43,7 +43,34 @@
   (add-hook 'js2-mode-hook #'radian--set-js2-mode-lighter)
   (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter))
 
-;; Markdown, see https://daringfireball.net/projects/markdown/syntax
+;; Live web development with Emacs.
+(use-package skewer-mode
+  :defer-install t
+  :commands (list-skewer-clients skewer-mode run-skewer skewer-run-phantomjs)
+  :init
+
+  ;; Enable the features of Skewer. Since the author was kind enough
+  ;; to put `skewer-setup' in a separate file, we don't have to worry
+  ;; about lazy-loading!
+  (skewer-setup)
+  :diminish skewer-mode)
+
+;; Contrary to the name of the package, this actually provides Company
+;; support for JavaScript.
+(use-package ac-js2
+  :defer-install t
+  :after (:all js2-mode company)
+  :config
+
+  ;; Ostensibly this provides more intelligent completions, by
+  ;; allowing `ac-js2' to evaluate your JavaScript code to generate
+  ;; completions.
+  (setq ac-js2-evaluate-calls t)
+
+  ;; Enable the Company integration for `ac-js2'.
+  (add-to-list 'company-backends 'ac-js2-company))
+
+;; Markdown, see https://daringfireball.net/projects/markdown/
 (use-package markdown-mode
   :defer-install t
   :mode (("\\.markdown\\'" . markdown-mode)
