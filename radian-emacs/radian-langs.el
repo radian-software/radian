@@ -60,13 +60,14 @@
   ;; to put `skewer-setup' in a separate file, we don't have to worry
   ;; about lazy-loading!
   (skewer-setup)
+
   :diminish skewer-mode)
 
 ;; Contrary to the name of the package, this actually provides Company
-;; support for JavaScript.
+;; support for JavaScript, using js2 parsing and Skewer.
 (use-package ac-js2
   :defer-install t
-  :after (:all js2-mode company)
+  :after skewer-repl
   :config
 
   ;; Ostensibly this provides more intelligent completions, by
@@ -74,8 +75,37 @@
   ;; completions.
   (setq ac-js2-evaluate-calls t)
 
-  ;; Enable the Company integration for `ac-js2'.
-  (add-to-list 'company-backends 'ac-js2-company))
+  ;; Enable the Company integration for `ac-js2', but only in the
+  ;; Skewer REPL.
+
+  (defun radian--enable-ac-js2-company ()
+    (make-local-variable 'company-backends)
+    (add-to-list 'company-backends 'ac-js2-company))
+
+  (add-hook 'skewer-repl-mode-hook #'radian--enable-ac-js2-company))
+
+;; This package provides a separate auto-completion backend for
+;; JavaScript that is more suitable for general code.
+(use-package tern
+  :defer-install t
+  :after js2-mode
+  :config
+
+  ;; We want Tern to be active whenever we're editing a JavaScript
+  ;; file. But not when we're in the Skewer REPL, since there we use
+  ;; `ac-js2' instead.
+  (add-hook 'js2-mode-hook #'tern-mode)
+
+  :diminish tern-mode)
+
+;; Company backend that uses Tern.
+(use-package company-tern
+  :defer-install t
+  :after (:all tern company)
+  :config
+
+  ;; This allows Company to use suggestions from Tern.
+  (add-to-list 'company-backends 'company-tern))
 
 ;; Markdown, see https://daringfireball.net/projects/markdown/
 (use-package markdown-mode
