@@ -42,13 +42,7 @@
     (setq-local mode-name "JSX"))
 
   (add-hook 'js2-mode-hook #'radian--set-js2-mode-lighter)
-  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter)
-
-  ;; Bind C-M-j to `js-indent-line', not just M-j. This is temporary
-  ;; until [1] is merged.
-  ;;
-  ;; [1]: https://github.com/mooz/js2-mode/pull/421
-  (bind-key [remap indent-new-comment-line] #'js2-line-break js2-mode-map))
+  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter))
 
 ;; Live web development with Emacs.
 (use-package skewer-mode
