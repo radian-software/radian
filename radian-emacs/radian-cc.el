@@ -128,8 +128,6 @@ This is an `:override' advice for `c-update-modeline'.")
 
 ;; ElDoc integration for Irony.
 (use-package irony-eldoc
-  :recipe (:fetcher github
-           :repo "raxod502/irony-eldoc")
   :defer-install t
   :commands (irony-eldoc)
   :init

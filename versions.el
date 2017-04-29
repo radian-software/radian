@@ -39,7 +39,7 @@
  ("hydra" . "38ce88a9c3be11b0431080078095159b2211ca7a")
  ("iflipb" . "8eb478535aa4847b94ea4ce29d9476a6b652be2b")
  ("inf-ruby" . "af4f238ef4555521d13c5eb2fb8e818acf59d70a")
- ("irony-eldoc" . "eb2cef2ea04cdc4155edefc5a7e9c50fd732fae6")
+ ("irony-eldoc" . "0526b60ba09526c1f5d068f70ffdef67bc46a62b")
  ("irony-mode" . "63eb90e1f6f257ea8113450d0e02366148f5c2fb")
  ("js2-mode" . "659f683dbae890d9483bfc603c5599280987f1c2")
  ("jump.el" . "9519c675e8a650f6afade7d870e925d0fb50f112")
