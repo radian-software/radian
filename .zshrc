@@ -756,6 +756,7 @@ fi
 #
 # [1]: https://github.com/github/hub
 if (( $+commands[hub] )); then
+    alias hcl='hub clone'
     alias hc='hub create'
     alias hf='hub fork'
     alias hp='hub pull-request'
