@@ -760,6 +760,9 @@ if (( $+commands[hub] )); then
     alias hc='hub create'
     alias hf='hub fork'
     alias hp='hub pull-request'
+    alias hb='hub browse'
+    alias hh='hub help'
+    alias hi='hub issue'
 fi
 
 ################################################################################
