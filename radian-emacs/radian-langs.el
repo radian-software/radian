@@ -16,6 +16,10 @@
   :defer-install t
   :mode "\\.go\\'")
 
+(with-eval-after-load 'js
+  ;; The standard JavaScript indent width is two spaces, not four.
+  (setq js-indent-level 2))
+
 ;; Improved JavaScript support.
 (use-package js2-mode
   :defer-install t
