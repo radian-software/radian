@@ -4,7 +4,6 @@
 bundles=(
     "mfaerevaag/wd, use:wd.sh, rename-to:wd" # Quickly jump to directories
     "plugins/docker, from:oh-my-zsh" # Completion for docker
-    "plugins/fasd, from:oh-my-zsh" # Quickly jump to directories
     "plugins/lein, from:oh-my-zsh" # Completion for lein
     "plugins/sudo, from:oh-my-zsh" # Quickly re-run commands with sudo
     "plugins/tmuxinator, from:oh-my-zsh" # Completion for tmuxinator
