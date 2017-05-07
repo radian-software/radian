@@ -5,6 +5,7 @@
 (require 'radian-indent)
 (require 'radian-os)
 (require 'radian-package)
+(require 'radian-patch)
 
 ;; AppleScript, see
 (use-package apples-mode
@@ -49,17 +50,46 @@
   (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter))
 
 ;; Live web development with Emacs.
+
 (use-package skewer-mode
   :defer-install t
-  :commands (list-skewer-clients skewer-mode run-skewer skewer-run-phantomjs)
+  :commands (list-skewer-clients
+             run-skewer
+             skewer-mode
+             skewer-run-phantomjs)
   :init
 
-  ;; Enable the features of Skewer. Since the author was kind enough
-  ;; to put `skewer-setup' in a separate file, we don't have to worry
-  ;; about lazy-loading!
+  ;; Enable the features of Skewer. Since this package uses deferred
+  ;; installation, we need to `el-patch'.
+
+  (el-patch-defun skewer-setup ()
+    "Fully integrate Skewer into js2-mode, css-mode, and html-mode buffers."
+    (add-hook 'js2-mode-hook 'skewer-mode)
+    (add-hook 'css-mode-hook 'skewer-css-mode)
+    (add-hook 'html-mode-hook 'skewer-html-mode))
+
   (skewer-setup)
 
+  (defun radian--enable-skewer-setup-patches ()
+    "Enable `el-patch' patches for `skewer-setup'."
+    (require 'skewer-setup))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-skewer-setup-patches)
+
   :diminish skewer-mode)
+
+(use-package skewer-css
+  :recipe skewer-mode
+  :defer-install t
+  :commands (skewer-css-mode)
+  :diminish skewer-css-mode)
+
+(use-package skewer-html
+  :recipe skewer-mode
+  :defer-install t
+  :commands (skewer-html-mode)
+  :diminish skewer-html-mode)
 
 ;; Contrary to the name of the package, this actually provides Company
 ;; support for JavaScript, using js2 parsing and Skewer.
