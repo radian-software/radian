@@ -12,9 +12,15 @@
 ;; cause the region to be deleted, as expected). See the commentary in
 ;; delsel.el for details about what is going on here.
 (with-eval-after-load 'paredit
-  (put 'paredit-forward-delete 'delete-selection 'supersede)
-  (put 'paredit-backward-delete 'delete-selection 'supersede)
-  (put 'paredit-newline 'delete-selection t))
+  (dolist (cmd '(paredit-forward-delete paredit-backward-delete))
+    (put cmd 'delete-selection 'supersede))
+  (dolist (cmd '(paredit-newline
+                 paredit-open-round
+                 paredit-open-bracket
+                 paredit-open-curly
+                 paredit-open-angled
+                 paredit-open-parenthesis))
+    (put cmd 'delete-selection t)))
 
 ;; Make delete-selection-mode work properly with AUCTeX.
 (with-eval-after-load 'latex
