@@ -48,6 +48,7 @@
  ("markdown-toc" . "0edc303871517da67483119f2b1969055e6e0608")
  ("multiple-cursors.el" . "ddbe3ae932b6564c7429c3b2507510093ed1f3aa")
  ("no-littering" . "8a6c817df9cd7ce33c6f9d1a1c05ce522b1c75f7")
+ ("org" . "5bc540eae129c34d7763aacf7eaa596b04a3f256")
  ("paredit" . "7c27746a8eb259ae24b5dce9380801c4846258f0")
  ("peg.el" . "081efeca91d790c7fbc90871ac22c40935f4833b")
  ("pkg-info.el" . "76ba7415480687d05a4353b27fea2ae02b8d9d61")
