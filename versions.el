@@ -43,7 +43,7 @@
  ("irony-mode" . "63eb90e1f6f257ea8113450d0e02366148f5c2fb")
  ("js2-mode" . "659f683dbae890d9483bfc603c5599280987f1c2")
  ("jump.el" . "9519c675e8a650f6afade7d870e925d0fb50f112")
- ("magit" . "5333ac7942bfe4da5ba74dd973461cdcbbc16f5a")
+ ("magit" . "0c461ec5ff525d8a6121621468a79849935887c6")
  ("markdown-mode" . "0f88075c9091b4120fac96aaf091ec647d2ea555")
  ("markdown-toc" . "0edc303871517da67483119f2b1969055e6e0608")
  ("multiple-cursors.el" . "ddbe3ae932b6564c7429c3b2507510093ed1f3aa")
