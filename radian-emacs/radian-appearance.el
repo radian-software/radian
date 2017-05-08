@@ -125,7 +125,9 @@ reasons.")
                                      "rev-parse" "--short" "HEAD")
                        (if (> (buffer-size) 0)
                            (string-trim (buffer-string))
-                         ;; We shouldn't get here.
+                         ;; We shouldn't get here. Unfortunately, it
+                         ;; turns out that we do every once in a
+                         ;; while. (I have no idea why.)
                          "???")))))
                 (dirty (when git
                          (with-temp-buffer
