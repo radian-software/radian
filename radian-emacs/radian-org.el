@@ -99,7 +99,14 @@
   ;; don't bother to change it. That should change, FIXME.
   (provide 'org-version)
   (with-eval-after-load 'org
-    (defalias #'org-git-version #'radian--org-git-version)))
+    (defalias #'org-git-version #'radian--org-git-version))
+
+  :config
+
+  ;; If you try to insert a heading in the middle of an entry, don't
+  ;; split it in half, but instead insert the new heading after the
+  ;; end of the current entry.
+  (setq org-insert-heading-respect-content t))
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
