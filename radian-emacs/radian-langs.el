@@ -47,7 +47,10 @@
     (setq-local mode-name "JSX"))
 
   (add-hook 'js2-mode-hook #'radian--set-js2-mode-lighter)
-  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter))
+  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter)
+
+  ;; Treat shebang lines (e.g. for node) correctly.
+  (setq js2-skip-preprocessor-directives t))
 
 ;; Live web development with Emacs.
 
