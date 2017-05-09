@@ -374,8 +374,8 @@ unalias run-help 2>/dev/null || true
 # run-help, but unfortunately they have a serious bug that causes them
 # to crash when there is an alias defined for the function that you
 # are requesting help for. (For example, loading run-help-git causes
-# an error when requesting help for git because we later alias
-# git=hub.) So we don't bother with those.
+# an error when requesting help for git if you alias git=hub.) So we
+# don't bother with those.
 autoload -Uz run-help
 
 # We define a function that wraps man to provide some basic
@@ -394,12 +394,6 @@ function man() {
 	man $@
 }
 
-# Now we make some convenient aliases to the run-help system. Note
-# that this means there are actually three different things called
-# man: an executable, a function, and an alias. It all seems to work
-# out as necessary, though, so that you get the run-help features,
-# with the syntax highlighting as defined above, when you type man.
-alias man=run-help
 alias help=run-help
 
 ################################################################################
