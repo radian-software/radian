@@ -24,6 +24,16 @@
       (setq insert-directory-program "gls")
     (setq dired-use-ls-dired nil)))
 
+;; Prevent `auto-revert-mode' from showing messages in the echo area
+;; in Dired mode.
+
+(defun radian--silence-auto-revert-mode ()
+  "Silence `auto-revert-mode' in the current buffer.
+This function is to be placed on `dired-mode-hook'."
+  (setq-local auto-revert-verbose nil))
+
+(add-hook 'dired-mode-hook #'radian--silence-auto-revert-mode)
+
 (provide 'radian-dired)
 
 ;;; radian-dired.el ends here
