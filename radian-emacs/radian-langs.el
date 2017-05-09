@@ -7,15 +7,50 @@
 (require 'radian-package)
 (require 'radian-patch)
 
-;; AppleScript, see
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; AppleScript
+
+;;  https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
+
 (use-package apples-mode
   :defer-install t
   :mode "\\.\\(applescri\\|sc\\)pt\\'")
 
-;; Go, see https://golang.org/
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Go
+
+;; https://golang.org/
+
 (use-package go-mode
   :defer-install t
   :mode "\\.go\\'")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; HTML
+
+;; https://www.w3.org/TR/html5/
+
+;; This package provides for editing HTML and HTML-like
+;; languages (e.g. templating engines like PHP, ASP, Handlebars,
+;; etc.).
+(use-package web-mode
+  :defer-install t
+  :commands (web-mode)
+  :init
+
+  ;; Enable `web-mode' when editing HTML documents.
+  (add-hook 'html-mode-hook #'web-mode)
+
+  :config
+
+  ;; Indent by two spaces by default.
+  (setq web-mode-markup-indent-offset 2)
+
+  ;; Autocomplete </ instantly.
+  (setq web-mode-enable-auto-closing t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; JavaScript
 
 (with-eval-after-load 'js
   ;; The standard JavaScript indent width is two spaces, not four.
@@ -138,7 +173,11 @@
   ;; This allows Company to use suggestions from Tern.
   (add-to-list 'company-backends 'company-tern))
 
-;; Markdown, see https://daringfireball.net/projects/markdown/
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Markdown
+
+;; https://daringfireball.net/projects/markdown/
+
 (use-package markdown-mode
   :defer-install t
   :mode (("\\.markdown\\'" . markdown-mode)
@@ -157,6 +196,11 @@
   ;; comment -- this way, you can have different header styles in
   ;; different documents.
   (setq markdown-toc-header-toc-title ""))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Python
+
+;; https://www.python.org/
 
 ;; Integrated development environment for Python.
 (use-package anaconda-mode
@@ -199,7 +243,11 @@
              (company-anaconda-description-in-chevrons
               candidate))))))
 
-;; Ruby, see https://www.ruby-lang.org/
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Ruby
+
+;; https://www.ruby-lang.org/
+
 (with-eval-after-load 'ruby-mode
   ;; Indent aggressively in Ruby.
   (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
@@ -215,7 +263,11 @@
 
   :diminish robe-mode)
 
-;; Rust, see https://www.rust-lang.org/
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Rust
+
+;; https://www.rust-lang.org/
+
 (use-package rust-mode
   :defer-install t
   :mode "\\.rs\\'")
@@ -244,10 +296,143 @@
 
   :diminish racer-mode)
 
-;; Swift, see https://developer.apple.com/swift/
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Shell
+
+;; http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
+;; https://www.gnu.org/software/bash/
+;; http://www.zsh.org/
+
+;; Inhibit the "Indentation setup for shell type *sh" message.
+
+(defun radian--enable-sh-script-patches ()
+  "Enable `el-patch' patches for `sh-script'."
+  (require 'sh-script))
+
+(add-hook 'el-patch-pre-validate-hook #'radian--enable-sh-script-patches)
+
+(with-eval-after-load 'sh-script
+  (el-patch-defun sh-set-shell (shell &optional no-query-flag insert-flag)
+    "Set this buffer's shell to SHELL (a string).
+When used interactively, insert the proper starting #!-line,
+and make the visited file executable via `executable-set-magic',
+perhaps querying depending on the value of `executable-query'.
+
+When this function is called noninteractively, INSERT-FLAG (the third
+argument) controls whether to insert a #!-line and think about making
+the visited file executable, and NO-QUERY-FLAG (the second argument)
+controls whether to query about making the visited file executable.
+
+Calls the value of `sh-set-shell-hook' if set.
+
+Shell script files can cause this function be called automatically
+when the file is visited by having a `sh-shell' file-local variable
+whose value is the shell name (don't quote it)."
+    (interactive (list (completing-read
+                        (format "Shell (default %s): "
+                                sh-shell-file)
+                        ;; This used to use interpreter-mode-alist, but that is
+                        ;; no longer appropriate now that uses regexps.
+                        ;; Maybe there could be a separate variable that lists
+                        ;; the shells, used here and to construct i-mode-alist.
+                        ;; But the following is probably good enough:
+                        (append (mapcar (lambda (e) (symbol-name (car e)))
+                                        sh-ancestor-alist)
+                                '("csh" "rc" "sh"))
+                        nil nil nil nil sh-shell-file)
+                       (eq executable-query 'function)
+                       t))
+    (if (string-match "\\.exe\\'" shell)
+        (setq shell (substring shell 0 (match-beginning 0))))
+    (setq sh-shell (sh-canonicalize-shell shell))
+    (if insert-flag
+        (setq sh-shell-file
+              (executable-set-magic shell (sh-feature sh-shell-arg)
+                                    no-query-flag insert-flag)))
+    (setq mode-line-process (format "[%s]" sh-shell))
+    (setq-local sh-shell-variables nil)
+    (setq-local sh-shell-variables-initialized nil)
+    (setq-local imenu-generic-expression
+                (sh-feature sh-imenu-generic-expression))
+    (let ((tem (sh-feature sh-mode-syntax-table-input)))
+      (when tem
+        (setq-local sh-mode-syntax-table
+                    (apply 'sh-mode-syntax-table tem))
+        (set-syntax-table sh-mode-syntax-table)))
+    (dolist (var (sh-feature sh-variables))
+      (sh-remember-variable var))
+    (if (setq-local sh-indent-supported-here
+                    (sh-feature sh-indent-supported))
+        (progn
+          (el-patch-remove
+            (message "Setting up indent for shell type %s" sh-shell))
+          (let ((mksym (lambda (name)
+                         (intern (format "sh-smie-%s-%s"
+                                         sh-indent-supported-here name)))))
+            (add-function :around (local 'smie--hanging-eolp-function)
+              (lambda (orig)
+                (if (looking-at "[ \t]*\\\\\n")
+                    (goto-char (match-end 0))
+                  (funcall orig))))
+            (add-hook 'smie-indent-functions #'sh-smie--indent-continuation nil t)
+            (smie-setup (symbol-value (funcall mksym "grammar"))
+                        (funcall mksym "rules")
+                        :forward-token  (funcall mksym "forward-token")
+                        :backward-token (funcall mksym "backward-token")))
+          (unless sh-use-smie
+            (setq-local parse-sexp-lookup-properties t)
+            (setq-local sh-kw-alist (sh-feature sh-kw))
+            (let ((regexp (sh-feature sh-kws-for-done)))
+              (if regexp
+                  (setq-local sh-regexp-for-done
+                              (sh-mkword-regexpr (regexp-opt regexp t)))))
+            (el-patch-remove
+              (message "setting up indent stuff"))
+            ;; sh-mode has already made indent-line-function local
+            ;; but do it in case this is called before that.
+            (setq-local indent-line-function 'sh-indent-line))
+          (if sh-make-vars-local
+              (sh-make-vars-local))
+          (el-patch-remove
+            (message "Indentation setup for shell type %s" sh-shell)))
+      (el-patch-remove
+        (message "No indentation for this shell type."))
+      (setq-local indent-line-function 'sh-basic-indent-line))
+    (when font-lock-mode
+      (setq font-lock-set-defaults nil)
+      (font-lock-set-defaults)
+      (font-lock-flush))
+    (setq sh-shell-process nil)
+    (run-hooks 'sh-set-shell-hook)))
+
+;; Inhibit the "Indentation variables are now local" message.
+
+(with-eval-after-load 'sh-script
+  (el-patch-defun sh-make-vars-local ()
+    "Make the indentation variables local to this buffer.
+Normally they already are local.  This command is provided in case
+variable `sh-make-vars-local' has been set to nil.
+
+To revert all these variables to the global values, use
+command `sh-reset-indent-vars-to-global-values'."
+    (interactive)
+    (mapc 'make-local-variable sh-var-list)
+    (el-patch-remove
+      (message "Indentation variables are now local."))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Swift
+
+;; https://developer.apple.com/swift/
+
 (use-package swift-mode
   :defer-install t
   :mode "\\.swift\\'")
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; TeX
+
+;; https://www.tug.org/begin.html
 
 ;; AUCTeX, integrated development environment for LaTeX and friends.
 ;; Unfortunately because AUCTeX is weird, we need to do a little dance
@@ -297,25 +482,6 @@
 
   ;; Enable the functionality of `company-auctex'.
   (company-auctex-init))
-
-;; This package provides for editing HTML and HTML-like
-;; languages (e.g. templating engines like PHP, ASP, Handlebars,
-;; etc.).
-(use-package web-mode
-  :defer-install t
-  :commands (web-mode)
-  :init
-
-  ;; Enable `web-mode' when editing HTML documents.
-  (add-hook 'html-mode-hook #'web-mode)
-
-  :config
-
-  ;; Indent by two spaces by default.
-  (setq web-mode-markup-indent-offset 2)
-
-  ;; Autocomplete </ instantly.
-  (setq web-mode-enable-auto-closing t))
 
 (provide 'radian-langs)
 
