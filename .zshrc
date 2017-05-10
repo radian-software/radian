@@ -2,7 +2,7 @@
 #### Define default bundle list
 
 bundles=(
-    "mfaerevaag/wd, use:wd.sh, rename-to:wd" # Quickly jump to directories
+    "mfaerevaag/wd, use:wd.sh, rename-to:wd, as:command" # Quickly jump to directories
     "plugins/docker, from:oh-my-zsh" # Completion for docker
     "plugins/lein, from:oh-my-zsh" # Completion for lein
     "plugins/sudo, from:oh-my-zsh" # Quickly re-run commands with sudo
