@@ -57,6 +57,7 @@
  ("pythonic" . "87475def246b84339f464e80c76c7e7fcc2e780a")
  ("restart-emacs" . "38603b019b703f6e78f640478ee6412ba743f7b1")
  ("robe" . "39d07da7e3fbcfbf9ab851acdeca1511974e913b")
+ ("ruby-electric" . "2300024ba89a44945b13e12f4ad588255403bc33")
  ("rust-mode" . "0de149a9ad04f652cd7a59a9ef67be8a7d86ba76")
  ("s.el" . "fc395c8d5e6c14d5e0920ab80d4d5df007eed14a")
  ("skewer-mode" . "18a90f401451f8ca0486bdaf45647ac3ccebc0ac")
