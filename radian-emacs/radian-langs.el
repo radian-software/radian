@@ -263,6 +263,15 @@
 
   :diminish robe-mode)
 
+;; When you type "do", insert a paired "end".
+(use-package ruby-electric
+  :defer-install t
+  :commands (ruby-electric-mode)
+  :init
+
+  ;; Enable `ruby-electric' when editing Ruby code.
+  (add-hook 'ruby-mode-hook #'ruby-electric-mode))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Rust
 
