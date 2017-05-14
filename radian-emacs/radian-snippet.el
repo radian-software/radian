@@ -4,7 +4,7 @@
 (require 'radian-package)
 
 ;; Don't show `abbrev-mode' in the mode line.
-(with-eval-after-load 'abbrev-mode
+(with-eval-after-load 'abbrev
   (diminish 'abbrev-mode))
 
 ;; YASnippet allows the expansion of user-defined abbreviations into
