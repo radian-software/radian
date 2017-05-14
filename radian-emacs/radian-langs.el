@@ -270,7 +270,46 @@
   :init
 
   ;; Enable `ruby-electric' when editing Ruby code.
-  (add-hook 'ruby-mode-hook #'ruby-electric-mode))
+  (add-hook 'ruby-mode-hook #'ruby-electric-mode)
+
+  ;; We already have paired delimiter support from
+  ;; `electric-pair-mode'. However, `ruby-electric' provides its own
+  ;; copy of this functionality, in a less optimal way. (In
+  ;; particular, typing a closing paren when your cursor is right
+  ;; before a closing paren will insert another paren rather than
+  ;; moving through the existing one.) Unfortunately,
+  ;; `ruby-electric-delimiters-alist' is defined as a constant, so we
+  ;; can't customize it by setting it to nil (actually, we can, but
+  ;; byte-compilation inserts the value literally at its use sites, so
+  ;; this does not take effect). Instead, we override the definition
+  ;; of `ruby-electric-mode-map' to make it ignore
+  ;; `ruby-electric-delimiters-alist'. Also note that we are actually
+  ;; doing this before `ruby-electric' is loaded. This is so that the
+  ;; modification will actually affect the definition of
+  ;; `ruby-electric-mode', which gets whatever value
+  ;; `ruby-electric-mode-map' happens to have at definition time. (The
+  ;; alternative is to also patch `ruby-electric-mode-map'.)
+  (el-patch-defvar ruby-electric-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map " " 'ruby-electric-space/return)
+      (define-key map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
+      (define-key map [remap newline] 'ruby-electric-space/return)
+      (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
+      (define-key map [remap electric-newline-and-maybe-indent] 'ruby-electric-space/return)
+      (el-patch-remove
+        (dolist (x ruby-electric-delimiters-alist)
+          (let* ((delim   (car x))
+                 (plist   (cdr x))
+                 (name    (plist-get plist :name))
+                 (func    (plist-get plist :handler))
+                 (closing (plist-get plist :closing)))
+            (define-key map (char-to-string delim) func)
+            (if closing
+                (define-key map (char-to-string closing) 'ruby-electric-closing-char)))))
+      map)
+    "Keymap used in ruby-electric-mode")
+
+  :diminish ruby-electric-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Rust
