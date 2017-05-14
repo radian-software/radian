@@ -20,7 +20,7 @@
  ("dash.el" . "98e819e407bbc35478cde30a74be15f077bd6d4b")
  ("diminish.el" . "826e19186bef91d2241739cb8b48b8cfba14c17a")
  ("edn.el" . "be9e32d1b49e35247b263b0243df7cfdc8d413ab")
- ("el-patch" . "37c1299c414a710be79fee6d5dd5f4e3950a48be")
+ ("el-patch" . "4d397d4b7830d5520fa4f25e96839840878ff00a")
  ("elpa" . "2dad73c22f2ac19899a40c68e3f16b2f56d932ae")
  ("emacs-async" . "666066d30a420d86801d8380f5991f2b82471107")
  ("emacs-fasd" . "5940b84dfa1ea7225b740d3a8dd215290d964873")

@@ -7,7 +7,11 @@
 ;; clear, and robust way of doing so. See the README [1].
 ;;
 ;; [1]: https://github.com/raxod502/el-patch
-(use-package el-patch)
+(use-package el-patch
+  :config
+
+  ;; When patching variable definitions, override the original values.
+  (setq el-patch-use-aggressive-defvar t))
 
 (provide 'radian-patch)
 
