@@ -23,6 +23,9 @@ This is an `:override' advice for
          ;; keybinding:
          ("C-h o" . describe-symbol)))
 
+;; Don't show the search field in Custom.
+(setq custom-search-field nil)
+
 (provide 'radian-help)
 
 ;;; radian-help.el ends here
