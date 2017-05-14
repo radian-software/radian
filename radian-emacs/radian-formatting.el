@@ -113,6 +113,9 @@ Interactively, reverse the characters in the current region."
     (whitespace-mode -1)
     (kill-local-variable 'whitespace-style)))
 
+;; Insert paired delimiters even when Paredit is not active.
+(electric-pair-mode 1)
+
 (provide 'radian-formatting)
 
 ;;; radian-formatting.el ends here
