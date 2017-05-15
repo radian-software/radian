@@ -39,8 +39,16 @@
         (require 'cl-lib)
         (require 'subr-x)
 
-        ;; Load local customizations.
-        (load radian-local-init-file 'noerror 'nomessage)
+        ;; Load local customizations. We disable eager macroexpansion
+        ;; here, since otherwise bad things can happen with e.g.
+        ;; `el-patch' as the package management system has not yet
+        ;; been loaded. See [1] for the hack used to disable eager
+        ;; macroexpansion.
+        ;;
+        ;; [1]: https://emacs.stackexchange.com/a/17329/12534
+        (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
+          (fmakunbound 'internal-macroexpand-for-load)
+          (load radian-local-init-file 'noerror 'nomessage))
 
         ;; Make the Radian libraries available.
         (add-to-list 'load-path radian-directory)
