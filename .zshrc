@@ -750,9 +750,10 @@ fi
 # [1]: https://github.com/github/hub
 if (( $+commands[hub] )); then
     alias hcl='hub clone'
-    alias hc='hub create'
+    alias hc='hub create --copy'
+    alias hcp='hub create -p --copy'
     alias hf='hub fork'
-    alias hp='hub pull-request'
+    alias hp='hub pull-request --copy'
     alias hb='hub browse'
     alias hh='hub help'
     alias hi='hub issue'
