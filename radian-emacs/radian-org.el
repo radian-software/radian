@@ -18,19 +18,32 @@
 
          :map org-mode-map
 
-         ;; Prevent Org from overriding the bindings for windmove.
+         ;; Prevent Org from overriding the bindings for windmove. By
+         ;; default, these keys are mapped to `org-shiftleft', etc.
          ("S-<left>" . nil)
          ("S-<right>" . nil)
          ("S-<up>" . nil)
          ("S-<down>" . nil)
 
-         ;; Add replacements for the some of keybindings we just
-         ;; removed. It looks like Org already binds C-up and C-down
-         ;; separately from M-{ and M-}, so we can't use those. Users
-         ;; will just have to make do with C-c <up> and C-c <down> for
-         ;; now.
+         ;; Add replacements for the keybindings we just removed.
+         ;; C-<left> and C-<right> are unused by Org. C-<up> and
+         ;; C-<down> are bound to `org-backward-paragraph', etc. (but
+         ;; see below).
          ("C-<left>" . org-shiftleft)
-         ("C-<right>" . org-shiftright))
+         ("C-<right>" . org-shiftright)
+         ("C-<up>" . org-shiftup)
+         ("C-<down>" . org-shiftdown)
+
+         ;; By default, Org maps C-<up> to `org-backward-paragraph'
+         ;; instead of `backward-paragraph' (and analogously for
+         ;; C-<down>). However, it doesn't do the same remapping for
+         ;; the other bindings of `backward-paragraph' (e.g. M-{).
+         ;; Here we establish that remapping. (This is important since
+         ;; we remap C-<up> and C-<down> to other things, above. So
+         ;; otherwise there would be no easy way to invoke
+         ;; `org-backward-paragraph' and `org-forward-paragraph'.)
+         ([remap backward-paragraph] . org-backward-paragraph)
+         ([remap forward-paragraph] . org-forward-paragraph))
   :init
 
   ;; This section is devoted to fixing the asinine version-check
