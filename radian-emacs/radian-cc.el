@@ -136,6 +136,58 @@ This is an `:override' advice for `c-update-modeline'.")
   (add-hook 'irony-mode-hook #'eldoc-mode)
   (add-hook 'irony-mode-hook #'irony-eldoc))
 
+;; Eclipse for Emacs.
+(use-package eclim
+  :defer-install t
+  :commands (eclim-mode)
+  :init
+
+  ;; Enable eclim for Java. It does other stuff too, but let's be
+  ;; honest -- it's really only good for Java, at least for now.
+  (add-hook 'java-mode-hook #'eclim-mode)
+
+  ;; Boilerplate for `el-patch'.
+
+  (defun radian--enable-eclim-patches ()
+    (and (use-package-install-deferred-package 'eclim :el-patch)
+         (require 'eclim)))
+
+  (add-hook 'el-patch-pre-validate-hook #'radian--enable-eclim-patches)
+
+  :config
+
+  ;; If we didn't find `eclim-executable'...
+  (unless eclim-executable
+    ;; Add the 'brew cask install eclipse-java' installation directory
+    ;; to the list of paths that are searched for the eclim
+    ;; executable.
+    (add-to-list 'eclim-eclipse-dirs
+                 "/Applications/Eclipse Java.app/Contents/Eclipse/")
+
+    ;; Then search again.
+    (custom-reevaluate-setting 'eclim-executable))
+
+  ;; Regrettably, eclim does not properly handle spaces in paths.
+  ;; Let's fix it for them.
+  (el-patch-defun eclim--make-command (args)
+    "Create a command string that can be executed from the shell.
+The first element in ARGS is the name of the eclim
+operation.  The rest are flags/values to be passed on to
+eclimd."
+    (when (not eclim-executable)
+      (error "Eclim installation not found. Please set eclim-executable."))
+    (cl-reduce (lambda (a b) (format "%s %s" a b))
+               (append (list (el-patch-wrap 1
+                               (shell-quote-argument eclim-executable))
+                             "-command" ((el-patch-swap first cl-first) args))
+                       (cl-loop for a = (cdr args) then (cdr (cdr a))
+                                for arg = ((el-patch-swap first cl-first) a)
+                                for val = ((el-patch-swap second cl-second) a)
+                                while arg append (if val (list arg (shell-quote-argument val)) (list arg))))))
+
+  ;; Start the eclim server automatically when necessary.
+  (setq eclimd-autostart t))
+
 (provide 'radian-cc)
 
 ;;; radian-cc.el ends here
