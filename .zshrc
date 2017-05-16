@@ -2,41 +2,40 @@
 #### Define default bundle list
 
 bundles=(
-    "mfaerevaag/wd, use:wd.sh, rename-to:wd, as:command" # Quickly jump to directories
-    "plugins/docker, from:oh-my-zsh" # Completion for docker
-    "plugins/lein, from:oh-my-zsh" # Completion for lein
-    "plugins/sudo, from:oh-my-zsh" # Quickly re-run commands with sudo
-    "plugins/tmuxinator, from:oh-my-zsh" # Completion for tmuxinator
-    "plugins/vault, from:oh-my-zsh" # Completion for vault
-    "zsh-users/zsh-autosuggestions" # Autosuggestions from history
+    # Quickly jump to directories:
+    "mfaerevaag/wd, use:wd.sh, rename-to:wd, as:command"
+    # Display autosuggestions from history:
+    "zsh-users/zsh-autosuggestions"
 )
 
 ################################################################################
 #### Define bundle list management functions
 
-# Usage: add_bundle <zplug-args>
+# Usage: radian_add_bundle <zplug-args>
 #
 # Adds a bundle to $bundles. Word splitting will be performed on
 # zplug-args to determine the arguments that will be passed to zplug.
-function add_bundle() {
+function radian_add_bundle() {
+    emulate -LR zsh
     if ! (( ${bundles[(I)$1]} )); then
         bundles+=($1)
     fi
 }
 
-# Usage: remove_bundle <zplug-args>
+# Usage: radian_remove_bundle <zplug-args>
 #
 # Removes a bundle from $bundles by name. The name should be exactly
 # the same as it appears in $bundles, with spaces if necessary.
-function remove_bundle() {
+function radian_remove_bundle() {
+    emulate -LR zsh
     bundles=("${(@)bundles:#$1}")
 }
 
 ################################################################################
-#### Load user-specific configuration file (1 of 2)
+#### Load local customizations
 
-if [[ -f ~/.zshrc.before.local ]]; then
-    . ~/.zshrc.before.local
+if [[ -f ~/.zshrc.local ]]; then
+    . ~/.zshrc.local
 fi
 
 ################################################################################
@@ -66,6 +65,10 @@ fi
 # Enable parameter expansion and other substitutions in the $PROMPT.
 setopt prompt_subst
 
+# Load some arrays that give us convenient access to color-changing
+# escape codes.
+autoload -U colors && colors
+
 # Here we define a prompt that displays the current directory and git
 # branch, and turns red on a nonzero exit code. Adapted heavily from
 # [1], with supporting functions extracted from Oh My Zsh [2] so that
@@ -80,6 +83,7 @@ if (( $+commands[git] )); then
     # surrounded by square brackets and followed by an asterisk if the
     # working directory is dirty, if the user is inside a Git repository.
     function radian_prompt_git_info() {
+        emulate -LR zsh
         local ref
         ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
             ref=$(command git rev-parse --short HEAD 2> /dev/null) || \
@@ -91,6 +95,7 @@ if (( $+commands[git] )); then
     # If $RADIAN_PROMPT_IGNORE_UNTRACKED_FILES is true, then untracked
     # files are not counted as dirty.
     function radian_prompt_git_dirty() {
+        emulate -LR zsh
         local FLAGS
         FLAGS=('--porcelain' '--ignore-submodules=dirty')
         if [[ $RADIAN_PROMPT_IGNORE_UNTRACKED_FILES == true ]]; then
@@ -119,6 +124,7 @@ fi
 #
 # [1]: http://unix.stackexchange.com/a/326948/176805
 function _accept-line() {
+    emulate -LR zsh
     if [[ $BUFFER == "." ]]; then
         BUFFER=". ~/.zshrc"
     elif [[ $BUFFER == "source" ]]; then
@@ -237,10 +243,12 @@ if (( $+commands[exa] )); then
     alias lg='exa --all --grid --header --long --color-scale'
     alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
     function lti() {
+        emulate -LR zsh
         exa --all --header --long --tree --color-scale --ignore-glob ".git|$1" ${@:2}
     }
     alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
     function ltli() {
+        emulate -LR zsh
         exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|$2" ${@:3}
     }
 else
@@ -284,7 +292,8 @@ alias 9='cd -9'
 
 # Enable wd.
 if (( $+commands[wd] )); then
-    wd() {
+    function wd {
+        emulate -LR zsh
         . wd
     }
 fi
@@ -301,6 +310,7 @@ alias ds='dirs -v | head -10'
 alias md='mkdir -p'
 alias rd='rmdir'
 function mcd() {
+    emulate -LR zsh
     mkdir -p $@
     cd ${@[$#]}
 }
@@ -311,28 +321,33 @@ function mcd() {
 # latter three functions defaults to the current directory as the
 # destination.
 function copy() {
-    RADIAN_COPY_TARGETS=()
+    emulate -LR zsh
+    radian_clipboard=()
     for target; do
         if [[ $target == /* ]]; then
-            RADIAN_COPY_TARGETS+=($target)
+            radian_clipboard+=($target)
         else
-            RADIAN_COPY_TARGETS+=($PWD/$target)
+            radian_clipboard+=($PWD/$target)
         fi
     done
 }
 function paste() {
-    cp -R $RADIAN_COPY_TARGETS ${1:-.}
+    emulate -LR zsh
+    cp -R $radian_clipboard ${1:-.}
 }
 function move() {
-    mv $RADIAN_COPY_TARGETS ${1:-.}
+    emulate -LR zsh
+    mv $radian_clipboard ${1:-.}
 }
 function pasteln() {
-    ln -s $RADIAN_COPY_TARGETS ${1:-.}
+    emulate -LR zsh
+    ln -s $radian_clipboard ${1:-.}
 }
 
 # This function takes a symlink, resolves it, and replaces it with a
 # copy of whatever it points to.
 function delink() {
+    emulate -LR zsh
     if [[ -z $1 ]]; then
         echo "usage: delink <symlinks>"
         return 1
@@ -421,7 +436,8 @@ if (( $+commands[git] )); then
     alias glap='git log --graph --decorate --all --patch'
     alias glaps='git log --graph --decorate --all --patch --stat'
     alias glao='git log --graph --decorate --all --oneline'
-    glg() {
+    function glg {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate ${@:2}
         else
@@ -429,7 +445,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgs() {
+    function glgs {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --stat ${@:2}
         else
@@ -437,7 +454,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgp() {
+    function glgp {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --patch ${@:2}
         else
@@ -445,7 +463,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgps() {
+    function glgps {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --patch --stat ${@:2}
         else
@@ -453,7 +472,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgo() {
+    function glgo {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --oneline ${@:2}
         else
@@ -461,7 +481,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glga() {
+    function glga {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --all ${@:2}
         else
@@ -469,7 +490,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgsa() {
+    function glgsa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --all --stat ${@:2}
         else
@@ -477,7 +499,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgpa() {
+    function glgpa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --all --patch ${@:2}
         else
@@ -485,7 +508,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgpsa() {
+    function glgpsa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --all --patch --stat ${@:2}
         else
@@ -493,7 +517,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glgoa() {
+    function glgoa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log --grep=$1 --graph --decorate --all --oneline ${@:2}
         else
@@ -501,7 +526,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glS() {
+    function glS {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate ${@:2}
         else
@@ -509,7 +535,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSs() {
+    function glSs {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --stat ${@:2}
         else
@@ -517,7 +544,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSp() {
+    function glSp {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --patch ${@:2}
         else
@@ -525,7 +553,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSps() {
+    function glSps {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --patch --stat ${@:2}
         else
@@ -533,7 +562,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSo() {
+    function glSo {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --oneline ${@:2}
         else
@@ -541,7 +571,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSa() {
+    function glSa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --all ${@:2}
         else
@@ -549,7 +580,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSsa() {
+    function glSsa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --all --stat ${@:2}
         else
@@ -557,7 +589,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSpa() {
+    function glSpa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --all --patch ${@:2}
         else
@@ -565,7 +598,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSpsa() {
+    function glSpsa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --all --patch --stat ${@:2}
         else
@@ -573,7 +607,8 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
-    glSoa() {
+    function glSoa {
+        emulate -LR zsh
         if (( $# >= 1 )); then
             git log -S $1 --graph --decorate --all --oneline ${@:2}
         else
@@ -606,31 +641,6 @@ if (( $+commands[git] )); then
     alias gcam='git commit --amend -m'
     alias gcama='git commit --amend --all -m'
     alias gcem='git commit --allow-empty -m'
-    function gcw() {
-        # This logic is taken from [1]. I think it is designed to
-        # correctly deal with the three kinds of changes that might need
-        # to be added: changes to existing files, untracked files, and
-        # deleted files. (These are surprisingly difficult to account for
-        # all at the same time.)
-        #
-        # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/3477ff25274fa75bd9e6110f391f6ad98ca2af72/plugins/git/git.plugin.zsh#L240
-        git add --all
-        git rm $(git ls-files --deleted) 2>/dev/null
-        git commit --message="(wip) ${(j: :)@}" --quiet && git show --stat
-    }
-    function gcaw() {
-        git add --all
-        git rm $(git ls-files --deleted) 2>/dev/null
-        git commit --message="(wip) ${(j: :)@}" --quiet --amend && git show --stat
-    }
-    function gcwp() {
-        gcw $@
-        git push --force
-    }
-    function gcawp() {
-        gcaw $@
-        git push --force
-    }
 
     alias gcp='git cherry-pick'
     alias gcpc='git cherry-pick --continue'
@@ -669,18 +679,6 @@ if (( $+commands[git] )); then
     alias gbusu='git branch --unset-upstream'
     alias gbd='git branch --delete'
     alias gbdd='git branch --delete --force'
-    function gbu() {
-        if (( $# == 1 )) && ! (echo $1 | fgrep -q /); then
-            if branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
-                git branch --set-upstream-to=$1/${branch_name##refs/heads/}
-            else
-                echo "There is no current branch."
-                return 1
-            fi
-        else
-            git branch --set-upstream-to=$@
-        fi
-    }
 
     alias gco='git checkout'
     alias gcop='git checkout --patch'
@@ -725,19 +723,7 @@ if (( $+commands[git] )); then
 
     alias gp='git push'
     alias gpf='git push --force'
-    function gpu() {
-        local branch_name
-        if (( $# == 1 )); then
-            if branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null); then
-                git push --set-upstream $1 ${branch_name##refs/heads/}
-            else
-                echo "There is no current branch."
-                return 1
-            fi
-        else
-            git push --set-upstream $@
-        fi
-    }
+    alias gpu='git push --set-upstream'
     alias gpd='git push --delete'
 fi
 
@@ -790,13 +776,16 @@ fi
 ################################################################################
 #### Leiningen
 
-# Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
-# showing up in the Mac app switcher. See [1]. Also, attempt to reduce
-# the incidence of exceptions with missing traces in Clojure. See [2].
-#
-# [1]: http://stackoverflow.com/q/24619300/3538165
-# [2]: https://dzone.com/articles/clojurejava-prevent-exceptions
-export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
+if (( $+commands[lein] )); then
+    # Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
+    # showing up in the Mac app switcher. See [1]. Also, attempt to
+    # reduce the incidence of exceptions with missing traces in
+    # Clojure. See [2].
+    #
+    # [1]: http://stackoverflow.com/q/24619300/3538165
+    # [2]: https://dzone.com/articles/clojurejava-prevent-exceptions
+    export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
+fi
 
 ################################################################################
 #### Vim
@@ -819,8 +808,8 @@ if (( $+commands[fasd] )); then
 fi
 
 ################################################################################
-#### Load user-specific configuration file (2 of 2)
+#### Run post-init hook for local configuration
 
-if [[ -f ~/.zshrc.local ]]; then
-    . ~/.zshrc.local
+if typeset -f radian_post_init_hook > /dev/null; then
+    radian_post_init_hook
 fi
