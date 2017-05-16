@@ -6,6 +6,8 @@ bundles=(
     "mfaerevaag/wd, use:wd.sh, rename-to:wd, as:command"
     # Display autosuggestions from history:
     "zsh-users/zsh-autosuggestions"
+    # Completion definitions for lots of additional commands.
+    "zsh-users/zsh-completions"
 )
 
 ################################################################################
