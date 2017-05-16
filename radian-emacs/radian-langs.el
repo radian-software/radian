@@ -520,7 +520,10 @@ command `sh-reset-indent-vars-to-global-values'."
   :config
 
   ;; Don't be afraid to break inline math between lines.
-  (setq LaTeX-fill-break-at-separators nil))
+  (setq LaTeX-fill-break-at-separators nil)
+
+  ;; Automatically insert matching braces intelligently.
+  (setq LaTeX-electric-left-right-brace t))
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex
