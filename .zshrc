@@ -44,7 +44,6 @@ fi
 #### zplug
 
 export ZPLUG_HOME=/usr/local/opt/zplug
-export ZSH=$ZPLUG_HOME/repos/robbyrussell/oh-my-zsh
 export ZSH_CACHE_DIR=$ZSH/cache
 
 if [[ -f $ZPLUG_HOME/init.zsh ]]; then
