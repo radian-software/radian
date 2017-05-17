@@ -30,12 +30,16 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; if (condition) {
 ;;   statement;
 ;; }
+;;
+;; We do this by defining a custom style that is based on K&R, and
+;; then overriding the indentation (which is set to 5 spaces by
+;; default -- yes, really). This style is only used in C, C++, etc.
+;; and not Java.
 (with-eval-after-load 'cc-mode
-  (if (assoc 'other c-default-style)
-      (setcdr (assoc 'other c-default-style)
-              "k&r")
-    (push '(other . "k&r") c-default-style))
-  (setq-default c-basic-offset 2))
+  (let ((radian-k&r (copy-alist (alist-get "k&r" c-style-alist))))
+    (setf (alist-get 'c-basic-offset radian-k&r) 2)
+    (setf (alist-get "radian-k&r" c-style-alist) radian-k&r))
+  (setf (alist-get 'other c-default-style) "radian-k&r"))
 
 ;; General support for C, C++, and Objective-C based on libclang.
 (use-package irony
