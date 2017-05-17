@@ -116,6 +116,10 @@ Interactively, reverse the characters in the current region."
 ;; Insert paired delimiters even when Paredit is not active.
 (electric-pair-mode 1)
 
+;; Be slightly more conservative with regard to inserting paired
+;; delimiters.
+(setq electric-pair-inhibit-predicate #'electric-pair-conservative-inhibit)
+
 (provide 'radian-formatting)
 
 ;;; radian-formatting.el ends here
