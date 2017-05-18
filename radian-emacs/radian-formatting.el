@@ -120,6 +120,13 @@ Interactively, reverse the characters in the current region."
 ;; delimiters.
 (setq electric-pair-inhibit-predicate #'electric-pair-conservative-inhibit)
 
+;; Support for EditorConfig, a "file format and collection of text
+;; editor plugins for maintaining consistent coding styles between
+;; different editors and IDEs".
+(use-package editorconfig
+  :defer-install t
+  :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
+
 (provide 'radian-formatting)
 
 ;;; radian-formatting.el ends here
