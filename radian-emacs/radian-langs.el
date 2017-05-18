@@ -250,7 +250,16 @@
 
 (with-eval-after-load 'ruby-mode
   ;; Indent aggressively in Ruby.
-  (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
+  (add-hook 'ruby-mode-hook #'aggressive-indent-mode)
+
+  ;; Pair pipes in Ruby.
+  (with-eval-after-load 'elec-pair
+    (defun radian--electric-pair-enable-pipes-locally ()
+      "Tell `electric-pair-mode' to pair pipe characters, locally."
+      (make-local-variable 'electric-pair-pairs)
+      (setf (alist-get ?| electric-pair-pairs) ?|))
+
+    (add-hook 'ruby-mode-hook #'radian--electric-pair-enable-pipes-locally)))
 
 ;; Autocompletion for Ruby.
 (use-package robe
