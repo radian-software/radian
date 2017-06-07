@@ -559,7 +559,10 @@ command `sh-reset-indent-vars-to-global-values'."
     "Capitalize the TypeScript mode lighter in the current buffer."
     (setq-local mode-name "TypeScript"))
 
-  (add-hook 'typescript-mode-hook #'radian--rename-typescript-mode-lighter))
+  (add-hook 'typescript-mode-hook #'radian--rename-typescript-mode-lighter)
+
+  ;; Let's be compatible with JavaScript here.
+  (setq typescript-indent-level js-indent-level))
 
 (provide 'radian-langs)
 
