@@ -570,7 +570,9 @@ command `sh-reset-indent-vars-to-global-values'."
   :init
 
   (with-eval-after-load 'typescript-mode
-    (add-hook 'typescript-mode-hook #'tide-setup)))
+    (add-hook 'typescript-mode-hook #'tide-setup))
+
+  :diminish tide-mode)
 
 (provide 'radian-langs)
 
