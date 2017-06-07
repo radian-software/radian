@@ -564,6 +564,14 @@ command `sh-reset-indent-vars-to-global-values'."
   ;; Let's be compatible with JavaScript here.
   (setq typescript-indent-level js-indent-level))
 
+(use-package tide
+  :defer-install t
+  :commands (tide-setup)
+  :init
+
+  (with-eval-after-load 'typescript-mode
+    (add-hook 'typescript-mode-hook #'tide-setup)))
+
 (provide 'radian-langs)
 
 ;;; radian-langs.el ends here
