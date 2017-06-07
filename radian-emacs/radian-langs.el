@@ -543,6 +543,15 @@ command `sh-reset-indent-vars-to-global-values'."
   ;; Enable the functionality of `company-auctex'.
   (company-auctex-init))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; TypeScript
+
+;; https://www.typescriptlang.org/
+
+(use-package typescript-mode
+  :defer-install t
+  :mode "\\.ts$")
+
 (provide 'radian-langs)
 
 ;;; radian-langs.el ends here
