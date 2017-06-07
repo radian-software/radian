@@ -550,7 +550,16 @@ command `sh-reset-indent-vars-to-global-values'."
 
 (use-package typescript-mode
   :defer-install t
-  :mode "\\.ts$")
+  :mode "\\.ts$"
+  :config
+
+  ;; Capitalize the name of the major mode. For consistency, and OCD.
+
+  (defun radian--rename-typescript-mode-lighter ()
+    "Capitalize the TypeScript mode lighter in the current buffer."
+    (setq-local mode-name "TypeScript"))
+
+  (add-hook 'typescript-mode-hook #'radian--rename-typescript-mode-lighter))
 
 (provide 'radian-langs)
 
