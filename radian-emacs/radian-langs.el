@@ -2,6 +2,7 @@
 
 (require 'radian-autocomplete)
 (require 'radian-bind-key)
+(require 'radian-check)
 (require 'radian-indent)
 (require 'radian-os)
 (require 'radian-package)
