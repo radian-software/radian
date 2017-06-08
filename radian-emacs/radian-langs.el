@@ -562,8 +562,8 @@ command `sh-reset-indent-vars-to-global-values'."
 
   (add-hook 'typescript-mode-hook #'radian--rename-typescript-mode-lighter)
 
-  ;; Let's be compatible with JavaScript here.
-  (setq typescript-indent-level js-indent-level))
+  ;; The standard TypeScript indent width is two spaces, not four.
+  (setq typescript-indent-level 2))
 
 (use-package tide
   :defer-install t
