@@ -613,13 +613,18 @@ command `sh-reset-indent-vars-to-global-values'."
   ;; The standard TypeScript indent width is two spaces, not four.
   (setq typescript-indent-level 2))
 
+;; TypeScript IDE for Emacs.
 (use-package tide
   :defer-install t
   :commands (tide-setup)
   :init
 
+  ;; Enable Tide (and `tide-mode') when editing TypeScript files.
   (with-eval-after-load 'typescript-mode
     (add-hook 'typescript-mode-hook #'tide-setup))
+
+  ;; Use tsserver to reformat the buffer on save.
+  (add-hook 'before-save-hook 'tide-format-before-save)
 
   :diminish tide-mode)
 
