@@ -626,6 +626,9 @@ command `sh-reset-indent-vars-to-global-values'."
   ;; Use tsserver to reformat the buffer on save.
   (add-hook 'before-save-hook 'tide-format-before-save)
 
+  ;; Maintain standard TypeScript indent width.
+  (setq tide-format-options '(:indentSize 2 :tabSize 2))
+
   :diminish tide-mode)
 
 (provide 'radian-langs)
