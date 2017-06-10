@@ -623,8 +623,15 @@ command `sh-reset-indent-vars-to-global-values'."
   (with-eval-after-load 'typescript-mode
     (add-hook 'typescript-mode-hook #'tide-setup))
 
+  :config
+
   ;; Use tsserver to reformat the buffer on save.
-  (add-hook 'before-save-hook 'tide-format-before-save)
+
+  (defun radian--tide-format-on-save ()
+    "Use tsserver to reformat the current buffer on save."
+    (add-hook 'before-save-hook #'tide-format-before-save nil 'local))
+
+  (add-hook 'tide-mode-hook #'radian--tide-format-on-save)
 
   ;; Maintain standard TypeScript indent width.
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
