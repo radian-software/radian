@@ -96,6 +96,10 @@
               (radian-after-init)))
 
           ;; This helps out the package management system. See the
+          ;; documentation on `straight-declare-init-finished'.
+          (straight-declare-init-finished)
+
+          ;; This helps out the package management system. See the
           ;; documentation on `straight-declare-init-succeeded'.
           (when init-successful
             (straight-declare-init-succeeded))))
