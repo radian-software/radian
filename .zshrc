@@ -737,7 +737,7 @@ fi
 #
 # [1]: https://github.com/github/hub
 if (( $+commands[hub] )); then
-    alias hcl='hub clone'
+    alias hcl='hub clone --recursive'
     alias hc='hub create --copy'
     alias hcp='hub create -p --copy'
     alias hf='hub fork'
