@@ -325,11 +325,7 @@ function copy() {
     emulate -LR zsh
     radian_clipboard=()
     for target; do
-        if [[ $target == /* ]]; then
-            radian_clipboard+=($target)
-        else
-            radian_clipboard+=($PWD/$target)
-        fi
+        radian_clipboard+=(${target:a})
     done
 }
 function paste() {
