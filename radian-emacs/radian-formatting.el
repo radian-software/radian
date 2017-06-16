@@ -52,10 +52,8 @@ Trailing whitespace is only deleted if variable
 ;; Automatically wrap lines when editing plain text files.
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
-;; Use an adaptive fill prefix when visually wrapping too-long lines.
-;; This means that if you have a line that is long enough to wrap
-;; around, the prefix (e.g. comment characters or indent) will be
-;; displayed again on the next visual line.
+;; Make `fill-paragraph' generally smarter. For example, it now
+;; behaves nicely in Markdown's bulleted lists.
 (use-package filladapt
   :demand t
   :diminish filladapt-mode
@@ -66,8 +64,10 @@ Trailing whitespace is only deleted if variable
   ;; `emacs-lisp-mode' and `clojure-mode'.
   (add-hook 'text-mode-hook #'filladapt-mode))
 
-;; Make `fill-paragraph' generally smarter. For example, it now
-;; behaves nicely in Markdown's bulleted lists.
+;; Use an adaptive fill prefix when visually wrapping too-long lines.
+;; This means that if you have a line that is long enough to wrap
+;; around, the prefix (e.g. comment characters or indent) will be
+;; displayed again on the next visual line.
 (use-package adaptive-wrap
   :demand t
   :config
