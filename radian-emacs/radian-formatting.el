@@ -61,18 +61,10 @@ Trailing whitespace is only deleted if variable
   :diminish filladapt-mode
   :config
 
-  ;; Enable filladapt (almost) everywhere.
-
-  (define-globalized-minor-mode global-filladapt-mode
-    filladapt-mode
-    (lambda ()
-      ;; If we enable `filladapt-mode' in `clojure-mode', then it
-      ;; breaks `fill-paragraph' in docstrings (Emacs can no longer
-      ;; tell when the docstring ends and the code begins).
-      (unless (derived-mode-p 'clojure-mode)
-        (filladapt-mode))))
-
-  (global-filladapt-mode 1))
+  ;; Enable filladapt in text modes. Enabling it globally has some
+  ;; nasty side effects for filling docstrings in e.g.
+  ;; `emacs-lisp-mode' and `clojure-mode'.
+  (add-hook 'text-mode-hook #'filladapt-mode))
 
 ;; Make `fill-paragraph' generally smarter. For example, it now
 ;; behaves nicely in Markdown's bulleted lists.
