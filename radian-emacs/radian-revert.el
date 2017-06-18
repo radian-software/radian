@@ -109,6 +109,15 @@ the timer when no buffers need to be checked."
 ;; it when they find a file. This disables that prompt.
 (setq revert-without-query '(".*"))
 
+;; Prevent *Help* buffers from asking for confirmation about
+;; reverting.
+(with-eval-after-load 'help-mode
+  (defun radian--advice-disable-help-mode-revert-prompt
+      (help-mode-revert-buffer _ignore-auto _noconfirm)
+    (funcall help-mode-revert-buffer _ignore-auto 'noconfirm))
+  (advice-add #'help-mode-revert-buffer :around
+              #'radian--advice-disable-help-mode-revert-prompt))
+
 (provide 'radian-revert)
 
 ;;; radian-revert.el ends here
