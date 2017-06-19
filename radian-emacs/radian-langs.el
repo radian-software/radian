@@ -182,6 +182,13 @@
   ;; Lazy-load json-mode. This requires some gymnastics. It concerns
   ;; me somewhat that this kind of stuff now seems routine to me.
 
+  (defun radian--enable-json-mode-patches ()
+    "Enable patches for `json-mode'."
+    (require 'json-mode))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-json-mode-patches)
+
   (el-patch-defconst json-mode-standard-file-ext '(".json" ".jsonld")
     "List of JSON file extensions.")
 
