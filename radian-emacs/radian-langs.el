@@ -347,6 +347,14 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; `ruby-electric-mode', which gets whatever value
   ;; `ruby-electric-mode-map' happens to have at definition time. (The
   ;; alternative is to also patch `ruby-electric-mode-map'.)
+
+  (defun radian--enable-ruby-electric-patches ()
+    "Load patches for `ruby-electric'."
+    (require 'ruby-electric))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-ruby-electric-patches)
+
   (el-patch-defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
