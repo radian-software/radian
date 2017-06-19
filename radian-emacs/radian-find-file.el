@@ -409,28 +409,6 @@ This is a function for `after-save-hook'. Remove
   (with-eval-after-load 'projectile
     (counsel-projectile-toggle 1)))
 
-;; This package allows you to jump to frequently used directories by
-;; name, assuming that you have the command-line tool of the same name
-;; installed.
-(use-package fasd
-  ;; Note that we don't enable fasd eagerly. This is because currently
-  ;; the feature wherein the fasd package will automatically register
-  ;; files you visit in Emacs in the fasd database is somewhat broken,
-  ;; and so temporarily disabled. With that feature disabled there is
-  ;; no need to have fasd loaded eagerly.
-
-  :defer-install t
-  :bind (;; Add a keybinding for using the functionality of `fasd'.
-         ("C-c f" . fasd-find-file))
-  :config
-
-  ;; Use completion from a list of fasd candidates for
-  ;; `fasd-find-file', instead of just prompting for an input.
-  (setq fasd-enable-initial-prompt nil)
-
-  ;; Use Ivy for completion, instead of `grizzl'.
-  (setq fasd-completing-read-function nil))
-
 (provide 'radian-find-file)
 
 ;;; radian-find-file.el ends here
