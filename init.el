@@ -91,9 +91,19 @@
           ;; packages. (Packages installed interactively do not belong to
           ;; either `radian' or `radian-local', and should not be written
           ;; to either lockfile.)
-          (let ((straight-current-profile 'radian-local))
-            (when (fboundp 'radian-after-init)
-              (radian-after-init)))
+          (if (member "--no-local" command-line-args)
+              (progn
+                ;; Make sure to delete --no-local from the list,
+                ;; because otherwise Emacs will issue a warning about
+                ;; the unknown argument.
+                (setq command-line-args
+                      (delete "--no-local" command-line-args))
+                ;; We don't want to prune the build cache when running
+                ;; without local packages.
+                (setq init-successful nil))
+            (let ((straight-current-profile 'radian-local))
+              (when (fboundp 'radian-after-init)
+                (radian-after-init))))
 
           ;; This helps out the package management system. See the
           ;; documentation on `straight-declare-init-finished'.
