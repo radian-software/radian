@@ -119,6 +119,16 @@ Interactively, reverse the characters in the current region."
   :defer-install t
   :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
 
+;; Multiple cursor support, like in Sublime Text.
+(use-package multiple-cursors
+  :defer-install t
+  ;; We are using my fork because [1] has not been merged at the time
+  ;; of this writing.
+  ;;
+  ;; [1]: https://github.com/magnars/multiple-cursors.el/pull/290
+  :recipe (:fetcher github
+           :repo "raxod502/multiple-cursors.el"))
+
 (provide 'radian-formatting)
 
 ;;; radian-formatting.el ends here
