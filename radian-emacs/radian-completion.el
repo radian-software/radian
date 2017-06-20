@@ -209,7 +209,7 @@ This is an `:around' advice for `counsel-M-x'."
 
 ;; Remembers your choices in completion menus.
 (use-package historian
-  :recipe (:fetcher github
+  :recipe (:host github
            :repo "PythonNut/historian.el"
            :files ("historian.el"))
   :demand t
@@ -220,7 +220,7 @@ This is an `:around' advice for `counsel-M-x'."
 
 ;; Uses Historian to sort Ivy candidates by frecency+flx.
 (use-package ivy-historian
-  :recipe (:fetcher github
+  :recipe (:host github
            :repo "PythonNut/historian.el"
            :files ("ivy-historian.el"))
   :after ivy
