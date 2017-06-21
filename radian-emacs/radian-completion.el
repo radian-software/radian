@@ -174,7 +174,7 @@ This is an `:around' advice for `counsel-M-x'."
 ;; Ivy is just a general-purpose completion framework. It can be used
 ;; to generate improved versions of many stock Emacs commands. This is
 ;; done by the Counsel library. (It also adds a few new commands, such
-;; as `counsel-git-ag'.)
+;; as `counsel-git-grep'.)
 (use-package counsel
   :bind (;; Use Counsel for common Emacs commands.
          ("M-x" . counsel-M-x)
@@ -192,7 +192,7 @@ This is an `:around' advice for `counsel-M-x'."
          ;; [1]: https://github.com/abo-abo/swiper
          ("C-c g" . counsel-git)
          ("C-c j" . counsel-git-grep)
-         ("C-c k" . counsel-ag)
+         ("C-c k" . counsel-rg)
 
          ;; Interactively select a kill to yank using ivy, when using
          ;; `yank-pop'.
