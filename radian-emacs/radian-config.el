@@ -1,6 +1,7 @@
 ;;; radian-config.el --- Support for editing various config files
 
 (require 'radian-package)
+(require 'radian-regexp)
 
 ;; Edit .htaccess and friends.
 (use-package apache-mode
@@ -11,6 +12,10 @@
          ("access\\.conf\\'" . apache-mode)
          ("sites-\\(available\\|enabled\\)/" . apache-mode)))
 
+;; Edit Dockerfiles.
+(use-package dockerfile-mode
+  :defer-install t
+  :mode "Dockerfile.*\\'")
 
 ;; Edit .gitignore files.
 (use-package gitignore-mode
@@ -19,6 +24,19 @@
          ("/info/exclude\\'" . gitignore-mode)
          ("/\\.gitignore\\'" . gitignore-mode)))
 
+;; Edit pip's requirements.txt files.
+(use-package pip-requirements
+  :defer-install t
+  :mode (((rx ".pip" string-end) . pip-requirements-mode)
+         ((rx "requirements" (zero-or-more anything) ".txt" string-end) . pip-requirements-mode)
+         ((rx "requirements.in") . pip-requirements-mode))
+  :config
+
+  (defun radian--rename-pip-requirements-mode-lighter ()
+    "Change the lighter for `pip-requirements-mode'."
+    (setq mode-name "Requirements"))
+
+  (add-hook 'pip-requirements-mode-hook #'radian--rename-pip-requirements-mode-lighter))
 
 ;; Editing for TOML files.
 (use-package toml-mode
