@@ -2,19 +2,23 @@
 
 (require 'radian-package)
 
-;; Provides syntax highlighting, indentation, and editing commands for
-;; YAML files.
-(use-package yaml-mode
+;; Edit .htaccess and friends.
+(use-package apache-mode
   :defer-install t
-  :mode "\\.\\(e?ya?\\|ra\\)ml\\'"
-  :config
+  :mode (("\\.htaccess\\'"   . apache-mode)
+         ("httpd\\.conf\\'"  . apache-mode)
+         ("srm\\.conf\\'"    . apache-mode)
+         ("access\\.conf\\'" . apache-mode)
+         ("sites-\\(available\\|enabled\\)/" . apache-mode)))
 
-  ;; Don't automatically wrap text when editing YAML files.
 
-  (defun radian--disable-auto-fill-mode ()
-    (auto-fill-mode -1))
+;; Edit .gitignore files.
+(use-package gitignore-mode
+  :defer-install t
+  :mode (("/git/ignore\\'" . gitignore-mode)
+         ("/info/exclude\\'" . gitignore-mode)
+         ("/\\.gitignore\\'" . gitignore-mode)))
 
-  (add-hook 'yaml-mode-hook #'radian--disable-auto-fill-mode))
 
 ;; Editing for TOML files.
 (use-package toml-mode
@@ -28,13 +32,6 @@
     (setq mode-name "TOML"))
 
   (add-hook 'toml-mode-hook #'radian--rename-toml-mode))
-
-;; Edit .gitignore files.
-(use-package gitignore-mode
-  :defer-install t
-  :mode (("/git/ignore\\'" . gitignore-mode)
-         ("/info/exclude\\'" . gitignore-mode)
-         ("/\\.gitignore\\'" . gitignore-mode)))
 
 ;; Provides syntax highlighting for VimScript files.
 (use-package vimrc-mode
@@ -55,14 +52,19 @@
 
   (add-hook 'vimrc-mode-hook #'radian--fix-vimrc-indentation))
 
-;; Edit .htaccess and friends.
-(use-package apache-mode
+;; Provides syntax highlighting, indentation, and editing commands for
+;; YAML files.
+(use-package yaml-mode
   :defer-install t
-  :mode (("\\.htaccess\\'"   . apache-mode)
-         ("httpd\\.conf\\'"  . apache-mode)
-         ("srm\\.conf\\'"    . apache-mode)
-         ("access\\.conf\\'" . apache-mode)
-         ("sites-\\(available\\|enabled\\)/" . apache-mode)))
+  :mode "\\.\\(e?ya?\\|ra\\)ml\\'"
+  :config
+
+  ;; Don't automatically wrap text when editing YAML files.
+
+  (defun radian--disable-auto-fill-mode ()
+    (auto-fill-mode -1))
+
+  (add-hook 'yaml-mode-hook #'radian--disable-auto-fill-mode))
 
 (provide 'radian-config)
 
