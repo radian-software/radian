@@ -29,8 +29,8 @@ with an eye to:
     * Clipboard, mouse, and PATH integration with macOS
     * Automatic creation and interactive removal of parent directories
       when finding files
-    * Extensible system for defining mnemonic key sequences for
-      jumping to dotfiles
+    * Extensible system for defining mnemonic key sequences to jump to
+      dotfiles
     * Emacsclient as a Git commit message editor
     * Lots of packages for pushing around windows and buffers in
       interesting ways
