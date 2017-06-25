@@ -767,8 +767,8 @@ if (( $+commands[emacs] )); then
 fi
 
 if (( $+commands[emacsclient] )); then
-    alias ec='emacsclient --alternate-editor="" -nw'
-    alias ecw='emacsclient --alternate-editor=""'
+    alias ec='emacsclient --alternate-editor= -nw'
+    alias ecw='emacsclient --alternate-editor='
 fi
 
 ################################################################################
