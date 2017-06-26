@@ -122,11 +122,11 @@ Interactively, reverse the characters in the current region."
 ;; Multiple cursor support, like in Sublime Text.
 (use-package multiple-cursors
   :defer-install t
-  ;; We are using my fork because [1] has not been merged at the time
-  ;; of this writing.
+  ;; My fork includes pull request [1], which has not been merged at
+  ;; the time of this writing.
   ;;
   ;; [1]: https://github.com/magnars/multiple-cursors.el/pull/290
-  :recipe (:fetcher github
+  :recipe (:host github
            :repo "raxod502/multiple-cursors.el"))
 
 (provide 'radian-formatting)

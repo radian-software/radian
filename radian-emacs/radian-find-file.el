@@ -347,8 +347,12 @@ This is a function for `after-save-hook'. Remove
 ;; This package provides enhanced versions of the Projectile commands
 ;; that use Ivy.
 (use-package counsel-projectile
-  :recipe (:fetcher github
-           :repo "raxod502/counsel-projectile")
+  ;; My fork remaps the 'f' action to do a find-file rather than just
+  ;; the same as pressing M-o again.
+  :recipe (:host github
+           :repo "raxod502/counsel-projectile"
+           :upstream (:host github
+                      :repo "ericdanan/counsel-projectile"))
   :init
 
   ;; Lazy-load `counsel-projectile'.
@@ -370,8 +374,12 @@ This is a function for `after-save-hook'. Remove
       "Switch to project buffer."
       (counsel-projectile-switch-to-buffer))
     (def-projectile-commander-method ?A
-      "Search project files with ag."
-      (counsel-projectile-ag))
+      (el-patch-swap
+        "Search project files with ag."
+        "Search project files with rg.")
+      (el-patch-swap
+        (counsel-projectile-ag)
+        (counsel-projectile-rg)))
     (def-projectile-commander-method ?s
       "Switch project."
       (counsel-projectile-switch-project)))
@@ -388,7 +396,8 @@ This is a function for `after-save-hook'. Remove
           (define-key projectile-mode-map [remap projectile-find-file] #'counsel-projectile-find-file)
           (define-key projectile-mode-map [remap projectile-find-dir] #'counsel-projectile-find-dir)
           (define-key projectile-mode-map [remap projectile-switch-project] #'counsel-projectile-switch-project)
-          (define-key projectile-mode-map [remap projectile-ag] #'counsel-projectile-ag)
+          (define-key projectile-mode-map [remap projectile-ag]
+            (el-patch-swap #'counsel-projectile-ag #'counsel-projectile-rg))
           (define-key projectile-mode-map [remap projectile-switch-to-buffer] #'counsel-projectile-switch-to-buffer)
           (counsel-projectile-commander-bindings))
       (progn
@@ -400,7 +409,10 @@ This is a function for `after-save-hook'. Remove
         (define-key projectile-mode-map [remap projectile-find-file] nil)
         (define-key projectile-mode-map [remap projectile-find-dir] nil)
         (define-key projectile-mode-map [remap projectile-switch-project] nil)
-        (define-key projectile-mode-map [remap projectile-ag] nil)
+        (define-key projectile-mode-map (el-patch-swap
+                                          [remap projectile-ag]
+                                          [remap projectile-rg])
+          nil)
         (define-key projectile-mode-map [remap projectile-switch-to-buffer] nil)
         (projectile-commander-bindings))))
 
