@@ -23,6 +23,13 @@
         (radian-local . "radian-local.el")
         (nil . "default.el")))
 
+;; Use the develop branch of straight.el on Radian's develop branch.
+;; (This code is different on master!)
+(setq straight-recipe-overrides
+      '((radian . ((straight :type git :host github
+                             :repo "raxod502/straight.el"
+                             :branch "develop")))))
+
 ;; Make sure we are running a modern enough Emacs, otherwise abort
 ;; init. We have to do this outside the `condition-case-unless-debug'
 ;; form, since old Emacsen do not actually have
