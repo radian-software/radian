@@ -23,6 +23,11 @@
         (radian-local . "radian-local.el")
         (nil . "default.el")))
 
+;; Reset `straight-recipe-overrides', so that removing a call to
+;; `straight-override-recipe' actually has an effect. (This code is
+;; different on develop!)
+(setq straight-recipe-overrides ())
+
 ;; Make sure we are running a modern enough Emacs, otherwise abort
 ;; init. We have to do this outside the `condition-case-unless-debug'
 ;; form, since old Emacsen do not actually have
