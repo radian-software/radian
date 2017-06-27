@@ -25,6 +25,7 @@
  ("el-patch" . "22682dd020ac93b621bf45e57c738e551e2cb14b")
  ("elpa" . "2dad73c22f2ac19899a40c68e3f16b2f56d932ae")
  ("emacs-async" . "666066d30a420d86801d8380f5991f2b82471107")
+ ("emacs-hcl-mode" . "0f2c5ec7e7bcf77c8548e8cac8721ea935ca1b5e")
  ("emacs-racer" . "40f99f69b46edbf0855c92d908c11e29bf2e817c")
  ("emacs-terraform-mode" . "6973d1acaba2835dfdf174f5a5e27de6366002e1")
  ("emacs-web-server" . "348483efea6ec2752bc5aa4028a16087d19b2809")
