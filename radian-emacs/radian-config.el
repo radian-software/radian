@@ -38,6 +38,11 @@
 
   (add-hook 'pip-requirements-mode-hook #'radian--rename-pip-requirements-mode-lighter))
 
+;; Edit Terraform configuration files.
+(use-package terraform-mode
+  :defer-install t
+  :mode "\\.tf\\(vars\\)?\\'")
+
 ;; Editing for TOML files.
 (use-package toml-mode
   :defer-install t
