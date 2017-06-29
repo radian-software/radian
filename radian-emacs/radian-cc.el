@@ -36,9 +36,9 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; default -- yes, really). This style is only used in C, C++, etc.
 ;; and not Java.
 (with-eval-after-load 'cc-mode
-  (let ((radian-k&r (copy-alist (alist-get "k&r" c-style-alist))))
-    (setf (alist-get 'c-basic-offset radian-k&r) 2)
-    (setf (alist-get "radian-k&r" c-style-alist) radian-k&r))
+  (c-add-style "radian-k&r"
+               '("k&r"
+                 (c-basic-offset . 2)))
   (setf (alist-get 'other c-default-style) "radian-k&r"))
 
 ;; General support for C, C++, and Objective-C based on libclang.

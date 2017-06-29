@@ -723,7 +723,8 @@ if (( $+commands[git] )); then
     alias gum='git pull --no-rebase'
 
     alias gp='git push'
-    alias gpf='git push --force'
+    alias gpf='git push --force-with-lease'
+    alias gpff='git push --force'
     alias gpu='git push --set-upstream'
     alias gpd='git push --delete'
 fi
