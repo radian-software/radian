@@ -1,4 +1,5 @@
 [advice]
+	detachedHead = false
 	pushNonFastForward = false
 	statusHints = false
 [alias]
