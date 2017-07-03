@@ -34,6 +34,8 @@
 [merge]
 	conflictstyle = diff3
 	stat = true
+[protocol "hg"]
+	allow = always
 [push]
 	default = tracking
 [rebase]
