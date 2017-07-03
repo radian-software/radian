@@ -82,7 +82,7 @@
  ("transpose-frame" . "011f420c3496b69fc22d789f64cb8091834feba7")
  ("typescript.el" . "9ad892fb2274decb637d12d81a8640d2c6cf11d3")
  ("undo-tree" . "4cba00bb049cfaa2ee6821a9e347209a88a740b5")
- ("use-package" . "0139f85595a10b9e50e38f3d8d59f70cf4f3a2a2")
+ ("use-package" . "3edb46d63343e26ffdde29766959b3cc037e2103")
  ("vimrc-mode" . "fae7604e5ea6eef104d8c68598c3bbf9d798aa74")
  ("visual-regexp-steroids.el" . "a6420b25ec0fbba43bf57875827092e1196d8a9e")
  ("visual-regexp.el" . "b3096c2d391ff4e28a2a4e8cd82efbf11071ea85")

@@ -31,8 +31,15 @@
 ;; lazy-loading, through the use of keyword arguments. See the README
 ;; [1].
 ;;
+;; We are using my fork until [2] is merged.
+;;
 ;; [1]: https://github.com/jwiegley/use-package
-(straight-use-package 'use-package)
+;; [2]: https://github.com/jwiegley/use-package/pull/479
+(straight-use-package '(use-package
+                         :host github
+                         :repo "raxod502/use-package"
+                         :upstream (:host github
+                                    :repo "jwiegley/use-package")))
 
 ;; Tell use-package to automatically install packages if they are
 ;; missing. By default, packages are installed via straight.el [1],
