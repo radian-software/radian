@@ -127,14 +127,20 @@ This is an `:override' advice for `c-update-modeline'.")
   :config
 
   ;; Once Flycheck-Irony is loaded, remove the default Flycheck
-  ;; checker for C/C++, because it is not as accurate.
+  ;; checkers for C/C++, because they are not as accurate.
 
   (defun radian--disable-flycheck-using-clang ()
     "Disable C/C++ checkers that are not sophisticated enough."
     (setq flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
 
   (add-hook 'c-mode-hook #'radian--disable-flycheck-using-clang)
-  (add-hook 'c++-mode-hook #'radian--disable-flycheck-using-clang))
+  (add-hook 'c++-mode-hook #'radian--disable-flycheck-using-clang)
+
+  ;; Also enable cppcheck, even though Flycheck-Irony is already
+  ;; enabled. See [1] for discussion.
+  ;;
+  ;; [1]: https://github.com/Sarcasm/flycheck-irony/issues/9
+  (flycheck-add-next-checker 'irony '(warning . c/c++-cppcheck)))
 
 (provide 'radian-cc)
 
