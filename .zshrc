@@ -681,6 +681,10 @@ if (( $+commands[git] )); then
     alias gcop='git checkout --patch'
     alias gcob='git checkout -B'
 
+    alias glsf='git ls-files'
+
+    alias gx='git clean'
+
     alias gbs='git bisect'
     alias gbss='git bisect start'
     alias gbsg='git bisect good'
