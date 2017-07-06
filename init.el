@@ -28,7 +28,8 @@
 (setq straight-recipe-overrides
       '((radian . ((straight :type git :host github
                              :repo "raxod502/straight.el"
-                             :branch "develop")))))
+                             :branch "develop"
+                             :files ("straight.el"))))))
 
 ;; Make sure we are running a modern enough Emacs, otherwise abort
 ;; init. We have to do this outside the `condition-case-unless-debug'
