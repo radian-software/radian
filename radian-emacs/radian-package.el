@@ -10,19 +10,16 @@
 ;; if it is not already installed and loaded).
 ;;
 ;; [1]: https://github.com/raxod502/straight.el
-(let ((repos-dir (concat user-emacs-directory "straight/repos/")))
-  (unless (file-exists-p (concat repos-dir "straight.el"))
-    (make-directory repos-dir 'parents)
-    (message "Cloning repository \"straight.el\"...")
-    (unless (= 0 (call-process
-                  "git" nil nil nil "clone" "--recursive" "-b" "develop"
-                  "https://github.com/raxod502/straight.el.git"
-                  (expand-file-name
-                   (concat repos-dir "straight.el"))))
-      (error "Could not clone straight.el"))
-    (message "Cloning repository \"straight.el\"...done"))
-  (load (concat repos-dir "straight.el/bootstrap.el")
-        nil 'nomessage))
+(let ((bootstrap-file (concat user-emacs-directory "straight/bootstrap.el"))
+      (bootstrap-version 1))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (delete-region (point-min) url-http-end-of-headers)
+      (eval-buffer)))
+  (load bootstrap-file nil 'nomessage))
 
 ;; To handle a lot of useful tasks related to package configuration,
 ;; we use a library called `use-package', which provides a macro by
