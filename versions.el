@@ -54,7 +54,6 @@
  ("jump.el" . "95a9559bd301ff86fa3b72b15126dc4851ce4a69")
  ("magit" . "456a77d36915cc2ead3799d8a5ec2fbf7f2a17ed")
  ("markdown-mode" . "2c8d0e537ea7a2e823b7768b603f7194beebe565")
- ("markdown-toc" . "0edc303871517da67483119f2b1969055e6e0608")
  ("melpa" . "f8f02a849debce8f7c78197a8154821c997d9142")
  ("multiple-cursors.el" . "fa91dfb9bdebe1ecbdffd08d0f7e8da0639a5ecc")
  ("no-littering" . "8b689a1e16d4825d0221f4a41756b63bbc361c82")
