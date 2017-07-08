@@ -33,7 +33,6 @@
 [include]
 	path = ~/.gitconfig.local
 [merge]
-	conflictstyle = diff3
 	stat = true
 [protocol "hg"]
 	allow = always
