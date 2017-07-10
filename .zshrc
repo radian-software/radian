@@ -325,11 +325,7 @@ function copy() {
     emulate -LR zsh
     radian_clipboard=()
     for target; do
-        if [[ $target == /* ]]; then
-            radian_clipboard+=($target)
-        else
-            radian_clipboard+=($PWD/$target)
-        fi
+        radian_clipboard+=(${target:a})
     done
 }
 function paste() {
@@ -685,6 +681,10 @@ if (( $+commands[git] )); then
     alias gcop='git checkout --patch'
     alias gcob='git checkout -B'
 
+    alias glsf='git ls-files'
+
+    alias gx='git clean'
+
     alias gbs='git bisect'
     alias gbss='git bisect start'
     alias gbsg='git bisect good'
@@ -737,7 +737,7 @@ fi
 #
 # [1]: https://github.com/github/hub
 if (( $+commands[hub] )); then
-    alias hcl='hub clone'
+    alias hcl='hub clone --recursive'
     alias hc='hub create --copy'
     alias hcp='hub create -p --copy'
     alias hf='hub fork'
@@ -771,8 +771,8 @@ if (( $+commands[emacs] )); then
 fi
 
 if (( $+commands[emacsclient] )); then
-    alias ec='emacsclient --alternate-editor="" -nw'
-    alias ecw='emacsclient --alternate-editor=""'
+    alias ec='emacsclient --alternate-editor= -nw'
+    alias ecw='emacsclient --alternate-editor='
 fi
 
 ################################################################################

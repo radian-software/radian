@@ -1,50 +1,46 @@
-[core]
-	pager = less -FRSX
-	excludesfile = ~/.gitexclude
-	editor = emacsclient --alternate-editor="" -nw
-	autocrlf = input
+[advice]
+	detachedHead = false
+	pushNonFastForward = false
+	statusHints = false
 [alias]
-	# git init
-	setup = !git init && git commit --allow-empty -m \"Initial commit\"
-	# git log
-	msg = log --format=%B -1
-	root = rev-list --max-parents=0 HEAD
-	# git stash
-	stash-rename = "!_() { newmsg=\"$1\" && stash=${2:-\"stash@{0}\"} && newbranch=\"$3\" && sha=$(git rev-parse \"$stash\") && olddesc=\"$(git stash list --format=%gs -1 \"$stash\")\" && newdesc=\"$(if [[ \"$newbranch\" = \".\" ]]; then echo \"$newmsg\"; else if [[ -n \"$newbranch\" ]]; then echo \"On $newbranch: $newmsg\"; else if [[ \"$olddesc\" =~ \":\" ]]; then echo \"$(echo \"$olddesc\" | cut -f1 -d\":\"): $newmsg\"; else echo \"$newmsg\"; fi; fi; fi)\" && git stash drop \"$stash\" > /dev/null || exit 1; git stash store -m \"$newdesc\" \"$sha\" && git stash list; }; _"
-	# git commit
-	reword = "!_() { uuid=$(uuidgen) && (saved=\"$(git stash save $uuid | grep $uuid)\"; git commit --amend; (if [[ -n \"$saved\" ]]; then git stash pop > /dev/null; fi);) }; _"
-	# git rebase
-	rework = "!_() { if [[ -n \"$1\" ]]; then git rebase -i HEAD~$1; else git rebase -i \"origin/$(git rev-parse --abbrev-ref HEAD)\"; fi; }; _"
-	# git config
 	alias = "!_() { git config --global alias.$1 \"$2\"; }; _"
-	unalias = "!_() { git config --global --unset alias.$1; }; _"
 	aliases = config --get-regexp ^alias\\.
 	checkup = !git log -1 && (git fetch --all 2>/dev/null || true) && git status
-[push]
-	default = tracking
+	msg = log --format=%B -1
+	reword = "!_() { uuid=$(uuidgen) && (saved=\"$(git stash save $uuid | grep $uuid)\"; git commit --amend; (if [[ -n \"$saved\" ]]; then git stash pop > /dev/null; fi);) }; _"
+	rework = "!_() { if [[ -n \"$1\" ]]; then git rebase -i HEAD~$1; else git rebase -i \"origin/$(git rev-parse --abbrev-ref HEAD)\"; fi; }; _"
+	root = rev-list --max-parents=0 HEAD
+	setup = !git init && git commit --allow-empty -m \"Initial commit\"
+	stash-rename = "!_() { newmsg=\"$1\" && stash=${2:-\"stash@{0}\"} && newbranch=\"$3\" && sha=$(git rev-parse \"$stash\") && olddesc=\"$(git stash list --format=%gs -1 \"$stash\")\" && newdesc=\"$(if [[ \"$newbranch\" = \".\" ]]; then echo \"$newmsg\"; else if [[ -n \"$newbranch\" ]]; then echo \"On $newbranch: $newmsg\"; else if [[ \"$olddesc\" =~ \":\" ]]; then echo \"$(echo \"$olddesc\" | cut -f1 -d\":\"): $newmsg\"; else echo \"$newmsg\"; fi; fi; fi)\" && git stash drop \"$stash\" > /dev/null || exit 1; git stash store -m \"$newdesc\" \"$sha\" && git stash list; }; _"
+	unalias = "!_() { git config --global --unset alias.$1; }; _"
+[branch]
+	autosetupmerge = true
 [color]
 	ui = auto
+[core]
+	autocrlf = input
+	editor = emacsclient --alternate-editor="" -nw
+	excludesfile = ~/.gitexclude
+	pager = less -FRSX
+[diff]
+	mnemonicprefix = true
+	renames = copies
+	submodule = log
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	required = true
+	smudge = git-lfs smudge -- %f
+[include]
+	path = ~/.gitconfig.local
 [merge]
-	conflictstyle = diff3
 	stat = true
+[protocol "hg"]
+	allow = always
+[push]
+	default = tracking
 [rebase]
 	autosquash = true
 [rerere]
 	enabled = true
 [status]
 	submodulesummary = true
-[diff]
-	submodule = log
-	renames = copies
-	mnemonicprefix = true
-[filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	required = true
-[include]
-	path = ~/.gitconfig.local
-[advice]
-	statusHints = false
-	pushNonFastForward = false
-[branch]
-	autosetupmerge = true

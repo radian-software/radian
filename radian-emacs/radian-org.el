@@ -8,7 +8,7 @@
 (require 'radian-package)
 
 (use-package org
-  :recipe (:fetcher github
+  :recipe (:host github
            :repo "emacsmirror/org"
            :files ("lisp/*.el"))
   :defer-install t

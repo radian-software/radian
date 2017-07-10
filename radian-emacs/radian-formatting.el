@@ -52,30 +52,22 @@ Trailing whitespace is only deleted if variable
 ;; Automatically wrap lines when editing plain text files.
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
-;; Use an adaptive fill prefix when visually wrapping too-long lines.
-;; This means that if you have a line that is long enough to wrap
-;; around, the prefix (e.g. comment characters or indent) will be
-;; displayed again on the next visual line.
+;; Make `fill-paragraph' generally smarter. For example, it now
+;; behaves nicely in Markdown's bulleted lists.
 (use-package filladapt
   :demand t
   :diminish filladapt-mode
   :config
 
-  ;; Enable filladapt (almost) everywhere.
+  ;; Enable filladapt in text modes. Enabling it globally has some
+  ;; nasty side effects for filling docstrings in e.g.
+  ;; `emacs-lisp-mode' and `clojure-mode'.
+  (add-hook 'text-mode-hook #'filladapt-mode))
 
-  (define-globalized-minor-mode global-filladapt-mode
-    filladapt-mode
-    (lambda ()
-      ;; If we enable `filladapt-mode' in `clojure-mode', then it
-      ;; breaks `fill-paragraph' in docstrings (Emacs can no longer
-      ;; tell when the docstring ends and the code begins).
-      (unless (derived-mode-p 'clojure-mode)
-        (filladapt-mode))))
-
-  (global-filladapt-mode 1))
-
-;; Make `fill-paragraph' generally smarter. For example, it now
-;; behaves nicely in Markdown's bulleted lists.
+;; Use an adaptive fill prefix when visually wrapping too-long lines.
+;; This means that if you have a line that is long enough to wrap
+;; around, the prefix (e.g. comment characters or indent) will be
+;; displayed again on the next visual line.
 (use-package adaptive-wrap
   :demand t
   :config
@@ -126,6 +118,16 @@ Interactively, reverse the characters in the current region."
 (use-package editorconfig
   :defer-install t
   :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
+
+;; Multiple cursor support, like in Sublime Text.
+(use-package multiple-cursors
+  :defer-install t
+  ;; My fork includes pull request [1], which has not been merged at
+  ;; the time of this writing.
+  ;;
+  ;; [1]: https://github.com/magnars/multiple-cursors.el/pull/290
+  :recipe (:host github
+           :repo "raxod502/multiple-cursors.el"))
 
 (provide 'radian-formatting)
 
