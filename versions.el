@@ -72,7 +72,7 @@
  ("s.el" . "e61dee51474e61b777575b474459c582f3084f64")
  ("skewer-mode" . "18a90f401451f8ca0486bdaf45647ac3ccebc0ac")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
- ("straight.el" . "e98db86e2df306633c3b3a8548c236599b52c479")
+ ("straight.el" . "9551e21e9459639e0a37b1552d0d201924eaa198")
  ("swift-mode" . "e91e924c225b7bfb7aa6e4a84b5d379c6268014a")
  ("swiper" . "bf0e4388d7c30914a3cc62c0472b5b8207d9b2e6")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")
