@@ -127,7 +127,9 @@ Interactively, reverse the characters in the current region."
   ;;
   ;; [1]: https://github.com/magnars/multiple-cursors.el/pull/290
   :recipe (:host github
-           :repo "raxod502/multiple-cursors.el"))
+           :repo "raxod502/multiple-cursors.el"
+           :upstream (:host github
+                      :repo "magnars/multiple-cursors.el")))
 
 (provide 'radian-formatting)
 
