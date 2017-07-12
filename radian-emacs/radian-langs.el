@@ -568,15 +568,18 @@ command `sh-reset-indent-vars-to-global-values'."
   (setq TeX-parse-self t)
 
   (radian-with-operating-system macOS
-    ;; Use TeXShop for previewing LaTeX, rather than Preview. This
-    ;; means we have to define the command to run TeXShop as a "viewer
-    ;; program", and then tell AUCTeX to use the TeXShop viewer when
-    ;; opening PDFs.
+    ;; Use Skim for previewing LaTeX, rather than Previewor TeXShop. This
+    ;; means we have to define the command to run Skim as a "viewer
+    ;; program", and then tell AUCTeX to use the Skim viewer when
+    ;; opening PDFs.  Skim is chosen because it allows for live updating
+    ;; of your output pdf --- no longer will you be forced to quit your
+    ;; viewer every time you want to open a new version of your compiled
+    ;; document.  Huzzah huzzah, Callooh Callay~
 
     (add-to-list 'TeX-view-program-list
-                 '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+                 '("Skim" "/usr/bin/open -a Skim.app %s.pdf"))
     (setf (alist-get 'output-pdf TeX-view-program-selection)
-          '("TeXShop"))))
+          '("Skim"))))
 
 (use-package latex
   :recipe auctex
