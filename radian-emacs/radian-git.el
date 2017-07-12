@@ -16,7 +16,12 @@
          ;;
          ;; [1]: https://magit.vc/manual/magit.html#Getting-Started
          ("C-x g" . magit-status)
-         ("C-x M-g" . magit-dispatch-popup)))
+         ("C-x M-g" . magit-dispatch-popup))
+  :config
+
+  ;; Enable the C-c M-g shortcut to go to a popup of Magit commands
+  ;; relevant to the current file.
+  (global-magit-file-mode +1))
 
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).

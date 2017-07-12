@@ -347,8 +347,12 @@ This is a function for `after-save-hook'. Remove
 ;; This package provides enhanced versions of the Projectile commands
 ;; that use Ivy.
 (use-package counsel-projectile
-  :recipe (:fetcher github
-           :repo "raxod502/counsel-projectile")
+  ;; My fork remaps the 'f' action to do a find-file rather than just
+  ;; the same as pressing M-o again.
+  :recipe (:host github
+           :repo "raxod502/counsel-projectile"
+           :upstream (:host github
+                      :repo "ericdanan/counsel-projectile"))
   :init
 
   ;; Lazy-load `counsel-projectile'.
@@ -370,8 +374,12 @@ This is a function for `after-save-hook'. Remove
       "Switch to project buffer."
       (counsel-projectile-switch-to-buffer))
     (def-projectile-commander-method ?A
-      "Search project files with ag."
-      (counsel-projectile-ag))
+      (el-patch-swap
+        "Search project files with ag."
+        "Search project files with rg.")
+      (el-patch-swap
+        (counsel-projectile-ag)
+        (counsel-projectile-rg)))
     (def-projectile-commander-method ?s
       "Switch project."
       (counsel-projectile-switch-project)))
@@ -388,7 +396,8 @@ This is a function for `after-save-hook'. Remove
           (define-key projectile-mode-map [remap projectile-find-file] #'counsel-projectile-find-file)
           (define-key projectile-mode-map [remap projectile-find-dir] #'counsel-projectile-find-dir)
           (define-key projectile-mode-map [remap projectile-switch-project] #'counsel-projectile-switch-project)
-          (define-key projectile-mode-map [remap projectile-ag] #'counsel-projectile-ag)
+          (define-key projectile-mode-map [remap projectile-ag]
+            (el-patch-swap #'counsel-projectile-ag #'counsel-projectile-rg))
           (define-key projectile-mode-map [remap projectile-switch-to-buffer] #'counsel-projectile-switch-to-buffer)
           (counsel-projectile-commander-bindings))
       (progn
@@ -400,7 +409,10 @@ This is a function for `after-save-hook'. Remove
         (define-key projectile-mode-map [remap projectile-find-file] nil)
         (define-key projectile-mode-map [remap projectile-find-dir] nil)
         (define-key projectile-mode-map [remap projectile-switch-project] nil)
-        (define-key projectile-mode-map [remap projectile-ag] nil)
+        (define-key projectile-mode-map (el-patch-swap
+                                          [remap projectile-ag]
+                                          [remap projectile-rg])
+          nil)
         (define-key projectile-mode-map [remap projectile-switch-to-buffer] nil)
         (projectile-commander-bindings))))
 
@@ -408,28 +420,6 @@ This is a function for `after-save-hook'. Remove
   ;; actually load the package, though.
   (with-eval-after-load 'projectile
     (counsel-projectile-toggle 1)))
-
-;; This package allows you to jump to frequently used directories by
-;; name, assuming that you have the command-line tool of the same name
-;; installed.
-(use-package fasd
-  ;; Note that we don't enable fasd eagerly. This is because currently
-  ;; the feature wherein the fasd package will automatically register
-  ;; files you visit in Emacs in the fasd database is somewhat broken,
-  ;; and so temporarily disabled. With that feature disabled there is
-  ;; no need to have fasd loaded eagerly.
-
-  :defer-install t
-  :bind (;; Add a keybinding for using the functionality of `fasd'.
-         ("C-c f" . fasd-find-file))
-  :config
-
-  ;; Use completion from a list of fasd candidates for
-  ;; `fasd-find-file', instead of just prompting for an input.
-  (setq fasd-enable-initial-prompt nil)
-
-  ;; Use Ivy for completion, instead of `grizzl'.
-  (setq fasd-completing-read-function nil))
 
 (provide 'radian-find-file)
 

@@ -5,14 +5,8 @@
 (use-package flycheck
   :init
 
-  ;; Enable Flycheck everywhere.
+  ;; Enable Flycheck everywhere unless otherwise specified.
   (global-flycheck-mode)
-
-  :config
-
-  ;; Disable Flycheck for Emacs Lisp (it's dangerous to byte-compile
-  ;; arbitrary work-in-progress code!).
-  (setq-default flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc))
 
   :diminish flycheck-mode)
 

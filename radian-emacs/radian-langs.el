@@ -182,6 +182,13 @@
   ;; Lazy-load json-mode. This requires some gymnastics. It concerns
   ;; me somewhat that this kind of stuff now seems routine to me.
 
+  (defun radian--enable-json-mode-patches ()
+    "Enable patches for `json-mode'."
+    (require 'json-mode))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-json-mode-patches)
+
   (el-patch-defconst json-mode-standard-file-ext '(".json" ".jsonld")
     "List of JSON file extensions.")
 
@@ -231,20 +238,6 @@ This function calls `json-mode--update-auto-mode' to change the
   :defer-install t
   :mode (("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'" . markdown-mode)))
-
-;; Provides the `markdown-toc-generate-toc' command to generate a
-;; table of contents for a Markdown file.
-(use-package markdown-toc
-  :defer-install t
-  :commands (markdown-toc-generate-toc
-             markdown-toc-version)
-  :config
-
-  ;; Remove the header inserted before the table of contents. If you
-  ;; want a header, just add one before the "markdown-toc start"
-  ;; comment -- this way, you can have different header styles in
-  ;; different documents.
-  (setq markdown-toc-header-toc-title ""))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Python
@@ -347,6 +340,14 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; `ruby-electric-mode', which gets whatever value
   ;; `ruby-electric-mode-map' happens to have at definition time. (The
   ;; alternative is to also patch `ruby-electric-mode-map'.)
+
+  (defun radian--enable-ruby-electric-patches ()
+    "Load patches for `ruby-electric'."
+    (require 'ruby-electric))
+
+  (add-hook 'el-patch-pre-validate-hook
+            #'radian--enable-ruby-electric-patches)
+
   (el-patch-defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
@@ -547,7 +548,11 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
 
 (use-package tex-site
-  :recipe (auctex :fetcher github
+  ;; This recipe can be removed once straight.el supports org-elpa
+  ;; [1].
+  ;;
+  ;; [1]: https://github.com/raxod502/straight.el/issues/36
+  :recipe (auctex :host github
                   :repo "emacsmirror/auctex"
                   :files (:defaults (:exclude "*.el.in")))
   :demand t)
@@ -613,13 +618,28 @@ command `sh-reset-indent-vars-to-global-values'."
   ;; The standard TypeScript indent width is two spaces, not four.
   (setq typescript-indent-level 2))
 
+;; TypeScript IDE for Emacs.
 (use-package tide
   :defer-install t
   :commands (tide-setup)
   :init
 
+  ;; Enable Tide (and `tide-mode') when editing TypeScript files.
   (with-eval-after-load 'typescript-mode
     (add-hook 'typescript-mode-hook #'tide-setup))
+
+  :config
+
+  ;; Use tsserver to reformat the buffer on save.
+
+  (defun radian--tide-format-on-save ()
+    "Use tsserver to reformat the current buffer on save."
+    (add-hook 'before-save-hook #'tide-format-before-save nil 'local))
+
+  (add-hook 'tide-mode-hook #'radian--tide-format-on-save)
+
+  ;; Maintain standard TypeScript indent width.
+  (setq tide-format-options '(:indentSize 2 :tabSize 2))
 
   :diminish tide-mode)
 

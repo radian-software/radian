@@ -1,6 +1,7 @@
 ;;; radian-cc.el --- Support for C-like languages
 
 (require 'radian-autocomplete)
+(require 'radian-check)
 (require 'radian-eldoc)
 (require 'radian-package)
 
@@ -60,33 +61,6 @@ This is an `:override' advice for `c-update-modeline'.")
   ;; [1]: https://github.com/Sarcasm/irony-mode
   (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
 
-  ;; Automatically install irony-server if it is missing. irony-server
-  ;; is necessary for Irony to work at all!
-
-  (defun radian--install-irony-server-if-missing ()
-    (unless (irony--locate-server-executable)
-      (if (yes-or-no-p "Install irony-server? ")
-          ;; The following `let' is copied from the definition of
-          ;; `irony-install-server'. A better solution would be to
-          ;; dynamically bind `irony--install-server-read-command' to
-          ;; `identity' and then just use `call-interactively' to invoke
-          ;; `irony-install-server' with no arguments, but I don't know how
-          ;; to do this.
-          (let ((command
-                 (format
-                  (concat "%s %s %s && %s --build . "
-                          "--use-stderr --config Release --target install")
-                  (shell-quote-argument irony-cmake-executable)
-                  (shell-quote-argument (concat "-DCMAKE_INSTALL_PREFIX="
-                                                (expand-file-name
-                                                 irony-server-install-prefix)))
-                  (shell-quote-argument irony-server-source-dir)
-                  (shell-quote-argument irony-cmake-executable))))
-            (irony-install-server command))
-        (message "irony-mode will not work until you M-x irony-install-server"))))
-
-  (add-hook 'irony-mode-hook #'radian--install-irony-server-if-missing)
-
   :diminish irony-mode)
 
 ;; Company integration for Irony.
@@ -139,6 +113,34 @@ This is an `:override' advice for `c-update-modeline'.")
   ;; Enable irony-eldoc. See `irony-eldoc' function documentation.
   (add-hook 'irony-mode-hook #'eldoc-mode)
   (add-hook 'irony-mode-hook #'irony-eldoc))
+
+;; Flycheck integration for Irony.
+(use-package flycheck-irony
+  :defer-install t
+  :commands (flycheck-irony-setup)
+  :init
+
+  ;; When Irony is enabled, also set up Flycheck-Irony. This will
+  ;; cause Flycheck to be loaded, if it wasn't already.
+  (add-hook 'irony-mode-hook #'flycheck-irony-setup)
+
+  :config
+
+  ;; Once Flycheck-Irony is loaded, remove the default Flycheck
+  ;; checkers for C/C++, because they are not as accurate.
+
+  (defun radian--disable-flycheck-using-clang ()
+    "Disable C/C++ checkers that are not sophisticated enough."
+    (setq flycheck-disabled-checkers '(c/c++-clang c/c++-gcc)))
+
+  (add-hook 'c-mode-hook #'radian--disable-flycheck-using-clang)
+  (add-hook 'c++-mode-hook #'radian--disable-flycheck-using-clang)
+
+  ;; Also enable cppcheck, even though Flycheck-Irony is already
+  ;; enabled. See [1] for discussion.
+  ;;
+  ;; [1]: https://github.com/Sarcasm/flycheck-irony/issues/9
+  (flycheck-add-next-checker 'irony '(warning . c/c++-cppcheck)))
 
 (provide 'radian-cc)
 

@@ -30,6 +30,11 @@
         (radian-local . "radian-local.el")
         (nil . "default.el")))
 
+;; Reset `straight-recipe-overrides', so that removing a call to
+;; `straight-override-recipe' actually has an effect. (This code is
+;; different on develop!)
+(setq straight-recipe-overrides ())
+
 ;; Make sure we are running a modern enough Emacs, otherwise abort
 ;; init. We have to do this outside the `condition-case-unless-debug'
 ;; form, since old Emacsen do not actually have
@@ -98,9 +103,23 @@
           ;; packages. (Packages installed interactively do not belong to
           ;; either `radian' or `radian-local', and should not be written
           ;; to either lockfile.)
-          (let ((straight-current-profile 'radian-local))
-            (when (fboundp 'radian-after-init)
-              (radian-after-init)))
+          (if (member "--no-local" command-line-args)
+              (progn
+                ;; Make sure to delete --no-local from the list,
+                ;; because otherwise Emacs will issue a warning about
+                ;; the unknown argument.
+                (setq command-line-args
+                      (delete "--no-local" command-line-args))
+                ;; We don't want to prune the build cache when running
+                ;; without local packages.
+                (setq init-successful nil))
+            (let ((straight-current-profile 'radian-local))
+              (when (fboundp 'radian-after-init)
+                (radian-after-init))))
+
+          ;; This helps out the package management system. See the
+          ;; documentation on `straight-declare-init-finished'.
+          (straight-declare-init-finished)
 
           ;; This helps out the package management system. See the
           ;; documentation on `straight-declare-init-succeeded'.
