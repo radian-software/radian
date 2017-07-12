@@ -3,6 +3,7 @@
 	excludesfile = ~/.gitexclude
 	editor = emacsclient --alternate-editor="" -nw
 	autocrlf = input
+	trustctime = false
 [alias]
 	# git init
 	setup = !git init && git commit --allow-empty -m \"Initial commit\"
