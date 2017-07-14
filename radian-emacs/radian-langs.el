@@ -3,6 +3,7 @@
 (require 'radian-autocomplete)
 (require 'radian-bind-key)
 (require 'radian-check)
+(require 'radian-eldoc)
 (require 'radian-indent)
 (require 'radian-os)
 (require 'radian-package)
@@ -640,6 +641,9 @@ command `sh-reset-indent-vars-to-global-values'."
 
   ;; Maintain standard TypeScript indent width.
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
+
+  ;; Enable ElDoc when Tide is active.
+  (add-hook 'tide-mode #'eldoc-mode)
 
   :diminish tide-mode)
 
