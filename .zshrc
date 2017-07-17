@@ -613,6 +613,96 @@ if (( $+commands[git] )); then
             return 1
         fi
     }
+    function glG {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGs {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --stat ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGp {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --patch ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGps {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --patch --stat ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGo {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --oneline ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGa {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --all ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGsa {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --all --stat ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGpa {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --all --patch ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGpsa {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --all --patch --stat ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
+    function glGoa {
+        emulate -LR zsh
+        if (( $# >= 1 )); then
+            git log -G $1 --graph --decorate --all --oneline ${@:2}
+        else
+            echo "No query provided."
+            return 1
+        fi
+    }
 
     alias ga='git add'
     alias gap='git add --patch'
