@@ -693,7 +693,7 @@ This is an `:around' advice for `TeX-load-style-file'."
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
 
   ;; Enable ElDoc when Tide is active.
-  (add-hook 'tide-mode #'eldoc-mode)
+  (add-hook 'tide-mode-hook #'eldoc-mode)
 
   :diminish tide-mode)
 
