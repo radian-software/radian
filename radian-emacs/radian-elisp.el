@@ -146,7 +146,9 @@ Nil means no keybinding is established."
   "Evaluate the current buffer as Elisp code."
   (interactive)
   (message "Evaluating %s..." (buffer-name))
-  (eval-buffer)
+  (if buffer-file-name
+      (load-file buffer-file-name)
+    (eval-buffer))
   (message "Evaluating %s... done." (buffer-name)))
 
 (bind-key "C-c C-k" #'radian-eval-buffer emacs-lisp-mode-map)
