@@ -1,3 +1,10 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (defvar radian-minimum-emacs-version "25.1"
   "Radian Emacs does not support any Emacs version below this.")
 
@@ -23,13 +30,10 @@
         (radian-local . "radian-local.el")
         (nil . "default.el")))
 
-;; Use the develop branch of straight.el on Radian's develop branch.
-;; (This code is different on master!)
-(setq straight-recipe-overrides
-      '((radian . ((straight :type git :host github
-                             :repo "raxod502/straight.el"
-                             :branch "develop"
-                             :files ("straight.el"))))))
+;; Reset `straight-recipe-overrides', so that removing a call to
+;; `straight-override-recipe' actually has an effect. (This code is
+;; different on develop!)
+(setq straight-recipe-overrides ())
 
 ;; Make sure we are running a modern enough Emacs, otherwise abort
 ;; init. We have to do this outside the `condition-case-unless-debug'

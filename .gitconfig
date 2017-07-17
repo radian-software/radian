@@ -1,3 +1,9 @@
+[core]
+	pager = less -FRSX
+	excludesfile = ~/.gitexclude
+	editor = emacsclient --alternate-editor="" -nw
+	autocrlf = input
+	trustctime = false
 [advice]
 	detachedHead = false
 	pushNonFastForward = false
