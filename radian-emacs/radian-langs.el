@@ -693,7 +693,13 @@ This is an `:around' advice for `TeX-load-style-file'."
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
 
   ;; Enable ElDoc when Tide is active.
-  (add-hook 'tide-mode-hook #'eldoc-mode)
+
+  (defun radian--enable-eldoc-in-tide-mode (&rest _args)
+    "Enable ElDoc mode in the current buffer.
+This is an `:after' advice for `tide-setup'."
+    (eldoc-mode 1))
+
+  (advice-add #'tide-setup :after #'radian--enable-eldoc-in-tide-mode)
 
   :diminish tide-mode)
 
