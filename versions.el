@@ -54,7 +54,7 @@
  ("jump.el" . "95a9559bd301ff86fa3b72b15126dc4851ce4a69")
  ("magit" . "456a77d36915cc2ead3799d8a5ec2fbf7f2a17ed")
  ("markdown-mode" . "2c8d0e537ea7a2e823b7768b603f7194beebe565")
- ("melpa" . "f8f02a849debce8f7c78197a8154821c997d9142")
+ ("melpa" . "1c44dbc8d3ca29d8715af755b845af7236e95406")
  ("multiple-cursors.el" . "fa91dfb9bdebe1ecbdffd08d0f7e8da0639a5ecc")
  ("no-littering" . "8b689a1e16d4825d0221f4a41756b63bbc361c82")
  ("org" . "602a1a21fccd65b0fa5dc9543a9865b6537a75b9")
@@ -72,7 +72,7 @@
  ("s.el" . "e61dee51474e61b777575b474459c582f3084f64")
  ("skewer-mode" . "18a90f401451f8ca0486bdaf45647ac3ccebc0ac")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
- ("straight.el" . "9551e21e9459639e0a37b1552d0d201924eaa198")
+ ("straight.el" . "f293f103dc75bc1391817ca93973259dbf07f86c")
  ("swift-mode" . "e91e924c225b7bfb7aa6e4a84b5d379c6268014a")
  ("swiper" . "bf0e4388d7c30914a3cc62c0472b5b8207d9b2e6")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")
@@ -90,4 +90,4 @@
  ("with-editor" . "9fc047751b537178b5123fead9426d72b794b4d3")
  ("yaml-mode" . "64b28913bfe910b147d6ee16488dbaedb1452ca6")
  ("yasnippet" . "65952e30547754eb5ed11750f0cd736095fd6700"))
-:mercury
+:venus

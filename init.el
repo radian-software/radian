@@ -40,91 +40,87 @@
                   "but you are running Emacs %s")
           radian-minimum-emacs-version emacs-version)
   ;; We have a modern Emacs, proceed with init.
-  (condition-case-unless-debug error-data
-      (progn
-        ;; Require some libraries that everyone needs, just to be
-        ;; explicit about it.
-        (require 'cl-lib)
-        (require 'subr-x)
+  (unwind-protect
+      (with-demoted-errors "%S"
+        (progn
+          ;; Require some libraries that everyone needs, just to be
+          ;; explicit about it.
+          (require 'cl-lib)
+          (require 'subr-x)
 
-        ;; Load local customizations. We disable eager macroexpansion
-        ;; here, since otherwise bad things can happen with e.g.
-        ;; `el-patch' as the package management system has not yet
-        ;; been loaded. See [1] for the hack used to disable eager
-        ;; macroexpansion.
-        ;;
-        ;; [1]: https://emacs.stackexchange.com/a/17329/12534
-        (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
-          (fmakunbound 'internal-macroexpand-for-load)
-          (load radian-local-init-file 'noerror 'nomessage))
+          ;; Load local customizations. We disable eager
+          ;; macroexpansion here, since otherwise bad things can
+          ;; happen with e.g. `el-patch' as the package management
+          ;; system has not yet been loaded. See [1] for the hack used
+          ;; to disable eager macroexpansion.
+          ;;
+          ;; [1]: https://emacs.stackexchange.com/a/17329/12534
+          (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
+            (fmakunbound 'internal-macroexpand-for-load)
+            (load radian-local-init-file 'noerror 'nomessage))
 
-        ;; Make the Radian libraries available.
-        (add-to-list 'load-path radian-directory)
+          ;; Make the Radian libraries available.
+          (add-to-list 'load-path radian-directory)
 
-        ;; Load the Radian libraries.
-        (let ((preloaded-features
-               '(;; no-littering changes lots of paths and needs to be
-                 ;; loaded as soon as possible.
-                 radian-emacsd))
-              (radian-features (mapcar
-                                (lambda (file)
-                                  (intern (string-remove-suffix ".el" file)))
-                                (directory-files
-                                 radian-directory nil
-                                 "^[a-z-]+\\.el$"
-                                 'nosort)))
-              ;; Any packages installed here are official Radian packages.
-              (straight-current-profile 'radian)
-              (init-successful t))
-          ;; First we need to unload all the features, so that the
-          ;; init-file can be reloaded to pick up changes.
-          (dolist (feature radian-features)
-            (setq features (remove feature features)))
-          (dolist (feature preloaded-features)
-            (condition-case-unless-debug error-data
-                (require feature)
-              (error (warn "Could not load `%S': %s" feature
-                           (error-message-string error-data))
-                     (setq init-successful nil))))
-          (dolist (feature radian-features)
-            (unless (member feature preloaded-features)
+          ;; Load the Radian libraries.
+          (let ((preloaded-features
+                 '(;; no-littering changes lots of paths and needs to
+                   ;; be loaded as soon as possible.
+                   radian-emacsd))
+                (radian-features (mapcar
+                                  (lambda (file)
+                                    (intern (string-remove-suffix ".el" file)))
+                                  (directory-files
+                                   radian-directory nil
+                                   "^[a-z-]+\\.el$"
+                                   'nosort)))
+                ;; Any packages installed here are official Radian
+                ;; packages.
+                (straight-current-profile 'radian)
+                (init-successful t))
+            ;; First we need to unload all the features, so that the
+            ;; init-file can be reloaded to pick up changes.
+            (dolist (feature radian-features)
+              (setq features (remove feature features)))
+            (dolist (feature preloaded-features)
               (condition-case-unless-debug error-data
                   (require feature)
                 (error (warn "Could not load `%S': %s" feature
                              (error-message-string error-data))
-                       (setq init-successful nil)))))
+                       (setq init-successful nil))))
+            (dolist (feature radian-features)
+              (unless (member feature preloaded-features)
+                (condition-case-unless-debug error-data
+                    (require feature)
+                  (error (warn "Could not load `%S': %s" feature
+                               (error-message-string error-data))
+                         (setq init-successful nil)))))
 
-          ;; Run local customizations that are supposed to be run after
-          ;; init. Any packages installed here are user-local
-          ;; packages. (Packages installed interactively do not belong to
-          ;; either `radian' or `radian-local', and should not be written
-          ;; to either lockfile.)
-          (if (member "--no-local" command-line-args)
-              (progn
-                ;; Make sure to delete --no-local from the list,
-                ;; because otherwise Emacs will issue a warning about
-                ;; the unknown argument.
-                (setq command-line-args
-                      (delete "--no-local" command-line-args))
-                ;; We don't want to prune the build cache when running
-                ;; without local packages.
-                (setq init-successful nil))
-            (let ((straight-current-profile 'radian-local))
-              (when (fboundp 'radian-after-init)
-                (radian-after-init))))
+            ;; Run local customizations that are supposed to be run
+            ;; after init. Any packages installed here are user-local
+            ;; packages. (Packages installed interactively do not
+            ;; belong to either `radian' or `radian-local', and should
+            ;; not be written to either lockfile.)
+            (if (member "--no-local" command-line-args)
+                (progn
+                  ;; Make sure to delete --no-local from the list,
+                  ;; because otherwise Emacs will issue a warning
+                  ;; about the unknown argument.
+                  (setq command-line-args
+                        (delete "--no-local" command-line-args))
+                  ;; We don't want to prune the build cache when
+                  ;; running without local packages.
+                  (setq init-successful nil))
+              (let ((straight-current-profile 'radian-local))
+                (when (fboundp 'radian-after-init)
+                  (radian-after-init))))
 
-          ;; This helps out the package management system. See the
-          ;; documentation on `straight-declare-init-finished'.
-          (straight-declare-init-finished)
+            ;; This helps out the package management system. See the
+            ;; documentation on `straight-declare-init-succeeded'.
+            (when init-successful
+              (straight-declare-init-succeeded)))))
 
-          ;; This helps out the package management system. See the
-          ;; documentation on `straight-declare-init-succeeded'.
-          (when init-successful
-            (straight-declare-init-succeeded))))
-
-    ;; Report errors as warnings.
-    (error (warn "%s" (error-message-string error-data))
-           ;; This helps out the package management system. See the
-           ;; documentation on `straight-declare-init-finished'.
-           (when (fboundp 'straight-declare-init-finished)
-             (straight-declare-init-finished)))))
+    ;; This helps out the package management system. See the
+    ;; documentation on `straight-declare-init-succeeded'.
+    (when (fboundp 'straight-declare-init-finished)
+      (straight-declare-init-finished))))

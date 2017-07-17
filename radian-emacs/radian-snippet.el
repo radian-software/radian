@@ -14,6 +14,11 @@
   :demand t
   :config
 
+  ;; Reduce verbosity. The default value is 3. Bumping it down to 2
+  ;; eliminates a message about successful snippet lazy-loading setup
+  ;; on every(!) Emacs init. Errors should still be shown.
+  (setq yas-verbosity 2)
+
   ;; Enable YASnippet everywhere.
   (yas-global-mode)
 
