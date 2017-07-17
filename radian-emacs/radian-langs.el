@@ -7,6 +7,7 @@
 (require 'radian-os)
 (require 'radian-package)
 (require 'radian-patch)
+(require 'radian-util)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; AppleScript
@@ -299,7 +300,7 @@ This function calls `json-mode--update-auto-mode' to change the
     (defun radian--electric-pair-enable-pipes-locally ()
       "Tell `electric-pair-mode' to pair pipe characters, locally."
       (make-local-variable 'electric-pair-pairs)
-      (setf (alist-get ?| electric-pair-pairs) ?|))
+      (radian-alist-set* ?| ?| electric-pair-pairs))
 
     (add-hook 'ruby-mode-hook #'radian--electric-pair-enable-pipes-locally)))
 
@@ -575,8 +576,8 @@ command `sh-reset-indent-vars-to-global-values'."
 
     (add-to-list 'TeX-view-program-list
                  '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-    (setf (alist-get 'output-pdf TeX-view-program-selection)
-          '("TeXShop"))))
+    (radian-alist-set*
+     'output-pdf '("TeXShop") TeX-view-program-selection 'symbol)))
 
 (use-package latex
   :recipe auctex
