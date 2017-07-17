@@ -211,7 +211,7 @@ Return the new `auto-mode-alist' entry"
       (add-to-list 'auto-mode-alist new-entry)
       new-entry))
 
-  (el-patch-defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc")
+  (el-patch-defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
     "List of filename as string to pass for the JSON entry of
 `auto-mode-alist'.
 

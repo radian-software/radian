@@ -331,7 +331,8 @@ should be the regular Clojure REPL started by the server process filter."
            "ns" ,(cider-current-ns)
            "code" ,cljs-repl-form)
          (cider-repl-handler (current-buffer)))
-        (cider--offer-to-open-app-in-browser nrepl-server-buffer)))))
+        (when cider-offer-to-open-cljs-app-in-browser
+          (cider--offer-to-open-app-in-browser nrepl-server-buffer))))))
 
 ;; Makes Emacs into a real Clojure IDE by providing a mountain of
 ;; automated refactoring tools.
