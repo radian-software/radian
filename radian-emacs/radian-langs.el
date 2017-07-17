@@ -560,6 +560,14 @@ command `sh-reset-indent-vars-to-global-values'."
 
 (use-package tex
   :recipe auctex
+  :init
+
+  (defun radian--enable-tex-patches ()
+    "Enable patches for `tex'."
+    (require 'tex))
+
+  (add-hook 'el-patch-pre-validate-hook 'radian--enable-tex-patches)
+
   :config
 
   ;; The following configuration is recommended in the manual [1].
@@ -577,7 +585,48 @@ command `sh-reset-indent-vars-to-global-values'."
     (add-to-list 'TeX-view-program-list
                  '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
     (radian-alist-set*
-     'output-pdf '("TeXShop") TeX-view-program-selection 'symbol)))
+     'output-pdf '("TeXShop") TeX-view-program-selection 'symbol))
+
+  (el-patch-defun TeX-update-style (&optional force)
+    "Run style specific hooks for the current document.
+
+Only do this if it has not been done before, or if optional argument
+FORCE is not nil."
+    (unless (or (and (boundp 'TeX-auto-update)
+                     (eq TeX-auto-update 'BibTeX)) ; Not a real TeX buffer
+                (and (not force)
+                     TeX-style-hook-applied-p))
+      (setq TeX-style-hook-applied-p t)
+      (el-patch-remove
+        (message "Applying style hooks..."))
+      (TeX-run-style-hooks (TeX-strip-extension nil nil t))
+      ;; Run parent style hooks if it has a single parent that isn't itself.
+      (if (or (not (memq TeX-master '(nil t)))
+              (and (buffer-file-name)
+                   (string-match TeX-one-master
+                                 (file-name-nondirectory (buffer-file-name)))))
+          (TeX-run-style-hooks (TeX-master-file)))
+      (if (and TeX-parse-self
+               (null (cdr-safe (assoc (TeX-strip-extension nil nil t)
+                                      TeX-style-hook-list))))
+          (TeX-auto-apply))
+      (run-hooks 'TeX-update-style-hook)
+      (el-patch-remove
+        (message "Applying style hooks... done"))))
+
+  (defun radian--advice-inhibit-style-loading-message
+      (TeX-load-style-file file)
+    "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
+This is an `:around' advice for `TeX-load-style-file'."
+    (cl-letf (((symbol-function #'load)
+               (lambda (file &optional
+                             noerror _nomessage
+                             nosuffix must-suffix)
+                 (load file noerror 'nomessage nosuffix must-suffix))))
+      (funcall TeX-load-style-file file)))
+
+  (advice-add #'TeX-load-style-file :around
+              #'radian--advice-inhibit-style-loading-message))
 
 (use-package latex
   :recipe auctex
