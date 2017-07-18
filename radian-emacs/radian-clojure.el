@@ -337,6 +337,10 @@ should be the regular Clojure REPL started by the server process filter."
 ;; Makes Emacs into a real Clojure IDE by providing a mountain of
 ;; automated refactoring tools.
 (use-package clj-refactor
+  ;; Waiting on https://github.com/clojure-emacs/clj-refactor.el/pull/385
+  :recipe (:host github :repo "raxod502/clj-refactor.el"
+           :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
+           :files (:defaults "CHANGELOG.md"))
   :defer-install t
   :init
 
@@ -413,6 +417,9 @@ This is an `:override' advice for `cljr--post-command-message'.")
 
   (advice-add #'cljr--post-command-message :override
               #'radian--advice-cljr-message-eagerly)
+
+  ;; Automatically sort project dependencies after changing them.
+  (setq cljr-auto-sort-project-dependencies t)
 
   :diminish clj-refactor-mode)
 
