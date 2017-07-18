@@ -421,6 +421,16 @@ This is a function for `after-save-hook'. Remove
   (with-eval-after-load 'projectile
     (counsel-projectile-toggle 1)))
 
+(use-package ffap
+  :ensure nil
+  :config
+
+  ;; Don't try to find URLs or remote machines.
+  (setq ffap-url-regexp nil)
+  (setq ffap-machine-p-local 'reject)
+  (setq ffap-machine-p-known 'reject)
+  (setq ffap-machine-p-unknown 'reject))
+
 (provide 'radian-find-file)
 
 ;;; radian-find-file.el ends here
