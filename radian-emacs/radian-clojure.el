@@ -175,13 +175,7 @@ Return nil if not inside a project."
 
   ;; We define some patches after CIDER is loaded. We need to make
   ;; sure el-patch knows how to find these patches.
-
-  (defun radian--enable-cider-patches ()
-    (use-package-install-deferred-package 'cider :el-patch)
-    (require 'cider))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-cider-patches)
+  (el-patch-feature cider)
 
   :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
          ("C-c M-j" . cider-jack-in)

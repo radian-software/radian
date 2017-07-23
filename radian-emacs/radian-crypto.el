@@ -3,12 +3,7 @@
 (require 'radian-patch)
 
 ;; Tell `el-patch' about the following patch.
-
-(defun radian--enable-epa-file-patches ()
-  (require 'epa-file))
-
-(add-hook 'el-patch-pre-validate-hook
-          #'radian--enable-epa-file-patches)
+(el-patch-feature epa-file nil)
 
 ;; Configuration for EPG, the Emacs frontend to GPG.
 (with-eval-after-load 'epa-file

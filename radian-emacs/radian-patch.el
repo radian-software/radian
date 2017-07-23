@@ -14,7 +14,22 @@
   :config
 
   ;; When patching variable definitions, override the original values.
-  (setq el-patch-use-aggressive-defvar t))
+  (setq el-patch-use-aggressive-defvar t)
+
+  ;; Support for deferred installation in `el-patch-validate-all'.
+
+  (defun radian-require-with-deferred-install (feature &rest args)
+    "Require FEATURE, installing PACKAGE if necessary.
+
+\(fn FEATURE &optional PACKAGE)"
+    (let ((package feature))
+      (when args
+        (setq package (car args)))
+      (when package
+        (use-package-install-deferred-package package :el-patch))
+      (require feature)))
+
+  (setq el-patch-require-function #'radian-require-with-deferred-install))
 
 (provide 'radian-patch)
 

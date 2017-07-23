@@ -32,10 +32,7 @@
 
   ;; Lazy-load `git-commit'.
 
-  (defun radian--enable-git-commit-patches ()
-    (require 'git-commit))
-
-  (add-hook 'el-patch-pre-validate-hook #'radian--enable-git-commit-patches)
+  (el-patch-feature git-commit)
 
   (el-patch-defconst git-commit-filename-regexp "/\\(\
 \\(\\(COMMIT\\|NOTES\\|PULLREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\

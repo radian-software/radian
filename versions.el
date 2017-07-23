@@ -22,7 +22,7 @@
  ("dockerfile-mode" . "3c6bc90360a2df53caad1721ee4c8285e2e22369")
  ("editorconfig-emacs" . "1543835ce00412c3cd34a61497af5f68ead250a6")
  ("edn.el" . "be9e32d1b49e35247b263b0243df7cfdc8d413ab")
- ("el-patch" . "a3f5681b48b75cef9aee8c0fa4115e7e842a1fd7")
+ ("el-patch" . "cc26f37e19ebc60ca75067115d3794cda88003c5")
  ("elpa" . "2484f609320ca48abc24f7ab0e938fee967fe430")
  ("emacs-async" . "d6222c2959caaca5c4980038756097da8a51e505")
  ("emacs-hcl-mode" . "0f2c5ec7e7bcf77c8548e8cac8721ea935ca1b5e")

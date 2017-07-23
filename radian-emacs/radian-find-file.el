@@ -356,12 +356,7 @@ This is a function for `after-save-hook'. Remove
   :init
 
   ;; Lazy-load `counsel-projectile'.
-
-  (defun radian--enable-counsel-projectile-patches ()
-    (require 'counsel-projectile))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-counsel-projectile-patches)
+  (el-patch-feature counsel-projectile)
 
   (el-patch-defun counsel-projectile-commander-bindings ()
     (def-projectile-commander-method ?f

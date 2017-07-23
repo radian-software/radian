@@ -35,10 +35,7 @@
 
   ;; Lazy-load Ivy.
 
-  (defun radian--enable-ivy-patches ()
-    (require 'ivy))
-
-  (add-hook 'el-patch-pre-validate-hook #'radian--enable-ivy-patches)
+  (el-patch-feature ivy)
 
   (el-patch-defvar ivy-mode-map
     (let ((map (make-sparse-keymap)))
