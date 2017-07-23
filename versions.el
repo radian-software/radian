@@ -77,7 +77,7 @@
  ("swiper" . "bf0e4388d7c30914a3cc62c0472b5b8207d9b2e6")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")
  ("tern" . "3f8a2bc7c2e9a4ac55e8c6f6c60c0634cbe71326")
- ("tide" . "ec4a2b7a68c2503a6bdb31f1b6977321ad588102")
+ ("tide" . "1a1a378060a989589cb6129fa22cfbf3eeb5eab8")
  ("toml-mode.el" . "f6c61817b00f9c4a3cab1bae9c309e0fc45cdd06")
  ("transpose-frame" . "011f420c3496b69fc22d789f64cb8091834feba7")
  ("typescript.el" . "9ad892fb2274decb637d12d81a8640d2c6cf11d3")
