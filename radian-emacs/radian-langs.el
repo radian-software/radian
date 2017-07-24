@@ -111,12 +111,7 @@
 
   (skewer-setup)
 
-  (defun radian--enable-skewer-setup-patches ()
-    "Enable `el-patch' patches for `skewer-setup'."
-    (require 'skewer-setup))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-skewer-setup-patches)
+  (el-patch-feature skewer-setup skewer-mode)
 
   :diminish skewer-mode)
 
@@ -184,12 +179,7 @@
   ;; Lazy-load json-mode. This requires some gymnastics. It concerns
   ;; me somewhat that this kind of stuff now seems routine to me.
 
-  (defun radian--enable-json-mode-patches ()
-    "Enable patches for `json-mode'."
-    (require 'json-mode))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-json-mode-patches)
+  (el-patch-feature json-mode)
 
   (el-patch-defconst json-mode-standard-file-ext '(".json" ".jsonld")
     "List of JSON file extensions.")
@@ -343,12 +333,7 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; `ruby-electric-mode-map' happens to have at definition time. (The
   ;; alternative is to also patch `ruby-electric-mode-map'.)
 
-  (defun radian--enable-ruby-electric-patches ()
-    "Load patches for `ruby-electric'."
-    (require 'ruby-electric))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-ruby-electric-patches)
+  (el-patch-feature ruby-electric)
 
   (el-patch-defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
@@ -414,11 +399,7 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; Inhibit the "Indentation setup for shell type *sh" message.
 
-(defun radian--enable-sh-script-patches ()
-  "Enable `el-patch' patches for `sh-script'."
-  (require 'sh-script))
-
-(add-hook 'el-patch-pre-validate-hook #'radian--enable-sh-script-patches)
+(el-patch-feature sh-script nil)
 
 (with-eval-after-load 'sh-script
   (el-patch-defun sh-set-shell (shell &optional no-query-flag insert-flag)
@@ -563,11 +544,7 @@ command `sh-reset-indent-vars-to-global-values'."
   :recipe auctex
   :init
 
-  (defun radian--enable-tex-patches ()
-    "Enable patches for `tex'."
-    (require 'tex))
-
-  (add-hook 'el-patch-pre-validate-hook 'radian--enable-tex-patches)
+  (el-patch-feature tex auctex)
 
   :config
 

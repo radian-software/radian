@@ -190,12 +190,7 @@ This is an `:around' advice for `yas--make-control-overlay'."
 
   ;; Let's future-proof our patching here just in case we ever decide
   ;; to lazy-load company-statistics.
-
-  (defun radian--enable-company-statistics-patches ()
-    (require 'company-statistics))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-company-statistics-patches)
+  (el-patch-feature company-statistics)
 
   ;; Disable the message that is normally printed when Company
   ;; Statistics loads its statistics file from disk.

@@ -35,11 +35,7 @@ This function is to be placed on `dired-mode-hook'."
 
 (add-hook 'dired-mode-hook #'radian--silence-auto-revert-mode)
 
-(defun radian--enable-dired-patches ()
-  "Enable patches for `dired'."
-  (require 'dired))
-
-(add-hook 'el-patch-pre-validate-hook #'radian--enable-dired-patches)
+(el-patch-feature dired nil)
 
 (with-eval-after-load 'dired
 

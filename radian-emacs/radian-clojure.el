@@ -175,13 +175,7 @@ Return nil if not inside a project."
 
   ;; We define some patches after CIDER is loaded. We need to make
   ;; sure el-patch knows how to find these patches.
-
-  (defun radian--enable-cider-patches ()
-    (use-package-install-deferred-package 'cider :el-patch)
-    (require 'cider))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-cider-patches)
+  (el-patch-feature cider)
 
   :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
          ("C-c M-j" . cider-jack-in)
@@ -337,6 +331,10 @@ should be the regular Clojure REPL started by the server process filter."
 ;; Makes Emacs into a real Clojure IDE by providing a mountain of
 ;; automated refactoring tools.
 (use-package clj-refactor
+  ;; Waiting on https://github.com/clojure-emacs/clj-refactor.el/pull/385
+  :recipe (:host github :repo "raxod502/clj-refactor.el"
+           :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
+           :files (:defaults "CHANGELOG.md"))
   :defer-install t
   :init
 
@@ -413,6 +411,9 @@ This is an `:override' advice for `cljr--post-command-message'.")
 
   (advice-add #'cljr--post-command-message :override
               #'radian--advice-cljr-message-eagerly)
+
+  ;; Automatically sort project dependencies after changing them.
+  (setq cljr-auto-sort-project-dependencies t)
 
   :diminish clj-refactor-mode)
 
