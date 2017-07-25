@@ -531,13 +531,7 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
 
 (use-package tex-site
-  ;; This recipe can be removed once straight.el supports org-elpa
-  ;; [1].
-  ;;
-  ;; [1]: https://github.com/raxod502/straight.el/issues/36
-  :recipe (auctex :host github
-                  :repo "emacsmirror/auctex"
-                  :files (:defaults (:exclude "*.el.in")))
+  :recipe auctex
   :demand t)
 
 (use-package tex

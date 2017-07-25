@@ -75,7 +75,7 @@
  ("skewer-mode" . "18a90f401451f8ca0486bdaf45647ac3ccebc0ac")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
  ("spinner" . "0637791f005f747532b4439439a81c3415961377")
- ("straight.el" . "2721f10370bd19ecfb00f05da324e556759518d9")
+ ("straight.el" . "08962982cb5e1f6bd31eaff2db2abfc42a2135f6")
  ("swift-mode" . "e91e924c225b7bfb7aa6e4a84b5d379c6268014a")
  ("swiper" . "bf0e4388d7c30914a3cc62c0472b5b8207d9b2e6")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")

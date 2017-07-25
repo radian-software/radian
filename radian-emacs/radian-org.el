@@ -8,9 +8,6 @@
 (require 'radian-package)
 
 (use-package org
-  :recipe (:host github
-           :repo "emacsmirror/org"
-           :files ("lisp/*.el"))
   :defer-install t
   :commands (org-version)
   :bind (;; Add a global keybinding for accessing the Org Agenda.
