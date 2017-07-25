@@ -559,6 +559,8 @@ command `sh-reset-indent-vars-to-global-values'."
     (radian-alist-set*
      'output-pdf '("TeXShop") TeX-view-program-selection 'symbol))
 
+  ;; Remove annoying messages when opening *.tex files.
+
   (el-patch-defun TeX-update-style (&optional force)
     "Run style specific hooks for the current document.
 
