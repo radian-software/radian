@@ -596,11 +596,12 @@ FORCE is not nil."
       (TeX-load-style-file file)
     "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
 This is an `:around' advice for `TeX-load-style-file'."
-    (cl-letf (((symbol-function #'load)
-               (lambda (file &optional
-                             noerror _nomessage
-                             nosuffix must-suffix)
-                 (load file noerror 'nomessage nosuffix must-suffix))))
+    (cl-letf* (((symbol-function #'raw-load) (symbol-function #'load))
+               ((symbol-function #'load)
+                (lambda (file &optional
+                              noerror _nomessage
+                              nosuffix must-suffix)
+                  (raw-load file noerror 'nomessage nosuffix must-suffix))))
       (funcall TeX-load-style-file file)))
 
   (advice-add #'TeX-load-style-file :around
