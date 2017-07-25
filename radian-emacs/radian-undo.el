@@ -50,7 +50,12 @@ loaded since the file was changed outside of Emacs."
       (apply undo-tree-load-history args)))
 
   (advice-add #'undo-tree-load-history :around
-              #'radian--advice-suppress-undo-tree-buffer-modified-message))
+              #'radian--advice-suppress-undo-tree-buffer-modified-message)
+
+  ;; Disable undo-in-region. It sounds like an interesting feature,
+  ;; but unfortunately the implementation is very buggy and regularly
+  ;; causes you to lose your undo history.
+  (setq undo-tree-enable-undo-in-region nil))
 
 (provide 'radian-undo)
 
