@@ -857,7 +857,9 @@ fi
 
 if (( $+commands[emacs] )); then
     alias e='emacs -nw'
+    alias eq='emacs -nw -Q'
     alias ew='emacs'
+    alias eqw='emacs -Q'
 fi
 
 if (( $+commands[emacsclient] )); then
