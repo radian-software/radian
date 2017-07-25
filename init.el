@@ -5,10 +5,14 @@
   "File for local customizations of Radian.")
 
 (defvar radian-directory
-  (expand-file-name "radian-emacs/" (file-name-directory
-                                     (file-truename (or load-file-name
-                                                        buffer-file-name))))
-  "Path to Radian libraries.")
+  (file-name-directory
+   (file-truename (or load-file-name
+                      buffer-file-name)))
+  "Path to the Radian repository.")
+
+(defvar radian-lib-directory
+  (expand-file-name "radian-emacs/" radian-directory)
+  "Path to the Radian Emacs libraries.")
 
 ;; Prevent package.el from modifying this file if the rest of
 ;; init fails.
@@ -63,7 +67,7 @@
             (load radian-local-init-file 'noerror 'nomessage))
 
           ;; Make the Radian libraries available.
-          (add-to-list 'load-path radian-directory)
+          (add-to-list 'load-path radian-lib-directory)
 
           ;; Load the Radian libraries.
           (let ((preloaded-features
@@ -74,7 +78,7 @@
                                   (lambda (file)
                                     (intern (string-remove-suffix ".el" file)))
                                   (directory-files
-                                   radian-directory nil
+                                   radian-lib-directory nil
                                    "^[a-z-]+\\.el$"
                                    'nosort)))
                 ;; Any packages installed here are official Radian
