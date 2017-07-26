@@ -33,7 +33,9 @@ This is an `:around' advice for `esup'."
     (let* ((esup-user-init-file esup-user-init-file))
       (when (file-exists-p radian-flattened-init-file)
         (setq esup-user-init-file radian-flattened-init-file))
-      (funcall esup init-file)))
+      (funcall esup init-file)
+      (when (file-newer-than-file-p user-init-file radian-flattened-init-file)
+        (message "Warning: init-file newer than flattened version"))))
 
   (advice-add #'esup :around #'radian--advice-esup-use-init-flat))
 
