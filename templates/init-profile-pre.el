@@ -28,6 +28,10 @@
 (require 'cl-lib)
 (require 'subr-x)
 
+;; This is to prevent indentation from being lost in the profiling
+;; results.
+(advice-add #'esup-child-chomp :override #'string-trim)
+
 (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
   (fmakunbound 'internal-macroexpand-for-load)
   (load radian-local-init-file 'noerror 'nomessage))
