@@ -11,15 +11,6 @@ If `user-init-file' is not something sane, this is nil.")
 
 ;; This is the most recent and full-featured Emacs startup profiler.
 (use-package esup
-  ;; My fork inhibits the behavior wherein esup descends into
-  ;; `require' forms, because this causes a terrible bug with
-  ;; `cl-lib', see [1].
-  ;;
-  ;; [1]: https://github.com/jschaf/esup/issues/40
-  :recipe (:host github
-           :repo "raxod502/esup"
-           :upstream (:host github
-                      :repo "jschaf/esup"))
   :defer-install t
   :commands (esup)
   :config
