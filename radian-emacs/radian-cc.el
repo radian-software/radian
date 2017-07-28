@@ -4,6 +4,7 @@
 (require 'radian-check)
 (require 'radian-eldoc)
 (require 'radian-package)
+(require 'radian-util)
 
 ;; Get rid of the submode indicators in the mode line. This transforms
 ;; e.g. "C++/l" into "C++". Since we are overriding a function
@@ -40,7 +41,7 @@ This is an `:override' advice for `c-update-modeline'.")
   (c-add-style "radian-k&r"
                '("k&r"
                  (c-basic-offset . 2)))
-  (setf (alist-get 'other c-default-style) "radian-k&r"))
+  (radian-alist-set* 'other "radian-k&r" c-default-style 'symbol))
 
 ;; General support for C, C++, and Objective-C based on libclang.
 (use-package irony

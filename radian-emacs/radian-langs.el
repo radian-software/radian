@@ -3,10 +3,12 @@
 (require 'radian-autocomplete)
 (require 'radian-bind-key)
 (require 'radian-check)
+(require 'radian-eldoc)
 (require 'radian-indent)
 (require 'radian-os)
 (require 'radian-package)
 (require 'radian-patch)
+(require 'radian-util)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; AppleScript
@@ -109,12 +111,7 @@
 
   (skewer-setup)
 
-  (defun radian--enable-skewer-setup-patches ()
-    "Enable `el-patch' patches for `skewer-setup'."
-    (require 'skewer-setup))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-skewer-setup-patches)
+  (el-patch-feature skewer-setup skewer-mode)
 
   :diminish skewer-mode)
 
@@ -182,12 +179,7 @@
   ;; Lazy-load json-mode. This requires some gymnastics. It concerns
   ;; me somewhat that this kind of stuff now seems routine to me.
 
-  (defun radian--enable-json-mode-patches ()
-    "Enable patches for `json-mode'."
-    (require 'json-mode))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-json-mode-patches)
+  (el-patch-feature json-mode)
 
   (el-patch-defconst json-mode-standard-file-ext '(".json" ".jsonld")
     "List of JSON file extensions.")
@@ -210,7 +202,7 @@ Return the new `auto-mode-alist' entry"
       (add-to-list 'auto-mode-alist new-entry)
       new-entry))
 
-  (el-patch-defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc")
+  (el-patch-defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
     "List of filename as string to pass for the JSON entry of
 `auto-mode-alist'.
 
@@ -299,7 +291,7 @@ This function calls `json-mode--update-auto-mode' to change the
     (defun radian--electric-pair-enable-pipes-locally ()
       "Tell `electric-pair-mode' to pair pipe characters, locally."
       (make-local-variable 'electric-pair-pairs)
-      (setf (alist-get ?| electric-pair-pairs) ?|))
+      (radian-alist-set* ?| ?| electric-pair-pairs))
 
     (add-hook 'ruby-mode-hook #'radian--electric-pair-enable-pipes-locally)))
 
@@ -341,12 +333,7 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; `ruby-electric-mode-map' happens to have at definition time. (The
   ;; alternative is to also patch `ruby-electric-mode-map'.)
 
-  (defun radian--enable-ruby-electric-patches ()
-    "Load patches for `ruby-electric'."
-    (require 'ruby-electric))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-ruby-electric-patches)
+  (el-patch-feature ruby-electric)
 
   (el-patch-defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
@@ -412,11 +399,7 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; Inhibit the "Indentation setup for shell type *sh" message.
 
-(defun radian--enable-sh-script-patches ()
-  "Enable `el-patch' patches for `sh-script'."
-  (require 'sh-script))
-
-(add-hook 'el-patch-pre-validate-hook #'radian--enable-sh-script-patches)
+(el-patch-feature sh-script nil)
 
 (with-eval-after-load 'sh-script
   (el-patch-defun sh-set-shell (shell &optional no-query-flag insert-flag)
@@ -548,17 +531,15 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
 
 (use-package tex-site
-  ;; This recipe can be removed once straight.el supports org-elpa
-  ;; [1].
-  ;;
-  ;; [1]: https://github.com/raxod502/straight.el/issues/36
-  :recipe (auctex :host github
-                  :repo "emacsmirror/auctex"
-                  :files (:defaults (:exclude "*.el.in")))
+  :recipe auctex
   :demand t)
 
 (use-package tex
   :recipe auctex
+  :init
+
+  (el-patch-feature tex auctex)
+
   :config
 
   ;; The following configuration is recommended in the manual [1].
@@ -575,8 +556,50 @@ command `sh-reset-indent-vars-to-global-values'."
 
     (add-to-list 'TeX-view-program-list
                  '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-    (setf (alist-get 'output-pdf TeX-view-program-selection)
-          '("TeXShop"))))
+    (radian-alist-set*
+     'output-pdf '("TeXShop") TeX-view-program-selection 'symbol))
+
+  (el-patch-defun TeX-update-style (&optional force)
+    "Run style specific hooks for the current document.
+
+Only do this if it has not been done before, or if optional argument
+FORCE is not nil."
+    (unless (or (and (boundp 'TeX-auto-update)
+                     (eq TeX-auto-update 'BibTeX)) ; Not a real TeX buffer
+                (and (not force)
+                     TeX-style-hook-applied-p))
+      (setq TeX-style-hook-applied-p t)
+      (el-patch-remove
+        (message "Applying style hooks..."))
+      (TeX-run-style-hooks (TeX-strip-extension nil nil t))
+      ;; Run parent style hooks if it has a single parent that isn't itself.
+      (if (or (not (memq TeX-master '(nil t)))
+              (and (buffer-file-name)
+                   (string-match TeX-one-master
+                                 (file-name-nondirectory (buffer-file-name)))))
+          (TeX-run-style-hooks (TeX-master-file)))
+      (if (and TeX-parse-self
+               (null (cdr-safe (assoc (TeX-strip-extension nil nil t)
+                                      TeX-style-hook-list))))
+          (TeX-auto-apply))
+      (run-hooks 'TeX-update-style-hook)
+      (el-patch-remove
+        (message "Applying style hooks... done"))))
+
+  (defun radian--advice-inhibit-style-loading-message
+      (TeX-load-style-file file)
+    "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
+This is an `:around' advice for `TeX-load-style-file'."
+    (cl-letf* (((symbol-function #'raw-load) (symbol-function #'load))
+               ((symbol-function #'load)
+                (lambda (file &optional
+                              noerror _nomessage
+                              nosuffix must-suffix)
+                  (raw-load file noerror 'nomessage nosuffix must-suffix))))
+      (funcall TeX-load-style-file file)))
+
+  (advice-add #'TeX-load-style-file :around
+              #'radian--advice-inhibit-style-loading-message))
 
 (use-package latex
   :recipe auctex
@@ -640,6 +663,15 @@ command `sh-reset-indent-vars-to-global-values'."
 
   ;; Maintain standard TypeScript indent width.
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
+
+  ;; Enable ElDoc when Tide is active.
+
+  (defun radian--enable-eldoc-in-tide-mode (&rest _args)
+    "Enable ElDoc mode in the current buffer.
+This is an `:after' advice for `tide-setup'."
+    (eldoc-mode 1))
+
+  (advice-add #'tide-setup :after #'radian--enable-eldoc-in-tide-mode)
 
   :diminish tide-mode)
 

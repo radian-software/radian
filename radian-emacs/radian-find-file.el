@@ -356,12 +356,7 @@ This is a function for `after-save-hook'. Remove
   :init
 
   ;; Lazy-load `counsel-projectile'.
-
-  (defun radian--enable-counsel-projectile-patches ()
-    (require 'counsel-projectile))
-
-  (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-counsel-projectile-patches)
+  (el-patch-feature counsel-projectile)
 
   (el-patch-defun counsel-projectile-commander-bindings ()
     (def-projectile-commander-method ?f
@@ -420,6 +415,16 @@ This is a function for `after-save-hook'. Remove
   ;; actually load the package, though.
   (with-eval-after-load 'projectile
     (counsel-projectile-toggle 1)))
+
+(use-package ffap
+  :ensure nil
+  :config
+
+  ;; Don't try to find URLs or remote machines.
+  (setq ffap-url-regexp nil)
+  (setq ffap-machine-p-local 'reject)
+  (setq ffap-machine-p-known 'reject)
+  (setq ffap-machine-p-unknown 'reject))
 
 (provide 'radian-find-file)
 

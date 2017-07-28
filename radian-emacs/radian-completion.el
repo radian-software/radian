@@ -35,10 +35,7 @@
 
   ;; Lazy-load Ivy.
 
-  (defun radian--enable-ivy-patches ()
-    (require 'ivy))
-
-  (add-hook 'el-patch-pre-validate-hook #'radian--enable-ivy-patches)
+  (el-patch-feature ivy)
 
   (el-patch-defvar ivy-mode-map
     (let ((map (make-sparse-keymap)))
@@ -209,9 +206,6 @@ This is an `:around' advice for `counsel-M-x'."
 
 ;; Remembers your choices in completion menus.
 (use-package historian
-  :recipe (:host github
-           :repo "PythonNut/historian.el"
-           :files ("historian.el"))
   :demand t
   :config
 
@@ -220,9 +214,6 @@ This is an `:around' advice for `counsel-M-x'."
 
 ;; Uses Historian to sort Ivy candidates by frecency+flx.
 (use-package ivy-historian
-  :recipe (:host github
-           :repo "PythonNut/historian.el"
-           :files ("ivy-historian.el"))
   :after ivy
   :config
 
