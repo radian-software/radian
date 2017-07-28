@@ -32,6 +32,24 @@
 ;; results.
 (advice-add #'esup-child-chomp :override #'string-trim)
 
+;; This puts the esup init into a single straight.el transaction. This
+;; requires some gymnastics since we haven't yet loaded straight.el,
+;; and therefore can't use the transaction macro defined there.
+
+(defun radian--advice-esup-init-as-transaction (esup-child-run &rest args)
+  "Put the esup init within a single straight.el transaction.
+Since we haven't loaded straight.el yet, the easiest way to do
+this is to simply pretend that init has not finished yet, and
+then manually end the transaction since `after-init-hook' will
+not be run."
+  (unwind-protect
+      (let ((straight-treat-as-init t))
+        (apply esup-child-run args))
+    (straight-finalize-transaction)))
+
+(advice-add #'esup-child-run :around
+            #'radian--advice-esup-init-as-transaction)
+
 (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
   (fmakunbound 'internal-macroexpand-for-load)
   (load radian-local-init-file 'noerror 'nomessage))
