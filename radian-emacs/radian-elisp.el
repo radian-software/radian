@@ -188,6 +188,15 @@ Nil means no keybinding is established."
 (add-hook 'lisp-interaction-mode-hook
           #'radian--rename-lisp-interaction-mode)
 
+;; Disable the checkdoc Flycheck checker for Emacs Lisp, as it appears
+;; to not work in some situations.
+(with-eval-after-load 'flycheck
+  (defun radian--disable-flycheck-for-emacs-lisp ()
+    "Disable Flycheck checkers for Elisp."
+    (setq flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+
+  (add-hook 'emacs-lisp-mode-hook #'radian--disable-flycheck-for-emacs-lisp))
+
 (provide 'radian-elisp)
 
 ;;; radian-elisp.el ends here
