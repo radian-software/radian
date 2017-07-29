@@ -193,7 +193,7 @@ Nil means no keybinding is established."
 (with-eval-after-load 'flycheck
   (defun radian--disable-flycheck-for-emacs-lisp ()
     "Disable Flycheck checkers for Elisp."
-    (setq flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
+    (setq flycheck-disabled-checkers '(emacs-lisp emacs-lisp-checkdoc)))
 
   (add-hook 'emacs-lisp-mode-hook #'radian--disable-flycheck-for-emacs-lisp))
 
