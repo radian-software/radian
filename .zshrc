@@ -146,6 +146,15 @@ setopt rc_quotes
 # freeze and unfreeze command output, respectively).
 unsetopt flow_control
 
+# Make bracketed paste slightly smarter. This causes url-quote-magic
+# below to work correctly.
+autoload -Uz bracketed-paste-magic
+zle -N bracketed-paste bracketed-paste-magic
+
+# Automatically escape URLs.
+autoload -Uz url-quote-magic
+zle -N self-insert url-quote-magic
+
 ################################################################################
 #### Completion
 
