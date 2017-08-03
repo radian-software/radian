@@ -189,6 +189,9 @@ setopt glob_dots
 # Sort numeric filenames numerically, instead of lexicographically.
 setopt numeric_glob_sort
 
+# Disable history expansion, so we can use ! in our commands.
+setopt no_bang_hist
+
 ################################################################################
 #### Command history
 
