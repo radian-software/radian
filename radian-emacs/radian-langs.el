@@ -236,6 +236,12 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; https://www.python.org/
 
+(use-package python
+  :ensure nil
+  :config
+
+  (setq python-fill-docstring-style 'pep-257-nn))
+
 ;; Integrated development environment for Python.
 (use-package anaconda-mode
   :defer-install t
