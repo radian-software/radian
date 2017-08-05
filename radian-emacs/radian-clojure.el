@@ -44,8 +44,7 @@
          ("RET" . newline-and-indent))
   :config
 
-  ;; Enable Paredit and Aggressive Indent in Clojure mode.
-  (add-hook 'clojure-mode-hook #'paredit-mode)
+  ;; Enable Aggressive Indent in Clojure mode.
   (add-hook 'clojure-mode-hook #'aggressive-indent-mode)
 
   ;;; Customize indentation like this:
@@ -185,8 +184,7 @@ Return nil if not inside a project."
   ;; Enable ElDoc in Clojure files when CIDER is running.
   (add-hook 'cider-mode-hook #'eldoc-mode)
 
-  ;; Enable Paredit and ElDoc in the CIDER REPL.
-  (add-hook 'cider-repl-mode-hook #'paredit-mode)
+  ;; Enable ElDoc in the CIDER REPL.
   (add-hook 'cider-repl-mode-hook #'eldoc-mode)
 
   ;; By default, any error messages that occur when CIDER is starting

@@ -73,6 +73,7 @@
  ("s.el" . "e61dee51474e61b777575b474459c582f3084f64")
  ("seq" . "b4d667e408a02a70dcf8e785aa499086e8aa4be7")
  ("skewer-mode" . "18a90f401451f8ca0486bdaf45647ac3ccebc0ac")
+ ("smartparens" . "218e8177a331c37ee681ad97cea8978f0532b2d4")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
  ("spinner" . "0637791f005f747532b4439439a81c3415961377")
  ("straight.el" . "34b948635d01de17f3a4bc8778bb8f39d3e7c908")

@@ -290,16 +290,7 @@ This function calls `json-mode--update-auto-mode' to change the
 
 (with-eval-after-load 'ruby-mode
   ;; Indent aggressively in Ruby.
-  (add-hook 'ruby-mode-hook #'aggressive-indent-mode)
-
-  ;; Pair pipes in Ruby.
-  (with-eval-after-load 'elec-pair
-    (defun radian--electric-pair-enable-pipes-locally ()
-      "Tell `electric-pair-mode' to pair pipe characters, locally."
-      (make-local-variable 'electric-pair-pairs)
-      (radian-alist-set* ?| ?| electric-pair-pairs))
-
-    (add-hook 'ruby-mode-hook #'radian--electric-pair-enable-pipes-locally)))
+  (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
 
 ;; Autocompletion for Ruby.
 (use-package robe
@@ -321,21 +312,20 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; Enable `ruby-electric' when editing Ruby code.
   (add-hook 'ruby-mode-hook #'ruby-electric-mode)
 
-  ;; We already have paired delimiter support from
-  ;; `electric-pair-mode'. However, `ruby-electric' provides its own
-  ;; copy of this functionality, in a less optimal way. (In
-  ;; particular, typing a closing paren when your cursor is right
-  ;; before a closing paren will insert another paren rather than
-  ;; moving through the existing one.) Unfortunately,
-  ;; `ruby-electric-delimiters-alist' is defined as a constant, so we
-  ;; can't customize it by setting it to nil (actually, we can, but
-  ;; byte-compilation inserts the value literally at its use sites, so
-  ;; this does not take effect). Instead, we override the definition
-  ;; of `ruby-electric-mode-map' to make it ignore
-  ;; `ruby-electric-delimiters-alist'. Also note that we are actually
-  ;; doing this before `ruby-electric' is loaded. This is so that the
-  ;; modification will actually affect the definition of
-  ;; `ruby-electric-mode', which gets whatever value
+  ;; We already have paired delimiter support from Smartparens.
+  ;; However, `ruby-electric' provides its own copy of this
+  ;; functionality, in a less optimal way. (In particular, typing a
+  ;; closing paren when your cursor is right before a closing paren
+  ;; will insert another paren rather than moving through the existing
+  ;; one.) Unfortunately, `ruby-electric-delimiters-alist' is defined
+  ;; as a constant, so we can't customize it by setting it to nil
+  ;; (actually, we can, but byte-compilation inserts the value
+  ;; literally at its use sites, so this does not take effect).
+  ;; Instead, we override the definition of `ruby-electric-mode-map'
+  ;; to make it ignore `ruby-electric-delimiters-alist'. Also note
+  ;; that we are actually doing this before `ruby-electric' is loaded.
+  ;; This is so that the modification will actually affect the
+  ;; definition of `ruby-electric-mode', which gets whatever value
   ;; `ruby-electric-mode-map' happens to have at definition time. (The
   ;; alternative is to also patch `ruby-electric-mode-map'.)
 
@@ -614,10 +604,7 @@ This is an `:around' advice for `TeX-load-style-file'."
   :config
 
   ;; Don't be afraid to break inline math between lines.
-  (setq LaTeX-fill-break-at-separators nil)
-
-  ;; Automatically insert matching braces intelligently.
-  (setq LaTeX-electric-left-right-brace t))
+  (setq LaTeX-fill-break-at-separators nil))
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex

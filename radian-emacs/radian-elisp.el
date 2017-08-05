@@ -12,9 +12,6 @@
 ;; Enable ElDoc for Elisp buffers and the *scratch* buffer.
 (add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
 
-;; Enable Paredit for Elisp buffers and the *scratch* buffer.
-(add-hook 'emacs-lisp-mode-hook #'paredit-mode)
-
 ;; Enable Aggressive Indent for Elisp buffers and the *scratch*
 ;; buffer.
 (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode)

@@ -36,9 +36,9 @@ with an eye to:
       interesting ways
     * Configured packages: [aggressive-indent-mode], [Autorevert],
       [Company], [company-statistics], [Counsel],
-      [delete-selection-mode], [EasyPG], [ElDoc], [Electric-Pair],
-      [Flx], [Flycheck], [Historian], [Ivy], [Magit], [no-littering],
-      [Org], [Paredit], [Projectile], [Smex], [Swiper], [undo-tree],
+      [delete-selection-mode], [EasyPG], [ElDoc], [Flx], [Flycheck],
+      [Historian], [Ivy], [Magit], [no-littering], [Org],
+      [Projectile], [Smartparens], [Smex], [Swiper], [undo-tree],
       [use-package], [visual-regexp], [YASnippet] (... and dozens
       more, but these are the biggest ones)
     * Supported languages: C/C++, [Clojure], JavaScript, [LaTeX],
@@ -111,7 +111,6 @@ code, [please do][prs].
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html
 [el-patch]: https://github.com/raxod502/el-patch
 [eldoc]: https://www.emacswiki.org/emacs/ElDoc
-[electric-pair]: https://www.emacswiki.org/emacs/ElectricPair
 [emacs]: https://www.gnu.org/software/emacs/
 [exa]: https://the.exa.website/
 [flx]: https://github.com/lewang/flx
@@ -127,7 +126,6 @@ code, [please do][prs].
 [markdown]: https://daringfireball.net/projects/markdown/syntax
 [no-littering]: https://github.com/tarsius/no-littering
 [org]: http://orgmode.org/
-[paredit]: http://danmidwood.com/content/2014/11/21/animated-paredit.html
 [powerline]: https://github.com/powerline/powerline
 [projectile]: http://batsov.com/projectile/
 [prs]: https://github.com/raxod502/radian/pulls
@@ -136,6 +134,7 @@ code, [please do][prs].
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [ruby]: https://www.ruby-lang.org/
 [rust]: https://www.rust-lang.org/
+[smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
 [swiper]: https://github.com/abo-abo/swiper#swiper

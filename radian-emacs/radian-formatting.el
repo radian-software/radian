@@ -105,13 +105,6 @@ Interactively, reverse the characters in the current region."
     (whitespace-mode -1)
     (kill-local-variable 'whitespace-style)))
 
-;; Insert paired delimiters even when Paredit is not active.
-(electric-pair-mode 1)
-
-;; Be slightly more conservative with regard to inserting paired
-;; delimiters.
-(setq electric-pair-inhibit-predicate #'electric-pair-conservative-inhibit)
-
 ;; Support for EditorConfig, a "file format and collection of text
 ;; editor plugins for maintaining consistent coding styles between
 ;; different editors and IDEs".

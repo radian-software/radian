@@ -6,8 +6,6 @@
 (require 'radian-package)
 
 (with-eval-after-load 'scheme
-  ;; Enable Paredit for Scheme.
-  (add-hook 'scheme-mode-hook #'paredit-mode)
 
   ;; Enable Aggressive Indent for Scheme.
   (add-hook 'scheme-mode-hook #'aggressive-indent-mode))
@@ -22,11 +20,7 @@
              run-geiser
              run-guile
              run-mit
-             run-racket)
-  :config
-
-  ;; Enable Paredit in the Geiser REPL.
-  (add-hook 'geiser-repl-mode-hook #'paredit-mode))
+             run-racket))
 
 (provide 'radian-scheme)
 
