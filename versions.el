@@ -53,7 +53,7 @@
  ("json-snatcher" . "c4cecc0a5051bd364373aa499c47a1bb7a5ac51c")
  ("jump.el" . "95a9559bd301ff86fa3b72b15126dc4851ce4a69")
  ("magit" . "456a77d36915cc2ead3799d8a5ec2fbf7f2a17ed")
- ("markdown-mode" . "2c8d0e537ea7a2e823b7768b603f7194beebe565")
+ ("markdown-mode" . "0f88075c9091b4120fac96aaf091ec647d2ea555")
  ("melpa" . "1c44dbc8d3ca29d8715af755b845af7236e95406")
  ("multiple-cursors.el" . "fa91dfb9bdebe1ecbdffd08d0f7e8da0639a5ecc")
  ("no-littering" . "8b689a1e16d4825d0221f4a41756b63bbc361c82")
