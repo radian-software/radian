@@ -29,6 +29,19 @@
   :mode "\\.go\\'")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Haskell
+
+;; https://www.haskell.org/
+
+(use-package haskell-mode
+  :defer-install t
+  :mode (("\\.[gh]s\\'" . haskell-mode)
+         ("\\.l[gh]s\\'" . literate-haskell-mode)
+         ("\\.hsc\\'" . haskell-mode))
+  :interpreter (("runghc" . haskell-mode)
+                ("runhaskell" . haskell-mode)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HTML
 
 ;; https://www.w3.org/TR/html5/
