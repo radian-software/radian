@@ -18,14 +18,6 @@
 ;; Turn off the alarm bell.
 (setq ring-bell-function #'ignore)
 
-;; When point is on a paren, highlight the matching paren, even if it
-;; wasn't just typed. Also, do it immediately, instead of after 1/8 of
-;; a second. Note that `show-paren-delay' must be changed *before*
-;; turning on `show-paren-mode' in order for the change to take
-;; effect.
-(setq show-paren-delay 0)
-(show-paren-mode 1)
-
 (radian-with-windowed-emacs
   ;; Disable the scroll bars.
   (scroll-bar-mode -1)
