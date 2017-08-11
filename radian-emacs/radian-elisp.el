@@ -150,7 +150,7 @@ Nil means no keybinding is established."
         (eval-buffer)
       (when (string= buffer-file-name user-init-file)
         (straight-mark-transaction-as-init))
-      (load-file buffer-file-name)))
+      (load buffer-file-name nil 'nomessage)))
   (message "Evaluating %s... done." (buffer-name)))
 
 (bind-key "C-c C-k" #'radian-eval-buffer emacs-lisp-mode-map)
