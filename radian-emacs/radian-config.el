@@ -17,6 +17,16 @@
   :defer-install t
   :mode "Dockerfile.*\\'")
 
+;; Edit .gitconfig and .gitmodules files.
+(use-package gitconfig-mode
+  :defer-install t
+  :mode (("/\\.gitconfig\\'" . gitconfig-mode)
+         ("/\\.git/config\\'" . gitconfig-mode)
+         ("/modules/.*/config\\'" . gitconfig-mode)
+         ("/git/config\\'" . gitconfig-mode)
+         ("/\\.gitmodules\\'" . gitconfig-mode)
+         ("/etc/gitconfig\\'" . gitconfig-mode)))
+
 ;; Edit .gitignore files.
 (use-package gitignore-mode
   :defer-install t
