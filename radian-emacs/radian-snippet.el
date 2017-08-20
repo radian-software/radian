@@ -12,6 +12,12 @@
 ;; its refactorings.
 (use-package yasnippet
   :demand t
+  :bind (:map yas-minor-mode-map
+
+         ;; Disable TAB from expanding snippets, as I don't use it and
+         ;; it's annoying.
+         ("TAB" . nil)
+         ("<tab>" . nil))
   :config
 
   ;; Reduce verbosity. The default value is 3. Bumping it down to 2
