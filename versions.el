@@ -9,7 +9,7 @@
  ("buffer-move" . "cb517ecf8409b5fdcda472d7190c6021f0c49751")
  ("cider" . "b4a3d2431ddf8562c39d8ba1386c8bdaaa542b63")
  ("clj-refactor.el" . "192a8a694d76b836563049d8402d693f70cf87cb")
- ("clojure-mode" . "197298e93af19f755cc2c54049dc5aeb04ce6553")
+ ("clojure-mode" . "a6f0592e9cabeb4e039e654bd30890a20208950e")
  ("company-anaconda" . "b268a00821c79d7e4c5da0d7035356afb389b3a7")
  ("company-auctex" . "d3727c9f5bb13c52b4a345bc8f895d3dbd9178b3")
  ("company-irony" . "b8001ffc4da7403172835d47bc740cfbac35364d")
