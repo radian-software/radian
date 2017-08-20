@@ -40,6 +40,7 @@
  ("geiser" . "f5ae5488a6d94fcd74d573049b58f8c2e7ff7012")
  ("git-modes" . "9f18eca514d242816a4969e86c4cfd2cf4dfe401")
  ("go-mode.el" . "bfe7a14e9bf957d050e3c429156e697bb3670f21")
+ ("haskell-mode" . "518701c157468659e393e40aed2bdc37bcb408db")
  ("help-fns-plus" . "7213ef84d0345e2625f28e2b3134f8d98489391f")
  ("historian.el" . "99e282bdd8994cb4e23185d9004b2cb42a214927")
  ("hydra" . "38ce88a9c3be11b0431080078095159b2211ca7a")
