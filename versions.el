@@ -56,7 +56,7 @@
  ("magit" . "456a77d36915cc2ead3799d8a5ec2fbf7f2a17ed")
  ("markdown-mode" . "0f88075c9091b4120fac96aaf091ec647d2ea555")
  ("melpa" . "1c44dbc8d3ca29d8715af755b845af7236e95406")
- ("multiple-cursors.el" . "fa91dfb9bdebe1ecbdffd08d0f7e8da0639a5ecc")
+ ("multiple-cursors.el" . "18f992bff596609091afca128b51a7d2e919ac40")
  ("no-littering" . "8b689a1e16d4825d0221f4a41756b63bbc361c82")
  ("org" . "602a1a21fccd65b0fa5dc9543a9865b6537a75b9")
  ("paredit" . "99829aa423c9e8dd1be8d64c4b68982cf4c1559b")
