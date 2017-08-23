@@ -4,8 +4,15 @@
 (defvar radian-local-init-file "~/.emacs.d/init.local.el"
   "File for local customizations of Radian.")
 
-(defvar radian-directory (expand-file-name "~/.emacs.d/radian/")
-  "Path to Radian libraries.")
+(defvar radian-directory
+  (file-name-directory
+   (file-truename (or load-file-name
+                      buffer-file-name)))
+  "Path to the Radian repository.")
+
+(defvar radian-lib-directory
+  (expand-file-name "radian-emacs/" radian-directory)
+  "Path to the Radian Emacs libraries.")
 
 ;; Prevent package.el from modifying this file if the rest of
 ;; init fails.
@@ -57,7 +64,7 @@
             (load radian-local-init-file 'noerror 'nomessage))
 
           ;; Make the Radian libraries available.
-          (add-to-list 'load-path radian-directory)
+          (add-to-list 'load-path radian-lib-directory)
 
           ;; Load the Radian libraries.
           (let ((preloaded-features
@@ -68,13 +75,12 @@
                                   (lambda (file)
                                     (intern (string-remove-suffix ".el" file)))
                                   (directory-files
-                                   radian-directory nil
+                                   radian-lib-directory nil
                                    "^[a-z-]+\\.el$"
                                    'nosort)))
                 ;; Any packages installed here are official Radian
                 ;; packages.
-                (straight-current-profile 'radian)
-                (init-successful t))
+                (straight-current-profile 'radian))
             ;; First we need to unload all the features, so that the
             ;; init-file can be reloaded to pick up changes.
             (dolist (feature radian-features)
@@ -83,15 +89,13 @@
               (condition-case-unless-debug error-data
                   (require feature)
                 (error (warn "Could not load `%S': %s" feature
-                             (error-message-string error-data))
-                       (setq init-successful nil))))
+                             (error-message-string error-data)))))
             (dolist (feature radian-features)
               (unless (member feature preloaded-features)
                 (condition-case-unless-debug error-data
                     (require feature)
                   (error (warn "Could not load `%S': %s" feature
-                               (error-message-string error-data))
-                         (setq init-successful nil)))))
+                               (error-message-string error-data))))))
 
             ;; Run local customizations that are supposed to be run
             ;; after init. Any packages installed here are user-local
@@ -104,20 +108,7 @@
                   ;; because otherwise Emacs will issue a warning
                   ;; about the unknown argument.
                   (setq command-line-args
-                        (delete "--no-local" command-line-args))
-                  ;; We don't want to prune the build cache when
-                  ;; running without local packages.
-                  (setq init-successful nil))
+                        (delete "--no-local" command-line-args)))
               (let ((straight-current-profile 'radian-local))
                 (when (fboundp 'radian-after-init)
-                  (radian-after-init))))
-
-            ;; This helps out the package management system. See the
-            ;; documentation on `straight-declare-init-succeeded'.
-            (when init-successful
-              (straight-declare-init-succeeded)))))
-
-    ;; This helps out the package management system. See the
-    ;; documentation on `straight-declare-init-succeeded'.
-    (when (fboundp 'straight-declare-init-finished)
-      (straight-declare-init-finished))))
+                  (radian-after-init)))))))))

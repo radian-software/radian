@@ -21,6 +21,9 @@ This is an `:override' advice for
 ;; be globally available do not work in it. (E.g., Projectile.)
 (setq inhibit-startup-screen t)
 
+;; Remove the initial *scratch* message.
+(setq initial-scratch-message nil)
+
 (provide 'radian-startup)
 
 ;;; radian-startup.el ends here

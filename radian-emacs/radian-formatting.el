@@ -105,35 +105,12 @@ Interactively, reverse the characters in the current region."
     (whitespace-mode -1)
     (kill-local-variable 'whitespace-style)))
 
-;; Insert paired delimiters even when Paredit is not active.
-(electric-pair-mode 1)
-
-;; Be slightly more conservative with regard to inserting paired
-;; delimiters.
-(setq electric-pair-inhibit-predicate #'electric-pair-conservative-inhibit)
-
 ;; Support for EditorConfig, a "file format and collection of text
 ;; editor plugins for maintaining consistent coding styles between
 ;; different editors and IDEs".
 (use-package editorconfig
   :defer-install t
   :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
-
-;; Multiple cursor support, like in Sublime Text.
-;;
-;; Why are we not using `use-package'? Radian doesn't explicitly use
-;; `multiple-cursors'; it's just loaded as a dependency. I don't want
-;; to imply that I've thought through the configuration for
-;; `multiple-cursors' when I haven't. But I still need to override the
-;; recipe until [1] is merged.
-;;
-;; [1]: https://github.com/magnars/multiple-cursors.el/pull/290
-(straight-register-package
- '(multiple-cursors
-   :host github
-   :repo "raxod502/multiple-cursors.el"
-   :upstream (:host github
-              :repo "magnars/multiple-cursors.el")))
 
 (provide 'radian-formatting)
 

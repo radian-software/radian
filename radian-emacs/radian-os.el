@@ -1,4 +1,4 @@
-;; radian-os.el --- Operating system detection
+;;; radian-os.el --- Operating system detection
 
 (require 'radian-custom)
 
@@ -27,4 +27,4 @@ which should not be quoted."
 
 (provide 'radian-os)
 
-;; radian-os.el ends here
+;;; radian-os.el ends here

@@ -7,21 +7,6 @@
 ;; the normal function of the key is performed.)
 (delete-selection-mode 1)
 
-;; Make delete-selection-mode work properly with Paredit (so that, for
-;; example, pressing DEL while there is a selection will actually
-;; cause the region to be deleted, as expected). See the commentary in
-;; delsel.el for details about what is going on here.
-(with-eval-after-load 'paredit
-  (dolist (cmd '(paredit-forward-delete paredit-backward-delete))
-    (put cmd 'delete-selection 'supersede))
-  (dolist (cmd '(paredit-newline
-                 paredit-open-round
-                 paredit-open-bracket
-                 paredit-open-curly
-                 paredit-open-angled
-                 paredit-open-parenthesis))
-    (put cmd 'delete-selection t)))
-
 ;; Make delete-selection-mode work properly with AUCTeX.
 (with-eval-after-load 'latex
   (put 'LaTeX-insert-left-brace 'delete-selection t))
