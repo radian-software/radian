@@ -66,15 +66,14 @@ with an eye to:
     * Rename stashes
     * Reword a commit while preserving the index
     * Alias and unalias without messing with `git config`
-    * More helpful output from `git status`, merge conflicts,
-      submodules, and more
+    * More helpful output from `git status`, submodules, and more
 * [Leiningen]
     * Modular profile system allowing maximal performance through
       selecting exactly the features you want
     * Inject useful utility functions using [Vinyasa]
     * Pull JARs from Maven and hotload them into your REPL with
       [Alembic]
-    * Refresh a dirty REPL a restart, using [tools.namespace]
+    * Refresh a dirty REPL without a restart, using [tools.namespace]
     * Colorization and pretty-printing of output and stack traces in
       the REPL
 
