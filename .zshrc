@@ -1,9 +1,14 @@
 ################################################################################
+#### Configuration of bundles
+
+export WDX_NAME=wd
+
+################################################################################
 #### Define default bundle list
 
 bundles=(
     # Quickly jump to directories:
-    "mfaerevaag/wd, use:wd.sh, rename-to:wd, as:command"
+    "raxod502/wdx"
     # Display autosuggestions from history:
     "zsh-users/zsh-autosuggestions"
     # Completion definitions for lots of additional commands.
@@ -303,13 +308,8 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 
-# Enable wd.
-if (( $+commands[wd] )); then
-    function wd {
-        emulate -LR zsh
-        . wd
-    }
-fi
+# Nice alias for common wdx operation.
+alias ws='wd set'
 
 # To complement the previous set of aliases, here is a convenient way
 # to list the last few directories visited, with their numbers. The
