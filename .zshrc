@@ -435,286 +435,38 @@ if (( $+commands[git] )); then
     alias gsh='git show'
     alias gshs='git show --stat'
 
-    alias gl='git log --graph --decorate'
-    alias gls='git log --graph --decorate --stat'
-    alias glp='git log --graph --decorate --patch'
-    alias glps='git log --graph --decorate --patch --stat'
-    alias glo='git log --graph --decorate --oneline'
-    alias gla='git log --graph --decorate --all'
-    alias glas='git log --graph --decorate --all --stat'
-    alias glap='git log --graph --decorate --all --patch'
-    alias glaps='git log --graph --decorate --all --patch --stat'
-    alias glao='git log --graph --decorate --all --oneline'
-    function glg {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate ${@:2}
-        else
-            echo "No query provided."
-            return 1
+    for all in "" a; do
+        local all_flags=
+        if [[ -n $all ]]; then
+            all_flags=" --all"
         fi
-    }
-    function glgs {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgp {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --patch ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgps {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --patch --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgo {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --oneline ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glga {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --all ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgsa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --all --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgpa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --all --patch ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgpsa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --all --patch --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glgoa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log --grep=$1 --graph --decorate --all --oneline ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glS {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSs {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSp {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --patch ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSps {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --patch --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSo {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --oneline ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --all ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSsa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --all --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSpa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --all --patch ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSpsa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --all --patch --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glSoa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -S $1 --graph --decorate --all --oneline ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glG {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGs {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGp {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --patch ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGps {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --patch --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGo {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --oneline ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --all ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGsa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --all --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGpa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --all --patch ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGpsa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --all --patch --stat ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
-    function glGoa {
-        emulate -LR zsh
-        if (( $# >= 1 )); then
-            git log -G $1 --graph --decorate --all --oneline ${@:2}
-        else
-            echo "No query provided."
-            return 1
-        fi
-    }
+        for oneline in "" o; do
+            local oneline_flags=
+            if [[ -n $oneline ]]; then
+                oneline_flags=" --oneline"
+            fi
+            for diff in "" s p ps sp; do
+                local diff_flags=
+                case $diff in
+                    s) diff_flags=" --stat";;
+                    p) diff_flags=" --patch";;
+                    ps|sp) diff_flags=" --patch --stat";;
+                esac
+                for search in "" g G S; do
+                    local search_flags=
+                    case $search in
+                        g) search_flags=" --grep";;
+                        G) search_flags=" -G";;
+                        S) search_flags=" -S";;
+                    esac
+                    alias="gl${all}${oneline}${diff}${search}="
+                    alias+="git log${all_flags}${oneline_flags}"
+                    alias+="${diff_flags}${search_flags}"
+                    alias $alias
+                done
+            done
+        done
+    done
 
     alias ga='git add'
     alias gap='git add --patch'
