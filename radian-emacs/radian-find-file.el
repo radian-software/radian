@@ -136,6 +136,12 @@ key sequences \"M-P e e i\" and \"M-P o e i\" respectively."
 ;; your home directory.
 (setq find-file-visit-truename t)
 
+;; Disable the warning "X and Y are the same file" which normally
+;; appears when you visit a symlinked file by the same name. (Doing
+;; this isn't dangerous, as it will just redirect you to the existing
+;; buffer.)
+(setq find-file-suppress-same-file-warnings t)
+
 ;; Disable Emacs' built-in version control handling. This improves
 ;; performance and disables some annoying warning messages and
 ;; prompts, especially regarding symlinks. See [1].
