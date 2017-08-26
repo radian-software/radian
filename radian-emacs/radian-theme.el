@@ -1,6 +1,7 @@
 ;;; radian-theme.el --- Loading color themes
 
 (require 'radian-custom)
+(require 'radian-package)
 
 ;;; See also `radian-appearance'.
 
@@ -24,10 +25,18 @@ wish to use your own color theme, you can set this to nil."
   :group 'radian
   :type `(choice ,@(mapcar (lambda (theme)
                              `(const :tag
-                                ,(radian--unlispify
-                                  (symbol-name theme))
+                                ,(if theme
+                                     (radian--unlispify
+                                      (symbol-name theme))
+                                   "None")
                                 ,theme))
-                           (custom-available-themes))))
+                           (cons
+                            nil
+                            (sort
+                             (append
+                              (custom-available-themes)
+                              '(zerodark))
+                             #'string-lessp)))))
 
 ;; This is a handy macro for conditionally enabling color theme
 ;; customizations.
@@ -60,6 +69,10 @@ The current color theme is determined by consulting
 
   ;; Eliminate the underline on mismatched parens.
   (set-face-underline 'show-paren-mismatch nil))
+
+(straight-register-package 'zerodark-theme)
+(radian-with-color-theme zerodark
+  (use-package zerodark-theme))
 
 ;; Load the appropriate color scheme as specified in
 ;; `radian-color-theme'.
