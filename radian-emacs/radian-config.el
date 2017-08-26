@@ -34,6 +34,20 @@
          ("/info/exclude\\'" . gitignore-mode)
          ("/\\.gitignore\\'" . gitignore-mode)))
 
+;; Edit Makefiles.
+(use-package make-mode
+  :ensure nil
+  :config
+
+  ;; Disable `indent-tabs-mode', which is evil even in Makefiles where
+  ;; we do want to use tabs sometimes.
+
+  (defun radian-disable-indent-tabs-mode ()
+    "Disable `indent-tabs-mode' for the current buffer."
+    (setq-local indent-tabs-mode nil))
+
+  (add-hook 'makefile-mode-hook #'radian-disable-indent-tabs-mode))
+
 ;; Edit pip's requirements.txt files.
 (use-package pip-requirements
   :defer-install t
