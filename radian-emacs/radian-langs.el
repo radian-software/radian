@@ -648,7 +648,16 @@ This is an `:around' advice for `TeX-load-style-file'."
   (add-hook 'typescript-mode-hook #'radian--rename-typescript-mode-lighter)
 
   ;; The standard TypeScript indent width is two spaces, not four.
-  (setq typescript-indent-level 2))
+  (setq typescript-indent-level 2)
+
+  ;; Disable the tslint syntax checker inside the node_modules
+  ;; directory, as it will generally just generate several thousand
+  ;; errors, disable itself, and print a warning.
+
+  (with-eval-after-load 'flycheck
+    (setf (flycheck-checker-get 'typescript-tslint 'predicate)
+          (lambda ()
+            (not (string-match-p "/node_modules/" default-directory))))))
 
 ;; TypeScript IDE for Emacs.
 (use-package tide
