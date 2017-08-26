@@ -538,6 +538,7 @@ if (( $+commands[git] )); then
     alias glsf='git ls-files'
 
     alias gx='git clean'
+    alias gxf='git clean -fd'
 
     alias gbs='git bisect'
     alias gbss='git bisect start'
