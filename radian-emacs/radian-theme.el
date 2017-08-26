@@ -38,6 +38,15 @@ wish to use your own color theme, you can set this to nil."
                               '(zerodark))
                              #'string-lessp)))))
 
+;; Allow to defer color theme loading until after init, which helps to
+;; avoid weirdness during the processing of the local init-file.
+(defcustom radian-defer-color-theme t
+  "Non-nil means defer loading the color theme until after init.
+Otherwise, the color theme is loaded whenever `radian-theme' is
+loaded."
+  :group 'radian
+  :type 'boolean)
+
 ;; This is a handy macro for conditionally enabling color theme
 ;; customizations.
 (defmacro radian-with-color-theme (theme &rest body)
@@ -77,7 +86,18 @@ The current color theme is determined by consulting
 ;; Load the appropriate color scheme as specified in
 ;; `radian-color-theme'.
 (when radian-color-theme
-  (load-theme radian-color-theme 'no-confirm))
+  (if radian-defer-color-theme
+      (progn
+        (eval-and-compile
+          (defun radian-load-color-theme ()
+            "Load the Radian color theme, as given by `radian-color-theme'.
+If there is an error, report it as a warning."
+            (condition-case-unless-debug error-data
+                (load-theme radian-color-theme 'no-confirm)
+              (error (warn "Could not load color theme: %s"
+                           (error-message-string error-data)))))
+          (add-hook 'after-init-hook #'radian-load-color-theme)))
+    (load-theme radian-color-theme 'no-confirm)))
 
 (provide 'radian-theme)
 
