@@ -1,5 +1,8 @@
 ;;; radian-util.el --- Miscellaneous utility functions
 
+;; These functions will become unnecessary in Emacs 26.1, which
+;; extends `map-put' to have a TESTFN argument.
+
 (defun radian-alist-set (key val alist &optional symbol)
   "Set property KEY to VAL in ALIST. Return new alist.
 This creates the association if it is missing, and otherwise sets

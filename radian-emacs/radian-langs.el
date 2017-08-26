@@ -1,5 +1,7 @@
 ;;; radian-langs.el --- Support for miscellaneous languages
 
+(require 'map)
+
 (require 'radian-autocomplete)
 (require 'radian-bind-key)
 (require 'radian-check)
@@ -565,8 +567,7 @@ command `sh-reset-indent-vars-to-global-values'."
 
     (add-to-list 'TeX-view-program-list
                  '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-    (radian-alist-set*
-     'output-pdf '("TeXShop") TeX-view-program-selection 'symbol))
+    (map-put TeX-view-program-selection 'output-pdf '("TeXShop")))
 
   ;; Remove annoying messages when opening *.tex files.
 

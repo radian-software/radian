@@ -1,5 +1,7 @@
 ;;; radian-cc.el --- Support for C-like languages
 
+(require 'map)
+
 (require 'radian-autocomplete)
 (require 'radian-check)
 (require 'radian-eldoc)
@@ -41,7 +43,7 @@ This is an `:override' advice for `c-update-modeline'.")
   (c-add-style "radian-k&r"
                '("k&r"
                  (c-basic-offset . 2)))
-  (radian-alist-set* 'other "radian-k&r" c-default-style 'symbol))
+  (map-put c-default-style 'other "radian-k&r"))
 
 ;; General support for C, C++, and Objective-C based on libclang.
 (use-package irony
