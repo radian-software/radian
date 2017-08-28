@@ -460,8 +460,8 @@ if (( $+commands[git] )); then
                         S) search_flags=" -S";;
                     esac
                     alias="gl${all}${oneline}${diff}${search}="
-                    alias+="git log${all_flags}${oneline_flags}"
-                    alias+="${diff_flags}${search_flags}"
+                    alias+="git log --graph --decorate${all_flags}"
+                    alias+="${oneline_flags}${diff_flags}${search_flags}"
                     alias $alias
                 done
             done
