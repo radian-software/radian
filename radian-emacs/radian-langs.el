@@ -613,6 +613,13 @@ This is an `:around' advice for `TeX-load-style-file'."
   (advice-add #'TeX-load-style-file :around
               #'radian--advice-inhibit-style-loading-message))
 
+(use-package tex-buf
+  :recipe auctex
+  :config
+
+  ;; Save buffers automatically when compiling, instead of prompting.
+  (setq TeX-save-query nil))
+
 (use-package latex
   :recipe auctex
   :config
