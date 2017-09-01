@@ -48,8 +48,7 @@ fi
 ################################################################################
 #### zplug
 
-export ZPLUG_HOME=/usr/local/opt/zplug
-export ZSH_CACHE_DIR=$ZSH/cache
+export ZPLUG_HOME=${ZPLUG_HOME:-/usr/local/opt/zplug}
 
 if [[ -f $ZPLUG_HOME/init.zsh ]]; then
     . $ZPLUG_HOME/init.zsh
