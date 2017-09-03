@@ -22,7 +22,7 @@ The function `radian-register-dotfile' creates a keybinding under
 this prefix, if you ask it to.")
 
 (defmacro radian-register-dotfile
-    (filename &optional keybinding other-window-keybinding)
+    (filename &optional keybinding pretty-filename)
   "Establish functions and keybindings to open a dotfile.
 
 The FILENAME should be a path relative to the user's home
@@ -30,24 +30,24 @@ directory. Two interactive functions are created: one to find the
 file in the current window, and one to find it in another window.
 
 If KEYBINDING is non-nil, the first function is bound to that key
-sequence after it is prefixed by `radian-find-dotfile-prefix'. If
-OTHER-WINDOW-KEYBINDING is nil, the second function is bound to
-the same key sequence, but prefixed instead by
+sequence after it is prefixed by `radian-find-dotfile-prefix',
+and the second function is bound to the same key sequence, but
+prefixed instead by
 `radian-find-dotfile-other-window-prefix' (provided that the two
-prefixes are different). If a key sequence (a string) is provided
-for OTHER-WINDOW-KEYBINDING, that key sequence is used
-instead (provided that the new key sequence is distinct from the
-first one). If OTHER-WINDOW-KEYBINDING is neither nil nor a
-string, no keybinding is established.
+prefixes are different).
 
 This is best demonstrated by example. Suppose FILENAME is
-\".emacs.d/init.el\", KEYBINDING is \"e i\", and
+\".emacs.d/init.el\", KEYBINDING is \"e i\",
 `radian-find-dotfile-prefix' is at its default value of \"M-P
 e\", and `radian-find-dotfile-other-window-prefix' is at its
 default value of \"M-P o\". Then `radian-register-dotfile' will
 create the interactive functions `radian-find-init-el' and
 `radian-find-init-el-other-window', and it will bind them to the
-key sequences \"M-P e e i\" and \"M-P o e i\" respectively."
+key sequences \"M-P e e i\" and \"M-P o e i\" respectively.
+
+If PRETTY-FILENAME, a string, is non-nil, then it will be used in
+place of \"init-el\" in this example. Otherwise, that string will
+be generated automatically from the basename of FILENAME."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (full-filename (concat "~/" filename))
          (defun-name (intern
@@ -56,9 +56,10 @@ key sequences \"M-P e e i\" and \"M-P o e i\" respectively."
                        "-"
                        (concat
                         "radian-find-"
-                        (replace-regexp-in-string
-                         "[^a-z0-9]" "-"
-                         bare-filename)))))
+                        (or pretty-filename
+                            (replace-regexp-in-string
+                             "[^a-z0-9]" "-"
+                             bare-filename))))))
          (defun-other-window-name
            (intern
             (concat (symbol-name defun-name)
@@ -83,12 +84,9 @@ key sequences \"M-P e e i\" and \"M-P o e i\" respectively."
              radian-find-dotfile-prefix
              keybinding)))
          (full-other-window-keybinding
-          (when (or (null other-window-keybinding)
-                    (stringp other-window-keybinding))
-            (radian-join-keys
-             radian-find-dotfile-other-window-prefix
-             (or other-window-keybinding
-                 keybinding)))))
+          (radian-join-keys
+           radian-find-dotfile-other-window-prefix
+           keybinding)))
     `(progn
        ,defun-form
        ,defun-other-window-form
