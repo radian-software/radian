@@ -353,6 +353,7 @@ This function calls `json-mode--update-auto-mode' to change the
       (define-key map [remap newline] 'ruby-electric-space/return)
       (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
       (define-key map [remap electric-newline-and-maybe-indent] 'ruby-electric-space/return)
+      (define-key map [remap reindent-then-newline-and-indent] 'ruby-electric-space/return)
       (el-patch-remove
         (dolist (x ruby-electric-delimiters-alist)
           (let* ((delim   (car x))

@@ -119,10 +119,14 @@ not docstrings."
         (progn
           (el-patch-defsubst clojure-in-docstring-p ()
             "Check whether point is in a docstring."
-            (el-patch-wrap 1 1
-              (or
-               (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-               (eq (get-text-property (point) 'face) 'font-lock-string-face))))
+            (let ((ppss (syntax-ppss)))
+              ;; are we in a string?
+              (when (nth 3 ppss)
+                ;; check font lock at the start of the string
+                ((el-patch-swap eq memq)
+                 (get-text-property (nth 8 ppss) 'face)
+                 (el-patch-wrap 1
+                   ('font-lock-string-face 'font-lock-doc-face))))))
           (el-patch-defun clojure-indent-line ()
             "Indent current line as Clojure code."
             (if (clojure-in-docstring-p)
