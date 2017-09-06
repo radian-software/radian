@@ -40,8 +40,8 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; default -- yes, really). This style is only used in C, C++, etc.
 ;; and not Java.
 (with-eval-after-load 'cc-mode
-  (c-add-style "radian-k&r"
-               '("k&r"
+  (c-add-style "radian-bsd"
+               '("bsd"
                  (c-basic-offset . 2)))
   (map-put c-default-style 'other "radian-k&r"))
 
