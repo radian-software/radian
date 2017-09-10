@@ -43,7 +43,7 @@ This is an `:override' advice for `c-update-modeline'.")
   (c-add-style "radian-bsd"
                '("bsd"
                  (c-basic-offset . 2)))
-  (map-put c-default-style 'other "radian-k&r"))
+  (map-put c-default-style 'other "radian-bsd"))
 
 ;; General support for C, C++, and Objective-C based on libclang.
 (use-package irony
