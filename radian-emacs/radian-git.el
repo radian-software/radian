@@ -21,7 +21,18 @@
 
   ;; Enable the C-c M-g shortcut to go to a popup of Magit commands
   ;; relevant to the current file.
-  (global-magit-file-mode +1))
+  (global-magit-file-mode +1)
+
+  ;; The default location for git-credential-cache is in
+  ;; ~/.config/git/credential. However, if ~/.git-credential-cache/
+  ;; exists, then it is used instead. Magit seems to be hardcoded to
+  ;; use the latter, so here we override it to have more correct
+  ;; behavior.
+  (unless (file-exists-p "~/.git-credential-cache/")
+    (let* ((xdg-config-home (or (getenv "XDG_CONFIG_HOME")
+                                (expand-file-name "~/.config/")))
+           (socket (expand-file-name "git/credential/socket" xdg-config-home)))
+      (setq magit-credential-cache-daemon-socket socket))))
 
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
