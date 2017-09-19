@@ -17,6 +17,12 @@
          ;; [1]: https://magit.vc/manual/magit.html#Getting-Started
          ("C-x g" . magit-status)
          ("C-x M-g" . magit-dispatch-popup))
+  :init
+
+  ;; Suppress the message we get about "Turning on
+  ;; magit-auto-revert-mode" when loading Magit.
+  (setq magit-no-message '("Turning on magit-auto-revert-mode..."))
+
   :config
 
   ;; Enable the C-c M-g shortcut to go to a popup of Magit commands
