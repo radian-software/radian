@@ -23,6 +23,7 @@
 	excludesfile = ~/.gitexclude
 	pager = less -FRSX
 [credential]
+	helper =
 	helper = cache --timeout 86400
 [diff]
 	mnemonicprefix = true
