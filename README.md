@@ -1,7 +1,8 @@
-# Radian
+**Radian**: dotfiles that marry elegance and practicality.
 
-Dotfiles that marry elegance and practicality. I write my dotfiles
-with an eye to:
+## Summary
+
+I write my dotfiles with an eye to:
 
 * extensive documentation and commentary within and outside of the
   code
@@ -77,6 +78,38 @@ with an eye to:
     * Colorization and pretty-printing of output and stack traces in
       the REPL
 
+## Installation
+
+Setup is in three parts: installing the software, installing the
+configuration, and optionally installing local configuration.
+
+### Installing software
+
+* Emacs: `brew install emacs --with-cocoa` or `pacman -S emacs`
+* Zsh: `brew install zsh` or `pacman -S zsh` (also recommended: `brew
+  install zplug`)
+* Tmux: `brew install tmux` or `pacman -S tmux`
+* Git: `brew install git` or `pacman -S git`
+* Leiningen: `brew cask install java && brew install leiningen` or
+  `pacman -S jdk8-openjdk && yaourt -S leiningen`
+
+### Installing configuration
+
+* Emacs: create `~/.emacs.d` and `~/.emacs.d/straight/versions`; link
+  `init.el` into `~/.emacs.d` and `versions.el` into
+  `~/.emacs.d/straight/versions`
+* Zsh: link `.zshrc` into `~`
+* Tmux: link `.tmux.conf` into `~`
+* Git: link `.gitconfig` and `.gitexclude` into `~`
+* Leiningen: create `~/.lein` and link `profiles.clj` into `~/.lein`
+
+### Installing local configuration
+
+* Emacs: create `~/.emacs.d/init.local.el`
+* Zsh: create `~/.zshrc.local`
+* Tmux: create `~/.tmux.local.conf`
+* Git: create `~/.gitconfig.local` (highly recommended)
+
 ## Release 1.0
 
 Check out [the issue tracker][1.0] to see what I have planned for the
@@ -95,7 +128,20 @@ first stable release of Radian. The biggest tasks still remaining are:
 Please feel free to contribute in any way that you would like. If you
 find a bug or have a question about how to use
 Radian, [report it][issues]. If you want to contribute
-code, [please do][prs].
+code, [please do][prs]. (See the [style guide][style]
+and [design pattern cheatsheet][patterns].)
+
+### Reading the source code
+
+Please do! It will probably be informative in one way or another. The
+goal is that *absolutely everything* has a comment, no exceptions.
+There are a couple of things that are done often enough that it would
+be silly to repeat the same comment over and over again, so these
+patterns are instead documented in
+the [design pattern cheatsheet][patterns].
+
+[patterns]: docs/patterns.md
+[style]: docs/style.md
 
 [1.0]: https://github.com/raxod502/radian/milestone/1
 [aggressive-indent-mode]: https://github.com/Malabarba/aggressive-indent-mode
