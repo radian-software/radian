@@ -1,4 +1,13 @@
 ################################################################################
+#### Identify Radian repository
+
+if [[ -L $0 && -d ${0:A:h}/radian-emacs ]]; then
+    export RADIAN=${0:A:h}
+else
+    unset RADIAN
+fi
+
+################################################################################
 #### Configuration of bundles
 
 export WDX_NAME=wd
@@ -420,6 +429,20 @@ function man() {
 alias help=run-help
 
 ################################################################################
+#### GPG
+
+if [[ -f ~/.config/scripts/gpg.sh ]]; then
+    source ~/.config/scripts/gpg.sh
+fi
+
+################################################################################
+#### SSH
+
+if [[ -f ~/.config/scripts/ssh.sh ]]; then
+    source ~/.config/scripts/ssh.sh
+fi
+
+################################################################################
 #### Git
 
 if (( $+commands[git] )); then
@@ -670,6 +693,6 @@ fi
 ################################################################################
 #### Run post-init hook for local configuration
 
-if typeset -f radian_post_init_hook > /dev/null; then
-    radian_post_init_hook
+if typeset -f radian_after_init_hook > /dev/null; then
+    radian_after_init_hook
 fi
