@@ -3,8 +3,20 @@
 (require 'radian-package)
 (require 'radian-patch)
 
-;; This is the de-facto standard in-buffer completion package. In case
-;; you're wondering, Company stands for Complete Anything.
+(defvar radian-company-backends-global
+  '(company-capf
+    company-files
+    (company-dabbrev-code company-keywords)
+    company-dabbrev)
+  "Values for `company-backends' used everywhere.
+If `company-backends' is overridden by Radian, then these
+backends will still be included.")
+
+;; Package `company' provides an in-buffer autocompletion framework.
+;; It allows for packages to define backends that supply completion
+;; candidates, as well as optional documentation and source code. Then
+;; Company allows for multiple frontends to display the candidates,
+;; such as a tooltip menu. Company stands for "Complete Anything".
 (use-package company
   :demand t
   :bind (;; Replace `completion-at-point' and `complete-symbol' with
@@ -14,9 +26,9 @@
          ([remap completion-at-point] . company-manual-begin)
          ([remap complete-symbol] . company-manual-begin)
 
-         ;; The following are keybindings that take effect whenever
-         ;; the completions menu is visible, even if the user has not
-         ;; explicitly interacted with Company.
+         ;;; The following are keybindings that take effect whenever
+         ;;; the completions menu is visible, even if the user has not
+         ;;; explicitly interacted with Company.
 
          :map company-active-map
 
@@ -28,15 +40,22 @@
          ;; Prevent SPC from ever triggering a completion.
          ("SPC" . nil)
 
-         ;; The following are keybindings that only take effect if the
-         ;; user has explicitly interacted with Company.
+         ;;; The following are keybindings that only take effect if
+         ;;; the user has explicitly interacted with Company.
 
+         ;; You'll want to take careful note of the repetition of
+         ;; `:map' here. It's because `use-package' parses `:bind'
+         ;; forms by sectioning them at each *group* of keywords,
+         ;; where a new keyword cancels all other keywords, and then
+         ;; all consecutive keywords apply to new bindings. See [1]
+         ;; for discussion of this.
+         ;;
+         ;; [1]: https://github.com/jwiegley/use-package/issues/334
          :map company-active-map
          :filter (company-explicit-action-p)
 
          ;; Make RET trigger a completion if and only if the user has
-         ;; explicitly interacted with Company. Note that <return> is
-         ;; for windowed Emacs and RET is for terminal Emacs.
+         ;; explicitly interacted with Company.
          ("<return>" . company-complete-selection)
          ("RET" . company-complete-selection)
 
@@ -59,9 +78,6 @@
 
   :diminish company-mode
   :config
-
-  ;; Turn on Company everywhere.
-  (global-company-mode 1)
 
   ;; Show completions instantly, rather than after half a second.
   (setq company-idle-delay 0)
@@ -98,11 +114,12 @@
 
   ;; Prevent Company completions from being lowercased in the
   ;; completion menu. This has only been observed to happen for
-  ;; comments and strings in Clojure.
+  ;; comments and strings in Clojure. (Although in general it will
+  ;; happen wherever the Dabbrev backend is invoked.)
   (setq company-dabbrev-downcase nil)
 
   ;; Only search the current buffer to get suggestions for
-  ;; company-dabbrev (a backend that creates suggestions from text
+  ;; `company-dabbrev' (a backend that creates suggestions from text
   ;; found in your buffers). This prevents Company from causing lag
   ;; once you have a lot of buffers open.
   (setq company-dabbrev-other-buffers nil)
@@ -119,32 +136,34 @@
   ;; completions menu rather than cancelling the snippet and moving
   ;; the cursor while leaving the completions menu on-screen in the
   ;; same location.
-
   (with-eval-after-load 'yasnippet
-    ;; TODO: this is all a horrible hack, can it be done with
+    ;; FIXME: this is all a horrible hack, can it be done with
     ;; `bind-key' instead?
-
+    ;;
     ;; This function translates the "event types" I get from
     ;; `map-keymap' into things that I can pass to `lookup-key'
     ;; and `define-key'. It's a hack, and I'd like to find a
     ;; built-in function that accomplishes the same thing while
     ;; taking care of any edge cases I might have missed in this
     ;; ad-hoc solution.
-    (defun radian--normalize-event (event)
+    (defun radian-normalize-event (event)
+      "This function is a complete hack, do not use.
+But in principle, it translates what we get from `map-keymap'
+into what `lookup-key' and `define-key' want."
       (if (vectorp event)
           event
         (vector event)))
 
     ;; Here we define a hybrid keymap that delegates first to
     ;; `company-active-map' and then to `yas-keymap'.
-    (setq radian--yas-company-keymap
+    (setq radian-yas-company-keymap
           ;; It starts out as a copy of `yas-keymap', and then we
           ;; merge in all of the bindings from
           ;; `company-active-map'.
           (let ((keymap (copy-keymap yas-keymap)))
             (map-keymap
              (lambda (event company-cmd)
-               (let* ((event (radian--normalize-event event))
+               (let* ((event (radian-normalize-event event))
                       (yas-cmd (lookup-key yas-keymap event)))
                  ;; Here we use an extended menu item with the
                  ;; `:filter' option, which allows us to
@@ -171,19 +190,25 @@
     ;; value of `yas-keymap' to build the Yasnippet overlay, so to
     ;; override the Yasnippet keymap we only need to dynamically
     ;; rebind `yas-keymap' for the duration of that function.
-    (defun radian--advice-company-overrides-yasnippet
+    (defun radian-advice-company-overrides-yasnippet
         (yas--make-control-overlay &rest args)
       "Allow `company' to override `yasnippet'.
 This is an `:around' advice for `yas--make-control-overlay'."
-      (let ((yas-keymap radian--yas-company-keymap))
+      (let ((yas-keymap radian-yas-company-keymap))
         (apply yas--make-control-overlay args)))
 
     (advice-add #'yas--make-control-overlay :around
-                #'radian--advice-company-overrides-yasnippet)))
+                #'radian-advice-company-overrides-yasnippet))
 
-;; This package adds usage-based sorting to Company
-;; completions. (Perhaps it too can be replaced by `historian' one
-;; day!)
+  ;; Turn on Company everywhere.
+  (global-company-mode +1))
+
+;; Package `company-statistics' adds usage-based sorting to Company
+;; completions. It is a goal to replace this package with `historian'
+;; or `prescient'. See [1] and [2].
+;;
+;; [1]: https://github.com/PythonNut/historian.el
+;; [2]: https://github.com/raxod502/prescient.el
 (use-package company-statistics
   :demand t
   :config
@@ -192,8 +217,8 @@ This is an `:around' advice for `yas--make-control-overlay'."
   ;; to lazy-load company-statistics.
   (el-patch-feature company-statistics)
 
-  ;; Disable the message that is normally printed when Company
-  ;; Statistics loads its statistics file from disk.
+  ;; Disable the message that is normally printed when
+  ;; `company-statistics' loads its statistics file from disk.
   (el-patch-defun company-statistics--load ()
     "Restore statistics."
     (load company-statistics-file 'noerror
@@ -201,7 +226,7 @@ This is an `:around' advice for `yas--make-control-overlay'."
           'nosuffix))
 
   ;; Enable Company Statistics.
-  (company-statistics-mode 1))
+  (company-statistics-mode +1))
 
 (provide 'radian-autocomplete)
 

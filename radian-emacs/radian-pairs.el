@@ -15,6 +15,10 @@
   ;; Enable the functionality of Smartparens everywhere.
   (smartparens-global-mode +1)
 
+  ;; Smartparens' Paredit emulation is missing a binding for sexp
+  ;; convolution, so we re-add it here.
+  (radian-alist-set* "M-?" #'sp-convolute-sexp sp-paredit-bindings)
+
   ;; Enable some default keybindings for Smartparens.
   (sp-use-paredit-bindings)
 

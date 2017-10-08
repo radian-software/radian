@@ -4,7 +4,8 @@
 (require 'radian-package)
 
 (defcustom radian-prefix "M-P"
-  "Prefix key sequence for Radian-related keybindings."
+  "Prefix key sequence for Radian-related keybindings.
+This is a string as would be passed to `kbd'."
   :group 'radian
   :type 'string)
 
@@ -15,14 +16,10 @@
 \(radian--join-keys \"M-P\" \"\" \"e i\") => \"M-P e i\""
   (string-join (remove "" (mapcar #'string-trim (remove nil keys))) " "))
 
-;; This library provides keybinding functions that are nicer to use
-;; than the ones that come with Emacs. This whole file is not strictly
-;; necessary, since `bind-key' is actually a dependency of
-;; `use-package' and is therefore already loaded by time we get here,
-;; but I think it is less confusing for files that use `bind-key' to
-;; require `radian-bind-key' than to require `radian-package'. Note
-;; that `bind-key' is versioned in the same repository as
-;; `use-package'.
+;; Package `bind-key' provides a macro by the same name, as well as a
+;; few others, that provides a much prettier API than `define-key' and
+;; `global-set-key' do. It's also the same API that the `:bind' and
+;; similar keywords in `use-package' use.
 (use-package bind-key)
 
 (provide 'radian-bind-key)

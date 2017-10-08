@@ -2,16 +2,20 @@
 
 (require 'radian-package)
 
+;; Package `flycheck' provides a framework for in-buffer error and
+;; warning highlighting, or more generally syntax checking. It comes
+;; with a large number of checkers pre-defined, and other packages
+;; define more.
 (use-package flycheck
   :init
 
-  ;; Enable Flycheck everywhere unless otherwise specified.
-  (global-flycheck-mode)
+  ;; Enable `flycheck' everywhere unless otherwise specified.
+  (global-flycheck-mode +1)
 
   :config
 
-  ;; Make it safe to set the Python executable to some known-good
-  ;; values.
+  ;; Make `flycheck-python-pycompile-executable' safe to set in a
+  ;; file-local variable.
   (dolist (name '("python" "python3"))
     (add-to-list 'safe-local-variable-values
                  `(flycheck-python-pycompile-executable . ,name)))
