@@ -76,7 +76,7 @@ not version-controlled with Git. If nothing should be displayed,
 this variable is set to nil.
 
 This variable is actually only a cached value; it is set by
-`radian-compute-mode-line-project-and-branch' for performance
+`radian-mode-line-compute-project-and-branch' for performance
 reasons.")
 
 ;; Don't clear the cache when switching major modes (or using M-x
@@ -203,51 +203,44 @@ taxing elements."
 ;; between timer fires, then the repeat timer will be stuck with a
 ;; really long idle delay, and won't fire again.
 
-(defvar radian-mode-line-idle-timer nil
+(defun radian-mode-line-compute-and-reschedule ()
+  "Compute mode line data and re-set timers.
+The delay is `radian-mode-line-update-delay'. The timers are
+`radian-mode-line-idle-timer' and
+`radian-mode-line-repeat-timer'."
+  ;; Do the computation.
+  (radian-mode-line-compute-project-and-branch)
+
+  ;; If Emacs is already idle (meaning that the main idle timer has
+  ;; already been triggered, and won't go again), then we need to
+  ;; schedule the repeat timer. Otherwise, the main idle timer will be
+  ;; triggered when Emacs does become idle, and we don't need to
+  ;; schedule anything. There's no need to clear an old repeat timer,
+  ;; since the idle timer will always get called before the repeat
+  ;; timer and that will cause the repeat timer to be re-set as below.
+  (when (current-idle-time)
+    (setq radian-mode-line-repeat-timer
+          (run-with-idle-timer
+           (time-add (current-idle-time) radian-mode-line-update-delay)
+           nil #'radian-mode-line-compute-and-reschedule))))
+
+(defvar radian-mode-line-idle-timer
+  (run-with-idle-timer
+   radian-mode-line-update-delay 'repeat
+   #'radian-mode-line-compute-and-reschedule)
   "Timer that recomputes information for the mode line, or nil.
 This runs once each time Emacs is idle.
 Future recomputations are scheduled under
 `radian-mode-line-repeat-timer'. See also
-`radian-compute-mode-line-and-reschedule' and
+`radian-mode-line-compute-and-reschedule' and
 `radian-mode-line-compute-project-and-branch'.")
 
 (defvar radian-mode-line-repeat-timer nil
   "Timer that recomputes information for the mode line, or nil.
 This is scheduled repeatedly at intervals after
 `radian-mode-line-idle-timer' runs once. See also
-`radian-compute-mode-line-and-reschedule' and
+`radian-mode-line-compute-and-reschedule' and
 `radian-mode-line-compute-project-and-branch'.")
-
-(defun radian-mode-line-compute-and-reschedule ()
-  "Compute mode line data and re-set timers.
-The delay is `radian-mode-line-update-delay'. The timers are
-`radian-mode-line-idle-timer' and
-`radian-mode-line-repeat-time'."
-  ;; Cancel outstanding timers.
-  (if radian-mode-line-idle-timer
-      (cancel-timer radian-mode-line-idle-timer)
-    ;; This must be the first time this function was called, so we'll
-    ;; set up an initial idle timer.
-    (setq radian-mode-line-idle-timer
-          (run-with-idle-timer
-           radian-mode-line-update-delay 'repeat
-           #'radian-mode-line-compute-and-reschedule))
-    (when radian-mode-line-repeat-timer
-      (cancel-timer radian-mode-line-repeat-timer))
-    ;; Do the actual computation.
-    (ignore-errors
-      (radian-mode-line-compute-project-and-branch))
-    ;; If Emacs is already idle (meaning that the main idle timer has
-    ;; already been triggered, and won't go again), then we need to
-    ;; schedule the repeat timer.
-    (when (current-idle-time)
-      (setq radian-mode-line-repeat-timer
-            (run-with-idle-timer
-             (time-add (current-idle-time) radian-mode-line-update-delay)
-             nil #'radian-mode-line-compute-and-reschedule)))))
-
-;; Kick off the timers (and cancel any existing ones).
-(radian-mode-line-compute-and-reschedule)
 
 ;; Make `mode-line-position' show the column, not just the row.
 (column-number-mode 1)
