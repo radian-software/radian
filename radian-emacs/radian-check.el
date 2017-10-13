@@ -7,6 +7,8 @@
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
+  :recipe (:host github :repo "raxod502/flycheck"
+           :upstream (:host github :repo "flycheck/flycheck"))
   :init
 
   ;; Enable `flycheck' everywhere unless otherwise specified.

@@ -79,26 +79,22 @@
 
   (setq clojure-indent-style :align-arguments)
 
-  ;; Load `clojure-mode' so that `define-clojure-indent' is defined.
-  ;; This has no effect when byte-compiling because `use-package'
-  ;; takes care of it, but runtime macroexpansion messes up since `->'
-  ;; and `->>' are also macros provided by `dash'. See [1].
-  ;;
-  ;; [1]: http://emacs.stackexchange.com/q/26261/12534
-  (eval-when-compile (require 'clojure-mode))
-
   ;; Ideally, we would be able to set the identation rules for
   ;; *all* keywords at the same time. But until we figure out how
   ;; to do that, we just have to deal with every keyword
   ;; individually. See issue [1].
   ;;
+  ;; Avoid using `define-clojure-indent', as `clojure-mode' may not be
+  ;; loaded yet and we don't want to load it during eager
+  ;; macroexpansion at runtime.
+  ;;
   ;; [1]: https://github.com/raxod502/radian/issues/26
-  (define-clojure-indent
-    (-> 1)
-    (->> 1)
-    (:import 0)
-    (:require 0)
-    (:use 0))
+  (dolist (spec '((-> 1)
+                  (->> 1)
+                  (:import 0)
+                  (:require 0)
+                  (:use 0)))
+    (put-clojure-indent (car spec) (cadr spec)))
 
   ;; `clojure-mode' does not correctly identify the docstrings of
   ;; protocol methods as docstrings, and as such electric and

@@ -81,6 +81,11 @@ The current color theme is determined by consulting
 
 (straight-register-package 'zerodark-theme)
 (radian-with-color-theme zerodark
+  ;; For some reason, `zerodark-theme' has Flycheck and Magit as hard
+  ;; dependencies. We need to make sure our configuration for those
+  ;; packages is loaded first, in case of custom recipes for them.
+  (require 'radian-check)
+  (require 'radian-git)
   (use-package zerodark-theme))
 
 ;; Load the appropriate color scheme as specified in
