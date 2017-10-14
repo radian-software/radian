@@ -80,7 +80,7 @@
  ("smartparens" . "218e8177a331c37ee681ad97cea8978f0532b2d4")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
  ("spinner" . "0637791f005f747532b4439439a81c3415961377")
- ("straight.el" . "e39d4affdc0270ac879bca51bea1a0146b157c41")
+ ("straight.el" . "6a75521e115c09cec16db91ebc80a23402bedc87")
  ("swift-mode" . "e91e924c225b7bfb7aa6e4a84b5d379c6268014a")
  ("swiper" . "0a1d361b926291874124f8c63a653d83ead64a36")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")
