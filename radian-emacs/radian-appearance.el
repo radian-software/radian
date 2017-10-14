@@ -208,6 +208,13 @@ taxing elements."
 The delay is `radian-mode-line-update-delay'. The timers are
 `radian-mode-line-idle-timer' and
 `radian-mode-line-repeat-timer'."
+
+  ;; Cancel any existing timer (we wouldn't want to introduce
+  ;; duplicate timers!), and do it early in a half-hearted attempt to
+  ;; avoid race conditions.
+  (when radian-mode-line-repeat-timer
+    (cancel-timer radian-mode-line-repeat-timer))
+
   ;; Do the computation.
   (radian-mode-line-compute-project-and-branch)
 
