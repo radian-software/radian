@@ -1,5 +1,7 @@
 ;;; radian-eldoc.el --- Eldoc customizations
 
+(require 'radian-slow)
+
 ;; Disable ElDoc globally. This prevents it from being enabled in the
 ;; minibuffer (ElDoc messages go into the mode line when you are in
 ;; the minibuffer, which looks very bad with Radian's default color
@@ -17,6 +19,15 @@
 
 ;; Don't show ElDoc in the mode line.
 (setq eldoc-minor-mode-string nil)
+
+(defun radian-eldoc-toggle-slow ()
+  "Slow down `eldoc' by turning up the delay before metadata is shown.
+This is done in `radian-slow-autocomplete-mode'."
+  (if radian-slow-autocomplete-mode
+      (setq-local eldoc-idle-delay 1)
+    (kill-local-variable 'eldoc-idle-delay)))
+
+(add-hook 'radian-slow-autocomplete-mode-hook #'radian-eldoc-toggle-slow)
 
 (provide 'radian-eldoc)
 

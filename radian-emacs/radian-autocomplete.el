@@ -2,6 +2,7 @@
 
 (require 'radian-package)
 (require 'radian-patch)
+(require 'radian-slow)
 
 (defvar radian-company-backends-global
   '(company-capf
@@ -128,6 +129,20 @@ backends will still be included.")
   ;; like a great idea, but it turns out to look really bad when you
   ;; have domain-specific words that have particular casing.
   (setq company-dabbrev-ignore-case nil)
+
+  ;; Register `company' in `radian-slow-autocomplete-mode'.
+
+  (defun radian-company-toggle-slow ()
+    "Slow down `company' by turning up the delays before completion starts.
+This is done in `radian-slow-autocomplete-mode'."
+    (if radian-slow-autocomplete-mode
+        (progn
+          (setq-local company-idle-delay 1)
+          (setq-local company-minimum-prefix-length 3))
+      (kill-local-variable 'company-idle-delay)
+      (kill-local-variable 'company-minimum-prefix-length)))
+
+  (add-hook 'radian-slow-autocomplete-mode-hook #'radian-company-toggle-slow)
 
   ;; Make it so that Company's keymap overrides Yasnippet's keymap
   ;; when a snippet is active. This way, you can TAB to complete a

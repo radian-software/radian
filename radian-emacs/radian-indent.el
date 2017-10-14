@@ -1,10 +1,7 @@
 ;;; radian-indent.el --- Indentation
 
 (require 'radian-package)
-
-(define-minor-mode radian-slow-indent-mode
-  "Minor mode for when the indentation code is slow.
-This prevents `aggressive-indent' from indenting as frequently.")
+(require 'radian-slow)
 
 ;; This package keeps indentation correct at all times. It can be a
 ;; phenomenal productivity booster, but only if your indentation is

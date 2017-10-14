@@ -7,6 +7,10 @@
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
+  ;; My fork adds support for running a syntax check when changing
+  ;; buffers. See [1].
+  ;;
+  ;; [1]: https://github.com/flycheck/flycheck/pull/1308
   :recipe (:host github :repo "raxod502/flycheck"
            :upstream (:host github :repo "flycheck/flycheck"))
   :init
@@ -21,6 +25,10 @@
   (dolist (name '("python" "python3"))
     (add-to-list 'safe-local-variable-values
                  `(flycheck-python-pycompile-executable . ,name)))
+
+  ;; Run a syntax check when changing buffers, just in case you
+  ;; modified some other files that impact the current one.
+  (add-to-list 'flycheck-check-syntax-automatically 'buffer-switch)
 
   :diminish flycheck-mode)
 

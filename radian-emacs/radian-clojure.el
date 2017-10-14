@@ -178,10 +178,10 @@ Return nil if not inside a project."
                $choices)
           $body)
         (let ($dir-name)
-          (or (gethash dir-name clojure-project-dir-cache)
+          (or (gethash dir-name radian-clojure-project-dir-cache)
               (puthash dir-name
                        (let ($choices) $body)
-                       clojure-project-dir-cache)))))))
+                       radian-clojure-project-dir-cache)))))))
 
 ;; Package `cider' provides integrated Clojure and ClojureScript REPLs
 ;; directly in Emacs, a Company backend that uses a live REPL
@@ -189,14 +189,11 @@ Return nil if not inside a project."
 ;; source lookups.
 (use-package cider
   :defer-install t
+  :commands (cider-jack-in cider-jack-in-clojurescript)
   :init
 
   (el-patch-feature cider)
 
-  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts
-         ;; everywhere, instead of just in Clojure(Script) buffers.
-         ("C-c M-j" . cider-jack-in)
-         ("C-c M-J" . cider-jack-in-clojurescript))
   :config
 
   (add-hook 'cider-mode-hook #'eldoc-mode)
@@ -210,13 +207,13 @@ Return nil if not inside a project."
   ;; :main namespace) are effectively silenced. So we copy everything
   ;; from the *nrepl-server* buffer to the *cider-repl* buffer, as
   ;; soon as the latter is available.
-
+  ;;
   ;; Note that this does *not* help in the case of things going so
   ;; horribly wrong that the REPL can't even start. In this case you
   ;; will have to check the *nrepl-server* buffer manually. Perhaps an
   ;; error message that is visible from any buffer could be added in
   ;; future.
-
+  ;;
   ;; Thanks to malabarba on Clojurians Slack for providing the
   ;; following code:
 
@@ -276,21 +273,14 @@ Return nil if not inside a project."
   ;; Don't show CIDER in the mode line.
   (setq cider-mode-line nil)
 
-  ;; CIDER makes computing indentation slow.
+  ;; CIDER makes indentation and autocomplete slow, because it gets
+  ;; data from the live REPL connection.
+
   (add-hook 'cider-mode-hook #'radian-slow-indent-mode)
   (add-hook 'cider-repl-mode-hook #'radian-slow-indent-mode)
 
-  ;; Make some modes perform their actions less often in buffers where
-  ;; CIDER is active. This is helpful because CIDER is slow, and will
-  ;; lag Emacs if its logic is called too often.
-
-  (defun radian-reduce-cider-lag ()
-    (setq-local company-idle-delay 1) ; increased from 0
-    (setq-local company-minimum-prefix-length 3) ; increased from 0
-    (setq-local eldoc-idle-delay 0.5)) ; increased from 0
-
-  (add-hook 'cider-mode-hook #'radian-reduce-cider-lag)
-  (add-hook 'cider-repl-mode-hook #'radian-reduce-cider-lag)
+  (add-hook 'cider-mode-hook #'radian-slow-autocomplete-mode)
+  (add-hook 'cider-repl-mode-hook #'radian-slow-autocomplete-mode)
 
   ;; Suppress the "Starting a custom ClojureScript REPL" message,
   ;; because it provides no useful information.
@@ -337,10 +327,13 @@ should be the regular Clojure REPL started by the server process filter."
         (when cider-offer-to-open-cljs-app-in-browser
           (cider--offer-to-open-app-in-browser nrepl-server-buffer))))))
 
-;; Makes Emacs into a real Clojure IDE by providing a mountain of
-;; automated refactoring tools.
+;; Package `clj-refactor' provides automated refactoring commands for
+;; Clojure code.
 (use-package clj-refactor
-  ;; Waiting on https://github.com/clojure-emacs/clj-refactor.el/pull/385
+  ;; My fork adds support for `cljr-auto-sort-project-dependencies'.
+  ;; See [1].
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/clj-refactor.el/pull/385
   :recipe (:host github :repo "raxod502/clj-refactor.el"
            :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
            :files (:defaults "CHANGELOG.md"))
@@ -364,7 +357,7 @@ should be the regular Clojure REPL started by the server process filter."
     ;;
     ;; [1]: https://github.com/clojure-emacs/clj-refactor.el
 
-    (defun radian--enable-clj-refactor-mode ()
+    (defun radian-clj-refactor-enable ()
       "Enable `clj-refactor' mode properly.
 This means that `yas-minor-mode' also needs to be enabled, and
 the `clj-refactor' keybindings need to be installed."
@@ -374,34 +367,56 @@ the `clj-refactor' keybindings need to be installed."
         (yas-minor-mode 1)
         (cljr-add-keybindings-with-prefix "C-c RET")))
 
-    (add-hook 'clojure-mode-hook #'radian--enable-clj-refactor-mode))
+    (add-hook 'clojure-mode-hook #'radian-clj-refactor-enable))
 
   (with-eval-after-load 'cider
     ;; Because we disabled injection of the clj-refactor middleware
     ;; earlier, we have to do it buffer-locally now (but only if we're
     ;; in a project).
 
-    (defun radian--advice-inject-cljr-dependencies (&rest args)
-      "Re-enable injection of `clj-refactor' middleware.
+    (defun radian-advice-cljr-inject-dependencies (&rest args)
+      "Re-enable injection of `clj-refactor' middleware if inside a project.
 This is a `:before' advice for `cider-jack-in'."
       (when (and (use-package-install-deferred-package
                   'clj-refactor :after)
-                 (cljr--project-dir))
+                 (require 'clj-refactor)
+                 (radian-cljr-project-dir))
+        ;; We need to set this in order for
+        ;; `cljr--inject-jack-in-dependencies' to have an effect. But
+        ;; we want it to remain nil globally, so that in the case that
+        ;; we are outside a project, the dependencies are not
+        ;; injected.
         (setq-local cljr-inject-dependencies-at-jack-in t)
+
+        ;; But we only want the dependencies to be injected in the
+        ;; current buffer.
         (make-local-variable 'cider-jack-in-lein-plugins)
         (make-local-variable 'cider-jack-in-nrepl-middlewares)
+
+        ;; Do it.
         (cljr--inject-jack-in-dependencies)))
 
     (advice-add #'cider-jack-in :before
-                #'radian--advice-inject-cljr-dependencies))
+                #'radian-advice-cljr-inject-dependencies))
 
   :config
+
+  ;; Recently `cljr--project-dir' was changed to return an empty
+  ;; string instead of nil when there is no containing project. Let's
+  ;; fix it, so that we can have a proper predicate to determine when
+  ;; refactor-nrepl should be injected.
+  (defun radian-cljr-project-dir ()
+    "Like `cljr--project-dir', but return nil instead of empty string."
+    (let ((project-dir (cljr--project-dir)))
+      (unless (string-empty-p project-dir)
+        project-dir)))
 
   ;; We also need to tell clj-refactor not to check that
   ;; refactor-nrepl is installed properly when we are not in a
   ;; project.
 
-  (defalias 'radian--advice-cljr-suppress-middleware-check #'cljr--project-dir
+  (defalias 'radian-advice-cljr-suppress-middleware-check
+    #'radian-cljr-project-dir
     "Suppress a spurious warning from `clj-refactor'.
 This is a `:before-while' advice for `cljr--init-middleware'. The
 warning in question is printed in the REPL and tells you that the
@@ -409,17 +424,17 @@ middleware is not injected, even though it shouldn't be injected
 when you're outside a project.")
 
   (advice-add #'cljr--init-middleware :before-while
-              #'radian--advice-cljr-suppress-middleware-check)
+              #'radian-advice-cljr-suppress-middleware-check)
 
   ;; Make clj-refactor show its messages right away, instead of
   ;; waiting for you to do another command.
 
-  (defalias 'radian--advice-cljr-message-eagerly #'message
+  (defalias 'radian-advice-cljr-message-eagerly #'message
     "Make `clj-refactor' show messages right away.
 This is an `:override' advice for `cljr--post-command-message'.")
 
   (advice-add #'cljr--post-command-message :override
-              #'radian--advice-cljr-message-eagerly)
+              #'radian-advice-cljr-message-eagerly)
 
   ;; Automatically sort project dependencies after changing them.
   (setq cljr-auto-sort-project-dependencies t)
