@@ -123,6 +123,7 @@
 (use-package org-agenda
   :recipe org
   :defer-install t
+  :commands (org-mode org-agenda)
   :bind (:map org-agenda-mode-map
 
          ;; Prevent Org Agenda from overriding the bindings for
