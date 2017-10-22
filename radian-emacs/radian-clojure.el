@@ -6,39 +6,49 @@
 (require 'radian-lisp)
 (require 'radian-package)
 (require 'radian-patch)
+(require 'radian-util)
 
-;; Provides indentation and syntax highlighting for Clojure code.
+;; Package `clojure-mode' provides syntax highlighting and indentation
+;; for Clojure [1] code.
+;;
+;; [1]: https://clojure.org/
 (use-package clojure-mode
   :defer-install t
   :mode (("\\.\\(clj\\|dtm\\|edn\\)\\'" . clojure-mode)
          ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
   :init
 
-  ;; We define some patches after clojure-mode is loaded. We need to
-  ;; make sure el-patch knows how to find these patches.
+  ;; We define some patches after `clojure-mode' is loaded. We need to
+  ;; make sure `el-patch' knows how to find these patches. Note that
+  ;; `el-patch-feature' is not sufficient for this, since
+  ;; `radian-clojure-strings-as-docstrings-mode' defines a patch of
+  ;; its own when (if) it's enabled.
 
-  (defun radian--enable-clojure-mode-patches ()
+  (defun radian-el-patch-enable-clojure-mode ()
+    "Make all the patches for `clojure-mode' defined."
     (require 'clojure-mode)
-    (radian-clojure-strings-as-docstrings-mode 1))
+    (radian-clojure-strings-as-docstrings-mode +1))
 
-  (defun radian--disable-clojure-mode-patches ()
+  (defun radian-el-patch-disable-clojure-mode ()
+    "Undo the effects of `radian-el-patch-enable-clojure-mode'."
     (radian-clojure-strings-as-docstrings-mode -1))
 
   (add-hook 'el-patch-pre-validate-hook
-            #'radian--enable-clojure-mode-patches)
+            #'radian-el-patch-enable-clojure-mode)
   (add-hook 'el-patch-post-validate-hook
-            #'radian--disable-clojure-mode-patches)
+            #'radian-el-patch-disable-clojure-mode)
 
   :bind (;; Make sure electric indentation *always* works. For some
-         ;; reason, if this is omitted, electric indentation works most
-         ;; of the time, but it fails inside Clojure docstrings. (TAB
-         ;; will add the requisite two spaces, but you shouldn't have to
-         ;; do this manually after pressing RET.) I'd like to find a more
-         ;; elegant solution to this problem. See [1].
-         ;;
-         ;; <return> is for windowed Emacs; RET is for terminal Emacs.
+         ;; reason, if this is omitted, electric indentation works
+         ;; most of the time, but it fails inside Clojure docstrings.
+         ;; (TAB will add the requisite two spaces, but you shouldn't
+         ;; have to do this manually after pressing RET.) I'd like to
+         ;; find a more elegant solution to this problem. See [1] for
+         ;; the issue tracking this hack, and [2] for a discussion of
+         ;; the bug.
          ;;
          ;; [1]: https://github.com/raxod502/radian/issues/2
+         ;; [2]: https://github.com/clojure-emacs/clojure-mode/issues/241
          :map clojure-mode-map
          ("<return>" . newline-and-indent)
          ("RET" . newline-and-indent))
@@ -67,35 +77,34 @@
   ;;; (:keyword
   ;;;   map)
 
-  (setq clojure-indent-style ':align-arguments)
+  (setq clojure-indent-style :align-arguments)
 
-  ;; We can't use define-clojure-indent here, due to a perverse
-  ;; threefold conspiracy perpetrated by dash.el, recursive
-  ;; macroexpansion, and the Gilardi scenario. See [1].
-  ;;
   ;; Ideally, we would be able to set the identation rules for
   ;; *all* keywords at the same time. But until we figure out how
   ;; to do that, we just have to deal with every keyword
-  ;; individually. See issue [2].
+  ;; individually. See issue [1].
   ;;
-  ;; [1]: http://emacs.stackexchange.com/q/26261/12534
-  ;; [2]: https://github.com/raxod502/radian/issues/26
+  ;; Avoid using `define-clojure-indent', as `clojure-mode' may not be
+  ;; loaded yet and we don't want to load it during eager
+  ;; macroexpansion at runtime.
+  ;;
+  ;; [1]: https://github.com/raxod502/radian/issues/26
   (dolist (spec '((-> 1)
                   (->> 1)
                   (:import 0)
                   (:require 0)
                   (:use 0)))
-    (put-clojure-indent (car spec) (cdr spec)))
+    (put-clojure-indent (car spec) (cadr spec)))
 
   ;; `clojure-mode' does not correctly identify the docstrings of
   ;; protocol methods as docstrings, and as such electric and
   ;; aggressive indentation do not work for them. Additionally, when
   ;; you hack a clojure.core function, such as defonce or defrecord,
-  ;; to provide docstring functionality, those docstrings are
-  ;; (perhaps rightly, but annoyingly) not recognized as docstrings
-  ;; either. However, there is an easy way to get electric indentation
-  ;; working for all potential docstrings: simply tell `clojure-mode'
-  ;; that *all* strings are docstrings. This will not change the font
+  ;; to provide docstring functionality, those docstrings are (perhaps
+  ;; rightly, but annoyingly) not recognized as docstrings either.
+  ;; However, there is an easy way to get electric indentation working
+  ;; for all potential docstrings: simply tell `clojure-mode' that
+  ;; *all* strings are docstrings. This will not change the font
   ;; locking, because for some weird reason `clojure-mode' determines
   ;; whether you're in a docstring by the font color instead of the
   ;; other way around. Note that this will cause electric indentation
@@ -103,26 +112,31 @@
   ;; very many non-docstring multiline strings in Clojure this is not
   ;; too inconvenient. (And, after all, it's only electric, not
   ;; aggressive, indentation.)
-
+  ;;
   ;; Unfortunately, `clojure-in-docstring-p' is defined as an inline
   ;; function, so we can't override it. Instead, we replace
   ;; `clojure-indent-line'. But inside a new minor mode, so that the
   ;; user can toggle it if they need to use `aggressive-indent-mode'
   ;; and multiline strings that are not docstrings at the same time.
-
   (define-minor-mode radian-clojure-strings-as-docstrings-mode
     "Treat all Clojure strings as docstrings.
-You want to turn this off if you have multiline strings that are
-not docstrings."
+You want to turn this on if you want to treat strings like
+docstrings even though they technically are not, and you want to
+turn it off if you have multiline strings that are not
+docstrings."
     nil nil nil
     (if radian-clojure-strings-as-docstrings-mode
         (progn
           (el-patch-defsubst clojure-in-docstring-p ()
             "Check whether point is in a docstring."
-            (el-patch-wrap 1 1
-              (or
-               (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-               (eq (get-text-property (point) 'face) 'font-lock-string-face))))
+            (let ((ppss (syntax-ppss)))
+              ;; are we in a string?
+              (when (nth 3 ppss)
+                ;; check font lock at the start of the string
+                ((el-patch-swap eq memq)
+                 (get-text-property (nth 8 ppss) 'face)
+                 (el-patch-wrap 1
+                   ('font-lock-string-face 'font-lock-doc-face))))))
           (el-patch-defun clojure-indent-line ()
             "Indent current line as Clojure code."
             (if (clojure-in-docstring-p)
@@ -136,13 +150,15 @@ not docstrings."
       (el-patch-unpatch 'clojure-in-docstring-p 'defsubst)
       (el-patch-unpatch 'clojure-indent-line 'defun)))
 
-  (add-hook 'clojure-mode-hook #'radian-clojure-strings-as-docstrings-mode)
-
   ;; Improve the performance of `clojure-project-dir' by memoizing it.
   ;; This alleviates some quite horrible lag generated by CIDER
   ;; calling this function continually.
 
-  (defvar clojure-project-dir-cache (make-hash-table :test 'equal))
+  (defvar radian-clojure-project-dir-cache (make-hash-table :test 'equal)
+    "Memoization table for function `clojure-project-dir'.
+The keys are strings naming directories, and the values are
+strings naming the corresponding root directories of Clojure
+projects.")
 
   (el-patch-defun clojure-project-dir (&optional dir-name)
     "Return the absolute path to the project's root directory.
@@ -150,10 +166,11 @@ not docstrings."
 Use `default-directory' if DIR-NAME is nil.
 Return nil if not inside a project."
     (el-patch-let (($dir-name (dir-name (or dir-name default-directory)))
-                   ($choices (choices (delq nil
-                                            (mapcar (lambda (fname)
-                                                      (locate-dominating-file dir-name fname))
-                                                    clojure-build-tool-files))))
+                   ($choices (choices
+                              (delq nil
+                                    (mapcar (lambda (fname)
+                                              (locate-dominating-file dir-name fname))
+                                            clojure-build-tool-files))))
                    ($body (when (> (length choices) 0)
                             (car (sort choices #'file-in-directory-p)))))
       (el-patch-swap
@@ -161,30 +178,25 @@ Return nil if not inside a project."
                $choices)
           $body)
         (let ($dir-name)
-          (or (gethash dir-name clojure-project-dir-cache)
+          (or (gethash dir-name radian-clojure-project-dir-cache)
               (puthash dir-name
                        (let ($choices) $body)
-                       clojure-project-dir-cache)))))))
+                       radian-clojure-project-dir-cache)))))))
 
-;; Provides Clojure and ClojureScript REPL integration, including
-;; documentation and source lookups, among many other features.
+;; Package `cider' provides integrated Clojure and ClojureScript REPLs
+;; directly in Emacs, a Company backend that uses a live REPL
+;; connection to retrieve completion candidates, and documentation and
+;; source lookups.
 (use-package cider
   :defer-install t
+  :commands (cider-jack-in cider-jack-in-clojurescript)
   :init
 
-  ;; We define some patches after CIDER is loaded. We need to make
-  ;; sure el-patch knows how to find these patches.
   (el-patch-feature cider)
 
-  :bind (;; Allow usage of the C-c M-j and C-c M-J shortcuts everywhere.
-         ("C-c M-j" . cider-jack-in)
-         ("C-c M-J" . cider-jack-in-clojurescript))
   :config
 
-  ;; Enable ElDoc in Clojure files when CIDER is running.
   (add-hook 'cider-mode-hook #'eldoc-mode)
-
-  ;; Enable ElDoc in the CIDER REPL.
   (add-hook 'cider-repl-mode-hook #'eldoc-mode)
 
   ;; By default, any error messages that occur when CIDER is starting
@@ -195,28 +207,30 @@ Return nil if not inside a project."
   ;; :main namespace) are effectively silenced. So we copy everything
   ;; from the *nrepl-server* buffer to the *cider-repl* buffer, as
   ;; soon as the latter is available.
-
+  ;;
   ;; Note that this does *not* help in the case of things going so
   ;; horribly wrong that the REPL can't even start. In this case you
   ;; will have to check the *nrepl-server* buffer manually. Perhaps an
   ;; error message that is visible from any buffer could be added in
   ;; future.
-
+  ;;
   ;; Thanks to malabarba on Clojurians Slack for providing the
   ;; following code:
 
-  (defun radian--dump-nrepl-server-log ()
+  (defun radian-cider-dump-nrepl-server-log ()
+    "Copy contents of *nrepl-server* to beginning of *cider-repl*."
     (save-excursion
       (goto-char (point-min))
       (insert
        (with-current-buffer nrepl-server-buffer
          (buffer-string)))))
 
-  (add-hook 'cider-connected-hook #'radian--dump-nrepl-server-log)
+  (add-hook 'cider-connected-hook #'radian-cider-dump-nrepl-server-log)
 
   ;; Use the :emacs profile defined in profiles.clj. This enables lots
   ;; of cool extra features in the REPL.
-  (setq cider-lein-parameters "with-profile +emacs repl :headless")
+  (when (radian-managed-p "~/.lein/profiles.clj")
+    (setq cider-lein-parameters "with-profile +emacs repl :headless"))
 
   ;; The CIDER welcome message often obscures any error messages that
   ;; the above code is supposed to be making visible. So, we need to
@@ -233,7 +247,7 @@ Return nil if not inside a project."
   ;; Don't focus the cursor in the CIDER REPL once it starts. Since
   ;; the REPL takes so long to start up, especially for large
   ;; projects, you either have to wait for a minute without doing
-  ;; anything or be prepared for your cursur to suddenly shift buffers
+  ;; anything or be prepared for your cursor to suddenly shift buffers
   ;; without warning sometime in the near future. This is annoying, so
   ;; turn off the behavior. For a historical perspective see [1].
   ;;
@@ -259,27 +273,14 @@ Return nil if not inside a project."
   ;; Don't show CIDER in the mode line.
   (setq cider-mode-line nil)
 
-  ;; Make some modes perform their actions less often in buffers where
-  ;; CIDER is active. This is helpful because CIDER is slow, and will
-  ;; lag Emacs if its logic is called too often.
+  ;; CIDER makes indentation and autocomplete slow, because it gets
+  ;; data from the live REPL connection.
 
-  (defun radian--disable-aggressive-indent-on-save ()
-    (remove-hook 'before-save-hook
-                 ;; Yes, this is a typo in `aggressive-indent'.
-                 #'aggressive-indent--proccess-changed-list-and-indent
-                 'local))
+  (add-hook 'cider-mode-hook #'radian-slow-indent-mode)
+  (add-hook 'cider-repl-mode-hook #'radian-slow-indent-mode)
 
-  (defun radian--reduce-cider-lag ()
-    (setq-local company-idle-delay 1) ; increased from 0
-    (setq-local company-minimum-prefix-length 3) ; increased from 0
-    (setq-local eldoc-idle-delay 0.5) ; increased from 0
-    (when cider-mode
-      (radian--disable-aggressive-indent-on-save)
-      (add-hook 'aggressive-indent-mode-hook
-                #'radian--disable-aggressive-indent-on-save)))
-
-  (add-hook 'cider-mode-hook #'radian--reduce-cider-lag)
-  (add-hook 'cider-repl-mode-hook #'radian--reduce-cider-lag)
+  (add-hook 'cider-mode-hook #'radian-slow-autocomplete-mode)
+  (add-hook 'cider-repl-mode-hook #'radian-slow-autocomplete-mode)
 
   ;; Suppress the "Starting a custom ClojureScript REPL" message,
   ;; because it provides no useful information.
@@ -326,26 +327,18 @@ should be the regular Clojure REPL started by the server process filter."
         (when cider-offer-to-open-cljs-app-in-browser
           (cider--offer-to-open-app-in-browser nrepl-server-buffer))))))
 
-;; Makes Emacs into a real Clojure IDE by providing a mountain of
-;; automated refactoring tools.
+;; Package `clj-refactor' provides automated refactoring commands for
+;; Clojure code.
 (use-package clj-refactor
-  ;; Waiting on https://github.com/clojure-emacs/clj-refactor.el/pull/385
+  ;; My fork adds support for `cljr-auto-sort-project-dependencies'.
+  ;; See [1].
+  ;;
+  ;; [1]: https://github.com/clojure-emacs/clj-refactor.el/pull/385
   :recipe (:host github :repo "raxod502/clj-refactor.el"
            :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
            :files (:defaults "CHANGELOG.md"))
   :defer-install t
   :init
-
-  ;; By default, clj-refactor enables the refactor-nrepl middleware in
-  ;; an *autoload*, meaning that it's already happened as soon as
-  ;; clj-refactor has loaded. But refactor-nrepl doesn't work outside
-  ;; a Clojure project, and signals a warning in that case. So we need
-  ;; to *selectively* inject refactor-nrepl, which means we need to
-  ;; disable it right away so we can do it buffer-locally later. See
-  ;; [1] for discussion of the problem.
-  ;;
-  ;; [1]: https://github.com/clojure-emacs/refactor-nrepl/issues/177
-  (setq cljr-inject-dependencies-at-jack-in nil)
 
   (with-eval-after-load 'clojure-mode
     ;; Enable clj-refactor in Clojure buffers. This is adapted from the
@@ -353,7 +346,7 @@ should be the regular Clojure REPL started by the server process filter."
     ;;
     ;; [1]: https://github.com/clojure-emacs/clj-refactor.el
 
-    (defun radian--enable-clj-refactor-mode ()
+    (defun radian-clj-refactor-enable ()
       "Enable `clj-refactor' mode properly.
 This means that `yas-minor-mode' also needs to be enabled, and
 the `clj-refactor' keybindings need to be installed."
@@ -363,52 +356,19 @@ the `clj-refactor' keybindings need to be installed."
         (yas-minor-mode 1)
         (cljr-add-keybindings-with-prefix "C-c RET")))
 
-    (add-hook 'clojure-mode-hook #'radian--enable-clj-refactor-mode))
-
-  (with-eval-after-load 'cider
-    ;; Because we disabled injection of the clj-refactor middleware
-    ;; earlier, we have to do it buffer-locally now (but only if we're
-    ;; in a project).
-
-    (defun radian--advice-inject-cljr-dependencies (&rest args)
-      "Re-enable injection of `clj-refactor' middleware.
-This is a `:before' advice for `cider-jack-in'."
-      (when (and (use-package-install-deferred-package
-                  'clj-refactor :after)
-                 (cljr--project-dir))
-        (setq-local cljr-inject-dependencies-at-jack-in t)
-        (make-local-variable 'cider-jack-in-lein-plugins)
-        (make-local-variable 'cider-jack-in-nrepl-middlewares)
-        (cljr--inject-jack-in-dependencies)))
-
-    (advice-add #'cider-jack-in :before
-                #'radian--advice-inject-cljr-dependencies))
+    (add-hook 'clojure-mode-hook #'radian-clj-refactor-enable))
 
   :config
-
-  ;; We also need to tell clj-refactor not to check that
-  ;; refactor-nrepl is installed properly when we are not in a
-  ;; project.
-
-  (defalias 'radian--advice-cljr-suppress-middleware-check #'cljr--project-dir
-    "Suppress a spurious warning from `clj-refactor'.
-This is a `:before-while' advice for `cljr--init-middleware'. The
-warning in question is printed in the REPL and tells you that the
-middleware is not injected, even though it shouldn't be injected
-when you're outside a project.")
-
-  (advice-add #'cljr--init-middleware :before-while
-              #'radian--advice-cljr-suppress-middleware-check)
 
   ;; Make clj-refactor show its messages right away, instead of
   ;; waiting for you to do another command.
 
-  (defalias 'radian--advice-cljr-message-eagerly #'message
+  (defalias 'radian-advice-cljr-message-eagerly #'message
     "Make `clj-refactor' show messages right away.
 This is an `:override' advice for `cljr--post-command-message'.")
 
   (advice-add #'cljr--post-command-message :override
-              #'radian--advice-cljr-message-eagerly)
+              #'radian-advice-cljr-message-eagerly)
 
   ;; Automatically sort project dependencies after changing them.
   (setq cljr-auto-sort-project-dependencies t)

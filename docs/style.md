@@ -15,11 +15,11 @@
 
 ### Advice
 
-* Name all advice functions as `radian--advice-some-descriptive-name`.
+* Name all advice functions as `radian-advice-some-descriptive-name`.
   If you need to add `ignore` as an `:override` advice on something,
   use
 
-      (defalias 'radian--advice-descriptive-name #'ignore)
+      (defalias 'radian-advice-descriptive-name #'ignore)
 
   This means that only Radian functions should be added as advice
   functions. Never add a lambda as an advice function.

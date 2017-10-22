@@ -1,6 +1,7 @@
 ;;; radian-theme.el --- Loading color themes
 
 (require 'radian-custom)
+(require 'radian-package)
 
 ;;; See also `radian-appearance'.
 
@@ -24,10 +25,27 @@ wish to use your own color theme, you can set this to nil."
   :group 'radian
   :type `(choice ,@(mapcar (lambda (theme)
                              `(const :tag
-                                ,(radian--unlispify
-                                  (symbol-name theme))
+                                ,(if theme
+                                     (radian--unlispify
+                                      (symbol-name theme))
+                                   "None")
                                 ,theme))
-                           (custom-available-themes))))
+                           (cons
+                            nil
+                            (sort
+                             (append
+                              (custom-available-themes)
+                              '(zerodark))
+                             #'string-lessp)))))
+
+;; Allow to defer color theme loading until after init, which helps to
+;; avoid weirdness during the processing of the local init-file.
+(defcustom radian-defer-color-theme t
+  "Non-nil means defer loading the color theme until after init.
+Otherwise, the color theme is loaded whenever `radian-theme' is
+loaded."
+  :group 'radian
+  :type 'boolean)
 
 ;; This is a handy macro for conditionally enabling color theme
 ;; customizations.
@@ -61,10 +79,30 @@ The current color theme is determined by consulting
   ;; Eliminate the underline on mismatched parens.
   (set-face-underline 'show-paren-mismatch nil))
 
+(straight-register-package 'zerodark-theme)
+(radian-with-color-theme zerodark
+  ;; For some reason, `zerodark-theme' has Flycheck and Magit as hard
+  ;; dependencies. We need to make sure our configuration for those
+  ;; packages is loaded first, in case of custom recipes for them.
+  (require 'radian-check)
+  (require 'radian-git)
+  (use-package zerodark-theme))
+
 ;; Load the appropriate color scheme as specified in
 ;; `radian-color-theme'.
 (when radian-color-theme
-  (load-theme radian-color-theme 'no-confirm))
+  (if radian-defer-color-theme
+      (progn
+        (eval-and-compile
+          (defun radian-load-color-theme ()
+            "Load the Radian color theme, as given by `radian-color-theme'.
+If there is an error, report it as a warning."
+            (condition-case-unless-debug error-data
+                (load-theme radian-color-theme 'no-confirm)
+              (error (warn "Could not load color theme: %s"
+                           (error-message-string error-data)))))
+          (add-hook 'after-init-hook #'radian-load-color-theme)))
+    (load-theme radian-color-theme 'no-confirm)))
 
 (provide 'radian-theme)
 

@@ -1,5 +1,7 @@
 ;;; radian-langs.el --- Support for miscellaneous languages
 
+(require 'map)
+
 (require 'radian-autocomplete)
 (require 'radian-bind-key)
 (require 'radian-check)
@@ -351,6 +353,7 @@ This function calls `json-mode--update-auto-mode' to change the
       (define-key map [remap newline] 'ruby-electric-space/return)
       (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
       (define-key map [remap electric-newline-and-maybe-indent] 'ruby-electric-space/return)
+      (define-key map [remap reindent-then-newline-and-indent] 'ruby-electric-space/return)
       (el-patch-remove
         (dolist (x ruby-electric-delimiters-alist)
           (let* ((delim   (car x))
@@ -565,8 +568,7 @@ command `sh-reset-indent-vars-to-global-values'."
 
     (add-to-list 'TeX-view-program-list
                  '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-    (radian-alist-set*
-     'output-pdf '("TeXShop") TeX-view-program-selection 'symbol))
+    (map-put TeX-view-program-selection 'output-pdf '("TeXShop")))
 
   ;; Remove annoying messages when opening *.tex files.
 
@@ -612,6 +614,13 @@ This is an `:around' advice for `TeX-load-style-file'."
   (advice-add #'TeX-load-style-file :around
               #'radian--advice-inhibit-style-loading-message))
 
+(use-package tex-buf
+  :recipe auctex
+  :config
+
+  ;; Save buffers automatically when compiling, instead of prompting.
+  (setq TeX-save-query nil))
+
 (use-package latex
   :recipe auctex
   :config
@@ -647,7 +656,16 @@ This is an `:around' advice for `TeX-load-style-file'."
   (add-hook 'typescript-mode-hook #'radian--rename-typescript-mode-lighter)
 
   ;; The standard TypeScript indent width is two spaces, not four.
-  (setq typescript-indent-level 2))
+  (setq typescript-indent-level 2)
+
+  ;; Disable the tslint syntax checker inside the node_modules
+  ;; directory, as it will generally just generate several thousand
+  ;; errors, disable itself, and print a warning.
+
+  (with-eval-after-load 'flycheck
+    (setf (flycheck-checker-get 'typescript-tslint 'predicate)
+          (lambda ()
+            (not (string-match-p "/node_modules/" default-directory))))))
 
 ;; TypeScript IDE for Emacs.
 (use-package tide

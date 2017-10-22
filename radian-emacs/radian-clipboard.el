@@ -10,12 +10,15 @@
 ;;
 ;; [1]: https://gist.github.com/the-kenny/267162
 ;; [2]: http://emacs.stackexchange.com/q/26471/12534
-
 (radian-with-operating-system macOS
   (radian-with-terminal-emacs
-    (defvar radian--last-copy-to-macOS nil
-      "The last text that was copied to the system clipboard.")
-    (defun radian--paste-from-macOS ()
+
+    (defvar radian-clipboard-last-copy nil
+      "The last text that was copied to the system clipboard.
+This is used to prevent duplicate entries in the kill ring.")
+
+    (defun radian-clipboard-paste ()
+      "Return the contents of the macOS clipboard, as a string."
       (let* (;; Setting `default-directory' to a directory that is
              ;; sure to exist means that this code won't error out
              ;; when the directory for the current buffer does not
@@ -25,14 +28,18 @@
              ;; string.
              (text (shell-command-to-string "pbpaste")))
         ;; If this function returns nil then the system clipboard is
-        ;; ignored and the first element in the yank ring (which, if
+        ;; ignored and the first element in the kill ring (which, if
         ;; the system clipboard has not been modified since the last
         ;; kill, will be the same). Including this `unless' clause
         ;; prevents you from getting the same text yanked the first
-        ;; time you run `yank-pop'.
-        (unless (string= text radian--last-copy-to-macOS)
+        ;; time you run `yank-pop'. (Of course, this is less relevant
+        ;; due to `counsel-yank-pop', but still arguably the correct
+        ;; behavior.)
+        (unless (string= text radian-clipboard-last-copy)
           text)))
-    (defun radian--copy-to-macOS (text)
+
+    (defun radian-clipboard-copy (text)
+      "Set the contents of the macOS clipboard to given TEXT string."
       (let* (;; Setting `default-directory' to a directory that is
              ;; sure to exist means that this code won't error out
              ;; when the directory for the current buffer does not
@@ -51,9 +58,10 @@
              (proc (start-process "pbcopy" nil "pbcopy")))
         (process-send-string proc text)
         (process-send-eof proc))
-      (setq radian--last-copy-to-macOS text))
-    (setq interprogram-paste-function #'radian--paste-from-macOS)
-    (setq interprogram-cut-function #'radian--copy-to-macOS)))
+      (setq radian-clipboard-last-copy text))
+
+    (setq interprogram-paste-function #'radian-clipboard-paste)
+    (setq interprogram-cut-function #'radian-clipboard-copy)))
 
 ;; If you have something on the system clipboard, and then kill
 ;; something in Emacs, then by default whatever you had on the system

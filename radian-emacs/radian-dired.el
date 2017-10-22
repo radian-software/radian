@@ -67,6 +67,11 @@ also offers to kill buffers visiting deleted files and directories."
              (dolist (buf buf-list)
                (kill-buffer buf)))))))
 
+;; Instantly revert Dired buffers on re-visiting them, with no
+;; message. (A message is shown if insta-revert is either disabled or
+;; determined dynamically by setting this variable to a function.)
+(setq dired-auto-revert-buffer t)
+
 (provide 'radian-dired)
 
 ;;; radian-dired.el ends here
