@@ -340,17 +340,6 @@ should be the regular Clojure REPL started by the server process filter."
   :defer-install t
   :init
 
-  ;; By default, clj-refactor enables the refactor-nrepl middleware in
-  ;; an *autoload*, meaning that it's already happened as soon as
-  ;; clj-refactor has loaded. But refactor-nrepl doesn't work outside
-  ;; a Clojure project, and signals a warning in that case. So we need
-  ;; to *selectively* inject refactor-nrepl, which means we need to
-  ;; disable it right away so we can do it buffer-locally later. See
-  ;; [1] for discussion of the problem.
-  ;;
-  ;; [1]: https://github.com/clojure-emacs/refactor-nrepl/issues/177
-  (setq cljr-inject-dependencies-at-jack-in nil)
-
   (with-eval-after-load 'clojure-mode
     ;; Enable clj-refactor in Clojure buffers. This is adapted from the
     ;; clj-refactor README [1].
@@ -369,62 +358,7 @@ the `clj-refactor' keybindings need to be installed."
 
     (add-hook 'clojure-mode-hook #'radian-clj-refactor-enable))
 
-  (with-eval-after-load 'cider
-    ;; Because we disabled injection of the clj-refactor middleware
-    ;; earlier, we have to do it buffer-locally now (but only if we're
-    ;; in a project).
-
-    (defun radian-advice-cljr-inject-dependencies (&rest args)
-      "Re-enable injection of `clj-refactor' middleware if inside a project.
-This is a `:before' advice for `cider-jack-in'."
-      (when (and (use-package-install-deferred-package
-                  'clj-refactor :after)
-                 (require 'clj-refactor)
-                 (radian-cljr-project-dir))
-        ;; We need to set this in order for
-        ;; `cljr--inject-jack-in-dependencies' to have an effect. But
-        ;; we want it to remain nil globally, so that in the case that
-        ;; we are outside a project, the dependencies are not
-        ;; injected.
-        (setq-local cljr-inject-dependencies-at-jack-in t)
-
-        ;; But we only want the dependencies to be injected in the
-        ;; current buffer.
-        (make-local-variable 'cider-jack-in-lein-plugins)
-        (make-local-variable 'cider-jack-in-nrepl-middlewares)
-
-        ;; Do it.
-        (cljr--inject-jack-in-dependencies)))
-
-    (advice-add #'cider-jack-in :before
-                #'radian-advice-cljr-inject-dependencies))
-
   :config
-
-  ;; Recently `cljr--project-dir' was changed to return an empty
-  ;; string instead of nil when there is no containing project. Let's
-  ;; fix it, so that we can have a proper predicate to determine when
-  ;; refactor-nrepl should be injected.
-  (defun radian-cljr-project-dir ()
-    "Like `cljr--project-dir', but return nil instead of empty string."
-    (let ((project-dir (cljr--project-dir)))
-      (unless (string-empty-p project-dir)
-        project-dir)))
-
-  ;; We also need to tell clj-refactor not to check that
-  ;; refactor-nrepl is installed properly when we are not in a
-  ;; project.
-
-  (defalias 'radian-advice-cljr-suppress-middleware-check
-    #'radian-cljr-project-dir
-    "Suppress a spurious warning from `clj-refactor'.
-This is a `:before-while' advice for `cljr--init-middleware'. The
-warning in question is printed in the REPL and tells you that the
-middleware is not injected, even though it shouldn't be injected
-when you're outside a project.")
-
-  (advice-add #'cljr--init-middleware :before-while
-              #'radian-advice-cljr-suppress-middleware-check)
 
   ;; Make clj-refactor show its messages right away, instead of
   ;; waiting for you to do another command.
