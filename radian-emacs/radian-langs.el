@@ -542,10 +542,6 @@ command `sh-reset-indent-vars-to-global-values'."
 ;;
 ;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
 
-(use-package tex-site
-  :recipe auctex
-  :demand t)
-
 (use-package tex
   :recipe auctex
   :init
