@@ -1,5 +1,6 @@
 ;;; radian-browse.el --- Browsing the web
 
+(require 'radian-os)
 (require 'radian-package)
 
 ;; In recent versions of macOS, there is an annoying configuration
