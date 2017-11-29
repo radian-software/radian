@@ -108,6 +108,14 @@
   ;; `org-check-version' is the same as the one used above, so we
   ;; don't bother to change it. That should change, FIXME.
   (provide 'org-version)
+  ;; Certain packages like elfeed use `(org-version)' to check to see
+  ;; what the org-version that emacs is using. If this happens it could
+  ;; result in an error because the package in question might expect a
+  ;; string containing a version number rather than what will be returned
+  ;; by `org-version'--"N\A". Adding this `(org-version)' function avoids
+  ;; error. This will probably not be needed anymore after 
+  ;; raxod502/straight.el#72 and raxod502/straight.el#115 are closed. 
+  (defun org-version () "9.1.3")
   (with-eval-after-load 'org
     (defalias #'org-git-version #'radian--org-git-version))
 
