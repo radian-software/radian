@@ -28,10 +28,11 @@
 ;; lazy-loading, through the use of keyword arguments. See the README
 ;; [1].
 ;;
-;; We are using my fork until [2] is merged.
+;; We are using my fork for the foreseeable future, until
+;; `with-feature' is ready. See [2].
 ;;
 ;; [1]: https://github.com/jwiegley/use-package
-;; [2]: https://github.com/jwiegley/use-package/pull/479
+;; [2]: https://github.com/jwiegley/use-package/commit/93bf693b6467df0a4992b2804330378dcd486040
 (straight-use-package '(use-package
                          :host github
                          :repo "raxod502/use-package"
