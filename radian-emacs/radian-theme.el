@@ -100,8 +100,8 @@ If there is an error, report it as a warning."
             (condition-case-unless-debug error-data
                 (load-theme radian-color-theme 'no-confirm)
               (error (warn "Could not load color theme: %s"
-                           (error-message-string error-data)))))
-          (add-hook 'after-init-hook #'radian-load-color-theme)))
+                           (error-message-string error-data))))))
+        (add-hook 'after-init-hook #'radian-load-color-theme))
     (load-theme radian-color-theme 'no-confirm)))
 
 (provide 'radian-theme)
