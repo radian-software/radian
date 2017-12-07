@@ -27,7 +27,10 @@
   (tool-bar-mode -1)
 
   ;; Prevent the cursor from blinking.
-  (blink-cursor-mode -1))
+  (blink-cursor-mode -1)
+
+  ;; Increase the default font size.
+  (set-face-attribute 'default nil :height 140))
 
 ;; Package `diminish' provides an easy way to change the display of
 ;; minor modes in the mode line. It provides a single function,
