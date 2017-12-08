@@ -34,7 +34,16 @@
   ;; Prevent all highlighting of inserted pairs.
   (setq sp-highlight-pair-overlay nil)
   (setq sp-highlight-wrap-overlay nil)
-  (setq sp-highlight-wrap-tag-overlay nil))
+  (setq sp-highlight-wrap-tag-overlay nil)
+
+  ;; Disable Smartparens in Org-related modes, since the keybindings
+  ;; conflict.
+
+  (with-eval-after-load 'org
+    (add-to-list 'sp-ignore-modes-list #'org-mode))
+
+  (with-eval-after-load 'org-agenda
+    (add-to-list 'sp-ignore-modes-list #'org-agenda-mode)))
 
 (provide 'radian-pairs)
 
