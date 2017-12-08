@@ -9,6 +9,11 @@
 ;;; theme. Menus, scroll bars, bells, cursors, and so on. See also
 ;;; `radian-theme', which customizes the color theme specifically.
 
+(defcustom radian-window-maximize-on-startup t
+  "Non-nil means maximize frames when they are created."
+  :type #'boolean
+  :group #'radian)
+
 ;; Disable the menu bar.
 (menu-bar-mode -1)
 
@@ -30,7 +35,10 @@
   (blink-cursor-mode -1)
 
   ;; Increase the default font size.
-  (set-face-attribute 'default nil :height 140))
+  (set-face-attribute 'default nil :height 140)
+
+  (when radian-window-maximize-on-startup
+    (add-to-list 'default-frame-alist '(fullscreen . maximized))))
 
 ;; Package `diminish' provides an easy way to change the display of
 ;; minor modes in the mode line. It provides a single function,
