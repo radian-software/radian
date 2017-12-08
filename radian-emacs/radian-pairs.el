@@ -2,6 +2,11 @@
 
 (require 'radian-package)
 
+;; Don't blink the cursor on the opening paren when you insert a
+;; closing paren, as we already have superior handling of that from
+;; `smartparens'.
+(setq blink-matching-paren nil)
+
 ;; Insert and manipulate paired delimiters.
 (use-package smartparens
   :init
