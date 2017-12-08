@@ -334,19 +334,32 @@ This is a function for `after-save-hook'. Remove
           (file-error (message "Saving places: can't write %s" file)))
         (kill-buffer (current-buffer))))))
 
-;; This package introduces a concept of "projects" and provides
-;; commands for quick navigation within and between them.
+;; Package `projectile' keeps track of a "project" list, which is
+;; automatically added to as you visit files in Git repositories,
+;; Node.js projects, etc. It then provides commands for quickly
+;; navigating between and within these projects.
 (use-package projectile
   :demand t
   :config
 
-  ;; Enable Projectile everywhere.
-  (projectile-mode 1)
+  ;; Enable Projectile globally.
+  (projectile-mode +1)
 
   ;; Don't show Projectile in the mode line. (Radian already adds a
   ;; custom indicator for the current project, so there's no need to
   ;; show the mode separately.)
-  (setq projectile-mode-line nil))
+  (setq projectile-mode-line nil)
+
+  ;; Make it possible to set Projectile's indexing method in a
+  ;; directory-local variable. (Useful for projects which need a
+  ;; nontrivial .projectile file.)
+
+  (defun radian-projectile-indexing-method-p (method)
+    "Non-nil if METHOD is a safe value for `projectile-indexing-method'."
+    (memq method '(native alien)))
+
+  (put 'projectile-indexing-method 'safe-local-variable
+       #'radian-projectile-indexing-method-p))
 
 ;; This package provides enhanced versions of the Projectile commands
 ;; that use Ivy.

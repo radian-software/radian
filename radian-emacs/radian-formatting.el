@@ -32,17 +32,17 @@
 
 ;; Make a function to replace `delete-trailing-whitespace' that
 ;; respects variable `radian-delete-trailing-whitespace'.
-(defun radian--maybe-delete-trailing-whitespace ()
+(defun radian-maybe-delete-trailing-whitespace ()
   "Maybe delete trailing whitespace in buffer.
 Trailing whitespace is only deleted if variable
 `radian-delete-trailing-whitespace' if non-nil."
   (when radian-delete-trailing-whitespace
     (delete-trailing-whitespace)))
 
-;; Call `radian--maybe-delete-trailing-whitespace' before saving a
+;; Call `radian-maybe-delete-trailing-whitespace' before saving a
 ;; file.
 (add-hook 'before-save-hook
-          #'radian--maybe-delete-trailing-whitespace)
+          #'radian-maybe-delete-trailing-whitespace)
 
 ;; Add a trailing newline if there is not one already, when saving.
 ;; This is enabled for default for certain modes, but we want it
@@ -52,8 +52,9 @@ Trailing whitespace is only deleted if variable
 ;; Automatically wrap lines when editing plain text files.
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
-;; Make `fill-paragraph' generally smarter. For example, it now
-;; behaves nicely in Markdown's bulleted lists.
+;; Package `filladapt' makes the `fill-paragraph' command generally
+;; smarter. For example, it now behaves nicely in Markdown's bulleted
+;; lists.
 (use-package filladapt
   :demand t
   :diminish filladapt-mode
@@ -63,21 +64,6 @@ Trailing whitespace is only deleted if variable
   ;; nasty side effects for filling docstrings in e.g.
   ;; `emacs-lisp-mode' and `clojure-mode'.
   (add-hook 'text-mode-hook #'filladapt-mode))
-
-;; Use an adaptive fill prefix when visually wrapping too-long lines.
-;; This means that if you have a line that is long enough to wrap
-;; around, the prefix (e.g. comment characters or indent) will be
-;; displayed again on the next visual line.
-(use-package adaptive-wrap
-  :demand t
-  :config
-
-  ;; Enable adaptive-wrap everywhere.
-
-  (define-globalized-minor-mode global-adaptive-wrap-prefix-mode
-    adaptive-wrap-prefix-mode adaptive-wrap-prefix-mode)
-
-  (global-adaptive-wrap-prefix-mode))
 
 ;; Useful utility function. Like `reverse-region', but works
 ;; characterwise rather than linewise.
@@ -96,12 +82,12 @@ Interactively, reverse the characters in the current region."
 ;; Minor mode for configuring `whitespace-mode' to highlight long
 ;; lines.
 (define-minor-mode radian-long-lines-mode
-  "When enabled, highlight long lines."
+  "Minor mode for highlighting long lines."
   nil nil nil
   (if radian-long-lines-mode
       (progn
         (setq-local whitespace-style '(face lines-tail))
-        (whitespace-mode 1))
+        (whitespace-mode +1))
     (whitespace-mode -1)
     (kill-local-variable 'whitespace-style)))
 
@@ -111,6 +97,10 @@ Interactively, reverse the characters in the current region."
 (use-package editorconfig
   :defer-install t
   :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
+
+;; If you run `comment-dwim' with no region active, comment the
+;; current line instead of inserting an end-of-line comment.
+(setq comment-insert-comment-function #'comment-line)
 
 (provide 'radian-formatting)
 

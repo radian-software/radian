@@ -47,6 +47,17 @@
              sx-tab-unanswered-my-tags
              sx-tab-week))
 
+;; Allow setting the regexp for bug references from file-local or
+;; directory-local variables. CIDER does this in its files, for
+;; example.
+(put 'bug-reference-bug-regexp 'safe-local-variable #'stringp)
+
+;; Package `ix' provides Emacs support for a fantastic command-line
+;; pastebin tool.
+(use-package ix
+  :defer-install t
+  :commands (ix ix-browse ix-delete))
+
 (provide 'radian-network)
 
 ;;; radian-browse.el ends here

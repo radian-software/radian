@@ -74,7 +74,9 @@
   ;; The standard JavaScript indent width is two spaces, not four.
   (setq js-indent-level 2))
 
-;; Improved JavaScript support.
+;; Package `js2-mode' provides improved semantic highlighting,
+;; indentation, and even simple Flycheck-like warnings for JavaScript
+;; code.
 (use-package js2-mode
   :defer-install t
   :commands (js2-minor-mode)
@@ -91,22 +93,26 @@
   ;; Change the mode lighters. (They are originally Javascript-IDE and
   ;; JSX-IDE, which are wordy.)
 
-  (defun radian--set-js2-mode-lighter ()
+  (defun radian-js2-diminish ()
     "Change the `js2-mode' lighter from Javascript-IDE to JavaScript."
     (setq-local mode-name "JavaScript"))
 
-  (defun radian--set-js2-jsx-mode-lighter ()
+  (defun radian-js2-jsx-diminish ()
     "Change the `js2-jsx-mode' lighter from JSX-IDE to JSX."
     (setq-local mode-name "JSX"))
 
-  (add-hook 'js2-mode-hook #'radian--set-js2-mode-lighter)
-  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter)
+  (add-hook 'js2-mode-hook #'radian-js2-diminish)
+  (add-hook 'js2-jsx-mode-hook #'radian-js2-jsx-diminish)
 
   ;; Treat shebang lines (e.g. for node) correctly.
-  (setq js2-skip-preprocessor-directives t))
+  (setq js2-skip-preprocessor-directives t)
+
+  ;; Don't emit a warning for trailing commas, since there are many
+  ;; contexts in which those are valid (anything preprocessed, or
+  ;; Node.js).
+  (setq js2-strict-trailing-comma-warning nil))
 
 ;; Live web development with Emacs.
-
 (use-package skewer-mode
   :defer-install t
   :commands (list-skewer-clients
@@ -534,13 +540,10 @@ command `sh-reset-indent-vars-to-global-values'."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; TeX
 
-;; https://www.tug.org/begin.html
-
-;; AUCTeX, integrated development environment for LaTeX and friends.
-;; Unfortunately because AUCTeX is weird, we need to do a little dance
-;; with the `use-package' declarations, see [1].
+;; Package `auctex' provides an integrated development environment for
+;; LaTeX [1] and friends.
 ;;
-;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
+;; [1]: https://www.tug.org/begin.html
 
 (use-package tex
   :recipe auctex
@@ -622,7 +625,11 @@ This is an `:around' advice for `TeX-load-style-file'."
   :config
 
   ;; Don't be afraid to break inline math between lines.
-  (setq LaTeX-fill-break-at-separators nil))
+  (setq LaTeX-fill-break-at-separators nil)
+
+  ;; Make it possible for a document to specify whether or not Biber
+  ;; is to be used, via a file-local variable.
+  (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex

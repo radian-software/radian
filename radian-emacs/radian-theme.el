@@ -17,7 +17,7 @@
 ;; The default color scheme is Wombat, for now. It's one of the few
 ;; reasonable-looking themes I can find that actually works in a
 ;; terminal.
-(defcustom radian-color-theme 'wombat
+(defcustom radian-color-theme 'zerodark
   "Specifies the color theme used by Radian.
 
 You can use anything listed by `custom-available-themes'. If you

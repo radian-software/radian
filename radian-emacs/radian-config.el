@@ -48,6 +48,15 @@
 
   (add-hook 'pip-requirements-mode-hook #'radian--rename-pip-requirements-mode-lighter))
 
+;; Package `ssh-config-mode' provides syntax highlighting and
+;; indentation for files in ~/.ssh.
+(use-package ssh-config-mode
+  :defer-install t
+  :mode ((".ssh/config\\'"       . ssh-config-mode)
+         ("sshd?_config\\'"      . ssh-config-mode)
+         ("known_hosts\\'"       . ssh-known-hosts-mode)
+         ("authorized_keys2?\\'" . ssh-authorized-keys-mode)))
+
 ;; Edit Terraform configuration files.
 (use-package terraform-mode
   :defer-install t

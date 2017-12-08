@@ -50,7 +50,11 @@ This is an `:override' advice for `c-update-modeline'.")
   (c-add-style "radian-bsd"
                '("bsd"
                  (c-basic-offset . 2)))
-  (map-put c-default-style 'other "radian-bsd"))
+  (map-put c-default-style 'other "radian-bsd")
+
+  ;; Allow setting the CC style in a file-local or directory-local
+  ;; variable.
+  (put 'c-default-style 'safe-local-variable #'stringp))
 
 ;; Package `irony-mode' provides a framework to use libclang to get
 ;; semantic information about C, C++, and Objective-C code. Frontends

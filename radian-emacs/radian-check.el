@@ -27,8 +27,14 @@
                  `(flycheck-python-pycompile-executable . ,name)))
 
   ;; Run a syntax check when changing buffers, just in case you
-  ;; modified some other files that impact the current one.
+  ;; modified some other files that impact the current one. (This has
+  ;; no effect until [1] is merged.)
+  ;;
+  ;; [1]: https://github.com/flycheck/flycheck/pull/1308
   (add-to-list 'flycheck-check-syntax-automatically 'buffer-switch)
+
+  ;; Allow disabling Flycheck in a buffer-local or file-local variable.
+  (put 'flycheck-mode 'safe-local-variable #'booleanp)
 
   :diminish flycheck-mode)
 

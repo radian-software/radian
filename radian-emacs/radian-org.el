@@ -7,11 +7,19 @@
 (require 'radian-bind-key)
 (require 'radian-package)
 
+(define-globalized-minor-mode global-outline-minor-mode
+  outline-minor-mode outline-minor-mode)
+
+(global-outline-minor-mode +1)
+(diminish 'outline-minor-mode)
+
 (use-package org
   :defer-install t
   :commands (org-version)
-  :bind (;; Add a global keybinding for accessing the Org Agenda.
+  :bind (;; Add the global keybindings for accessing Org Agenda and
+         ;; Org Capture that are recommended in the Org manual.
          ("C-c a" . org-agenda)
+         ("C-c c" . org-capture)
 
          :map org-mode-map
 
@@ -40,7 +48,10 @@
          ;; otherwise there would be no easy way to invoke
          ;; `org-backward-paragraph' and `org-forward-paragraph'.)
          ([remap backward-paragraph] . org-backward-paragraph)
-         ([remap forward-paragraph] . org-forward-paragraph))
+         ([remap forward-paragraph] . org-forward-paragraph)
+
+         ;; Very convenient keybinding for inserting a new heading.
+         ("M-RET" . org-insert-heading))
   :init
 
   ;; This section is devoted to fixing the asinine version-check
@@ -111,7 +122,34 @@
   ;; If you try to insert a heading in the middle of an entry, don't
   ;; split it in half, but instead insert the new heading after the
   ;; end of the current entry.
-  (setq org-insert-heading-respect-content t))
+  (setq org-insert-heading-respect-content t)
+
+  ;; Indent subsections.
+  (add-hook 'org-mode-hook #'org-indent-mode)
+
+  ;; Utility functions.
+
+  (defun radian-org-sort-buffer ()
+    "Sort all entries in the Org buffer recursively in alphabetical order."
+    (interactive)
+    (org-map-entries (lambda ()
+                       (condition-case x
+                           (org-sort-entries nil ?a)
+                         ;; Ignore any errors signalled by Org.
+                         (user-error)))))
+
+  (defun radian-org-archive-past ()
+    "Archive DONE items with deadlines either missing or in the past."
+    (interactive)
+    (org-map-entries
+     (lambda ()
+       (when (and (string= (org-get-todo-state) "DONE")
+                  (let ((deadline (org-entry-get (point) "DEADLINE")))
+                    (or (null deadline)
+                        (time-less-p (org-time-string-to-time deadline)
+                                     (current-time)))))
+         (org-archive-subtree)
+         (setq org-map-continue-from (line-beginning-position)))))))
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
