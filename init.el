@@ -92,12 +92,9 @@ This is an absolute path.")
                     (nil . "default.el")))
 
             ;; Use the develop branch of straight.el on Radian's
-            ;; develop branch. (This code is different on master!)
-            (setq straight-recipe-overrides
-                  '((radian . ((straight :type git :host github
-                                         :repo "raxod502/straight.el"
-                                         :branch "develop"
-                                         :files ("straight.el"))))))
+            ;; develop branch. (On master of Radian, we use the master
+            ;; branch of straight.el.)
+            (setq straight-repository-branch "develop")
 
             (defvar radian-after-init-hook nil
               "Hook run after Radian init has finished.
