@@ -24,6 +24,11 @@
 ;; Turn off the alarm bell.
 (setq ring-bell-function #'ignore)
 
+(defcustom radian-font-size 140
+  "Default font size, in pixels."
+  :type 'integer
+  :group 'radian)
+
 (radian-with-windowed-emacs
   ;; Disable the scroll bars.
   (scroll-bar-mode -1)
@@ -35,7 +40,7 @@
   (blink-cursor-mode -1)
 
   ;; Increase the default font size.
-  (set-face-attribute 'default nil :height 140)
+  (set-face-attribute 'default nil :height radian-font-size)
 
   (when radian-window-maximize-on-startup
     (add-to-list 'default-frame-alist '(fullscreen . maximized))))
