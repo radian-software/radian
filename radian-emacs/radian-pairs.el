@@ -42,6 +42,12 @@
   (setq sp-highlight-wrap-overlay nil)
   (setq sp-highlight-wrap-tag-overlay nil)
 
+  ;; Don't disable autoskip when point moves backwards. (This lets you
+  ;; open a sexp, type some things, delete some things, etc., and then
+  ;; type over the closing delimiter as long as you didn't leave the
+  ;; sexp entirely.)
+  (setq sp-cancel-autoskip-on-backward-movement nil)
+
   ;; Disable Smartparens in Org-related modes, since the keybindings
   ;; conflict.
 
