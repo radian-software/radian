@@ -1,6 +1,7 @@
 ;;; radian-pairs.el --- Paired delimiter handling
 
 (require 'radian-package)
+(require 'radian-windowed)
 
 ;; Don't blink the cursor on the opening paren when you insert a
 ;; closing paren, as we already have superior handling of that from
@@ -24,6 +25,30 @@
   ;; re-add them here.
   (radian-alist-set* "M-?" #'sp-convolute-sexp sp-paredit-bindings)
   (radian-alist-set* "M-j" #'sp-join-sexp sp-paredit-bindings)
+
+  (defun radian-sp-wrap-round ()
+    "Wrap following sexp in round parentheses."
+    (interactive)
+    (sp-wrap-with-pair "("))
+
+  (defun radian-sp-wrap-square ()
+    "Wrap following sexp in square brackets."
+    (interactive)
+    (sp-wrap-with-pair "["))
+
+  (defun radian-sp-wrap-curly ()
+    "Wrap following sexp in curly braces."
+    (interactive)
+    (sp-wrap-with-pair "{"))
+
+  ;; M-( is uncontroversial, and bound by Paredit. In windowed mode,
+  ;; we can also bind M-[ (which Paredit doesn't do), but not in the
+  ;; terminal since that messed up the escape sequences sent for the
+  ;; arrows and other keys. M-{ is a no-go because it's bound to
+  ;; `backward-paragraph'.
+  (radian-alist-set* "M-(" #'radian-sp-wrap-round sp-paredit-bindings)
+  (radian-with-windowed-emacs
+    (radian-alist-set* "M-[" #'radian-sp-wrap-square sp-paredit-bindings))
 
   ;; Enable some default keybindings for Smartparens.
   (sp-use-paredit-bindings)
