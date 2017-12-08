@@ -82,7 +82,7 @@
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
  ("spinner" . "0637791f005f747532b4439439a81c3415961377")
  ("ssh-config-mode-el" . "c6dc66b6678605f0df8eb61778b10ae21eb7caf5")
- ("straight.el" . "b3db3815c3dd17f55f83dda70fd7af32376ba701")
+ ("straight.el" . "b3a6959412ab86b283394833a77a96c7683a5f7c")
  ("swift-mode" . "e91e924c225b7bfb7aa6e4a84b5d379c6268014a")
  ("swiper" . "f7470feef4880a735495c5013465efffd049270d")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")
