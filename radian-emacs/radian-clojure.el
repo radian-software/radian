@@ -352,8 +352,8 @@ This means that `yas-minor-mode' also needs to be enabled, and
 the `clj-refactor' keybindings need to be installed."
       (when (and (use-package-install-deferred-package 'clj-refactor :after)
                  (use-package-install-deferred-package 'yasnippet :after))
-        (clj-refactor-mode 1)
-        (yas-minor-mode 1)
+        (clj-refactor-mode +1)
+        (yas-minor-mode +1)
         (cljr-add-keybindings-with-prefix "C-c RET")))
 
     (add-hook 'clojure-mode-hook #'radian-clj-refactor-enable))
