@@ -98,10 +98,6 @@ Interactively, reverse the characters in the current region."
   :defer-install t
   :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
 
-;; If you run `comment-dwim' with no region active, comment the
-;; current line instead of inserting an end-of-line comment.
-(setq comment-insert-comment-function #'comment-line)
-
 (provide 'radian-formatting)
 
 ;;; radian-formatting.el ends here
