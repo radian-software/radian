@@ -52,7 +52,7 @@ with which Emacs should be restarted."
                                                              restart-args))))))
       (el-patch-swap
         (save-buffers-kill-emacs)
-        (restart-emacs--launch-other-emacs nil))))
+        (restart-emacs--launch-other-emacs restart-args))))
 
   (bind-key "C-x C" #'radian-new-emacs))
 
