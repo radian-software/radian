@@ -15,10 +15,11 @@
            :upstream (:host github :repo "flycheck/flycheck"))
   :init
 
+  :defer 3
+  :config
+
   ;; Enable `flycheck' everywhere unless otherwise specified.
   (global-flycheck-mode +1)
-
-  :config
 
   ;; Make `flycheck-python-pycompile-executable' safe to set in a
   ;; file-local variable.
