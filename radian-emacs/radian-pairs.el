@@ -80,7 +80,23 @@
     (add-to-list 'sp-ignore-modes-list #'org-mode))
 
   (with-eval-after-load 'org-agenda
-    (add-to-list 'sp-ignore-modes-list #'org-agenda-mode)))
+    (add-to-list 'sp-ignore-modes-list #'org-agenda-mode))
+
+  ;; When pressing RET after a newly entered curly-brace pair, add an
+  ;; extra newline and indent. See [1].
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/issues/80#issuecomment-18910312
+
+  (sp-local-pair 'cc-mode "{" nil :post-handlers
+                 '((radian-enter-and-indent-sexp "RET")
+                   (radian-enter-and-indent-sexp "<return>")))
+
+  (defun radian-enter-and-indent-sexp (&rest _ignored)
+    "Insert an extra newline after point, and reindent."
+    (newline)
+    (indent-according-to-mode)
+    (forward-line -1)
+    (indent-according-to-mode)))
 
 (provide 'radian-pairs)
 
