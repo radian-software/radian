@@ -11,8 +11,8 @@
   ;; buffers. See [1].
   ;;
   ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :recipe (:host github :repo "raxod502/flycheck"
-           :upstream (:host github :repo "flycheck/flycheck"))
+  :straight (:host github :repo "raxod502/flycheck"
+             :upstream (:host github :repo "flycheck/flycheck"))
   :init
 
   :defer 3

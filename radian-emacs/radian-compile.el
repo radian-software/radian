@@ -3,7 +3,7 @@
 (require 'radian-package)
 
 (use-package compile
-  :ensure nil
+  :straight nil
   :config
 
   ;; Automatically scroll the Compilation buffer as output appears,

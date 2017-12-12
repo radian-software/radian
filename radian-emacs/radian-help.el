@@ -17,7 +17,6 @@ This is an `:override' advice for
 ;; outdated, it's not autoloaded. (But `use-package' takes care of
 ;; that for us.)
 (use-package help-fns+
-  :defer-install t
   :bind (("C-h M-k" . describe-keymap)
          ;; Prevent help-fns+ from overriding this built-in
          ;; keybinding:

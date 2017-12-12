@@ -28,32 +28,11 @@
 ;; lazy-loading, through the use of keyword arguments. See the README
 ;; [1].
 ;;
-;; We are using my fork for the foreseeable future, until
-;; `with-feature' is ready. See [2].
-;;
 ;; [1]: https://github.com/jwiegley/use-package
-;; [2]: https://github.com/jwiegley/use-package/commit/93bf693b6467df0a4992b2804330378dcd486040
-(straight-use-package '(use-package
-                         :host github
-                         :repo "raxod502/use-package"
-                         :upstream (:host github
-                                    :repo "jwiegley/use-package")))
+(straight-use-package 'use-package)
 
-;; Tell use-package to automatically install packages if they are
-;; missing. By default, packages are installed via straight.el [1],
-;; which draws package installation recipes (short lists explaining
-;; where to download the package) from MELPA [2], GNU ELPA [3], and
-;; EmacsMirror [4]. (But you can also specify a recipe manually by
-;; putting `:recipe' in the `use-package' call, which is an extension
-;; to `use-package' provided by straight.el.) Learn more about recipe
-;; formatting from the MELPA README [5].
-;;
-;; [1]: https://github.com/raxod502/straight.el
-;; [2]: http://melpa.org/#/
-;; [3]: https://elpa.gnu.org/
-;; [4]: https://emacsmirror.net/
-;; [5]: https://github.com/melpa/melpa#recipe-format
-(setq use-package-always-ensure t)
+;; Install packages by default.
+(setq straight-use-package-by-default t)
 
 ;; Tell use-package to always load packages lazily unless told
 ;; otherwise. It's nicer to have this kind of thing be deterministic:

@@ -30,8 +30,12 @@
 
 ### use-package
 
-* Don't use `:ensure` or `:defer`. These are on by default in Radian.
-  To eagerly load a package, use `:demand`.
+* Don't use `:defer t`; this is the default in Radian. To eagerly load
+  a package, use `:demand`.
+* Don't use `:ensure`; that is for `package.el`. Use `:straight`
+  instead, but note that `:straight t` is superfluous since it's the
+  default. To avoid installing a package, use `:straight nil`. To
+  provide a custom recipe, pass it to `:straight`.
 * Don't use `:delight`; prefer `:diminish`.
 * Don't use `:pin`; this is not relevant since Radian uses
   `straight.el` instead of `package.el`.
@@ -40,9 +44,7 @@
   or silly. For partial lazy-loading, use `el-patch`.
 * Order `use-package` keywords as follows, so that they are in the
   rough order of execution:
-    * `:recipe`
-    * `:defer-install`
-    * `:commands`
+    * `:straight`
     * `:mode`
     * `:interpreter`
     * `:init`

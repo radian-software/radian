@@ -10,7 +10,6 @@
 
 ;; A Git Porcelain inside Emacs.
 (use-package magit
-  :defer-install t
   :bind (;; Add important keybindings for Magit as described in the
          ;; manual [1].
          ;;
@@ -43,8 +42,6 @@
 ;; Allows editing Git commit messages from the command line (i.e. with
 ;; emacs or emacsclient as your core.editor).
 (use-package git-commit
-  :defer-install t
-  :commands (git-commit-setup)
   :init
 
   ;; Lazy-load `git-commit'.

@@ -135,8 +135,7 @@ code.")
                                       (intern (string-remove-suffix ".el" file)))
                                     (directory-files
                                      radian-lib-directory nil
-                                     "^[a-z-]+\\.el$"
-                                     'nosort)))
+                                     "^[a-z-]+\\.el$")))
                   ;; Any packages installed here are official Radian
                   ;; packages.
                   (straight-current-profile 'radian))

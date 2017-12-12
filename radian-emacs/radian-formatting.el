@@ -94,9 +94,7 @@ Interactively, reverse the characters in the current region."
 ;; Support for EditorConfig, a "file format and collection of text
 ;; editor plugins for maintaining consistent coding styles between
 ;; different editors and IDEs".
-(use-package editorconfig
-  :defer-install t
-  :mode ("/\\.editorconfig\\'" . editorconfig-conf-mode))
+(use-package editorconfig)
 
 (provide 'radian-formatting)
 

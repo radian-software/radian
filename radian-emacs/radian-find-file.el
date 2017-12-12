@@ -366,10 +366,10 @@ This is a function for `after-save-hook'. Remove
 (use-package counsel-projectile
   ;; My fork remaps the 'f' action to do a find-file rather than just
   ;; the same as pressing M-o again.
-  :recipe (:host github
-           :repo "raxod502/counsel-projectile"
-           :upstream (:host github
-                      :repo "ericdanan/counsel-projectile"))
+  :straight (:host github
+             :repo "raxod502/counsel-projectile"
+             :upstream (:host github
+                        :repo "ericdanan/counsel-projectile"))
   :init
 
   ;; Lazy-load `counsel-projectile'.
@@ -434,7 +434,7 @@ This is a function for `after-save-hook'. Remove
     (counsel-projectile-toggle 1)))
 
 (use-package ffap
-  :ensure nil
+  :straight nil
   :config
 
   ;; Don't try to find URLs or remote machines.

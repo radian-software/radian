@@ -14,7 +14,7 @@
 ;; Package `cc-mode' provides indentation and syntax highlighting for
 ;; C, C++, Objective-C, Java, and other similar languages.
 (use-package cc-mode
-  :ensure nil
+  :straight nil
   :config
 
   ;; Get rid of the submode indicators in the mode line. This
@@ -60,8 +60,6 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; semantic information about C, C++, and Objective-C code. Frontends
 ;; are provided by other packages.
 (use-package irony
-  :defer-install t
-  :commands (irony-mode)
   :init
 
   ;; Enable `irony-mode' for C, C++, and Objective-C files.
@@ -93,8 +91,6 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; Package `company-irony' provides a `company' backend that uses
 ;; `irony-mode' to complete symbols in C, C++, and Objective-C.
 (use-package company-irony
-  :defer-install t
-  :commands (company-irony)
   :after irony
   :config
 
@@ -115,8 +111,6 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; uses `irony-mode' to complete header file #includes in C, C++, and
 ;; Objective-C.
 (use-package company-irony-c-headers
-  :defer-install t
-  :commands (company-irony-c-headers)
   :after irony
   :init
 
@@ -137,8 +131,6 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; `irony-mode' to display function signatures in C, C++, and
 ;; Objective-C.
 (use-package irony-eldoc
-  :defer-install t
-  :commands (irony-eldoc)
   :after irony
   :init
 
@@ -151,8 +143,6 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; `irony-mode' to display compilation errors and warnings in C, C++,
 ;; and Objective-C.
 (use-package flycheck-irony
-  :defer-install t
-  :commands (flycheck-irony-setup)
   :after irony
   :config
 

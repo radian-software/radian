@@ -14,8 +14,6 @@
 (diminish 'outline-minor-mode)
 
 (use-package org
-  :defer-install t
-  :commands (org-version)
   :bind (;; Add the global keybindings for accessing Org Agenda and
          ;; Org Capture that are recommended in the Org manual.
          ("C-c a" . org-agenda)
@@ -154,9 +152,7 @@
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
 (use-package org-agenda
-  :recipe org
-  :defer-install t
-  :commands (org-mode org-agenda)
+  :straight org
   :bind (:map org-agenda-mode-map
 
          ;; Prevent Org Agenda from overriding the bindings for

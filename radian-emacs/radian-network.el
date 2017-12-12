@@ -25,27 +25,7 @@
 ;; First, run `sx-authenticate' in order to provide your username and
 ;; password. After that, you can use any of the entry points listened
 ;; below. Navigation is keyboard-centric.
-(use-package sx
-  :defer-install t
-  :commands (sx-ask
-             sx-authenticate
-             sx-bug-report
-             sx-inbox
-             sx-inbox-notifications
-             sx-open-link
-             sx-search
-             sx-search-tag-at-point
-             sx-tab-all-questions
-             sx-tab-featured
-             sx-tab-frontpage
-             sx-tab-hot
-             sx-tab-month
-             sx-tab-newest
-             sx-tab-starred
-             sx-tab-topvoted
-             sx-tab-unanswered
-             sx-tab-unanswered-my-tags
-             sx-tab-week))
+(use-package sx)
 
 ;; Allow setting the regexp for bug references from file-local or
 ;; directory-local variables. CIDER does this in its files, for
@@ -54,9 +34,7 @@
 
 ;; Package `ix' provides Emacs support for a fantastic command-line
 ;; pastebin tool.
-(use-package ix
-  :defer-install t
-  :commands (ix ix-browse ix-delete))
+(use-package ix)
 
 (provide 'radian-network)
 
