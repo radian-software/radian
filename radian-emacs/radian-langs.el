@@ -229,11 +229,27 @@ This function calls `json-mode--update-auto-mode' to change the
 (use-package anaconda-mode
   :init
 
+  (el-patch-feature anaconda-mode)
+
   ;; Enable the functionality of anaconda-mode in Python buffers, as
   ;; suggested in the README [1].
   ;;
   ;; [1]: https://github.com/proofit404/anaconda-mode
   (add-hook 'python-mode-hook #'anaconda-mode)
+
+  :config
+
+  ;; Make it possible to quit out of the *anaconda-response* buffer
+  ;; with 'q'.
+  (el-patch-defun anaconda-mode-show-unreadable-response (response)
+    "Show unreadable RESPONSE to user, so he can report it properly."
+    (pop-to-buffer
+     (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
+       (el-patch-add (special-mode))
+       (erase-buffer)
+       (insert response)
+       (goto-char (point-min))
+       (current-buffer))))
 
   :diminish anaconda-mode)
 
