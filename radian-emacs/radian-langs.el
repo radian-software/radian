@@ -252,10 +252,10 @@ This function calls `json-mode--update-auto-mode' to change the
     "Show unreadable RESPONSE to user, so he can report it properly."
     (pop-to-buffer
      (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
-       (el-patch-add (special-mode))
        (erase-buffer)
        (insert response)
        (goto-char (point-min))
+       (el-patch-add (special-mode))
        (current-buffer))))
 
   :diminish anaconda-mode)
