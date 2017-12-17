@@ -66,6 +66,13 @@
 ;; indentation, and even simple Flycheck-like warnings for JavaScript
 ;; code.
 (use-package js2-mode
+  ;; This is slightly different than what is recommended in the README
+  ;; [1]. It seems to make the most sense though. See also [2].
+  ;;
+  ;; [1]: http://elpa.gnu.org/packages/js2-mode.html
+  ;; [2]: https://github.com/PythonNut/emacs-config/blob/41c132ed89d85b96c3cd5267cb86b6bb30ac45f3/modules/config-modes.el#L220-L222
+  :mode (("\\.js\\'" . js2-mode)
+         ("\\.jsx\\'" . js2-jsx-mode))
   :interpreter ("node" . js2-mode)
   :config
 
