@@ -10,15 +10,15 @@
 ;; if it is not already installed and loaded).
 ;;
 ;; [1]: https://github.com/raxod502/straight.el
-(let ((bootstrap-file (concat user-emacs-directory "straight/bootstrap.el"))
-      (bootstrap-version 1))
+(let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
+      (bootstrap-version 3))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
          "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
-      (delete-region (point-min) url-http-end-of-headers)
-      (eval-buffer)))
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
 ;; To handle a lot of useful tasks related to package configuration,
