@@ -91,6 +91,7 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; Package `company-irony' provides a `company' backend that uses
 ;; `irony-mode' to complete symbols in C, C++, and Objective-C.
 (use-package company-irony
+  :demand t
   :after irony
   :config
 
@@ -111,6 +112,7 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; uses `irony-mode' to complete header file #includes in C, C++, and
 ;; Objective-C.
 (use-package company-irony-c-headers
+  :demand t
   :after irony
   :init
 
@@ -131,6 +133,7 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; `irony-mode' to display function signatures in C, C++, and
 ;; Objective-C.
 (use-package irony-eldoc
+  :demand t
   :after irony
   :init
 
@@ -143,6 +146,7 @@ This is an `:override' advice for `c-update-modeline'.")
 ;; `irony-mode' to display compilation errors and warnings in C, C++,
 ;; and Objective-C.
 (use-package flycheck-irony
+  :demand t
   :after irony
   :config
 

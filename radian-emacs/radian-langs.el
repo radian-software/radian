@@ -128,6 +128,7 @@
 ;; Contrary to the name of the package, this actually provides Company
 ;; support for JavaScript, using js2 parsing and Skewer.
 (use-package ac-js2
+  :demand t
   :after skewer-repl
   :config
 
@@ -148,6 +149,7 @@
 ;; This package provides a separate auto-completion backend for
 ;; JavaScript that is more suitable for general code.
 (use-package tern
+  :demand t
   :after js2-mode
   :config
 
@@ -160,6 +162,7 @@
 
 ;; Company backend that uses Tern.
 (use-package company-tern
+  :demand t
   :after (:all tern company)
   :config
 
@@ -608,6 +611,7 @@ This is an `:around' advice for `TeX-load-style-file'."
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex
+  :demand t
   :after tex
   :config
 

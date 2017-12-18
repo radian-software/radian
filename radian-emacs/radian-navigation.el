@@ -139,6 +139,7 @@ nil means no keybinding is established."
 ;; This package allows the use of other regexp engines for
 ;; visual-regexp.
 (use-package visual-regexp-steroids
+  :demand t
   :after visual-regexp
   :config
 
