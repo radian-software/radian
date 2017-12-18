@@ -37,7 +37,8 @@
   ;; Allow disabling Flycheck in a buffer-local or file-local variable.
   (put 'flycheck-mode 'safe-local-variable #'booleanp)
 
-  :diminish flycheck-mode)
+  ;; Disable Flycheck's mode-line indicator.
+  (setq flycheck-mode-line nil))
 
 (provide 'radian-check)
 
