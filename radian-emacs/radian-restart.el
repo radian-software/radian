@@ -12,7 +12,8 @@
 
   (el-patch-feature restart-emacs)
 
-  :bind ("C-x M-c" . restart-emacs)
+  :bind (("C-x M-c" . restart-emacs)
+         ("C-x   C" . radian-new-emacs))
   :config
 
   (el-patch-defun (el-patch-swap restart-emacs radian-new-emacs)
@@ -52,9 +53,7 @@ with which Emacs should be restarted."
                                                              restart-args))))))
       (el-patch-swap
         (save-buffers-kill-emacs)
-        (restart-emacs--launch-other-emacs restart-args))))
-
-  (bind-key "C-x C" #'radian-new-emacs))
+        (restart-emacs--launch-other-emacs restart-args)))))
 
 (provide 'radian-restart)
 
