@@ -289,6 +289,27 @@ This function calls `json-mode--update-auto-mode' to change the
               candidate))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; ReST
+
+;; http://docutils.sourceforge.net/rst.html
+
+(use-package rst-mode
+  :straight nil
+  :config
+
+  ;; See: https://github.com/flycheck/flycheck/issues/953
+  (defun radian-flycheck-maybe-disable-rst ()
+    "If inside Sphinx project, disable the `rst' checker from `flycheck'.
+This prevents it from signalling spurious errors."
+    (with-eval-after-load 'flycheck
+      (when (locate-dominating-file default-directory "conf.py")
+        (make-local-variable 'flycheck-disabled-checkers)
+        (push 'rst flycheck-disabled-checkers)
+        (setq-local flycheck-check-syntax-automatically '(save mode-enabled)))))
+
+  (add-hook 'rst-mode-hook #'radian-flycheck-maybe-disable-rst))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Ruby
 
 ;; https://www.ruby-lang.org/
