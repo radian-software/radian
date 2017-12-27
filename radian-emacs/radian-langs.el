@@ -98,54 +98,6 @@
   ;; Node.js).
   (setq js2-strict-trailing-comma-warning nil))
 
-;; Live web development with Emacs.
-(use-package skewer-mode
-  :init
-
-  ;; Enable the features of Skewer. Since this package uses deferred
-  ;; installation, we need to `el-patch'.
-
-  (el-patch-defun skewer-setup ()
-    "Fully integrate Skewer into js2-mode, css-mode, and html-mode buffers."
-    (add-hook 'js2-mode-hook 'skewer-mode)
-    (add-hook 'css-mode-hook 'skewer-css-mode)
-    (add-hook 'html-mode-hook 'skewer-html-mode))
-
-  (skewer-setup)
-
-  (el-patch-feature skewer-setup skewer-mode)
-
-  :diminish skewer-mode)
-
-(use-package skewer-css
-  :straight skewer-mode
-  :diminish skewer-css-mode)
-
-(use-package skewer-html
-  :straight skewer-mode
-  :diminish skewer-html-mode)
-
-;; Contrary to the name of the package, this actually provides Company
-;; support for JavaScript, using js2 parsing and Skewer.
-(use-package ac-js2
-  :demand t
-  :after skewer-repl
-  :config
-
-  ;; Ostensibly this provides more intelligent completions, by
-  ;; allowing `ac-js2' to evaluate your JavaScript code to generate
-  ;; completions.
-  (setq ac-js2-evaluate-calls t)
-
-  ;; Enable the Company integration for `ac-js2', but only in the
-  ;; Skewer REPL.
-
-  (defun radian--enable-ac-js2-company ()
-    (make-local-variable 'company-backends)
-    (add-to-list 'company-backends 'ac-js2-company))
-
-  (add-hook 'skewer-repl-mode-hook #'radian--enable-ac-js2-company))
-
 ;; This package provides a separate auto-completion backend for
 ;; JavaScript that is more suitable for general code.
 (use-package tern
