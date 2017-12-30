@@ -95,13 +95,13 @@ configuration, and optionally installing local configuration.
 
 ### Installing configuration
 
-* Emacs: create `~/.emacs.d` and `~/.emacs.d/straight/versions`; link
-  `init.el` into `~/.emacs.d` and `versions.el` into
-  `~/.emacs.d/straight/versions`
-* Zsh: link `.zshrc` into `~`
-* Tmux: link `.tmux.conf` into `~`
-* Git: link `.gitconfig` and `.gitexclude` into `~`
-* Leiningen: create `~/.lein` and link `profiles.clj` into `~/.lein`
+* Emacs: create `~/.emacs.d/` and `~/.emacs.d/straight/versions/`;
+  link `init.el` into `~/.emacs.d/` and `versions.el` into
+  `~/.emacs.d/straight/versions/`
+* Zsh: link `.zshrc` and `.profile` into `~/`
+* Tmux: link `.tmux.conf` into `~/`
+* Git: link `.gitconfig` and `.gitexclude` into `~/`
+* Leiningen: create `~/.lein/` and link `profiles.clj` into `~/.lein/`
 
 ### Installing local configuration
 
