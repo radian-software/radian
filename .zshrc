@@ -356,7 +356,7 @@ fi
 
 #### wdx
 
-if (( $+commands[$WDX_NAME] )); then
+if command -v $WDX_NAME &>/dev/null; then
     alias ws="$WDX_NAME set"
 fi
 
