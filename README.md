@@ -85,7 +85,7 @@ configuration, and optionally installing local configuration.
 
 ### Installing software
 
-* Emacs: `brew install emacs --with-cocoa` or `pacman -S emacs`
+* Emacs: `brew cask install emacs` or `pacman -S emacs`
 * Zsh: `brew install zsh` or `pacman -S zsh` (also recommended: `brew
   install zplug`)
 * Tmux: `brew install tmux` or `pacman -S tmux`
@@ -106,9 +106,15 @@ configuration, and optionally installing local configuration.
 ### Installing local configuration
 
 * Emacs: create `~/.emacs.d/init.local.el`
-* Zsh: create `~/.zshrc.local`
+* Zsh: create `~/.zshrc.local` and `~/.profile.local`
 * Tmux: create `~/.tmux.local.conf`
 * Git: create `~/.gitconfig.local` (highly recommended)
+
+### Tips and tricks
+
+In order to get `$PATH`, `ssh-agent`, and `gpg-agent` working
+correctly in graphical applications, use
+`scripts/patch-macos-app.zsh`.
 
 ## Release 1.0
 
