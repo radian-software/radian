@@ -102,7 +102,7 @@ if [ -f ~/.profile ]; then
     . ~/.profile
 fi
 
-'$PWD/$backup'
+'$PWD/$backup' \$@
 EOF
     chmod +x $binary
     echo "Patched successfully: $app"
