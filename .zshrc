@@ -294,15 +294,14 @@ autoload -Uz run-help-svn
 ### Filesystem navigation
 #### cd
 
-# These are global aliases; you can use them anywhere in a command.
-alias -g ...='../..'
-alias -g ....='../../..'
-alias -g .....='../../../..'
-alias -g ......='../../../../..'
-alias -g .......='../../../../../..'
-alias -g ........='../../../../../../..'
-alias -g .........='../../../../../../../..'
-alias -g ..........='../../../../../../../../..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
+alias .......='cd ../../../../../..'
+alias ........='cd ../../../../../../..'
+alias .........='cd ../../../../../../../..'
+alias ..........='cd ../../../../../../../../..'
 
 # These are some aliases for moving to previously visited directories.
 # The first alias uses "--" so that we can alias "-" without it being
