@@ -13,9 +13,6 @@
 ;;
 ;; [1]: https://clojure.org/
 (use-package clojure-mode
-  :defer-install t
-  :mode (("\\.\\(clj\\|dtm\\|edn\\)\\'" . clojure-mode)
-         ("\\(?:build\\|profile\\)\\.boot\\'" . clojure-mode))
   :init
 
   ;; We define some patches after `clojure-mode' is loaded. We need to
@@ -188,8 +185,6 @@ Return nil if not inside a project."
 ;; connection to retrieve completion candidates, and documentation and
 ;; source lookups.
 (use-package cider
-  :defer-install t
-  :commands (cider-jack-in cider-jack-in-clojurescript)
   :init
 
   (el-patch-feature cider)
@@ -334,10 +329,9 @@ should be the regular Clojure REPL started by the server process filter."
   ;; See [1].
   ;;
   ;; [1]: https://github.com/clojure-emacs/clj-refactor.el/pull/385
-  :recipe (:host github :repo "raxod502/clj-refactor.el"
-           :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
-           :files (:defaults "CHANGELOG.md"))
-  :defer-install t
+  :straight (:host github :repo "raxod502/clj-refactor.el"
+             :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
+             :files (:defaults "CHANGELOG.md"))
   :init
 
   (with-eval-after-load 'clojure-mode
@@ -350,11 +344,9 @@ should be the regular Clojure REPL started by the server process filter."
       "Enable `clj-refactor' mode properly.
 This means that `yas-minor-mode' also needs to be enabled, and
 the `clj-refactor' keybindings need to be installed."
-      (when (and (use-package-install-deferred-package 'clj-refactor :after)
-                 (use-package-install-deferred-package 'yasnippet :after))
-        (clj-refactor-mode 1)
-        (yas-minor-mode 1)
-        (cljr-add-keybindings-with-prefix "C-c RET")))
+      (clj-refactor-mode +1)
+      (yas-minor-mode +1)
+      (cljr-add-keybindings-with-prefix "C-c RET"))
 
     (add-hook 'clojure-mode-hook #'radian-clj-refactor-enable))
 

@@ -10,15 +10,15 @@
 ;; if it is not already installed and loaded).
 ;;
 ;; [1]: https://github.com/raxod502/straight.el
-(let ((bootstrap-file (concat user-emacs-directory "straight/bootstrap.el"))
-      (bootstrap-version 1))
+(let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
+      (bootstrap-version 3))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
          "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
-      (delete-region (point-min) url-http-end-of-headers)
-      (eval-buffer)))
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
 ;; To handle a lot of useful tasks related to package configuration,
@@ -28,31 +28,11 @@
 ;; lazy-loading, through the use of keyword arguments. See the README
 ;; [1].
 ;;
-;; We are using my fork until [2] is merged.
-;;
 ;; [1]: https://github.com/jwiegley/use-package
-;; [2]: https://github.com/jwiegley/use-package/pull/479
-(straight-use-package '(use-package
-                         :host github
-                         :repo "raxod502/use-package"
-                         :upstream (:host github
-                                    :repo "jwiegley/use-package")))
+(straight-use-package 'use-package)
 
-;; Tell use-package to automatically install packages if they are
-;; missing. By default, packages are installed via straight.el [1],
-;; which draws package installation recipes (short lists explaining
-;; where to download the package) from MELPA [2], GNU ELPA [3], and
-;; EmacsMirror [4]. (But you can also specify a recipe manually by
-;; putting `:recipe' in the `use-package' call, which is an extension
-;; to `use-package' provided by straight.el.) Learn more about recipe
-;; formatting from the MELPA README [5].
-;;
-;; [1]: https://github.com/raxod502/straight.el
-;; [2]: http://melpa.org/#/
-;; [3]: https://elpa.gnu.org/
-;; [4]: https://emacsmirror.net/
-;; [5]: https://github.com/melpa/melpa#recipe-format
-(setq use-package-always-ensure t)
+;; Install packages by default.
+(setq straight-use-package-by-default t)
 
 ;; Tell use-package to always load packages lazily unless told
 ;; otherwise. It's nicer to have this kind of thing be deterministic:

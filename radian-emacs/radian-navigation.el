@@ -132,7 +132,6 @@ nil means no keybinding is established."
 ;; This package highlights matches and previews replacements in query
 ;; replace.
 (use-package visual-regexp
-  :defer-install t
   :bind (;; Replace the regular query replace with the regexp query
          ;; replace provided by this package.
          ("M-%" . vr/query-replace)))
@@ -140,7 +139,7 @@ nil means no keybinding is established."
 ;; This package allows the use of other regexp engines for
 ;; visual-regexp.
 (use-package visual-regexp-steroids
-  :defer-install t
+  :demand t
   :after visual-regexp
   :config
 

@@ -214,6 +214,7 @@ This is an `:around' advice for `counsel-M-x'."
 
 ;; Uses Historian to sort Ivy candidates by frecency+flx.
 (use-package ivy-historian
+  :demand t
   :after ivy
   :config
 

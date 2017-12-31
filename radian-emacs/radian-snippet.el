@@ -25,9 +25,6 @@
   ;; on every(!) Emacs init. Errors should still be shown.
   (setq yas-verbosity 2)
 
-  ;; Enable YASnippet everywhere.
-  (yas-global-mode)
-
   :diminish yas-minor-mode)
 
 (provide 'radian-snippet)

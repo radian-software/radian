@@ -11,8 +11,6 @@ If `user-init-file' is not something sane, this is nil.")
 
 ;; This is the most recent and full-featured Emacs startup profiler.
 (use-package esup
-  :defer-install t
-  :commands (esup)
   :config
 
   ;; Integration with `radian-flatten-init-file'.
@@ -34,10 +32,8 @@ This is an `:around' advice for `esup'."
 ;; as I know). But it can be useful sometimes.
 (use-package profile-dotemacs
   ;; Package is unmaintained. No upstream.
-  :recipe (:host github
-           :repo "raxod502/profile-dotemacs")
-  :defer-install t
-  :commands (profile-dotemacs))
+  :straight (:host github
+             :repo "raxod502/profile-dotemacs"))
 
 ;; Nice function for making esup more useful.
 (defun radian-flatten-init-file ()

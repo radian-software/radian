@@ -118,6 +118,9 @@ the timer when no buffers need to be checked."
   (advice-add #'help-mode-revert-buffer :around
               #'radian--advice-disable-help-mode-revert-prompt))
 
+;; Don't show it in the mode line.
+(setq auto-revert-mode-text nil)
+
 (provide 'radian-revert)
 
 ;;; radian-revert.el ends here

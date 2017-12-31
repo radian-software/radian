@@ -17,31 +17,21 @@
 
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
 
-(use-package apples-mode
-  :defer-install t
-  :mode "\\.\\(applescri\\|sc\\)pt\\'")
+(use-package apples-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Go
 
 ;; https://golang.org/
 
-(use-package go-mode
-  :defer-install t
-  :mode "\\.go\\'")
+(use-package go-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Haskell
 
 ;; https://www.haskell.org/
 
-(use-package haskell-mode
-  :defer-install t
-  :mode (("\\.[gh]s\\'" . haskell-mode)
-         ("\\.l[gh]s\\'" . literate-haskell-mode)
-         ("\\.hsc\\'" . haskell-mode))
-  :interpreter (("runghc" . haskell-mode)
-                ("runhaskell" . haskell-mode)))
+(use-package haskell-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HTML
@@ -52,8 +42,6 @@
 ;; languages (e.g. templating engines like PHP, ASP, Handlebars,
 ;; etc.).
 (use-package web-mode
-  :defer-install t
-  :commands (web-mode)
   :init
 
   ;; Enable `web-mode' when editing HTML documents.
@@ -74,10 +62,10 @@
   ;; The standard JavaScript indent width is two spaces, not four.
   (setq js-indent-level 2))
 
-;; Improved JavaScript support.
+;; Package `js2-mode' provides improved semantic highlighting,
+;; indentation, and even simple Flycheck-like warnings for JavaScript
+;; code.
 (use-package js2-mode
-  :defer-install t
-  :commands (js2-minor-mode)
   ;; This is slightly different than what is recommended in the README
   ;; [1]. It seems to make the most sense though. See also [2].
   ;;
@@ -91,28 +79,27 @@
   ;; Change the mode lighters. (They are originally Javascript-IDE and
   ;; JSX-IDE, which are wordy.)
 
-  (defun radian--set-js2-mode-lighter ()
+  (defun radian-js2-diminish ()
     "Change the `js2-mode' lighter from Javascript-IDE to JavaScript."
     (setq-local mode-name "JavaScript"))
 
-  (defun radian--set-js2-jsx-mode-lighter ()
+  (defun radian-js2-jsx-diminish ()
     "Change the `js2-jsx-mode' lighter from JSX-IDE to JSX."
     (setq-local mode-name "JSX"))
 
-  (add-hook 'js2-mode-hook #'radian--set-js2-mode-lighter)
-  (add-hook 'js2-jsx-mode-hook #'radian--set-js2-jsx-mode-lighter)
+  (add-hook 'js2-mode-hook #'radian-js2-diminish)
+  (add-hook 'js2-jsx-mode-hook #'radian-js2-jsx-diminish)
 
   ;; Treat shebang lines (e.g. for node) correctly.
-  (setq js2-skip-preprocessor-directives t))
+  (setq js2-skip-preprocessor-directives t)
+
+  ;; Don't emit a warning for trailing commas, since there are many
+  ;; contexts in which those are valid (anything preprocessed, or
+  ;; Node.js).
+  (setq js2-strict-trailing-comma-warning nil))
 
 ;; Live web development with Emacs.
-
 (use-package skewer-mode
-  :defer-install t
-  :commands (list-skewer-clients
-             run-skewer
-             skewer-mode
-             skewer-run-phantomjs)
   :init
 
   ;; Enable the features of Skewer. Since this package uses deferred
@@ -131,21 +118,17 @@
   :diminish skewer-mode)
 
 (use-package skewer-css
-  :recipe skewer-mode
-  :defer-install t
-  :commands (skewer-css-mode)
+  :straight skewer-mode
   :diminish skewer-css-mode)
 
 (use-package skewer-html
-  :recipe skewer-mode
-  :defer-install t
-  :commands (skewer-html-mode)
+  :straight skewer-mode
   :diminish skewer-html-mode)
 
 ;; Contrary to the name of the package, this actually provides Company
 ;; support for JavaScript, using js2 parsing and Skewer.
 (use-package ac-js2
-  :defer-install t
+  :demand t
   :after skewer-repl
   :config
 
@@ -166,7 +149,7 @@
 ;; This package provides a separate auto-completion backend for
 ;; JavaScript that is more suitable for general code.
 (use-package tern
-  :defer-install t
+  :demand t
   :after js2-mode
   :config
 
@@ -179,7 +162,7 @@
 
 ;; Company backend that uses Tern.
 (use-package company-tern
-  :defer-install t
+  :demand t
   :after (:all tern company)
   :config
 
@@ -187,8 +170,6 @@
   (add-to-list 'company-backends 'company-tern))
 
 (use-package json-mode
-  :defer-install t
-  :commands (json-mode json-mode-show-path json-mode-beautify)
   :init
 
   ;; Lazy-load json-mode. This requires some gymnastics. It concerns
@@ -241,10 +222,7 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; https://daringfireball.net/projects/markdown/
 
-(use-package markdown-mode
-  :defer-install t
-  :mode (("\\.markdown\\'" . markdown-mode)
-         ("\\.md\\'" . markdown-mode)))
+(use-package markdown-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Python
@@ -252,16 +230,16 @@ This function calls `json-mode--update-auto-mode' to change the
 ;; https://www.python.org/
 
 (use-package python
-  :ensure nil
+  :straight nil
   :config
 
   (setq python-fill-docstring-style 'pep-257-nn))
 
 ;; Integrated development environment for Python.
 (use-package anaconda-mode
-  :defer-install t
-  :commands (anaconda-mode)
   :init
+
+  (el-patch-feature anaconda-mode)
 
   ;; Enable the functionality of anaconda-mode in Python buffers, as
   ;; suggested in the README [1].
@@ -269,12 +247,24 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; [1]: https://github.com/proofit404/anaconda-mode
   (add-hook 'python-mode-hook #'anaconda-mode)
 
+  :config
+
+  ;; Make it possible to quit out of the *anaconda-response* buffer
+  ;; with 'q'.
+  (el-patch-defun anaconda-mode-show-unreadable-response (response)
+    "Show unreadable RESPONSE to user, so he can report it properly."
+    (pop-to-buffer
+     (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
+       (erase-buffer)
+       (insert response)
+       (goto-char (point-min))
+       (el-patch-add (special-mode))
+       (current-buffer))))
+
   :diminish anaconda-mode)
 
 ;; Company integration for anaconda-mode.
 (use-package company-anaconda
-  :defer-install t
-  :commands (company-anaconda)
   :init
 
   (with-eval-after-load 'company
@@ -303,14 +293,14 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; https://www.ruby-lang.org/
 
-(with-eval-after-load 'ruby-mode
-  ;; Indent aggressively in Ruby.
+(use-package ruby-mode
+  :straight nil
+  :config
+
   (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
 
 ;; Autocompletion for Ruby.
 (use-package robe
-  :defer-install t
-  :commands (robe-mode)
   :init
 
   ;; Enable Robe in Ruby files.
@@ -320,8 +310,6 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; When you type "do", insert a paired "end".
 (use-package ruby-electric
-  :defer-install t
-  :commands (ruby-electric-mode)
   :init
 
   ;; Enable `ruby-electric' when editing Ruby code.
@@ -374,14 +362,10 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; https://www.rust-lang.org/
 
-(use-package rust-mode
-  :defer-install t
-  :mode "\\.rs\\'")
+(use-package rust-mode)
 
 ;; Autocompletion for Rust.
 (use-package racer
-  :defer-install t
-  :commands (racer-mode)
   :init
 
   (add-hook 'rust-mode-hook #'racer-mode)
@@ -409,11 +393,15 @@ This function calls `json-mode--update-auto-mode' to change the
 ;; https://www.gnu.org/software/bash/
 ;; http://www.zsh.org/
 
-;; Inhibit the "Indentation setup for shell type *sh" message.
+(use-package sh-script
+  :straight nil
+  :init
 
-(el-patch-feature sh-script nil)
+  (el-patch-feature sh-script nil)
 
-(with-eval-after-load 'sh-script
+  :config
+
+  ;; Inhibit the "Indentation setup for shell type *sh" message.
   (el-patch-defun sh-set-shell (shell &optional no-query-flag insert-flag)
     "Set this buffer's shell to SHELL (a string).
 When used interactively, insert the proper starting #!-line,
@@ -505,11 +493,9 @@ whose value is the shell name (don't quote it)."
       (font-lock-set-defaults)
       (font-lock-flush))
     (setq sh-shell-process nil)
-    (run-hooks 'sh-set-shell-hook)))
+    (run-hooks 'sh-set-shell-hook))
 
-;; Inhibit the "Indentation variables are now local" message.
-
-(with-eval-after-load 'sh-script
+  ;; Inhibit the "Indentation variables are now local" message.
   (el-patch-defun sh-make-vars-local ()
     "Make the indentation variables local to this buffer.
 Normally they already are local.  This command is provided in case
@@ -527,27 +513,18 @@ command `sh-reset-indent-vars-to-global-values'."
 
 ;; https://developer.apple.com/swift/
 
-(use-package swift-mode
-  :defer-install t
-  :mode "\\.swift\\'")
+(use-package swift-mode)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; TeX
 
-;; https://www.tug.org/begin.html
-
-;; AUCTeX, integrated development environment for LaTeX and friends.
-;; Unfortunately because AUCTeX is weird, we need to do a little dance
-;; with the `use-package' declarations, see [1].
+;; Package `auctex' provides an integrated development environment for
+;; LaTeX [1] and friends.
 ;;
-;; [1]: https://github.com/jwiegley/use-package/issues/379#issuecomment-258217014
-
-(use-package tex-site
-  :recipe auctex
-  :demand t)
+;; [1]: https://www.tug.org/begin.html
 
 (use-package tex
-  :recipe auctex
+  :straight auctex
   :init
 
   (el-patch-feature tex auctex)
@@ -615,22 +592,26 @@ This is an `:around' advice for `TeX-load-style-file'."
               #'radian--advice-inhibit-style-loading-message))
 
 (use-package tex-buf
-  :recipe auctex
+  :straight auctex
   :config
 
   ;; Save buffers automatically when compiling, instead of prompting.
   (setq TeX-save-query nil))
 
 (use-package latex
-  :recipe auctex
+  :straight auctex
   :config
 
   ;; Don't be afraid to break inline math between lines.
-  (setq LaTeX-fill-break-at-separators nil))
+  (setq LaTeX-fill-break-at-separators nil)
+
+  ;; Make it possible for a document to specify whether or not Biber
+  ;; is to be used, via a file-local variable.
+  (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex
-  :defer-install t
+  :demand t
   :after tex
   :config
 
@@ -643,8 +624,6 @@ This is an `:around' advice for `TeX-load-style-file'."
 ;; https://www.typescriptlang.org/
 
 (use-package typescript-mode
-  :defer-install t
-  :mode "\\.ts$"
   :config
 
   ;; Capitalize the name of the major mode. For consistency, and OCD.
@@ -669,8 +648,6 @@ This is an `:around' advice for `TeX-load-style-file'."
 
 ;; TypeScript IDE for Emacs.
 (use-package tide
-  :defer-install t
-  :commands (tide-setup)
   :init
 
   ;; Enable Tide (and `tide-mode') when editing TypeScript files.

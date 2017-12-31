@@ -4,42 +4,19 @@
 (require 'radian-regexp)
 
 ;; Edit .htaccess and friends.
-(use-package apache-mode
-  :defer-install t
-  :mode (("\\.htaccess\\'"   . apache-mode)
-         ("httpd\\.conf\\'"  . apache-mode)
-         ("srm\\.conf\\'"    . apache-mode)
-         ("access\\.conf\\'" . apache-mode)
-         ("sites-\\(available\\|enabled\\)/" . apache-mode)))
+(use-package apache-mode)
 
 ;; Edit Dockerfiles.
-(use-package dockerfile-mode
-  :defer-install t
-  :mode "Dockerfile.*\\'")
+(use-package dockerfile-mode)
 
 ;; Edit .gitconfig and .gitmodules files.
-(use-package gitconfig-mode
-  :defer-install t
-  :mode (("/\\.gitconfig\\'" . gitconfig-mode)
-         ("/\\.git/config\\'" . gitconfig-mode)
-         ("/modules/.*/config\\'" . gitconfig-mode)
-         ("/git/config\\'" . gitconfig-mode)
-         ("/\\.gitmodules\\'" . gitconfig-mode)
-         ("/etc/gitconfig\\'" . gitconfig-mode)))
+(use-package gitconfig-mode)
 
 ;; Edit .gitignore files.
-(use-package gitignore-mode
-  :defer-install t
-  :mode (("/git/ignore\\'" . gitignore-mode)
-         ("/info/exclude\\'" . gitignore-mode)
-         ("/\\.gitignore\\'" . gitignore-mode)))
+(use-package gitignore-mode)
 
 ;; Edit pip's requirements.txt files.
 (use-package pip-requirements
-  :defer-install t
-  :mode (((rx ".pip" string-end) . pip-requirements-mode)
-         ((rx "requirements" (zero-or-more anything) ".txt" string-end) . pip-requirements-mode)
-         ((rx "requirements.in") . pip-requirements-mode))
   :config
 
   (defun radian--rename-pip-requirements-mode-lighter ()
@@ -48,15 +25,15 @@
 
   (add-hook 'pip-requirements-mode-hook #'radian--rename-pip-requirements-mode-lighter))
 
+;; Package `ssh-config-mode' provides syntax highlighting and
+;; indentation for files in ~/.ssh.
+(use-package ssh-config-mode)
+
 ;; Edit Terraform configuration files.
-(use-package terraform-mode
-  :defer-install t
-  :mode "\\.tf\\(vars\\)?\\'")
+(use-package terraform-mode)
 
 ;; Editing for TOML files.
 (use-package toml-mode
-  :defer-install t
-  :mode "\\.toml\\'"
   :config
 
   ;; Show `toml-mode' as "TOML" instead of "Toml" in the mode line.
@@ -68,10 +45,6 @@
 
 ;; Provides syntax highlighting for VimScript files.
 (use-package vimrc-mode
-  :defer-install t
-  :mode (("\\.exrc\\'" . vimrc-mode)
-         ("[._]?g?vimrc\\'" . vimrc-mode)
-         ("\\.vim\\'" . vimrc-mode))
   :config
 
   ;; Indent by two spaces in `vimrc-mode' rather than eight spaces.
@@ -88,8 +61,6 @@
 ;; Provides syntax highlighting, indentation, and editing commands for
 ;; YAML files.
 (use-package yaml-mode
-  :defer-install t
-  :mode "\\.\\(e?ya?\\|ra\\)ml\\'"
   :config
 
   ;; Don't automatically wrap text when editing YAML files.

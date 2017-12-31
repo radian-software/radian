@@ -11,14 +11,15 @@
   ;; buffers. See [1].
   ;;
   ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :recipe (:host github :repo "raxod502/flycheck"
-           :upstream (:host github :repo "flycheck/flycheck"))
+  :straight (:host github :repo "raxod502/flycheck"
+             :upstream (:host github :repo "flycheck/flycheck"))
   :init
+
+  :defer 3
+  :config
 
   ;; Enable `flycheck' everywhere unless otherwise specified.
   (global-flycheck-mode +1)
-
-  :config
 
   ;; Make `flycheck-python-pycompile-executable' safe to set in a
   ;; file-local variable.
@@ -27,10 +28,17 @@
                  `(flycheck-python-pycompile-executable . ,name)))
 
   ;; Run a syntax check when changing buffers, just in case you
-  ;; modified some other files that impact the current one.
+  ;; modified some other files that impact the current one. (This has
+  ;; no effect until [1] is merged.)
+  ;;
+  ;; [1]: https://github.com/flycheck/flycheck/pull/1308
   (add-to-list 'flycheck-check-syntax-automatically 'buffer-switch)
 
-  :diminish flycheck-mode)
+  ;; Allow disabling Flycheck in a buffer-local or file-local variable.
+  (put 'flycheck-mode 'safe-local-variable #'booleanp)
+
+  ;; Disable Flycheck's mode-line indicator.
+  (setq flycheck-mode-line nil))
 
 (provide 'radian-check)
 
