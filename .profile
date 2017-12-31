@@ -1,3 +1,10 @@
+## External configuration
+### ~/.profile.local
+
+if [ -f ~/.profile.local ]; then
+    . ~/.profile.local
+fi
+
 ## gpg-agent
 
 if command -v gpg-agent >/dev/null 2>&1; then
