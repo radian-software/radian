@@ -294,6 +294,7 @@ autoload -Uz run-help-svn
 ### Filesystem navigation
 #### cd
 
+alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
