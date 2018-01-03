@@ -23,8 +23,8 @@
 
 ;; Package `sx' allows you to browse Stack Overflow from within Emacs.
 ;; First, run `sx-authenticate' in order to provide your username and
-;; password. After that, you can use any of the entry points listened
-;; below. Navigation is keyboard-centric.
+;; password. After that, you can use any of the autoloaded entry
+;; points. Navigation is keyboard-centric.
 (use-package sx)
 
 ;; Allow setting the regexp for bug references from file-local or
