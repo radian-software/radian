@@ -32,9 +32,9 @@
 ;; example.
 (put 'bug-reference-bug-regexp 'safe-local-variable #'stringp)
 
-;; Package `ix' provides Emacs support for a fantastic command-line
-;; pastebin tool.
-(use-package ix)
+;; Package `webpaste' provides Emacs support for many different
+;; command-line pastebins.
+(use-package webpaste)
 
 (provide 'radian-network)
 
