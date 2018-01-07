@@ -175,7 +175,8 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; https://daringfireball.net/projects/markdown/
 
-(use-package markdown-mode)
+(use-package markdown-mode
+  :mode "\\.mmark\\'")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Python
