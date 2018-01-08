@@ -97,7 +97,7 @@ configuration, and optionally installing local configuration.
 
 * Emacs: create `~/.emacs.d/` and `~/.emacs.d/straight/versions/`;
   link `init.el` into `~/.emacs.d/` and `versions.el` into
-  `~/.emacs.d/straight/versions/`
+  `~/.emacs.d/straight/versions/` (with the link named `radian.el`)
 * Zsh: link `.zshrc` and `.profile` into `~/`
 * Tmux: link `.tmux.conf` into `~/`
 * Git: link `.gitconfig` and `.gitexclude` into `~/`
