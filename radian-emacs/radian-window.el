@@ -1,4 +1,4 @@
-;;; radian-window.el --- Window management
+;;; radian-window.el --- Window and buffer management
 
 (require 'radian-package)
 
@@ -57,6 +57,12 @@ This is a `:before-while' advice for `iflipb-message'. See also
 
   (advice-add #'iflipb-format-buffers :override #'ignore)
   (advice-add #'iflipb-message :before-while #'identity))
+
+;; Package `ibuffer' provides a replacement for the default binding of
+;; C-x C-b to `list-buffers'.
+(use-package ibuffer
+  :straight nil
+  :bind (("C-x C-b" . ibuffer)))
 
 (provide 'radian-window)
 
