@@ -41,6 +41,7 @@
  ("geiser" . "f5ae5488a6d94fcd74d573049b58f8c2e7ff7012")
  ("ghub" . "887ba91d724c656c35fed3eecd2e7d826553ff91")
  ("git-modes" . "9f18eca514d242816a4969e86c4cfd2cf4dfe401")
+ ("git.el" . "a3396a7027a7d986598c6a2d6d5599bac918f3da")
  ("go-mode.el" . "bfe7a14e9bf957d050e3c429156e697bb3670f21")
  ("haskell-mode" . "518701c157468659e393e40aed2bdc37bcb408db")
  ("help-fns-plus" . "7213ef84d0345e2625f28e2b3134f8d98489391f")
