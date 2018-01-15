@@ -5,6 +5,7 @@
 ;; else related to Org-anization.
 
 (require 'radian-bind-key)
+(require 'radian-git)
 (require 'radian-package)
 
 (define-globalized-minor-mode global-outline-minor-mode
@@ -52,67 +53,42 @@
          ("M-RET" . org-insert-heading))
   :init
 
-  ;; This section is devoted to fixing the asinine version-check
-  ;; handling in Org (it's not designed to handle the case where you
-  ;; run straight from the Git repo, apparently). This is one of the
-  ;; worse hacks I've ever had the misfortune to create in Emacs.
+  ;; The following is a temporary hack until straight.el supports
+  ;; building Org, see:
+  ;;
+  ;; * https://github.com/raxod502/straight.el/issues/211
+  ;; * https://github.com/raxod502/radian/issues/410
+  ;;
+  ;; There are three things missing from our version of Org: the
+  ;; functions `org-git-version' and `org-release', and the feature
+  ;; `org-version'. We provide all three of those ourself, therefore.
 
-  ;; First we define a function to return a proper version string
-  ;; based on the Git repo. (This is somewhat similar to what happens
-  ;; in org-fixup.el.) We should really define a function that will
-  ;; return the latest tag, as well, but this remains a FIXME for now.
-  (defun radian-org-git-version ()
-    "Return the abbreviated SHA for the Org Git repo."
-    (let ((default-directory (concat user-emacs-directory
-                                     "straight/repos/org/")))
-      (if (executable-find "git")
-          (with-temp-buffer
-            ;; Returns the shortest prefix of the SHA for HEAD that is
-            ;; unique, down to a minimum of 4 characters (see
-            ;; git-rev-parse(1)).
-            (call-process "git" nil '(t nil) nil
-                          "rev-parse" "--short" "HEAD")
-            (if (> (buffer-size) 0)
-                (string-trim (buffer-string))
-              ;; This shouldn't happen, unless somehow Org is not
-              ;; actually a Git repo.
-              "revision unknown"))
-        ;; This also shouldn't happen, because how would you have
-        ;; gotten Org in the first place, then? But the real world
-        ;; sucks and we have to account for stuff like this.
-        "git not available")))
+  (defun org-git-version ()
+    "The Git version of org-mode.
+  Inserted by installing org-mode or when a release is made."
+    (require 'git)
+    (let ((git-repo (expand-file-name
+                     "straight/repos/org/" user-emacs-directory)))
+      (string-trim
+       (git-run "describe"
+                "--match=release\*"
+                "--abbrev=6"
+                "HEAD"))))
 
-  ;; Here we're defining `org-git-version' and `org-release' eagerly.
-  ;; Pay close attention here, since we actually do this multiple
-  ;; times. The control flow is really weird. The reason we define the
-  ;; functions here is that Emacs includes its own copy of Org, and
-  ;; these functions are autoloaded by Emacs. Now, normally the
-  ;; built-in autoloads are overridden by the version of Org
-  ;; downloaded from EmacsMirror, but since we're running straight
-  ;; from the Git repo, `org-git-version' and `org-release' are not
-  ;; generated and autoloaded. So in order to avoid the original
-  ;; autoloads from being triggered under any circumstances, we have
-  ;; to overwrite them here.
-  (defalias #'org-git-version #'radian-org-git-version)
-  (defun org-release () "9.1.3")
+  (defun org-release ()
+    "The release version of org-mode.
+  Inserted by installing org-mode or when a release is made."
+    (require 'git)
+    (let ((git-repo (expand-file-name
+                     "straight/repos/org/" user-emacs-directory)))
+      (string-trim
+       (string-remove-prefix
+        "release_"
+        (git-run "describe"
+                 "--match=release\*"
+                 "--abbrev=0"
+                 "HEAD")))))
 
-  ;; Now, the culprit function is `org-check-version', which is
-  ;; defined in org-compat.el and called from org.el. The problem with
-  ;; this function is that if the version of Org in use is not a
-  ;; release version (i.e. it's running straight from the repo, as we
-  ;; are doing), then it prints a warning. We don't want this. The
-  ;; natural thought is to override `org-check-version'.
-  ;; Unfortunately, this is completely impossible since
-  ;; `org-check-version' is a macro, and org.el (which is where the
-  ;; macro is used) is byte-compiled, so the code of
-  ;; `org-check-version' is hardcoded into org.elc. The easiest way
-  ;; around the problem, other than doing something even more
-  ;; horrifying like suppressing warnings while loading Org, seems to
-  ;; be to *pretend* that org-version.el is available, even though it
-  ;; doesn't exist. Then `org-check-version' happily defines
-  ;; `org-git-version' and `org-release' as autoloads pointing to
-  ;; org-version.el (which is a no-op since we already defined the
-  ;; functions).
   (provide 'org-version)
 
   :config

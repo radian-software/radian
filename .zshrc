@@ -1,69 +1,76 @@
-################################################################################
-#### Identify Radian repository
+## Preliminary configuration
+### Radian repository
 
+# Set $RADIAN to the location of the Radian repository, if found.
 if [[ -L $0 && -d ${0:A:h}/radian-emacs ]]; then
     export RADIAN=${0:A:h}
 else
     unset RADIAN
 fi
 
-################################################################################
-#### Configuration of bundles
+### zplug configuration
 
+# Identify the location of zplug. Below is the location to which zplug
+# is installed by Homebrew on macOS.
+export ZPLUG_HOME=/usr/local/opt/zplug
+
+### Plugin configuration
+
+# Have wdx generate a function by the name 'wd' instead of 'wdx'.
 export WDX_NAME=wd
 
-################################################################################
-#### Define default bundle list
+### Plugin list
 
-bundles=(
-    # Quickly jump to directories:
+RADIAN_PLUGINS=(
+    # Quickly jump to directories.
     "raxod502/wdx"
-    # Display autosuggestions from history:
+    # Display autosuggestions from history.
     "zsh-users/zsh-autosuggestions"
     # Completion definitions for lots of additional commands.
     "zsh-users/zsh-completions"
 )
 
-################################################################################
-#### Define bundle list management functions
-
-# Usage: radian_add_bundle <zplug-args>
+# Usage: radian_add_plugin <zplug-args>
 #
-# Adds a bundle to $bundles. Word splitting will be performed on
+# Add a plugin to $RADIAN_PLUGINS. Word splitting will be performed on
 # zplug-args to determine the arguments that will be passed to zplug.
-function radian_add_bundle() {
+function radian_add_plugin {
     emulate -LR zsh
-    if ! (( ${bundles[(I)$1]} )); then
-        bundles+=($1)
+    if ! (( ${RADIAN_PLUGINS[(I)$1]} )); then
+        RADIAN_PLUGINS+=($1)
     fi
 }
 
-# Usage: radian_remove_bundle <zplug-args>
+# Usage: radian_remove_plugin <zplug-args>
 #
-# Removes a bundle from $bundles by name. The name should be exactly
-# the same as it appears in $bundles, with spaces if necessary.
-function radian_remove_bundle() {
+# Remove a plugin from $RADIAN_PLUGINS by name. The name should be
+# exactly the same as it appears in $plugins, with spaces if
+# necessary.
+function radian_remove_plugin {
     emulate -LR zsh
-    bundles=("${(@)bundles:#$1}")
+    RADIAN_PLUGINS=("${(@)RADIAN_PLUGINS:#$1}")
 }
 
-################################################################################
-#### Load local customizations
+## External configuration
+### ~/.zshrc.local
 
 if [[ -f ~/.zshrc.local ]]; then
     . ~/.zshrc.local
 fi
 
-################################################################################
-#### zplug
+### ~/.profile
 
-export ZPLUG_HOME=${ZPLUG_HOME:-/usr/local/opt/zplug}
+if [[ -f ~/.profile ]]; then
+    . ~/.profile
+fi
+
+## zplug
 
 if [[ -f $ZPLUG_HOME/init.zsh ]]; then
     . $ZPLUG_HOME/init.zsh
 
-    for bundle in $bundles; do
-        zplug $=bundle
+    for plugin in $RADIAN_PLUGINS; do
+        zplug $=plugin
     done
 
     if ! zplug check; then
@@ -73,14 +80,14 @@ if [[ -f $ZPLUG_HOME/init.zsh ]]; then
     zplug load
 fi
 
-################################################################################
-#### Prompt
+## Shell configuration
+### Prompt
 
 # Enable parameter expansion and other substitutions in the $PROMPT.
 setopt prompt_subst
 
-# Load some arrays that give us convenient access to color-changing
-# escape codes.
+# Load some associative arrays (color, fg, and bg) that give us
+# convenient access to color-changing escape codes.
 autoload -U colors && colors
 
 # Here we define a prompt that displays the current directory and git
@@ -91,12 +98,33 @@ autoload -U colors && colors
 # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/master/themes/mgutz.zsh-theme
 # [2]: https://github.com/robbyrussell/oh-my-zsh/blob/3705d47bb3f3229234cba992320eadc97a221caf/lib/git.zsh
 
+# Change the color and then display the working directory.
+radian_prompt_prefix='%(?.%{$fg[blue]%}.%{$fg[red]%})%c'
+
+# Change the color and then display a '%' or '#', then reset the color
+# for the user's input.
+radian_prompt_suffix='%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
+
 if (( $+commands[git] )); then
 
-    # Function that prints the branch or revision of the current HEAD,
-    # surrounded by square brackets and followed by an asterisk if the
-    # working directory is dirty, if the user is inside a Git repository.
-    function radian_prompt_git_info() {
+    # Usage: radian_prompt_git_dirty
+    #
+    # Print an asterisk if the working directory is dirty.
+    function radian_prompt_git_dirty {
+        emulate -LR zsh
+        local FLAGS
+        FLAGS=('--porcelain' '--ignore-submodules=dirty')
+        if [[ $(command git status --porcelain 2>/dev/null | tail -n1) ]]; then
+            echo "*"
+        fi
+    }
+
+    # Usage: radian_prompt_git_info
+    #
+    # If inside a Git repository, print the branch or abbreviated
+    # revision of the current HEAD, surrounded by square brackets and
+    # followed by an asterisk if the working directory is dirty.
+    function radian_prompt_git_info {
         emulate -LR zsh
         local ref
         ref=$(command git symbolic-ref HEAD 2> /dev/null) || \
@@ -105,39 +133,26 @@ if (( $+commands[git] )); then
         echo "[${ref#refs/heads/}$(radian_prompt_git_dirty)]"
     }
 
-    # Function that prints an asterisk if the working directory is dirty.
-    # If $RADIAN_PROMPT_IGNORE_UNTRACKED_FILES is true, then untracked
-    # files are not counted as dirty.
-    function radian_prompt_git_dirty() {
-        emulate -LR zsh
-        local FLAGS
-        FLAGS=('--porcelain' '--ignore-submodules=dirty')
-        if [[ $RADIAN_PROMPT_IGNORE_UNTRACKED_FILES == true ]]; then
-            FLAGS+='--untracked-files=no'
-        fi
-        if [[ $(command git status ${FLAGS} 2> /dev/null | tail -n1) ]]; then
-            echo "*"
-        fi
-    }
+    # Reset the color and display the Git branch and modification
+    # status.
+    radian_prompt_git_info='%{$reset_color%}$(radian_prompt_git_info)'
 
-    # Define the actual prompt format.
-    PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%{$reset_color%}$(radian_prompt_git_info)%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
+    # The actual prompt.
+    PROMPT="${radian_prompt_prefix}${radian_prompt_git_info}${radian_prompt_suffix}"
 
 else
 
-    # Backup prompt for if the user doesn't have Git.
-    PROMPT='%(?.%{$fg[blue]%}.%{$fg[red]%})%c%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
+    PROMPT="${radian_prompt_prefix}${radian_prompt_suffix}"
 
 fi
 
-################################################################################
-#### Input/output
+### Command line
 
 # When no arguments are provided to "." or "source", they default to
 # sourcing .zshrc. Based on [1], thanks @PythonNut!
 #
 # [1]: http://unix.stackexchange.com/a/326948/176805
-function _accept-line() {
+function _accept-line {
     emulate -LR zsh
     if [[ $BUFFER == "." ]]; then
         BUFFER=". ~/.zshrc"
@@ -168,7 +183,6 @@ zle -N bracketed-paste bracketed-paste-magic
 autoload -Uz url-quote-magic
 zle -N self-insert url-quote-magic
 
-################################################################################
 #### Completion
 
 # For ambiguous completions, use an interactive menu (which can be
@@ -187,7 +201,6 @@ bindkey '^[[Z' reverse-menu-complete
 # [1]: http://unix.stackexchange.com/q/330481/176805
 zstyle ':completion:*' matcher-list 'l:|=* r:|=* m:{a-z\-}={A-Z\_}'
 
-################################################################################
 #### Globbing
 
 # This makes globs case-insensitive.
@@ -205,7 +218,6 @@ setopt numeric_glob_sort
 # Disable history expansion, so we can use ! in our commands.
 setopt no_bang_hist
 
-################################################################################
 #### Command history
 
 # Never discard history within a session, or at least not before any
@@ -237,16 +249,11 @@ setopt hist_fcntl_lock
 setopt hist_reduce_blanks
 
 # When history expansion is used (e.g. sudo !!), do the expansion
-# instead of executing the command immediately. (Of course, the above
-# use case is better serviced by just pressing ESC twice.)
+# instead of executing the command immediately. This currently has no
+# effect since history expansion is disabled.
 setopt hist_verify
 
-################################################################################
-#### Filesystem navigation
-
-# You can cd to a directory just by typing its name; no need to
-# preface it with cd.
-setopt autocd
+### Filesystem navigation
 
 # This makes it so that when you cd to a new directory, the old
 # directory is saved in the directory stack (view with dirs or ds).
@@ -263,44 +270,39 @@ setopt pushdminus
 # case-insensitive filesystem.
 setopt chaselinks
 
-# Better ls defaults.
-if (( $+commands[exa] )); then
-    alias l='exa --all --header --long --color-scale'
-    alias lg='exa --all --grid --header --long --color-scale'
-    alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
-    function lti() {
-        emulate -LR zsh
-        exa --all --header --long --tree --color-scale --ignore-glob ".git|$1" ${@:2}
-    }
-    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
-    function ltli() {
-        emulate -LR zsh
-        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|$2" ${@:3}
-    }
-else
-    # We alias gls to a git command elsewhere, so we use "command"
-    # here to prevent it from being interpreted as said git command.
-    # If you want to run coreutils ls, use "\gls".
-    if (( $+commands[gls] )); then
-        alias l='command gls -AlhF --color=auto'
-    else
-        alias l='ls -AlhF'
-    fi
-    if (( $+commands[tree] )); then
-        alias lt=tree
-        alias ltl='tree -L'
-    fi
-fi
+### Help system
 
-# These are global aliases; you can use them anywhere in a command.
-alias -g ...='../..'
-alias -g ....='../../..'
-alias -g .....='../../../..'
-alias -g ......='../../../../..'
-alias -g .......='../../../../../..'
-alias -g ........='../../../../../../..'
-alias -g .........='../../../../../../../..'
-alias -g ..........='../../../../../../../../..'
+# By default, run-help is an alias to man. We want to turn that off so
+# that we can access the function definition of run-help (by default,
+# aliases take precedence over functions). But if you re-source this
+# file, then the alias might already be removed, so we suppress any
+# error that this might throw.
+unalias run-help 2>/dev/null || true
+
+# Now we autoload run-help and several extensions to it which provide
+# more precise help for certain external commands.
+autoload -Uz run-help
+autoload -Uz run-help-git
+autoload -Uz run-help-ip
+autoload -Uz run-help-openssl
+autoload -Uz run-help-p4
+autoload -Uz run-help-sudo
+autoload -Uz run-help-svk
+autoload -Uz run-help-svn
+
+## Aliases
+### Filesystem navigation
+#### cd
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ......='cd ../../../../..'
+alias .......='cd ../../../../../..'
+alias ........='cd ../../../../../../..'
+alias .........='cd ../../../../../../../..'
+alias ..........='cd ../../../../../../../../..'
 
 # These are some aliases for moving to previously visited directories.
 # The first alias uses "--" so that we can alias "-" without it being
@@ -316,54 +318,102 @@ alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
 
-# Nice alias for common wdx operation.
-alias ws='wd set'
+#### dirs
 
-# To complement the previous set of aliases, here is a convenient way
-# to list the last few directories visited, with their numbers. The
-# alias "d", which is used by oh-my-zsh for this purpose, is taken
-# from fasd, so instead I chose a different convenient abbreviation of
-# "dirs".
+# This alias is a convenient way to list the last few directories
+# visited, with their numbers. You can then use the 'cd -n' aliases to
+# jump to those directories.
 alias ds='dirs -v | head -10'
 
-# These aliases are for interacting with directories on the
-# filesystem.
-alias md='mkdir -p'
-alias rd='rmdir'
-function mcd() {
-    emulate -LR zsh
-    mkdir -p $@
-    cd ${@[$#]}
-}
+#### ls, exa
+
+if (( $+commands[exa] )); then
+    alias l='exa --all --header --long --color-scale'
+    alias lg='exa --all --grid --header --long --color-scale'
+    alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
+    function lti {
+        emulate -LR zsh
+        exa --all --header --long --tree --color-scale --ignore-glob ".git|$1" ${@:2}
+    }
+    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
+    function ltli {
+        emulate -LR zsh
+        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|$2" ${@:3}
+    }
+else
+    # We alias gls to a git command elsewhere, so we use "command"
+    # here to prevent it from being interpreted as said git command.
+    if (( $+commands[gls] )); then
+        alias l='command gls -AlhF --color=auto'
+    else
+        alias l='ls -AlhF'
+    fi
+    if (( $+commands[tree] )); then
+        alias lt=tree
+        alias ltl='tree -L'
+    fi
+fi
+
+#### wdx
+
+if command -v $WDX_NAME &>/dev/null; then
+    alias ws="$WDX_NAME set"
+fi
+
+### Filesystem management
+
+#### cp, mv, ln
 
 # You can "copy" any number of files, then "paste", "move" or
 # "pasteln" them to pass them as arguments to cp, mv, or ln
 # respectively. Just like a graphical filesystem manager. Each of the
 # latter three functions defaults to the current directory as the
 # destination.
-function copy() {
+
+# Usage: copy <path>...
+#
+# Copy all of the paths provided to the clipboard, stored in the array
+# $RADIAN_CLIPBOARD.
+function copy {
     emulate -LR zsh
-    radian_clipboard=()
+    RADIAN_CLIPBOARD=()
     for target; do
-        radian_clipboard+=(${target:a})
+        RADIAN_CLIPBOARD+=(${target:a})
     done
 }
-function paste() {
+
+# Usage: paste [<path>]
+#
+# Invoke 'cp -R' on all paths in $RADIAN_CLIPBOARD as well as the
+# argument provided, which defaults to the current directory.
+function paste {
     emulate -LR zsh
-    cp -R $radian_clipboard ${1:-.}
-}
-function move() {
-    emulate -LR zsh
-    mv $radian_clipboard ${1:-.}
-}
-function pasteln() {
-    emulate -LR zsh
-    ln -s $radian_clipboard ${1:-.}
+    cp -R $RADIAN_CLIPBOARD ${1:-.}
 }
 
-# This function takes a symlink, resolves it, and replaces it with a
-# copy of whatever it points to.
-function delink() {
+# Usage: move [<path>]
+#
+# Invoke 'mv' on all paths in $RADIAN_CLIPBOARD as well as the
+# argument provided, which defaults to the current directory.
+function move {
+    emulate -LR zsh
+    mv $RADIAN_CLIPBOARD ${1:-.}
+}
+
+# Usage: pasteln [<path>]
+#
+# Invoke 'ln -s' on all paths in $RADIAN_CLIPBOARD as well as the
+# argument provided, which defaults to the current directory.
+function pasteln {
+    emulate -LR zsh
+    ln -s $RADIAN_CLIPBOARD ${1:-.}
+}
+
+# Usage: delink <path>
+#
+# Resolve the symlink at the given path and replace it with a copy of
+# the file it points to.
+function delink {
     emulate -LR zsh
     if [[ -z $1 ]]; then
         echo "usage: delink <symlinks>"
@@ -389,60 +439,39 @@ function delink() {
     done
 }
 
-################################################################################
-#### Man
+#### mkdir
 
-# By default, run-help is an alias to man. We want to turn that off so
-# that we can access the function definition of run-help (by default,
-# aliases take precedence over functions). But if you re-source this
-# file, then the alias might already be removed, so we suppress any
-# error that this might throw.
-unalias run-help 2>/dev/null || true
+alias md='mkdir -p'
 
-# Now we tell Zsh to autoload the run-help function, meaning that when
-# it is invoked, Zsh will load the function from the file where it is
-# defined. (That file comes with Zsh.) There are additional functions
-# that we can autoload that will increase the functionality of
-# run-help, but unfortunately they have a serious bug that causes them
-# to crash when there is an alias defined for the function that you
-# are requesting help for. (For example, loading run-help-git causes
-# an error when requesting help for git if you alias git=hub.) So we
-# don't bother with those.
-autoload -Uz run-help
-
-# We define a function that wraps man to provide some basic
-# highlighting for man pages. This makes them a little easier on the
-# eyes. (This is done by binding some environment variables that less
-# looks at.) See [1].
-#
-# [1]: https://github.com/robbyrussell/oh-my-zsh/blob/3ebbb40b31fa1ce9f10040742cdb06ea04fa7c41/plugins/colored-man-pages/colored-man-pages.plugin.zsh
-function man() {
-    env \
-	LESS_TERMCAP_mb=$(printf "\e[1;31m") \
-	LESS_TERMCAP_md=$(printf "\e[1;31m") \
-	LESS_TERMCAP_me=$(printf "\e[0m") \
-	LESS_TERMCAP_ue=$(printf "\e[0m") \
-	LESS_TERMCAP_us=$(printf "\e[1;32m") \
-	man $@
+function mcd {
+    emulate -LR zsh
+    mkdir -p $@
+    cd ${@[$#]}
 }
+
+#### rmdir
+
+alias rd='rmdir'
+
+### Help system
 
 alias help=run-help
 
-################################################################################
-#### GPG
+### Utilities
+#### Emacs
 
-if [[ -f ~/.config/scripts/gpg.sh ]]; then
-    source ~/.config/scripts/gpg.sh
+if (( $+commands[emacs] )); then
+    alias e='emacs -nw'
+    alias eq='emacs -nw -Q'
+    alias ew='emacs'
+    alias eqw='emacs -Q'
 fi
 
-################################################################################
-#### SSH
-
-if [[ -f ~/.config/scripts/ssh.sh ]]; then
-    source ~/.config/scripts/ssh.sh
+if (( $+commands[emacsclient] )); then
+    alias ec='emacsclient --alternate-editor= -nw'
+    alias ecw='emacsclient --alternate-editor='
 fi
 
-################################################################################
 #### Git
 
 if (( $+commands[git] )); then
@@ -608,13 +637,8 @@ if (( $+commands[git] )); then
     alias gpd='git push --delete'
 fi
 
-################################################################################
 #### Hub
 
-# This extends Git to work especially well with Github. See [1] for
-# more information.
-#
-# [1]: https://github.com/github/hub
 if (( $+commands[hub] )); then
     alias hcl='hub clone --recursive'
     alias hc='hub create --copy'
@@ -626,7 +650,6 @@ if (( $+commands[hub] )); then
     alias hi='hub issue'
 fi
 
-################################################################################
 #### Tmux
 
 if (( $+commands[tmux] )); then
@@ -634,30 +657,18 @@ if (( $+commands[tmux] )); then
     alias ts='tmux new-session -s'
 fi
 
-################################################################################
-#### Tmuxinator
+#### Vi, Vim, Neovim
 
-if (( $+commands[tmuxinator] )); then
-    alias mux=tmuxinator
+if (( $+commands[nvim] )); then
+    alias v='nvim'
+elif (( $+commands[vim] )); then
+    alias v='vim'
+elif (( $+commands[vi] )); then
+    alias v='vi'
 fi
 
-################################################################################
-#### Emacs
-
-if (( $+commands[emacs] )); then
-    alias e='emacs -nw'
-    alias eq='emacs -nw -Q'
-    alias ew='emacs'
-    alias eqw='emacs -Q'
-fi
-
-if (( $+commands[emacsclient] )); then
-    alias ec='emacsclient --alternate-editor= -nw'
-    alias ecw='emacsclient --alternate-editor='
-fi
-
-################################################################################
-#### Leiningen
+## External command configuration
+### Leiningen
 
 if (( $+commands[lein] )); then
     # Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
@@ -670,29 +681,32 @@ if (( $+commands[lein] )); then
     export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
 fi
 
-################################################################################
-#### Vim
+### man
 
-if (( $+commands[nvim] )); then
-    alias v='nvim'
-elif (( $+commands[vim] )); then
-    alias v='vim'
-elif (( $+commands[vi] )); then
-    alias v='vi'
-fi
+# We define a function that wraps man to provide some basic
+# highlighting for man pages. This makes them a little easier on the
+# eyes. (This is done by binding some environment variables that less
+# looks at.) See [1].
+#
+# [1]: https://github.com/robbyrussell/oh-my-zsh/blob/3ebbb40b31fa1ce9f10040742cdb06ea04fa7c41/plugins/colored-man-pages/colored-man-pages.plugin.zsh
+function man {
+    env \
+	LESS_TERMCAP_mb=$(printf "\e[1;31m") \
+	LESS_TERMCAP_md=$(printf "\e[1;31m") \
+	LESS_TERMCAP_me=$(printf "\e[0m") \
+	LESS_TERMCAP_ue=$(printf "\e[0m") \
+	LESS_TERMCAP_us=$(printf "\e[1;32m") \
+	man $@
+}
 
-################################################################################
-#### Fasd
-
-# Turn off case sensitivity permanently in Fasd. This functionality is
-# only available in my fork of Fasd.
-if (( $+commands[fasd] )); then
-    export _FASD_NOCASE=1
-fi
-
-################################################################################
-#### Run post-init hook for local configuration
+## External configuration hook
 
 if typeset -f radian_after_init_hook > /dev/null; then
     radian_after_init_hook
 fi
+
+## Closing remarks
+
+# Local Variables:
+# outline-regexp: "##+"
+# End:

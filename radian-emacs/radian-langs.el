@@ -51,6 +51,7 @@
 
   ;; Indent by two spaces by default.
   (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
 
   ;; Autocomplete </ instantly.
   (setq web-mode-enable-auto-closing t))
@@ -97,54 +98,6 @@
   ;; contexts in which those are valid (anything preprocessed, or
   ;; Node.js).
   (setq js2-strict-trailing-comma-warning nil))
-
-;; Live web development with Emacs.
-(use-package skewer-mode
-  :init
-
-  ;; Enable the features of Skewer. Since this package uses deferred
-  ;; installation, we need to `el-patch'.
-
-  (el-patch-defun skewer-setup ()
-    "Fully integrate Skewer into js2-mode, css-mode, and html-mode buffers."
-    (add-hook 'js2-mode-hook 'skewer-mode)
-    (add-hook 'css-mode-hook 'skewer-css-mode)
-    (add-hook 'html-mode-hook 'skewer-html-mode))
-
-  (skewer-setup)
-
-  (el-patch-feature skewer-setup skewer-mode)
-
-  :diminish skewer-mode)
-
-(use-package skewer-css
-  :straight skewer-mode
-  :diminish skewer-css-mode)
-
-(use-package skewer-html
-  :straight skewer-mode
-  :diminish skewer-html-mode)
-
-;; Contrary to the name of the package, this actually provides Company
-;; support for JavaScript, using js2 parsing and Skewer.
-(use-package ac-js2
-  :demand t
-  :after skewer-repl
-  :config
-
-  ;; Ostensibly this provides more intelligent completions, by
-  ;; allowing `ac-js2' to evaluate your JavaScript code to generate
-  ;; completions.
-  (setq ac-js2-evaluate-calls t)
-
-  ;; Enable the Company integration for `ac-js2', but only in the
-  ;; Skewer REPL.
-
-  (defun radian--enable-ac-js2-company ()
-    (make-local-variable 'company-backends)
-    (add-to-list 'company-backends 'ac-js2-company))
-
-  (add-hook 'skewer-repl-mode-hook #'radian--enable-ac-js2-company))
 
 ;; This package provides a separate auto-completion backend for
 ;; JavaScript that is more suitable for general code.
@@ -222,7 +175,8 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; https://daringfireball.net/projects/markdown/
 
-(use-package markdown-mode)
+(use-package markdown-mode
+  :mode "\\.mmark\\'")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Python
@@ -287,6 +241,27 @@ This function calls `json-mode--update-auto-mode' to change the
              " "
              (company-anaconda-description-in-chevrons
               candidate))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; ReST
+
+;; http://docutils.sourceforge.net/rst.html
+
+(use-package rst-mode
+  :straight nil
+  :config
+
+  ;; See: https://github.com/flycheck/flycheck/issues/953
+  (defun radian-flycheck-maybe-disable-rst ()
+    "If inside Sphinx project, disable the `rst' checker from `flycheck'.
+This prevents it from signalling spurious errors."
+    (with-eval-after-load 'flycheck
+      (when (locate-dominating-file default-directory "conf.py")
+        (make-local-variable 'flycheck-disabled-checkers)
+        (push 'rst flycheck-disabled-checkers)
+        (setq-local flycheck-check-syntax-automatically '(save mode-enabled)))))
+
+  (add-hook 'rst-mode-hook #'radian-flycheck-maybe-disable-rst))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Ruby

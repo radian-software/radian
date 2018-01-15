@@ -157,8 +157,7 @@ Force a redisplay of the mode line if necessary. This is buffer-local."
                     (dirty (when git
                              (with-temp-buffer
                                (call-process "git" nil t nil
-                                             "status" "--porcelain"
-                                             "--ignore-submodules=none")
+                                             "status" "--porcelain")
                                (if (> (buffer-size) 0)
                                    "*" "")))))
                (cond

@@ -8,6 +8,10 @@
 (with-eval-after-load 'smerge-mode
   (diminish 'smerge-mode))
 
+;; Package `git' provides commands which wrap the git(1) command-line
+;; tool. It is meant to be used as a library.
+(use-package git)
+
 ;; A Git Porcelain inside Emacs.
 (use-package magit
   :bind (;; Add important keybindings for Magit as described in the

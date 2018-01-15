@@ -85,7 +85,7 @@ configuration, and optionally installing local configuration.
 
 ### Installing software
 
-* Emacs: `brew install emacs --with-cocoa` or `pacman -S emacs`
+* Emacs: `brew cask install emacs` or `pacman -S emacs`
 * Zsh: `brew install zsh` or `pacman -S zsh` (also recommended: `brew
   install zplug`)
 * Tmux: `brew install tmux` or `pacman -S tmux`
@@ -95,20 +95,26 @@ configuration, and optionally installing local configuration.
 
 ### Installing configuration
 
-* Emacs: create `~/.emacs.d` and `~/.emacs.d/straight/versions`; link
-  `init.el` into `~/.emacs.d` and `versions.el` into
-  `~/.emacs.d/straight/versions`
-* Zsh: link `.zshrc` into `~`
-* Tmux: link `.tmux.conf` into `~`
-* Git: link `.gitconfig` and `.gitexclude` into `~`
-* Leiningen: create `~/.lein` and link `profiles.clj` into `~/.lein`
+* Emacs: create `~/.emacs.d/` and `~/.emacs.d/straight/versions/`;
+  link `init.el` into `~/.emacs.d/` and `versions.el` into
+  `~/.emacs.d/straight/versions/` (with the link named `radian.el`)
+* Zsh: link `.zshrc` and `.profile` into `~/`
+* Tmux: link `.tmux.conf` into `~/`
+* Git: link `.gitconfig` and `.gitexclude` into `~/`
+* Leiningen: create `~/.lein/` and link `profiles.clj` into `~/.lein/`
 
 ### Installing local configuration
 
 * Emacs: create `~/.emacs.d/init.local.el`
-* Zsh: create `~/.zshrc.local`
+* Zsh: create `~/.zshrc.local` and `~/.profile.local`
 * Tmux: create `~/.tmux.local.conf`
 * Git: create `~/.gitconfig.local` (highly recommended)
+
+### Tips and tricks
+
+In order to get `$PATH`, `ssh-agent`, and `gpg-agent` working
+correctly in graphical applications, use
+`scripts/patch-macos-app.zsh`.
 
 ## Release 1.0
 

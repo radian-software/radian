@@ -94,13 +94,15 @@
     (forward-line -1)
     (indent-according-to-mode))
 
-  (sp-local-pair 'cc-mode "{" nil :post-handlers
-                 '((radian-enter-and-indent-sexp "RET")
-                   (radian-enter-and-indent-sexp "<return>")))
+  (dolist (mode '(c-mode c++-mode objc-mode java-mode js2-mode python-mode sh-mode web-mode))
+    (sp-local-pair mode "{" nil :post-handlers
+                   '((radian-enter-and-indent-sexp "RET")
+                     (radian-enter-and-indent-sexp "<return>"))))
 
-  (sp-local-pair 'python-mode "{" nil :post-handlers
-                 '((radian-enter-and-indent-sexp "RET")
-                   (radian-enter-and-indent-sexp "<return>"))))
+  (dolist (mode '(js2-mode python-mode web-mode))
+    (sp-local-pair mode "[" nil :post-handlers
+                   '((radian-enter-and-indent-sexp "RET")
+                     (radian-enter-and-indent-sexp "<return>")))))
 
 (provide 'radian-pairs)
 
