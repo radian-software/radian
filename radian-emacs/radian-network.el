@@ -34,11 +34,7 @@
 
 ;; Package `webpaste' provides Emacs support for many different
 ;; command-line pastebins.
-(use-package webpaste
-  :straight (:host github
-             :repo "raxod502/webpaste.el"
-             :upstream (:host github
-                        :repo "etu/webpaste.el")))
+(use-package webpaste)
 
 (provide 'radian-network)
 

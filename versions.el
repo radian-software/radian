@@ -95,7 +95,7 @@
  ("visual-regexp-steroids.el" . "a6420b25ec0fbba43bf57875827092e1196d8a9e")
  ("visual-regexp.el" . "b3096c2d391ff4e28a2a4e8cd82efbf11071ea85")
  ("web-mode" . "8c35710775de9369f0637a9bd5fde39e4074db72")
- ("webpaste.el" . "7397cbcedd89f29b0f182931ae6ced7e462e6c9a")
+ ("webpaste.el" . "ba3ce4021159e2bd2775c0706fc184155794aa65")
  ("with-editor" . "9fc047751b537178b5123fead9426d72b794b4d3")
  ("yaml-mode" . "64b28913bfe910b147d6ee16488dbaedb1452ca6")
  ("yasnippet" . "65952e30547754eb5ed11750f0cd736095fd6700")
