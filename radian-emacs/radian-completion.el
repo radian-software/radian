@@ -220,9 +220,9 @@ This is an `:around' advice for `counsel-M-x'."
 
   ;; Tweak historian weighting settings. These values are chosen
   ;; subjectively to produce good results.
-  (setq ivy-historian-freq-boost-factor 500)
-  (setq ivy-historian-recent-boost 500)
-  (setq ivy-historian-recent-decrement 50)
+  (setq ivy-historian-freq-boost-factor 2000)
+  (setq ivy-historian-recent-boost 2000)
+  (setq ivy-historian-recent-decrement 1000)
 
   ;; Enable the functionality of historian-ivy.
   (ivy-historian-mode 1))
