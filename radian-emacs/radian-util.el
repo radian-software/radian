@@ -17,7 +17,7 @@ used instead.
 This method may mutate the original alist, but you still need to
 use the return value of this method instead of the original
 alist, to ensure correct results."
-  (if-let ((pair (if symbol (assq key alist) (assoc key alist))))
+  (if-let* ((pair (if symbol (assq key alist) (assoc key alist))))
       (setcdr pair val)
     (push (cons key val) alist))
   alist)
