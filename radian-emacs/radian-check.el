@@ -7,12 +7,6 @@
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
-  ;; My fork adds support for running a syntax check when changing
-  ;; buffers. See [1].
-  ;;
-  ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :straight (:host github :repo "raxod502/flycheck"
-             :upstream (:host github :repo "flycheck/flycheck"))
   :init
 
   :defer 3
