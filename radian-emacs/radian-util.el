@@ -81,6 +81,11 @@ This means that FILENAME is a symlink whose target is inside
                         ;; case-insensitively in that situation.
                         (eq radian-operating-system 'macOS))))
 
+(defun radian-random-string ()
+  "Return a random string designed to be globally unique."
+  (md5 (format "%s%s%s%s"
+               (system-name) (emacs-pid) (current-time) (random))))
+
 (provide 'radian-util)
 
 ;;; radian-util.el ends here
