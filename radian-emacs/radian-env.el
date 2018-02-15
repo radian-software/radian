@@ -35,7 +35,7 @@ If nil, then sourcing doesn't happen."
           (let* ((results (split-string
                            (buffer-string) (regexp-quote delimiter)))
                  (results (cl-subseq results 1 (1- (length results)))))
-            (if (evenp (length results))
+            (if (cl-evenp (length results))
                 (cl-loop for (var value) on results by #'cddr do
                          (setenv var value))
               (message "Loading %s produced malformed result; see %s"
