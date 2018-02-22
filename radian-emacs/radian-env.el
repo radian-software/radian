@@ -8,7 +8,7 @@ If nil, then sourcing doesn't happen."
   :group 'radian
   :type '(choice (const nil) string))
 
-(defcustom radian-env-output-buffer-name "*radian-env-output*"
+(defcustom radian-env-output-buffer-name " *radian-env-output*"
   "Name of buffer used for sourcing ~/.profile."
   :group 'radian
   :type 'string)
