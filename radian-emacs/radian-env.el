@@ -37,7 +37,9 @@ If nil, then sourcing doesn't happen."
                  (results (cl-subseq results 1 (1- (length results)))))
             (if (cl-evenp (length results))
                 (cl-loop for (var value) on results by #'cddr do
-                         (setenv var value))
+                         (setenv var value)
+                         (when (string= var "PATH")
+                           (setq exec-path (parse-colon-path value))))
               (message "Loading %s produced malformed result; see %s"
                        radian-env-profile-file
                        radian-env-output-buffer-name)))
