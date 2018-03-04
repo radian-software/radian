@@ -9,8 +9,8 @@
 ;; [1]: https://github.com/raxod502/el-patch
 (use-package el-patch
   :straight (:host github
-             :repo "raxod502/el-patch"
-             :branch "develop")
+                   :repo "raxod502/el-patch"
+                   :branch "develop")
   :config
 
   ;; When patching variable definitions, override the original values.
