@@ -499,7 +499,9 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; [1]: https://www.tug.org/begin.html
 
 (use-package tex
-  :straight auctex
+  :straight (auctex :host github :repo "raxod502/auctex"
+                    :branch "fork/1"
+                    :files (:defaults (:exclude "doc/*.texi")))
   :init
 
   (el-patch-feature tex auctex)

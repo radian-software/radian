@@ -7,6 +7,9 @@
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
+  :straight (:host github :repo "raxod502/flycheck" :branch "fork/1"
+                   :upstream (:host github :repo "flycheck/flycheck"
+                                    :branch "master"))
   :init
 
   :defer 3
@@ -26,7 +29,7 @@
   ;; no effect until [1] is merged.)
   ;;
   ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  (add-to-list 'flycheck-check-syntax-automatically 'buffer-switch)
+  (add-to-list 'flycheck-check-syntax-automatically 'idle-buffer-switch)
 
   ;; Allow disabling Flycheck in a buffer-local or file-local variable.
   (put 'flycheck-mode 'safe-local-variable #'booleanp)
