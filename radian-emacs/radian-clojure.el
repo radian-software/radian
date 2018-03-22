@@ -366,6 +366,10 @@ This is an `:override' advice for `cljr--post-command-message'.")
   ;; Automatically sort project dependencies after changing them.
   (setq cljr-auto-sort-project-dependencies t)
 
+  ;; Don't print a warning when starting a REPL outside of project
+  ;; context.
+  (setq cljr-suppress-no-project-warning t)
+
   :diminish clj-refactor-mode)
 
 (provide 'radian-clojure)
