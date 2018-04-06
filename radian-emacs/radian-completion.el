@@ -198,11 +198,7 @@ This is an `:around' advice for `counsel-M-x'."
          ;; After you have pressed M-:, you can use C-r to select a
          ;; previous entry using Counsel.
          :map read-expression-map
-         ("C-r" . counsel-expression-history))
-  :config
-
-  ;; If there is a valid file at point, pre-select in C-x C-f.
-  (setq counsel-find-file-at-point t))
+         ("C-r" . counsel-expression-history)))
 
 ;; Remembers your choices in completion menus.
 (use-package historian
