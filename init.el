@@ -123,7 +123,7 @@ code.")
                 (load radian-local-init-file 'noerror 'nomessage)))
 
             ;; Make the Radian libraries available.
-            (add-to-list 'load-path radian-lib-directory)
+            (add-to-list 'load-path (directory-file-name radian-lib-directory))
 
             ;; Load the Radian libraries.
             (let ((preloaded-features
