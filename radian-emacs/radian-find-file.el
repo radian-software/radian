@@ -371,9 +371,9 @@ This is a function for `after-save-hook'. Remove
   ;; My fork remaps the 'f' action to do a find-file rather than just
   ;; the same as pressing M-o again.
   :straight (:host github
-             :repo "raxod502/counsel-projectile"
-             :upstream (:host github
-                        :repo "ericdanan/counsel-projectile"))
+                   :repo "raxod502/counsel-projectile"
+                   :upstream (:host github
+                                    :repo "ericdanan/counsel-projectile"))
   :init
 
   ;; Lazy-load `counsel-projectile'.
