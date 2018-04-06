@@ -31,7 +31,12 @@
 
 ;; https://www.haskell.org/
 
-(use-package haskell-mode)
+(use-package haskell-mode
+  :config
+
+  ;; Disable in-buffer underlining of errors and warnings, since we
+  ;; already have them from Flycheck.
+  (setq haskell-process-show-overlays nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HTML
