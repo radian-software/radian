@@ -45,6 +45,7 @@
  ("go-mode.el" . "bfe7a14e9bf957d050e3c429156e697bb3670f21")
  ("haskell-mode" . "9018ad5cac0b1b1b5e0a51586027fb0ca4076b1a")
  ("help-fns-plus" . "7213ef84d0345e2625f28e2b3134f8d98489391f")
+ ("hindent" . "6f6db40cca1b759f78d7e4b971111e40833c3aa0")
  ("historian.el" . "99e282bdd8994cb4e23185d9004b2cb42a214927")
  ("hydra" . "38ce88a9c3be11b0431080078095159b2211ca7a")
  ("iflipb" . "e19229473be70e55c56a26ccc26c4e11e8be6389")
