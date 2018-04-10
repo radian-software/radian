@@ -45,30 +45,30 @@
             (require 'subr-x)
 
             (defvar radian-directory
-              (when-let ((link-target
-                          ;; This function returns the target of the
-                          ;; link. If the init-file is not a symlink,
-                          ;; then we abort.
-                          (file-symlink-p
-                           (or
-                            ;; If we are loading the init-file
-                            ;; normally, then the filename is in
-                            ;; `load-file-name'.
-                            load-file-name
-                            ;; Otherwise, that's nil and the filename
-                            ;; is in `buffer-file-name' (this will
-                            ;; happen if you `eval-buffer' for
-                            ;; example).
-                            buffer-file-name))))
+              (let ((link-target
+                     ;; This function returns the target of the link.
+                     ;; If the init-file is not a symlink, then we
+                     ;; abort.
+                     (file-symlink-p
+                      (or
+                       ;; If we are loading the init-file normally,
+                       ;; then the filename is in `load-file-name'.
+                       load-file-name
+                       ;; Otherwise, that's nil and the filename is in
+                       ;; `buffer-file-name' (this will happen if you
+                       ;; `eval-buffer' for example).
+                       buffer-file-name))))
                 ;; We identify a directory as the Radian repository by
                 ;; the existence of a "radian-emacs" folder inside it.
                 ;; Note that the previous check does disallow copying
                 ;; the init-file and radian-emacs folder into
                 ;; ~/.emacs.d, which is fine as that is a ridiculous
                 ;; use case.
-                (when (file-directory-p (expand-file-name
-                                         "radian-emacs/"
-                                         (file-name-directory link-target)))
+                (when (and
+                       link-target
+                       (file-directory-p (expand-file-name
+                                          "radian-emacs/"
+                                          (file-name-directory link-target))))
                   (file-name-directory
                    (file-truename link-target))))
               "Path to the Radian repository, or nil if not found.
@@ -127,7 +127,11 @@ code.")
 
             ;; Load the Radian libraries.
             (let ((preloaded-features
-                   '(;; no-littering changes lots of paths and needs
+                   '(;; Compatibility functions may be needed
+                     ;; anywhere, as they modify functions outside of
+                     ;; the usual `require' tree.
+                     radian-compat
+                     ;; no-littering changes lots of paths and needs
                      ;; to be loaded as soon as possible.
                      radian-emacsd))
                   (radian-features (mapcar

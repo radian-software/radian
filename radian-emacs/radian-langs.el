@@ -499,7 +499,9 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; [1]: https://www.tug.org/begin.html
 
 (use-package tex
-  :straight auctex
+  :straight (auctex :host github :repo "raxod502/auctex"
+                    :branch "fork/1"
+                    :files (:defaults (:exclude "doc/*.texi")))
   :init
 
   (el-patch-feature tex auctex)
@@ -571,7 +573,18 @@ This is an `:around' advice for `TeX-load-style-file'."
   :config
 
   ;; Save buffers automatically when compiling, instead of prompting.
-  (setq TeX-save-query nil))
+  (setq TeX-save-query nil)
+
+  ;; Hide compilation buffers, as they otherwise get in the way of
+  ;; buffer selection.
+
+  (defun radian-advice-tex-hide-compilation-buffers (name)
+    "Hide AUCTeX compilation buffers by prepending a space to their names.
+This is a `:filter-return' advice for `TeX-process-buffer-name'."
+    (concat " " name))
+
+  (advice-add #'TeX-process-buffer-name :filter-return
+              #'radian-advice-tex-hide-compilation-buffers))
 
 (use-package latex
   :straight auctex

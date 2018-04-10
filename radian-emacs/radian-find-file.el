@@ -116,6 +116,10 @@ be generated automatically from the basename of FILENAME."
 ;; Leiningen
 (radian-register-dotfile ".lein/profiles.clj" "l p")
 
+;; Shell
+(radian-register-dotfile ".profile" "p r")
+(radian-register-dotfile ".profile.local" "p l")
+
 ;; Tmux
 (radian-register-dotfile ".tmux.conf" "t c")
 (radian-register-dotfile ".tmux.local.conf" "t l")

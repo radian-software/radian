@@ -185,6 +185,10 @@ Return nil if not inside a project."
 ;; connection to retrieve completion candidates, and documentation and
 ;; source lookups.
 (use-package cider
+  :straight (:host github :repo "raxod502/cider" :branch "fork/1"
+                   :upstream (:host github :repo "clojure-emacs/cider"
+                                    :branch "master")
+                   :files ("*.el" (:exclude ".dir-locals.el")))
   :init
 
   (el-patch-feature cider)
@@ -325,13 +329,10 @@ should be the regular Clojure REPL started by the server process filter."
 ;; Package `clj-refactor' provides automated refactoring commands for
 ;; Clojure code.
 (use-package clj-refactor
-  ;; My fork adds support for `cljr-auto-sort-project-dependencies'.
-  ;; See [1].
-  ;;
-  ;; [1]: https://github.com/clojure-emacs/clj-refactor.el/pull/385
-  :straight (:host github :repo "raxod502/clj-refactor.el"
-             :upstream (:host github :repo "clojure-emacs/clj-refactor.el")
-             :files (:defaults "CHANGELOG.md"))
+  :straight (:host github :repo "raxod502/clj-refactor.el" :branch "fork/2"
+                   :upstream (:host github :repo "clojure-emacs/clj-refactor.el"
+                                    :branch "master")
+                   :files (:defaults "CHANGELOG.md"))
   :init
 
   (with-eval-after-load 'clojure-mode
@@ -364,6 +365,10 @@ This is an `:override' advice for `cljr--post-command-message'.")
 
   ;; Automatically sort project dependencies after changing them.
   (setq cljr-auto-sort-project-dependencies t)
+
+  ;; Don't print a warning when starting a REPL outside of project
+  ;; context.
+  (setq cljr-suppress-no-project-warning t)
 
   :diminish clj-refactor-mode)
 

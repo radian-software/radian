@@ -98,6 +98,12 @@
   ;; end of the current entry.
   (setq org-insert-heading-respect-content t)
 
+  ;; When you create a sparse tree and `org-indent-mode' is enabled,
+  ;; the highlighting destroys the invisibility added by
+  ;; `org-indent-mode'. Therefore, don't highlight when creating a
+  ;; sparse tree.
+  (setq org-highlight-sparse-tree-matches nil)
+
   ;; Indent subsections.
   (add-hook 'org-mode-hook #'org-indent-mode)
 

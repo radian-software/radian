@@ -17,7 +17,7 @@ used instead.
 This method may mutate the original alist, but you still need to
 use the return value of this method instead of the original
 alist, to ensure correct results."
-  (if-let ((pair (if symbol (assq key alist) (assoc key alist))))
+  (if-let* ((pair (if symbol (assq key alist) (assoc key alist))))
       (setcdr pair val)
     (push (cons key val) alist))
   alist)
@@ -80,6 +80,11 @@ This means that FILENAME is a symlink whose target is inside
                         ;; but case-preserving, so we have to compare
                         ;; case-insensitively in that situation.
                         (eq radian-operating-system 'macOS))))
+
+(defun radian-random-string ()
+  "Return a random string designed to be globally unique."
+  (md5 (format "%s%s%s%s"
+               (system-name) (emacs-pid) (current-time) (random))))
 
 (provide 'radian-util)
 

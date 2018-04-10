@@ -10,9 +10,12 @@ fi
 
 ### zplug configuration
 
-# Identify the location of zplug. Below is the location to which zplug
-# is installed by Homebrew on macOS.
-export ZPLUG_HOME=/usr/local/opt/zplug
+# Identify the location of zplug.
+if [[ $OSTYPE == darwin* ]]; then
+    export ZPLUG_INSTALL=/usr/local/opt/zplug
+else
+    export ZPLUG_INSTALL=/usr/share/zsh/scripts/zplug
+fi
 
 ### Plugin configuration
 
@@ -66,8 +69,8 @@ fi
 
 ## zplug
 
-if [[ -f $ZPLUG_HOME/init.zsh ]]; then
-    . $ZPLUG_HOME/init.zsh
+if [[ -f $ZPLUG_INSTALL/init.zsh ]]; then
+    . $ZPLUG_INSTALL/init.zsh
 
     for plugin in $RADIAN_PLUGINS; do
         zplug $=plugin
