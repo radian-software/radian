@@ -52,19 +52,6 @@ Trailing whitespace is only deleted if variable
 ;; Automatically wrap lines when editing plain text files.
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
-;; Package `filladapt' makes the `fill-paragraph' command generally
-;; smarter. For example, it now behaves nicely in Markdown's bulleted
-;; lists.
-(use-package filladapt
-  :demand t
-  :diminish filladapt-mode
-  :config
-
-  ;; Enable filladapt in text modes. Enabling it globally has some
-  ;; nasty side effects for filling docstrings in e.g.
-  ;; `emacs-lisp-mode' and `clojure-mode'.
-  (add-hook 'text-mode-hook #'filladapt-mode))
-
 ;; Useful utility function. Like `reverse-region', but works
 ;; characterwise rather than linewise.
 (defun radian-reverse-characters (beg end)

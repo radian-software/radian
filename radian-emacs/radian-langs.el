@@ -480,10 +480,10 @@ whose value is the shell name (don't quote it)."
                          (intern (format "sh-smie-%s-%s"
                                          sh-indent-supported-here name)))))
             (add-function :around (local 'smie--hanging-eolp-function)
-              (lambda (orig)
-                (if (looking-at "[ \t]*\\\\\n")
-                    (goto-char (match-end 0))
-                  (funcall orig))))
+                          (lambda (orig)
+                            (if (looking-at "[ \t]*\\\\\n")
+                                (goto-char (match-end 0))
+                              (funcall orig))))
             (add-hook 'smie-indent-functions #'sh-smie--indent-continuation nil t)
             (smie-setup (symbol-value (funcall mksym "grammar"))
                         (funcall mksym "rules")
@@ -613,13 +613,13 @@ This is an `:around' advice for `TeX-load-style-file'."
   (advice-add #'TeX-load-style-file :around
               #'radian--advice-inhibit-style-loading-message)
 
-  ;; Disable annoying Flycheck checkers for TeX.
+  (with-eval-after-load 'flycheck
 
-  (defun radian-flycheck-disable-tex ()
-    "Disable annoying Flycheck checkers for TeX code."
-    (setq-local flycheck-disabled-checkers '(tex-chktex tex-lacheck)))
+    (defun radian-tex-disable-checkers ()
+      "Disable chktex and lacheck in TeX buffers."
+      (setq-local flycheck-disabled-checkers '(tex-chktex tex-lacheck)))
 
-  (add-hook 'TeX-mode-hook #'radian-flycheck-disable-tex))
+    (add-hook 'TeX-mode-hook #'radian-tex-disable-checkers)))
 
 (use-package tex-buf
   :straight auctex
