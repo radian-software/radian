@@ -417,7 +417,7 @@ This prevents it from signalling spurious errors."
   :straight nil
   :init
 
-  (el-patch-feature sh-script nil)
+  (el-patch-feature sh-script)
 
   :config
 
@@ -549,7 +549,7 @@ command `sh-reset-indent-vars-to-global-values'."
                     :files (:defaults (:exclude "doc/*.texi")))
   :init
 
-  (el-patch-feature tex auctex)
+  (el-patch-feature tex)
 
   :config
 
