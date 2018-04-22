@@ -1,6 +1,5 @@
 ;;; radian-autocomplete.el --- In-buffer completion
 
-(require 'radian-package)
 (require 'radian-patch)
 (require 'radian-slow)
 

@@ -1,7 +1,6 @@
 ;;; radian-theme.el --- Loading color themes
 
 (require 'radian-custom)
-(require 'radian-package)
 
 ;;; See also `radian-appearance'.
 

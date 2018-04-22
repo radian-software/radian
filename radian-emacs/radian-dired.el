@@ -3,74 +3,65 @@
 (require 'radian-bind-key)
 (require 'radian-os)
 (require 'radian-patch)
+(require 'radian-revert)
 
-;; Make C-x C-j jump to the current file in Dired. For some reason,
-;; the autoload for `dired-jump' does not appear to work correctly, so
-;; we have to autoload the functions explicitly.
+;; For some reason, the autoloads from `dired-aux' and `dired-x' are
+;; not loaded automatically. Do it.
+(require 'dired-loaddefs)
 
-(autoload #'dired-jump "dired-x")
-(autoload #'dired-jump-other-window "dired-x")
+(use-feature files
+  :config
 
-(bind-keys
- ("C-x C-j" . dired-jump)
- ("C-x 4 C-j" . dired-jump-other-window))
+  ;; Dired has some trouble parsing out filenames that have e.g.
+  ;; leading spaces, unless the ls program used has support for Dired.
+  ;; GNU ls has this support, so if it is available we tell Dired to
+  ;; use it.
+  (when (executable-find "gls")
+    (setq insert-directory-program "gls")))
 
-;; Dired has some trouble parsing out filenames that have e.g. leading
-;; spaces, unless the ls program used has support for Dired. GNU ls
-;; has this support, so if it is available we tell Dired to use it.
-;; Otherwise, we tell Dired to not attempt to use the --dired option
-;; and to just do its best.
-(radian-with-operating-system macOS
-  (if (executable-find "gls")
-      (setq insert-directory-program "gls")
-    (setq dired-use-ls-dired nil)))
+(use-feature dired
+  :init
 
-;; Prevent `auto-revert-mode' from showing messages in the echo area
-;; in Dired mode.
+  (el-patch-feature dired)
 
-(defun radian--silence-auto-revert-mode ()
-  "Silence `auto-revert-mode' in the current buffer.
-This function is to be placed on `dired-mode-hook'."
-  (setq-local auto-revert-verbose nil))
+  :config
 
-(add-hook 'dired-mode-hook #'radian--silence-auto-revert-mode)
+  ;; Prevent Dired from printing a message if your ls does not support
+  ;; the --dired option. (We do this by performing the check
+  ;; ourselves, and refraining from printing a message in the
+  ;; problematic case.)
 
-(el-patch-feature dired)
+  (defun radian-advice-dired-check-for-ls-dired (&rest _)
+    "Check if ls --dired is supported ahead of time, and silently.
+This is a `:before' advice for `dired-insert-directory'."
+    (when (eq dired-use-ls-dired 'unspecified)
+      (setq dired-use-ls-dired
+            (eq 0 (call-process insert-directory-program
+                                nil nil nil "--dired")))))
 
-(with-eval-after-load 'dired
+  (advice-add #'dired-insert-directory :before
+              #'radian-advice-dired-check-for-ls-dired)
 
-  ;; Skip the silly prompt about whether I want to kill the Dired
-  ;; buffer for a deleted directory. Of course I do! It's just a Dired
-  ;; buffer, after all.
-  (el-patch-defun dired-clean-up-after-deletion (fn)
-    "Clean up after a deleted file or directory FN.
-Removes any expanded subdirectory of deleted directory.
-If `dired-x' is loaded and `dired-clean-up-buffers-too' is non-nil,
-also offers to kill buffers visiting deleted files and directories."
-    (save-excursion (and (cdr dired-subdir-alist)
-                         (dired-goto-subdir fn)
-                         (dired-kill-subdir)))
-    ;; Offer to kill buffer of deleted file FN.
-    (when (and (featurep 'dired-x) dired-clean-up-buffers-too)
-      (let ((buf (get-file-buffer fn)))
-        (and buf
-             (funcall #'y-or-n-p
-                      (format "Kill buffer of %s, too? "
-                              (file-name-nondirectory fn)))
-             (kill-buffer buf)))
-      (let ((buf-list (dired-buffers-for-dir (expand-file-name fn))))
-        (and buf-list
-             (el-patch-remove
-               (y-or-n-p (format "Kill Dired buffer%s of %s, too? "
-                                 (dired-plural-s (length buf-list))
-                                 (file-name-nondirectory fn))))
-             (dolist (buf buf-list)
-               (kill-buffer buf)))))))
+  ;; Prevent `auto-revert-mode' from showing messages in the echo area
+  ;; in Dired mode.
+  (add-hook 'dired-mode-hook #'radian-revert-silence)
 
-;; Instantly revert Dired buffers on re-visiting them, with no
-;; message. (A message is shown if insta-revert is either disabled or
-;; determined dynamically by setting this variable to a function.)
-(setq dired-auto-revert-buffer t)
+  ;; Disable the prompt about whether I want to kill the Dired buffer
+  ;; for a deleted directory. Of course I do! It's just a Dired
+  ;; buffer, after all. Note that this variable, for reasons unknown
+  ;; to me, is defined in `dired-x', but only affects the behavior of
+  ;; functions defined in `dired'.
+  (setq dired-clean-confirm-killing-deleted-buffers nil)
+
+  ;; Instantly revert Dired buffers on re-visiting them, with no
+  ;; message. (A message is shown if insta-revert is either disabled or
+  ;; determined dynamically by setting this variable to a function.)
+  (setq dired-auto-revert-buffer t))
+
+(use-feature dired-x
+  :bind (;; Bindings for jumping to the current directory in Dired.
+         ("C-x C-j" . dired-jump)
+         ("C-x 4 C-j" . dired-jump-other-window)))
 
 (provide 'radian-dired)
 

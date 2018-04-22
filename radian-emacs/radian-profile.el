@@ -1,7 +1,5 @@
 ;;; radian-profile.el --- Profile Emacs startup
 
-(require 'radian-package)
-
 (defvar radian-flattened-init-file
   (when user-init-file
     (when-let* ((init-directory (file-name-directory user-init-file)))

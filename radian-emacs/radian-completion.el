@@ -2,7 +2,6 @@
 
 (require 'cl-lib)
 (require 'radian-appearance)
-(require 'radian-package)
 (require 'radian-patch)
 
 ;; This package provides a simple mechanism for recording the user's

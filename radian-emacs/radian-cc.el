@@ -5,7 +5,6 @@
 (require 'radian-autocomplete)
 (require 'radian-check)
 (require 'radian-eldoc)
-(require 'radian-package)
 (require 'radian-util)
 
 (defvar radian-company-backend-cc nil

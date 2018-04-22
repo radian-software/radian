@@ -1,7 +1,5 @@
 ;;; radian-check.el --- On-the-fly syntax and semantics checking
 
-(require 'radian-package)
-
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting, or more generally syntax checking. It comes
 ;; with a large number of checkers pre-defined, and other packages

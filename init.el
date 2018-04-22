@@ -131,6 +131,11 @@ code.")
                      ;; anywhere, as they modify functions outside of
                      ;; the usual `require' tree.
                      radian-compat
+                     ;; The package management layer is used almost
+                     ;; everywhere, and now that we use the
+                     ;; `use-feature' macro, it's used basically
+                     ;; everywhere else too.
+                     radian-package
                      ;; no-littering changes lots of paths and needs
                      ;; to be loaded as soon as possible.
                      radian-emacsd))
@@ -142,27 +147,31 @@ code.")
                                      "^[a-z-]+\\.el$")))
                   ;; Any packages installed here are official Radian
                   ;; packages.
-                  (straight-current-profile 'radian))
+                  (straight-current-profile 'radian)
+                  (success t))
 
               ;; First we need to unload all the features, so that the
               ;; init-file can be reloaded to pick up changes.
               (dolist (feature radian-features)
                 (setq features (remove feature features)))
 
-              ;; Now load features that should be loaded first.
+              ;; Now load features that should be loaded first. If
+              ;; errors occur while loading them, don't even try to
+              ;; proceed with init.
               (dolist (feature preloaded-features)
-                (condition-case-unless-debug error-data
-                    (require feature)
-                  (error (warn "Could not load `%S': %s" feature
-                               (error-message-string error-data)))))
+                (require feature))
 
-              ;; And then the rest of the features.
+              ;; And then the rest of the features. If they fail to
+              ;; load, maybe we can keep going, as long as we note
+              ;; that there was an error.
               (dolist (feature radian-features)
                 (unless (member feature preloaded-features)
                   (condition-case-unless-debug error-data
                       (require feature)
-                    (error (warn "Could not load `%S': %s" feature
-                                 (error-message-string error-data))))))
+                    (error
+                     (setq success nil)
+                     (warn "Could not load `%S': %s" feature
+                           (error-message-string error-data))))))
 
               ;; Run local customizations that are supposed to be run
               ;; after init. Any packages installed here are
@@ -171,4 +180,10 @@ code.")
               ;; `radian-local', and should not be written to either
               ;; lockfile.)
               (let ((straight-current-profile 'radian-local))
-                (run-hooks 'radian-after-init-hook))))))))
+                (run-hooks 'radian-after-init-hook))
+
+              ;; Prune the build cache for straight.el; this will
+              ;; prevent it from growing too large. Only do this if we
+              ;; definitely loaded all desired packages, however.
+              (when success
+                (straight-prune-build-cache))))))))

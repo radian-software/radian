@@ -1,7 +1,6 @@
 ;;; radian-formatting.el --- Formatting text
 
 (require 'radian-appearance)
-(require 'radian-package)
 
 ;; Don't use tabs for indentation, even in deeply indented lines.
 (setq-default indent-tabs-mode nil)

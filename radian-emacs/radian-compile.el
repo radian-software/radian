@@ -1,7 +1,5 @@
 ;;; radian-compile.el --- M-x compile and friends
 
-(require 'radian-package)
-
 (use-package compile
   :straight nil
   :config

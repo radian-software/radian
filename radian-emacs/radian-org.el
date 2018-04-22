@@ -6,7 +6,6 @@
 
 (require 'radian-bind-key)
 (require 'radian-git)
-(require 'radian-package)
 
 (define-globalized-minor-mode global-outline-minor-mode
   outline-minor-mode outline-minor-mode)

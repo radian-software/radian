@@ -1,6 +1,5 @@
 ;;; radian-pairs.el --- Paired delimiter handling
 
-(require 'radian-package)
 (require 'radian-windowed)
 
 ;; Don't blink the cursor on the opening paren when you insert a

@@ -1,7 +1,6 @@
 ;;; radian-browse.el --- Browsing the web
 
 (require 'radian-os)
-(require 'radian-package)
 
 ;; In recent versions of macOS, there is an annoying configuration
 ;; problem wherein TLS verification does not work out of the box,

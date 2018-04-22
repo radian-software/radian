@@ -3,7 +3,6 @@
 (require 'radian-autocomplete)
 (require 'radian-indent)
 (require 'radian-lisp)
-(require 'radian-package)
 
 (use-package scheme
   :straight nil

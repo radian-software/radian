@@ -1,7 +1,5 @@
 ;;; radian-undo.el --- Undo and redo
 
-(require 'radian-package)
-
 ;; This package provides undo/redo commands that are both more
 ;; intuitive and more powerful than the Emacs defaults. It also allows
 ;; you to visualize the undo/redo tree, which uses a branching model

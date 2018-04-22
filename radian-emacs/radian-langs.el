@@ -8,31 +8,21 @@
 (require 'radian-eldoc)
 (require 'radian-indent)
 (require 'radian-os)
-(require 'radian-package)
 (require 'radian-patch)
 (require 'radian-util)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; AppleScript
-
-;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
-
+;; Package `apples-mode' provides a major mode for AppleScript. For
+;; more information on the language, see
+;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html.
 (use-package apples-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Go
-
-;; https://golang.org/
-
+;; Package `go-mode' provides a major mode for Go. For more
+;; information on the language, see https://golang.org/.
 (use-package go-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Haskell
-
-;; https://www.haskell.org/
-
-;; Package `haskell-mode' provides syntax highlighting, indentation,
-;; and interactive REPL integration for Haskell code.
+;; Package `haskell-mode' provides a major mode for Haskell, including
+;; REPL integration. For more information on the language, see
+;; https://www.haskell.org/.
 (use-package haskell-mode
   :config
 
@@ -489,8 +479,8 @@ whose value is the shell name (don't quote it)."
                         (funcall mksym "rules")
                         :forward-token  (funcall mksym "forward-token")
                         :backward-token (funcall mksym "backward-token")))
+          (setq-local parse-sexp-lookup-properties t)
           (unless sh-use-smie
-            (setq-local parse-sexp-lookup-properties t)
             (setq-local sh-kw-alist (sh-feature sh-kw))
             (let ((regexp (sh-feature sh-kws-for-done)))
               (if regexp
@@ -528,21 +518,13 @@ command `sh-reset-indent-vars-to-global-values'."
     (el-patch-remove
       (message "Indentation variables are now local."))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Swift
-
-;; https://developer.apple.com/swift/
-
+;; Package `swift-mode' provides a major mode for Swift code. For more
+;; information on Swift, see https://developer.apple.com/swift/.
 (use-package swift-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; TeX
-
-;; Package `auctex' provides an integrated development environment for
-;; LaTeX [1] and friends.
-;;
-;; [1]: https://www.tug.org/begin.html
-
+;; Package `auctex' provides major modes for TeX code, including
+;; compiler and viewer integration. For more information on TeX, see
+;; https://www.tug.org/begin.html.
 (use-package tex
   :straight (auctex :host github :repo "raxod502/auctex"
                     :branch "fork/1"
@@ -596,9 +578,9 @@ FORCE is not nil."
           (TeX-auto-apply))
       (run-hooks 'TeX-update-style-hook)
       (el-patch-remove
-        (message "Applying style hooks... done"))))
+        (message "Applying style hooks...done"))))
 
-  (defun radian--advice-inhibit-style-loading-message
+  (defun radian-advice-tex-inhibit-style-loading-message
       (TeX-load-style-file file)
     "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
 This is an `:around' advice for `TeX-load-style-file'."
@@ -611,7 +593,7 @@ This is an `:around' advice for `TeX-load-style-file'."
       (funcall TeX-load-style-file file)))
 
   (advice-add #'TeX-load-style-file :around
-              #'radian--advice-inhibit-style-loading-message)
+              #'radian-advice-tex-inhibit-style-loading-message)
 
   (with-eval-after-load 'flycheck
 
@@ -700,9 +682,10 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   ;; errors, disable itself, and print a warning.
 
   (with-eval-after-load 'flycheck
-    (setf (flycheck-checker-get 'typescript-tslint 'predicate)
-          (lambda ()
-            (not (string-match-p "/node_modules/" default-directory))))))
+    (eval'
+     (setf (flycheck-checker-get 'typescript-tslint 'predicate)
+           (lambda ()
+             (not (string-match-p "/node_modules/" default-directory)))))))
 
 ;; TypeScript IDE for Emacs.
 (use-package tide

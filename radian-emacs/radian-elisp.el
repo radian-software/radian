@@ -6,7 +6,6 @@
 (require 'radian-eldoc)
 (require 'radian-indent)
 (require 'radian-lisp)
-(require 'radian-package)
 (require 'radian-patch)
 
 ;; Enable ElDoc for Elisp buffers and the *scratch* buffer.
