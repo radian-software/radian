@@ -5,7 +5,7 @@
 (require 'radian-autocomplete)
 (require 'radian-eldoc)
 (require 'radian-indent)
-(require 'radian-lisp)
+(require 'radian-langs)
 (require 'radian-patch)
 (require 'radian-util)
 

@@ -11,6 +11,11 @@
 (require 'radian-patch)
 (require 'radian-util)
 
+(use-feature lisp-mode
+  :config
+
+  (add-hook 'lisp-mode-hook #'aggressive-indent-mode))
+
 ;; Package `apples-mode' provides a major mode for AppleScript. For
 ;; more information on the language, see
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html.
@@ -178,11 +183,6 @@ This function calls `json-mode--update-auto-mode' to change the
   (el-patch-defvar json-mode--auto-mode-entry (json-mode--update-auto-mode json-mode-auto-mode-list)
     "Regexp generated from the `json-mode-auto-mode-list'."))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Markdown
-
-;;
-
 ;; Package `markdown-mode' provides syntax highlighting and structural
 ;; editing commands for Markdown. See
 ;; https://daringfireball.net/projects/markdown/ for more details on
@@ -218,8 +218,7 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
 
 ;; https://www.python.org/
 
-(use-package python
-  :straight nil
+(use-feature python
   :config
 
   (setq python-fill-docstring-style 'pep-257-nn))
@@ -282,8 +281,7 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
 
 ;; http://docutils.sourceforge.net/rst.html
 
-(use-package rst-mode
-  :straight nil
+(use-feature rst-mode
   :config
 
   ;; See: https://github.com/flycheck/flycheck/issues/953
@@ -303,8 +301,7 @@ This prevents it from signalling spurious errors."
 
 ;; https://www.ruby-lang.org/
 
-(use-package ruby-mode
-  :straight nil
+(use-feature ruby-mode
   :config
 
   (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
@@ -396,6 +393,17 @@ This prevents it from signalling spurious errors."
 
   :diminish racer-mode)
 
+;; Package `scheme' provides major modes for Scheme languages. For
+;; more information on Scheme, see http://www.schemers.org/.
+(use-feature scheme
+  :config
+
+  (add-hook 'scheme-mode-hook #'aggressive-indent-mode))
+
+;; Package `geiser' provides REPL integration for several
+;; implementations of Scheme.
+(use-package geiser)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Shell
 
@@ -403,8 +411,7 @@ This prevents it from signalling spurious errors."
 ;; https://www.gnu.org/software/bash/
 ;; http://www.zsh.org/
 
-(use-package sh-script
-  :straight nil
+(use-feature sh-script
   :init
 
   (el-patch-feature sh-script)
@@ -525,10 +532,9 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; Package `auctex' provides major modes for TeX code, including
 ;; compiler and viewer integration. For more information on TeX, see
 ;; https://www.tug.org/begin.html.
-(use-package tex
-  :straight (auctex :host github :repo "raxod502/auctex"
-                    :branch "fork/1"
-                    :files (:defaults (:exclude "doc/*.texi")))
+(straight-use-package 'auctex)
+
+(use-feature tex
   :init
 
   (el-patch-feature tex)
@@ -603,8 +609,7 @@ This is an `:around' advice for `TeX-load-style-file'."
 
     (add-hook 'TeX-mode-hook #'radian-tex-disable-checkers)))
 
-(use-package tex-buf
-  :straight auctex
+(use-feature tex-buf
   :config
 
   ;; Save buffers automatically when compiling, instead of prompting.
@@ -621,8 +626,7 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   (advice-add #'TeX-process-buffer-name :filter-return
               #'radian-advice-tex-hide-compilation-buffers))
 
-(use-package latex
-  :straight auctex
+(use-feature latex
   :config
 
   ;; Don't be afraid to break inline math between lines.
@@ -632,8 +636,7 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   ;; is to be used, via a file-local variable.
   (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
-(use-package font-latex
-  :straight auctex
+(use-feature font-latex
   :config
 
   ;; Prevent superscripts and subscripts from being displayed in a

@@ -132,23 +132,22 @@
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
-(use-package org-agenda
-  :straight org
+(use-feature org-agenda
   :bind (:map org-agenda-mode-map
 
-         ;; Prevent Org Agenda from overriding the bindings for
-         ;; windmove.
-         ("S-<up>" . nil)
-         ("S-<down>" . nil)
-         ("S-<left>" . nil)
-         ("S-<right>" . nil)
+              ;; Prevent Org Agenda from overriding the bindings for
+              ;; windmove.
+              ("S-<up>" . nil)
+              ("S-<down>" . nil)
+              ("S-<left>" . nil)
+              ("S-<right>" . nil)
 
-         ;; Same routine as above. Now for Org Agenda, we could use
-         ;; C-up and C-down because M-{ and M-} are bound to the same
-         ;; commands. But I think it's best to take the same approach
-         ;; as before, for consistency.
-         ("C-<left>" . org-agenda-do-date-earlier)
-         ("C-<right>" . org-agenda-do-date-later))
+              ;; Same routine as above. Now for Org Agenda, we could use
+              ;; C-up and C-down because M-{ and M-} are bound to the same
+              ;; commands. But I think it's best to take the same approach
+              ;; as before, for consistency.
+              ("C-<left>" . org-agenda-do-date-earlier)
+              ("C-<right>" . org-agenda-do-date-later))
   :config
 
   ;; Make the Org Agenda split the window horizontally (with two tall
