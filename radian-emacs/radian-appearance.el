@@ -43,7 +43,11 @@
   (set-face-attribute 'default nil :height radian-font-size)
 
   (when radian-window-maximize-on-startup
-    (add-to-list 'default-frame-alist '(fullscreen . maximized))))
+    (add-to-list 'default-frame-alist '(fullscreen . maximized)))
+
+  ;; Use the same font for fixed-pitch text as the rest of Emacs (you
+  ;; *are* using a monospace font, right?).
+  (set-face-attribute 'fixed-pitch nil :family 'unspecified))
 
 ;; Package `diminish' provides an easy way to change the display of
 ;; minor modes in the mode line. It provides a single function,

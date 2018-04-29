@@ -35,7 +35,7 @@ This function is to be placed on `dired-mode-hook'."
 
 (add-hook 'dired-mode-hook #'radian--silence-auto-revert-mode)
 
-(el-patch-feature dired nil)
+(el-patch-feature dired)
 
 (with-eval-after-load 'dired
 

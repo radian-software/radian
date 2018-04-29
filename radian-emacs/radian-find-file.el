@@ -371,9 +371,9 @@ This is a function for `after-save-hook'. Remove
   ;; My fork remaps the 'f' action to do a find-file rather than just
   ;; the same as pressing M-o again.
   :straight (:host github
-             :repo "raxod502/counsel-projectile"
-             :upstream (:host github
-                        :repo "ericdanan/counsel-projectile"))
+                   :repo "raxod502/counsel-projectile"
+                   :upstream (:host github
+                                    :repo "ericdanan/counsel-projectile"))
   :init
 
   ;; Lazy-load `counsel-projectile'.
@@ -436,16 +436,6 @@ This is a function for `after-save-hook'. Remove
   ;; actually load the package, though.
   (with-eval-after-load 'projectile
     (counsel-projectile-toggle 1)))
-
-(use-package ffap
-  :straight nil
-  :config
-
-  ;; Don't try to find URLs or remote machines.
-  (setq ffap-url-regexp nil)
-  (setq ffap-machine-p-local 'reject)
-  (setq ffap-machine-p-known 'reject)
-  (setq ffap-machine-p-unknown 'reject))
 
 (provide 'radian-find-file)
 

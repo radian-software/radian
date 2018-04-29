@@ -31,7 +31,25 @@
 
 ;; https://www.haskell.org/
 
-(use-package haskell-mode)
+;; Package `haskell-mode' provides syntax highlighting, indentation,
+;; and interactive REPL integration for Haskell code.
+(use-package haskell-mode
+  :config
+
+  ;; Disable in-buffer underlining of errors and warnings, since we
+  ;; already have them from Flycheck.
+  (setq haskell-process-show-overlays nil)
+
+  ;; Enable REPL integration when editing Haskell files.
+  (add-hook 'haskell-mode-hook #'interactive-haskell-mode))
+
+;; Package `hindent' provides a way to invoke the Haskell code
+;; formatter of the same name as a `fill-paragraph' replacement.
+(use-package hindent
+  :init
+
+  (with-eval-after-load 'haskell-mode
+    (add-hook 'haskell-mode-hook #'hindent-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HTML
@@ -173,10 +191,37 @@ This function calls `json-mode--update-auto-mode' to change the
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Markdown
 
-;; https://daringfireball.net/projects/markdown/
+;;
 
+;; Package `markdown-mode' provides syntax highlighting and structural
+;; editing commands for Markdown. See
+;; https://daringfireball.net/projects/markdown/ for more details on
+;; Markdown.
 (use-package markdown-mode
-  :mode "\\.mmark\\'")
+  :init
+
+  ;; Redefine the `auto-mode-alist' entries provided by
+  ;; `markdown-mode', because `markdown-mode' adds them to the end of
+  ;; the list, and in Emacs 26 an earlier entry takes precedence to
+  ;; cause files named "CHANGELOG.md" to open in ChangeLog mode
+  ;; instead of Markdown mode.
+  (dolist (regex '("\\.md\\'" "\\.markdown\\'"))
+    (setq auto-mode-alist
+          (cl-remove regex auto-mode-alist :test #'equal :key #'car))
+    (add-to-list 'auto-mode-alist `(,regex . markdown-mode)))
+
+  :mode (;; Extension used by Hugo.
+         ("\\.mmark\\'" . markdown-mode))
+  :config
+
+  (defalias 'radian-advice-markdown-disable-metadata-fontification #'ignore
+    "Disable fontification of YAML front-matter in `markdown-mode'.
+This is an `:override' advice for
+`markdown-match-generic-metadata'. See also
+https://github.com/jrblevin/markdown-mode/issues/328.")
+
+  (advice-add #'markdown-match-generic-metadata :override
+              #'radian-advice-markdown-disable-metadata-fontification))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Python
@@ -372,7 +417,7 @@ This prevents it from signalling spurious errors."
   :straight nil
   :init
 
-  (el-patch-feature sh-script nil)
+  (el-patch-feature sh-script)
 
   :config
 
@@ -435,10 +480,10 @@ whose value is the shell name (don't quote it)."
                          (intern (format "sh-smie-%s-%s"
                                          sh-indent-supported-here name)))))
             (add-function :around (local 'smie--hanging-eolp-function)
-              (lambda (orig)
-                (if (looking-at "[ \t]*\\\\\n")
-                    (goto-char (match-end 0))
-                  (funcall orig))))
+                          (lambda (orig)
+                            (if (looking-at "[ \t]*\\\\\n")
+                                (goto-char (match-end 0))
+                              (funcall orig))))
             (add-hook 'smie-indent-functions #'sh-smie--indent-continuation nil t)
             (smie-setup (symbol-value (funcall mksym "grammar"))
                         (funcall mksym "rules")
@@ -504,7 +549,7 @@ command `sh-reset-indent-vars-to-global-values'."
                     :files (:defaults (:exclude "doc/*.texi")))
   :init
 
-  (el-patch-feature tex auctex)
+  (el-patch-feature tex)
 
   :config
 
@@ -566,7 +611,15 @@ This is an `:around' advice for `TeX-load-style-file'."
       (funcall TeX-load-style-file file)))
 
   (advice-add #'TeX-load-style-file :around
-              #'radian--advice-inhibit-style-loading-message))
+              #'radian--advice-inhibit-style-loading-message)
+
+  (with-eval-after-load 'flycheck
+
+    (defun radian-tex-disable-checkers ()
+      "Disable chktex and lacheck in TeX buffers."
+      (setq-local flycheck-disabled-checkers '(tex-chktex tex-lacheck)))
+
+    (add-hook 'TeX-mode-hook #'radian-tex-disable-checkers)))
 
 (use-package tex-buf
   :straight auctex
@@ -596,6 +649,23 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   ;; Make it possible for a document to specify whether or not Biber
   ;; is to be used, via a file-local variable.
   (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
+
+(use-package font-latex
+  :straight auctex
+  :config
+
+  ;; Prevent superscripts and subscripts from being displayed in a
+  ;; different font size.
+  (setq font-latex-fontify-script nil)
+
+  ;; Prevent section headers from being displayed in different font
+  ;; sizes.
+  (setq font-latex-fontify-sectioning 1)
+
+  ;; If faces were already defined, then we need to explicitly ask for
+  ;; them to be updated after changing configuration.
+  (when (featurep 'font-latex)
+    (font-latex-update-sectioning-faces)))
 
 ;; Company integration for AUCTeX.
 (use-package company-auctex
