@@ -44,7 +44,17 @@
   :init
 
   (with-eval-after-load 'haskell-mode
-    (add-hook 'haskell-mode-hook #'hindent-mode)))
+
+    ;; Don't enable `hindent-mode' in `literate-haskell-mode'. See
+    ;; https://github.com/commercialhaskell/hindent/issues/496.
+
+    (defun radian-haskell-maybe-hindent-mode (&optional arg)
+      "Enable `hindent-mode' if not in `literate-haskell-mode'.
+ARG is passed to `hindent-mode' toggle function."
+      (unless (derived-mode-p 'literate-haskell-mode)
+        (hindent-mode arg)))
+
+    (add-hook 'haskell-mode-hook #'radian-haskell-maybe-hindent-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HTML
