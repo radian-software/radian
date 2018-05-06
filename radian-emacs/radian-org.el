@@ -46,10 +46,7 @@
          ;; otherwise there would be no easy way to invoke
          ;; `org-backward-paragraph' and `org-forward-paragraph'.)
          ([remap backward-paragraph] . org-backward-paragraph)
-         ([remap forward-paragraph] . org-forward-paragraph)
-
-         ;; Very convenient keybinding for inserting a new heading.
-         ("M-RET" . org-insert-heading))
+         ([remap forward-paragraph] . org-forward-paragraph))
   :init
 
   ;; The following is a temporary hack until straight.el supports
