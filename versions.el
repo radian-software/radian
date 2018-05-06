@@ -3,6 +3,7 @@
  ("anaconda-mode" . "1e7c9322c1ef395c4c4585bb29f5a421f2aa3077")
  ("apache-mode" . "8fd0d4db7ede5d4e360630235ede3beb1ba56cdf")
  ("apples-mode" . "83a9ab0d6ba82496e2f7df386909b1a55701fccb")
+ ("auctex" . "5f007f11d52f3460244fe8486d5eb3dfd39cbdfe")
  ("avy" . "228ed97d07d51e369eb6ad27bf408c5b3218a23b")
  ("buffer-move" . "cb517ecf8409b5fdcda472d7190c6021f0c49751")
  ("cider" . "918789346ec9b06991050e5be13e70641b6add47")

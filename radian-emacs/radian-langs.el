@@ -542,7 +542,9 @@ command `sh-reset-indent-vars-to-global-values'."
 ;; Package `auctex' provides major modes for TeX code, including
 ;; compiler and viewer integration. For more information on TeX, see
 ;; https://www.tug.org/begin.html.
-(straight-use-package 'auctex)
+(straight-use-package '(auctex :host github :repo "raxod502/auctex"
+                               :branch "fork/1"
+                               :files (:defaults (:exclude "doc/*.texi"))))
 
 (use-feature tex
   :init
