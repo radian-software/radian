@@ -78,7 +78,7 @@
  ("smartparens" . "65fbcfc849afb89e2642f9b87f66e6a96382f88c")
  ("smex" . "55aaebe3d793c2c990b39a302eb26c184281c42c")
  ("ssh-config-mode-el" . "c6dc66b6678605f0df8eb61778b10ae21eb7caf5")
- ("straight.el" . "29ee01dcb7faf4eca1b5e79344e84b81c27ac0ae")
+ ("straight.el" . "359ae97dca65e67591aaffb021b250d1d83de33f")
  ("swift-mode" . "e91e924c225b7bfb7aa6e4a84b5d379c6268014a")
  ("swiper" . "384ffffda8138530a9c2c765f0a3bf8a646e777b")
  ("sx.el" . "8f1e3346286cfa5a5299ef192cc5aca3f37a7745")
