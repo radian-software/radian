@@ -76,7 +76,8 @@ Nil means no keybinding is established."
 (bind-keys
  ("C-h C-f" . find-function)
  ("C-h C-v" . find-variable)
- ("C-h C-o" . find-symbol))
+ ("C-h C-o" . find-symbol)
+ ("C-h C-l" . find-library))
 
 ;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
 ;; Interaction" in the mode line.
