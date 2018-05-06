@@ -146,7 +146,7 @@ The libraries are offered from `load-path'."
                 (el-patch-add
                   :sort t))))
 
-  :diminish t)
+  :diminish counsel-mode)
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts. It is not published to MELPA, so we
