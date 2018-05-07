@@ -153,7 +153,13 @@ The libraries are offered from `load-path'."
 ;; must define a recipe here.
 (use-package prescient
   :straight (:host github :repo "raxod502/prescient.el"
-                   :files ("prescient.el")))
+                   :files ("prescient.el"))
+  :demand t
+  :after ivy
+  :config
+
+  ;; Remember usage statistics across Emacs sessions.
+  (prescient-persist-mode +1))
 
 ;; Package `ivy-prescient' provides intelligent sorting and filtering
 ;; for candidates in Ivy menus.
