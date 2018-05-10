@@ -2,7 +2,6 @@
 
 (require 'map)
 
-(require 'radian-autocomplete)
 (require 'radian-check)
 (require 'radian-eldoc)
 (require 'radian-util)

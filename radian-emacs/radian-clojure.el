@@ -2,7 +2,6 @@
 
 (require 'map)
 
-(require 'radian-autocomplete)
 (require 'radian-eldoc)
 (require 'radian-indent)
 (require 'radian-langs)
