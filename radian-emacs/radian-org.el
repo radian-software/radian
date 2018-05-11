@@ -94,6 +94,18 @@
   ;; end of the current entry.
   (setq org-insert-heading-respect-content t)
 
+  ;; But add a new keybinding for recovering the old behavior.
+
+  (defun radian-org-insert-heading-at-point ()
+    "Insert heading without respecting content.
+This runs `org-insert-heading' with
+`org-insert-heading-respect-content' bound to nil."
+    (interactive)
+    (let ((org-insert-heading-respect-content nil))
+      (org-insert-heading)))
+
+  (bind-key "M-S-RET" #'radian-org-insert-heading-at-point org-mode-map)
+
   ;; When you create a sparse tree and `org-indent-mode' is enabled,
   ;; the highlighting destroys the invisibility added by
   ;; `org-indent-mode'. Therefore, don't highlight when creating a
