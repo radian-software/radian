@@ -74,8 +74,6 @@ Minibuffer bindings:
 (use-package counsel
   :init
 
-  (el-patch-feature counsel)
-
   ;; Lazy-load `counsel'.
 
   (el-patch-defvar counsel-mode-map
@@ -150,18 +148,6 @@ This is an `:around' advice for `ivy-read'."
     (apply ivy-read prompt collection rest))
 
   (advice-add #'ivy-read :around #'radian-advice-counsel-override-sort)
-
-  (el-patch-defun counsel-find-library ()
-    "Visit a selected the Emacs Lisp library.
-The libraries are offered from `load-path'."
-    (interactive)
-    (let ((cands (counsel-library-candidates)))
-      (ivy-read "Find library: " cands
-                :action #'counsel--find-symbol
-                :keymap counsel-describe-map
-                :caller 'counsel-find-library
-                (el-patch-add
-                  :sort t))))
 
   :diminish counsel-mode)
 
