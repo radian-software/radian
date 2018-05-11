@@ -87,6 +87,9 @@
 
   (provide 'org-version)
 
+  :bind (:map org-mode-map
+              ("C-M-RET" . radian-org-insert-heading-at-point)
+              ("C-M-<return>" . radian-org-insert-heading-at-point))
   :config
 
   ;; If you try to insert a heading in the middle of an entry, don't
@@ -103,8 +106,6 @@ This runs `org-insert-heading' with
     (interactive)
     (let ((org-insert-heading-respect-content nil))
       (org-insert-heading)))
-
-  (bind-key "M-S-RET" #'radian-org-insert-heading-at-point org-mode-map)
 
   ;; When you create a sparse tree and `org-indent-mode' is enabled,
   ;; the highlighting destroys the invisibility added by
