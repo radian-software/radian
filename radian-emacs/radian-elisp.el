@@ -48,7 +48,7 @@ Nil means no keybinding is established."
   (interactive)
   (message "Evaluating %s..." (buffer-name))
   (straight-transaction
-    (if (null buffer-file-name)
+    (if (or (null buffer-file-name) (buffer-modified-p))
         (eval-buffer)
       (when (string= buffer-file-name user-init-file)
         (straight-mark-transaction-as-init))
