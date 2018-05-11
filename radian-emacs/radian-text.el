@@ -35,7 +35,25 @@ file."
 
   (radian-trim-whitespace-global-mode +1)
 
-  (put 'radian-trim-whitespace-mode 'safe-local-variable #'booleanp))
+  (put 'radian-trim-whitespace-mode 'safe-local-variable #'booleanp)
+
+  (defun radian-advice-stop-kill-at-whitespace (kill-line &rest args)
+    "Prevent `kill-line' from killing through whitespace to a newline.
+This affects the case where you press \\[kill-line] when point is
+followed by some whitespace and then a newline. Without this
+advice, \\[kill-line] will kill both the whitespace and the
+newline, which is inconsistent with its behavior when the
+whitespace is replaced with non-whitespace. With this advice,
+\\[kill-line] will kill just the whitespace, and another
+invocation will kill the newline.
+
+This is an `:around' advice for `kill-line'. KILL-LINE is the
+original definition of `kill-line' and ARGS are the arguments
+that were passed to it."
+    (let ((show-trailing-whitespace t))
+      (apply kill-line args)))
+
+  (advice-add #'kill-line :around #'radian-advice-stop-kill-at-whitespace))
 
 (use-feature paragraphs
   :config
