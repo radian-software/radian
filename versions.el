@@ -65,7 +65,7 @@
  ("peg.el" . "081efeca91d790c7fbc90871ac22c40935f4833b")
  ("pip-requirements.el" . "babe44af1132fb05748c7ee098a4226b9e31eb76")
  ("pkg-info.el" . "76ba7415480687d05a4353b27fea2ae02b8d9d61")
- ("prescient.el" . "7acba2b33f52baa39cada8a7274c994a543a0921")
+ ("prescient.el" . "3984f7eedfdd2334fb12fe64d7f42e8c453b3a4c")
  ("profile-dotemacs" . "520c18c8023703c05aaffb9e2926b5006d3dbc28")
  ("projectile" . "56e262dd3b5998d0dc6a590d06bc11058839c588")
  ("pythonic" . "87475def246b84339f464e80c76c7e7fcc2e780a")

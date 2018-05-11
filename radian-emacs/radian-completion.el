@@ -133,6 +133,24 @@ replacements. "
 
   :config
 
+  (defvar radian-counsel-sort-commands
+    '(counsel-find-library counsel-find-file)
+    "List of commands which should have their candidates always sorted.")
+
+  (cl-defun radian-advice-counsel-override-sort
+      (ivy-read prompt collection &rest rest &key caller &allow-other-keys)
+    "Delegate to `ivy-read', overriding `:sort' depending on CALLER.
+Specifically, if CALLER appears in
+`radian-counsel-sort-commands', then override `:sort' to non-nil
+unconditionally.
+
+This is an `:around' advice for `ivy-read'."
+    (when (memq caller radian-counsel-sort-commands)
+      (setq rest (append '(:sort t) rest)))
+    (apply ivy-read prompt collection rest))
+
+  (advice-add #'ivy-read :around #'radian-advice-counsel-override-sort)
+
   (el-patch-defun counsel-find-library ()
     "Visit a selected the Emacs Lisp library.
 The libraries are offered from `load-path'."
