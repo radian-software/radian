@@ -230,6 +230,7 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
 (use-feature python
   :config
 
+  ;; Slightly less offensive Python docstring style.
   (setq python-fill-docstring-style 'pep-257-nn))
 
 ;; Integrated development environment for Python.
