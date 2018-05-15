@@ -1,4 +1,4 @@
-;;; radian-browse.el --- Browsing the web
+;;; radian-network.el --- Network connections and web browsing
 
 (require 'radian-os)
 
@@ -37,4 +37,4 @@
 
 (provide 'radian-network)
 
-;;; radian-browse.el ends here
+;;; radian-network.el ends here
