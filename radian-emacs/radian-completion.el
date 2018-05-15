@@ -69,6 +69,11 @@ Minibuffer bindings:
   ;; as the initial input is pretty useless.)
   (setq ivy-initial-inputs-alist nil)
 
+  ;; With enough packages loaded, it is easy to get commands like
+  ;; `describe-symbol' to offer more than 30,000 candidates. Allow
+  ;; sorting in these cases.
+  (setq ivy-sort-max-size 50000)
+
   :diminish ivy-mode)
 
 ;; Package `counsel' provides purpose-built replacements for many
