@@ -63,7 +63,10 @@ Minibuffer bindings:
 
   ;; Allow arbitrary substring matching (not requiring matches to
   ;; start at the beginning of a candidate) for all commands, by
-  ;; default.
+  ;; default. (This is particularly useful in light of the fact that
+  ;; `prescient', configured below, does not support using a leading
+  ;; caret (^) to match the beginning of a string, so having a caret
+  ;; as the initial input is pretty useless.)
   (setq ivy-initial-inputs-alist nil)
 
   :diminish ivy-mode)
