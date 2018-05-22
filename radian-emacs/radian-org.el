@@ -6,6 +6,8 @@
 
 (require 'radian-bind-key)
 (require 'radian-git)
+(require 'radian-patch)
+(require 'radian-util)
 
 (define-globalized-minor-mode global-outline-minor-mode
   outline-minor-mode outline-minor-mode)
@@ -190,6 +192,48 @@ This is an `:around' advice for `org-agenda'. It commutes with
 
   (advice-add #'org-agenda :around
               #'radian--advice-org-agenda-default-directory))
+
+(use-feature org-clock
+  :config
+
+  ;; Automatically save current clock state between Emacs sessions.
+  (setq org-clock-persist t)
+  (org-clock-persistence-insinuate)
+
+  ;; Silence the messages that are usually printed when the clock data
+  ;; is loaded from disk.
+  (el-patch-defun org-clock-load ()
+    "Load clock-related data from disk, maybe resuming a stored clock."
+    (when (and org-clock-persist (not org-clock-loaded))
+      (if (not (file-readable-p org-clock-persist-file))
+	  (el-patch-swap
+            (message "Not restoring clock data; %S not found" org-clock-persist-file)
+            nil)
+        (el-patch-remove
+          (message "Restoring clock data"))
+        ;; Load history.
+        (el-patch-wrap 1
+          (radian-with-silent-load
+           (load-file org-clock-persist-file)))
+        (setq org-clock-loaded t)
+        (pcase-dolist (`(,(and file (pred file-exists-p)) . ,position)
+		       org-clock-stored-history)
+	  (org-clock-history-push position (find-file-noselect file)))
+        ;; Resume clock.
+        (pcase org-clock-stored-resume-clock
+	  (`(,(and file (pred file-exists-p)) . ,position)
+	   (with-current-buffer (find-file-noselect file)
+	     (when (or (not org-clock-persist-query-resume)
+		       (y-or-n-p (format "Resume clock (%s) "
+				         (save-excursion
+					   (goto-char position)
+					   (org-get-heading t t)))))
+	       (goto-char position)
+	       (let ((org-clock-in-resume 'auto-restart)
+		     (org-clock-auto-clock-resolution nil))
+	         (org-clock-in)
+	         (when (org-invisible-p) (org-show-context))))))
+	  (_ nil))))))
 
 (provide 'radian-org)
 
