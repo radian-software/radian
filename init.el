@@ -36,158 +36,157 @@
               radian-minimum-emacs-version emacs-version)
 
       ;; We have a modern Emacs, proceed with init.
-      (unwind-protect
-          (with-demoted-errors "%S"
+      (with-demoted-errors "%S"
 
-            ;; Require some libraries that everyone needs, just to be
-            ;; explicit about it.
-            (require 'cl-lib)
-            (require 'subr-x)
+        ;; Require some libraries that everyone needs, just to be
+        ;; explicit about it.
+        (require 'cl-lib)
+        (require 'subr-x)
 
-            (defvar radian-directory
-              (let ((link-target
-                     ;; This function returns the target of the link.
-                     ;; If the init-file is not a symlink, then we
-                     ;; abort.
-                     (file-symlink-p
-                      (or
-                       ;; If we are loading the init-file normally,
-                       ;; then the filename is in `load-file-name'.
-                       load-file-name
-                       ;; Otherwise, that's nil and the filename is in
-                       ;; `buffer-file-name' (this will happen if you
-                       ;; `eval-buffer' for example).
-                       buffer-file-name))))
-                ;; We identify a directory as the Radian repository by
-                ;; the existence of a "radian-emacs" folder inside it.
-                ;; Note that the previous check does disallow copying
-                ;; the init-file and radian-emacs folder into
-                ;; ~/.emacs.d, which is fine as that is a ridiculous
-                ;; use case.
-                (when (and
-                       link-target
-                       (file-directory-p (expand-file-name
-                                          "radian-emacs/"
-                                          (file-name-directory link-target))))
-                  (file-name-directory
-                   (file-truename link-target))))
-              "Path to the Radian repository, or nil if not found.
+        (defvar radian-directory
+          (let ((link-target
+                 ;; This function returns the target of the link.
+                 ;; If the init-file is not a symlink, then we
+                 ;; abort.
+                 (file-symlink-p
+                  (or
+                   ;; If we are loading the init-file normally,
+                   ;; then the filename is in `load-file-name'.
+                   load-file-name
+                   ;; Otherwise, that's nil and the filename is in
+                   ;; `buffer-file-name' (this will happen if you
+                   ;; `eval-buffer' for example).
+                   buffer-file-name))))
+            ;; We identify a directory as the Radian repository by
+            ;; the existence of a "radian-emacs" folder inside it.
+            ;; Note that the previous check does disallow copying
+            ;; the init-file and radian-emacs folder into
+            ;; ~/.emacs.d, which is fine as that is a ridiculous
+            ;; use case.
+            (when (and
+                   link-target
+                   (file-directory-p (expand-file-name
+                                      "radian-emacs/"
+                                      (file-name-directory link-target))))
+              (file-name-directory
+               (file-truename link-target))))
+          "Path to the Radian repository, or nil if not found.
 This is an absolute path.")
 
-            (defvar radian-lib-directory
-              (and radian-directory
-                   (expand-file-name "radian-emacs/" radian-directory))
-              "Path to the Radian Emacs libraries, or nil if not found.
+        (defvar radian-lib-directory
+          (and radian-directory
+               (expand-file-name "radian-emacs/" radian-directory))
+          "Path to the Radian Emacs libraries, or nil if not found.
 This is an absolute path.")
 
-            ;; Fail fast if we can't find the Radian libraries.
-            (unless radian-directory
-              (error "Couldn't find Radian repository"))
+        ;; Fail fast if we can't find the Radian libraries.
+        (unless radian-directory
+          (error "Couldn't find Radian repository"))
 
-            ;; Tell straight.el about the profiles we are going to be
-            ;; using.
-            (setq straight-profiles
-                  '((radian . "radian.el")
-                    (radian-local . "radian-local.el")
-                    (nil . "default.el")))
+        ;; Tell straight.el about the profiles we are going to be
+        ;; using.
+        (setq straight-profiles
+              '((radian . "radian.el")
+                (radian-local . "radian-local.el")
+                (nil . "default.el")))
 
-            ;; Use the develop branch of straight.el on Radian's
-            ;; develop branch. (On master of Radian, we use the master
-            ;; branch of straight.el.)
-            (setq straight-repository-branch "develop")
+        ;; Use the develop branch of straight.el on Radian's
+        ;; develop branch. (On master of Radian, we use the master
+        ;; branch of straight.el.)
+        (setq straight-repository-branch "develop")
 
-            (defvar radian-after-init-hook nil
-              "Hook run after Radian init has finished.
+        (defvar radian-after-init-hook nil
+          "Hook run after Radian init has finished.
 This is where you should probably add most of your local init
 code.")
 
-            ;; Allow to disable local customizations with a
-            ;; command-line argument.
-            (if (member "--no-local" command-line-args)
-                (progn
-                  ;; Make sure to delete --no-local from the list,
-                  ;; because otherwise Emacs will issue a warning
-                  ;; about the unknown argument.
-                  (setq command-line-args
-                        (delete "--no-local" command-line-args)))
+        ;; Allow to disable local customizations with a
+        ;; command-line argument.
+        (if (member "--no-local" command-line-args)
+            (progn
+              ;; Make sure to delete --no-local from the list,
+              ;; because otherwise Emacs will issue a warning
+              ;; about the unknown argument.
+              (setq command-line-args
+                    (delete "--no-local" command-line-args)))
 
-              ;; Load local customizations. We disable eager
-              ;; macroexpansion here, since otherwise bad things can
-              ;; happen with e.g. `el-patch' as the package management
-              ;; system has not yet been loaded. See [1] for the hack
-              ;; used to disable eager macroexpansion.
-              ;;
-              ;; [1]: https://emacs.stackexchange.com/a/17329/12534
-              (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
-                (fmakunbound 'internal-macroexpand-for-load)
-                (load radian-local-init-file 'noerror 'nomessage)))
+          ;; Load local customizations. We disable eager
+          ;; macroexpansion here, since otherwise bad things can
+          ;; happen with e.g. `el-patch' as the package management
+          ;; system has not yet been loaded. See [1] for the hack
+          ;; used to disable eager macroexpansion.
+          ;;
+          ;; [1]: https://emacs.stackexchange.com/a/17329/12534
+          (cl-letf (((symbol-function #'internal-macroexpand-for-load) nil))
+            (fmakunbound 'internal-macroexpand-for-load)
+            (load radian-local-init-file 'noerror 'nomessage)))
 
-            ;; Make the Radian libraries available.
-            (add-to-list 'load-path (directory-file-name radian-lib-directory))
+        ;; Make the Radian libraries available.
+        (add-to-list 'load-path (directory-file-name radian-lib-directory))
 
-            ;; Load the Radian libraries.
-            (let ((preloaded-features
-                   '(;; Compatibility functions may be needed
-                     ;; anywhere, as they modify functions outside of
-                     ;; the usual `require' tree.
-                     radian-compat
-                     ;; The package management layer is used almost
-                     ;; everywhere, and now that we use the
-                     ;; `use-feature' macro, it's used basically
-                     ;; everywhere else too.
-                     radian-package
-                     ;; no-littering changes lots of paths and needs
-                     ;; to be loaded as soon as possible.
-                     radian-emacsd
-                     ;; We want to avoid the Emacs-provided Org
-                     ;; getting loaded, so we should load our Org as
-                     ;; soon as possible.
-                     radian-org))
-                  (radian-features (mapcar
-                                    (lambda (file)
-                                      (intern (string-remove-suffix ".el" file)))
-                                    (directory-files
-                                     radian-lib-directory nil
-                                     "^[a-z-]+\\.el$")))
-                  ;; Any packages installed here are official Radian
-                  ;; packages.
-                  (straight-current-profile 'radian)
-                  (success t))
+        ;; Load the Radian libraries.
+        (let ((preloaded-features
+               '(;; Compatibility functions may be needed
+                 ;; anywhere, as they modify functions outside of
+                 ;; the usual `require' tree.
+                 radian-compat
+                 ;; The package management layer is used almost
+                 ;; everywhere, and now that we use the
+                 ;; `use-feature' macro, it's used basically
+                 ;; everywhere else too.
+                 radian-package
+                 ;; no-littering changes lots of paths and needs
+                 ;; to be loaded as soon as possible.
+                 radian-emacsd
+                 ;; We want to avoid the Emacs-provided Org
+                 ;; getting loaded, so we should load our Org as
+                 ;; soon as possible.
+                 radian-org))
+              (radian-features (mapcar
+                                (lambda (file)
+                                  (intern (string-remove-suffix ".el" file)))
+                                (directory-files
+                                 radian-lib-directory nil
+                                 "^[a-z-]+\\.el$")))
+              ;; Any packages installed here are official Radian
+              ;; packages.
+              (straight-current-profile 'radian)
+              (success t))
 
-              ;; First we need to unload all the features, so that the
-              ;; init-file can be reloaded to pick up changes.
-              (dolist (feature radian-features)
-                (setq features (remove feature features)))
+          ;; First we need to unload all the features, so that the
+          ;; init-file can be reloaded to pick up changes.
+          (dolist (feature radian-features)
+            (setq features (remove feature features)))
 
-              ;; Now load features that should be loaded first. If
-              ;; errors occur while loading them, don't even try to
-              ;; proceed with init.
-              (dolist (feature preloaded-features)
-                (require feature))
+          ;; Now load features that should be loaded first. If
+          ;; errors occur while loading them, don't even try to
+          ;; proceed with init.
+          (dolist (feature preloaded-features)
+            (require feature))
 
-              ;; And then the rest of the features. If they fail to
-              ;; load, maybe we can keep going, as long as we note
-              ;; that there was an error.
-              (dolist (feature radian-features)
-                (unless (member feature preloaded-features)
-                  (condition-case-unless-debug error-data
-                      (require feature)
-                    (error
-                     (setq success nil)
-                     (warn "Could not load `%S': %s" feature
-                           (error-message-string error-data))))))
+          ;; And then the rest of the features. If they fail to
+          ;; load, maybe we can keep going, as long as we note
+          ;; that there was an error.
+          (dolist (feature radian-features)
+            (unless (member feature preloaded-features)
+              (condition-case-unless-debug error-data
+                  (require feature)
+                (error
+                 (setq success nil)
+                 (warn "Could not load `%S': %s" feature
+                       (error-message-string error-data))))))
 
-              ;; Run local customizations that are supposed to be run
-              ;; after init. Any packages installed here are
-              ;; user-local packages. (Packages installed
-              ;; interactively do not belong to either `radian' or
-              ;; `radian-local', and should not be written to either
-              ;; lockfile.)
-              (let ((straight-current-profile 'radian-local))
-                (run-hooks 'radian-after-init-hook))
+          ;; Run local customizations that are supposed to be run
+          ;; after init. Any packages installed here are
+          ;; user-local packages. (Packages installed
+          ;; interactively do not belong to either `radian' or
+          ;; `radian-local', and should not be written to either
+          ;; lockfile.)
+          (let ((straight-current-profile 'radian-local))
+            (run-hooks 'radian-after-init-hook))
 
-              ;; Prune the build cache for straight.el; this will
-              ;; prevent it from growing too large. Only do this if we
-              ;; definitely loaded all desired packages, however.
-              (when success
-                (straight-prune-build-cache))))))))
+          ;; Prune the build cache for straight.el; this will
+          ;; prevent it from growing too large. Only do this if we
+          ;; definitely loaded all desired packages, however.
+          (when success
+            (straight-prune-build-cache)))))))
