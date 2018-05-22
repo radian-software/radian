@@ -138,7 +138,11 @@ code.")
                      radian-package
                      ;; no-littering changes lots of paths and needs
                      ;; to be loaded as soon as possible.
-                     radian-emacsd))
+                     radian-emacsd
+                     ;; We want to avoid the Emacs-provided Org
+                     ;; getting loaded, so we should load our Org as
+                     ;; soon as possible.
+                     radian-org))
                   (radian-features (mapcar
                                     (lambda (file)
                                       (intern (string-remove-suffix ".el" file)))
