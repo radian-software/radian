@@ -5,7 +5,7 @@
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
-  :straight (:host github :repo "raxod502/flycheck" :branch "fork/1"
+  :straight (:host github :repo "raxod502/flycheck" :branch "fork/2"
                    :upstream (:host github :repo "flycheck/flycheck"
                                     :branch "master"))
   :init
