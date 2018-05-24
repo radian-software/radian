@@ -19,7 +19,6 @@
  ("dash.el" . "1e14307e2d829d3e4d502991d572eb9a5d7f173f")
  ("diminish.el" . "d5c61a14e1a5590a65f83c099a5bd42fcadff24d")
  ("dockerfile-mode" . "3c6bc90360a2df53caad1721ee4c8285e2e22369")
- ("editorconfig-emacs" . "1543835ce00412c3cd34a61497af5f68ead250a6")
  ("edn.el" . "be9e32d1b49e35247b263b0243df7cfdc8d413ab")
  ("el-patch" . "e385093725c7bdf18d66b2a0205ddd09cfe9e1bb")
  ("elpa" . "299dbf6bbc233a87e65de54b863930a9ad220efe")
