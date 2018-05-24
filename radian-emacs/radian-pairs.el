@@ -108,6 +108,9 @@
   (dolist (mode '(python-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian-enter-and-indent-sexp "RET")
+                     (radian-enter-and-indent-sexp "<return>")))
+    (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
+                   '((radian-enter-and-indent-sexp "RET")
                      (radian-enter-and-indent-sexp "<return>")))))
 
 (provide 'radian-pairs)
