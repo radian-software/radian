@@ -15,7 +15,14 @@ Interactively, reverse the characters in the current region."
     (insert
      (reverse
       (delete-and-extract-region
-       beg end)))))
+       beg end))))
+
+  ;; Trigger auto-fill after punctutation characters, not just
+  ;; whitespace.
+  (mapcar
+   (lambda (c)
+     (set-char-table-range auto-fill-chars c t))
+   ".!?)"))
 
 (use-feature simple
   :config
