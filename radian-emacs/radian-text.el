@@ -22,7 +22,7 @@ Interactively, reverse the characters in the current region."
   (mapcar
    (lambda (c)
      (set-char-table-range auto-fill-chars c t))
-   ".!?)"))
+   "!-=+]};:'\",.?"))
 
 (use-feature simple
   :config
