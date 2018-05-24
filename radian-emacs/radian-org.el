@@ -194,11 +194,13 @@ This is an `:around' advice for `org-agenda'. It commutes with
               #'radian--advice-org-agenda-default-directory))
 
 (use-feature org-clock
-  :config
+  :init
 
   ;; Automatically save current clock state between Emacs sessions.
   (setq org-clock-persist t)
   (org-clock-persistence-insinuate)
+
+  :config
 
   ;; Silence the messages that are usually printed when the clock data
   ;; is loaded from disk.
