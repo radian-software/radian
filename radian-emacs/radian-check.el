@@ -8,9 +8,7 @@
   :straight (:host github :repo "raxod502/flycheck" :branch "fork/2"
                    :upstream (:host github :repo "flycheck/flycheck"
                                     :branch "master"))
-  :init
-
-  :defer 3
+  :demand t
   :config
 
   ;; Enable `flycheck' everywhere unless otherwise specified.
