@@ -9,6 +9,16 @@
 ;; improvement over the default Emacs interface for candidate
 ;; selection.
 (use-package ivy
+  :straight (
+             :host github
+             :repo "raxod502/swiper"
+             :files (:defaults (:exclude
+                                "swiper.el"
+                                "counsel.el"
+                                "ivy-hydra.el")
+                               "doc/ivy-help.org")
+             :branch "fork/1"
+             :upstream (:host github :repo "abo-abo/swiper"))
   :init
 
   ;; Lazy-load `ivy'.
@@ -136,26 +146,6 @@ replacements. "
 
   ;; Diminish the lazy-loaded version of `counsel-mode'.
   (diminish 'counsel-mode)
-
-  :config
-
-  (defvar radian-counsel-sort-commands
-    '(counsel-find-library counsel-find-file)
-    "List of commands which should have their candidates always sorted.")
-
-  (cl-defun radian-advice-counsel-override-sort
-      (ivy-read prompt collection &rest rest &key caller &allow-other-keys)
-    "Delegate to `ivy-read', overriding `:sort' depending on CALLER.
-Specifically, if CALLER appears in
-`radian-counsel-sort-commands', then override `:sort' to non-nil
-unconditionally.
-
-This is an `:around' advice for `ivy-read'."
-    (when (memq caller radian-counsel-sort-commands)
-      (setq rest (append '(:sort t) rest)))
-    (apply ivy-read prompt collection rest))
-
-  (advice-add #'ivy-read :around #'radian-advice-counsel-override-sort)
 
   :diminish counsel-mode)
 
