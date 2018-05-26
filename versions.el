@@ -93,5 +93,5 @@
  ("with-editor" . "ad5bb005ed3afec2d8b9b2bc1df19fb9b5e2dd84")
  ("yaml-mode" . "64b28913bfe910b147d6ee16488dbaedb1452ca6")
  ("yasnippet" . "65952e30547754eb5ed11750f0cd736095fd6700")
- ("zerodark-theme" . "3b78c376aa5bfbd2734af5efc5061a08d7bc8221"))
+ ("zerodark-theme" . "6189e9debc0843b593afcd3bf92633434a194de0"))
 :jupiter

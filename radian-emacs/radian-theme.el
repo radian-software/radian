@@ -78,10 +78,7 @@ The current color theme is determined by consulting
   ;; Eliminate the underline on mismatched parens.
   (set-face-underline 'show-paren-mismatch nil))
 
-(straight-register-package
- '(zerodark-theme
-   :host github :repo "raxod502/zerodark-theme" :branch "fork/1"
-   :upstream (:host github :repo "NicolasPetton/zerodark-theme")))
+(straight-register-package 'zerodark-theme)
 (radian-with-color-theme zerodark
   ;; For some reason, `zerodark-theme' has Flycheck and Magit as hard
   ;; dependencies. We need to make sure our configuration for those
