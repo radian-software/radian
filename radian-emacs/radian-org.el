@@ -235,7 +235,11 @@ This is an `:around' advice for `org-agenda'. It commutes with
 		     (org-clock-auto-clock-resolution nil))
 	         (org-clock-in)
 	         (when (org-invisible-p) (org-show-context))))))
-	  (_ nil))))))
+	  (_ nil)))))
+
+  ;; Don't record a clock entry if you clocked out in less than one
+  ;; minute.
+  (setq org-clock-out-remove-zero-time-clocks t))
 
 (provide 'radian-org)
 
