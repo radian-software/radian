@@ -22,7 +22,11 @@ Interactively, reverse the characters in the current region."
   (mapcar
    (lambda (c)
      (set-char-table-range auto-fill-chars c t))
-   "!-=+]};:'\",.?"))
+   "!-=+]};:'\",.?")
+
+  ;; When filling paragraphs, assume that sentences end with one space
+  ;; rather than two.
+  (setq sentence-end-double-space nil))
 
 (use-feature simple
   :config
@@ -61,13 +65,6 @@ that were passed to it."
       (apply kill-line args)))
 
   (advice-add #'kill-line :around #'radian-advice-stop-kill-at-whitespace))
-
-(use-feature paragraphs
-  :config
-
-  ;; When filling paragraphs, assume that sentences end with one space
-  ;; rather than two.
-  (setq sentence-end-double-space nil))
 
 (use-feature files
   :config
