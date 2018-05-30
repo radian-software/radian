@@ -99,8 +99,8 @@
   ;; end of the current entry.
   (setq org-insert-heading-respect-content t)
 
-  ;; But add a new keybinding for recovering the old behavior.
-
+  ;; But add a new keybinding for recovering the old behavior (see
+  ;; `:bind' above).
   (defun radian-org-insert-heading-at-point ()
     "Insert heading without respecting content.
 This runs `org-insert-heading' with
@@ -109,16 +109,17 @@ This runs `org-insert-heading' with
     (let ((org-insert-heading-respect-content nil))
       (org-insert-heading)))
 
+  ;; Indent text according to outline structure.
+  (add-hook 'org-mode-hook #'org-indent-mode)
+
   ;; When you create a sparse tree and `org-indent-mode' is enabled,
   ;; the highlighting destroys the invisibility added by
   ;; `org-indent-mode'. Therefore, don't highlight when creating a
   ;; sparse tree.
   (setq org-highlight-sparse-tree-matches nil)
 
-  ;; Indent subsections.
-  (add-hook 'org-mode-hook #'org-indent-mode)
-
-  ;; Utility functions.
+  ;; Make it possible to dim or hide blocked tasks in the agenda view.
+  (setq org-enforce-todo-dependencies t)
 
   (defun radian-org-sort-buffer ()
     "Sort all entries in the Org buffer recursively in alphabetical order."
@@ -127,20 +128,7 @@ This runs `org-insert-heading' with
                        (condition-case x
                            (org-sort-entries nil ?a)
                          ;; Ignore any errors signalled by Org.
-                         (user-error)))))
-
-  (defun radian-org-archive-past ()
-    "Archive DONE items with deadlines either missing or in the past."
-    (interactive)
-    (org-map-entries
-     (lambda ()
-       (when (and (string= (org-get-todo-state) "DONE")
-                  (let ((deadline (org-entry-get (point) "DEADLINE")))
-                    (or (null deadline)
-                        (time-less-p (org-time-string-to-time deadline)
-                                     (current-time)))))
-         (org-archive-subtree)
-         (setq org-map-continue-from (line-beginning-position)))))))
+                         (user-error))))))
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
@@ -191,7 +179,10 @@ This is an `:around' advice for `org-agenda'. It commutes with
       (apply org-agenda args)))
 
   (advice-add #'org-agenda :around
-              #'radian--advice-org-agenda-default-directory))
+              #'radian--advice-org-agenda-default-directory)
+
+  ;; Hide blocked tasks in the agenda view.
+  (setq org-agenda-dim-blocked-tasks 'invisible))
 
 (use-feature org-clock
   :init
