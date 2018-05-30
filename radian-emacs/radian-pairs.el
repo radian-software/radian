@@ -23,6 +23,10 @@
 
   ;; Smartparens' Paredit emulation is missing some bindings, so we
   ;; re-add them here.
+  ;;
+  ;; This can be removed once [1] is merged.
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/pull/891
   (radian-alist-set* "M-?" #'sp-convolute-sexp sp-paredit-bindings)
   (radian-alist-set* "M-j" #'sp-join-sexp sp-paredit-bindings)
 
@@ -46,6 +50,10 @@
   ;; terminal since that messed up the escape sequences sent for the
   ;; arrows and other keys. M-{ is a no-go because it's bound to
   ;; `backward-paragraph'.
+  ;;
+  ;; The first binding can be removed once [1] is merged.
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/pull/891
   (radian-alist-set* "M-(" #'radian-sp-wrap-round sp-paredit-bindings)
   (radian-with-windowed-emacs
     (radian-alist-set* "M-[" #'radian-sp-wrap-square sp-paredit-bindings))
@@ -120,9 +128,13 @@
   ;; contexts. This prevents C-g from reaching Company, if a Company
   ;; menu is active. As a consequence, two presses of C-g are
   ;; necessary to dismiss the Company menu, if an overlay would have
-  ;; been active. Until
-  ;; https://github.com/Fuco1/smartparens/issues/889 is addressed, the
-  ;; following is a simple way to patch the UX problem.
+  ;; been active. Until [1] is addressed, the following is a simple
+  ;; way to patch the UX problem.
+  ;;
+  ;; This can be removed once [2] is merged.
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/issues/889
+  ;; [2]: https://github.com/Fuco1/smartparens/pull/890
   (unbind-key "C-g" sp-pair-overlay-keymap))
 
 (provide 'radian-pairs)
