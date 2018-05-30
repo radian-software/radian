@@ -245,20 +245,6 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
   ;; [1]: https://github.com/proofit404/anaconda-mode
   (add-hook 'python-mode-hook #'anaconda-mode)
 
-  :config
-
-  ;; Make it possible to quit out of the *anaconda-response* buffer
-  ;; with 'q'.
-  (el-patch-defun anaconda-mode-show-unreadable-response (response)
-    "Show unreadable RESPONSE to user, so he can report it properly."
-    (pop-to-buffer
-     (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
-       (erase-buffer)
-       (insert response)
-       (goto-char (point-min))
-       (el-patch-add (special-mode))
-       (current-buffer))))
-
   :diminish anaconda-mode)
 
 ;; Company integration for anaconda-mode.

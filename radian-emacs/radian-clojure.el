@@ -262,64 +262,7 @@ projects.")
   (add-hook 'cider-repl-mode-hook #'radian-slow-indent-mode)
 
   (add-hook 'cider-mode-hook #'radian-slow-autocomplete-mode)
-  (add-hook 'cider-repl-mode-hook #'radian-slow-autocomplete-mode)
-
-  ;; Suppress the "Starting a custom ClojureScript REPL" message,
-  ;; because it provides no useful information.
-
-  (el-patch-defun cider-create-sibling-cljs-repl (client-buffer)
-    "Create a ClojureScript REPL with the same server as CLIENT-BUFFER.
-The new buffer will correspond to the same project as CLIENT-BUFFER, which
-should be the regular Clojure REPL started by the server process filter.
-
-Normally this would prompt for the ClojureScript REPL to start (e.g. Node,
-Figwheel, etc), unless you've set `cider-default-cljs-repl'."
-    (interactive (list (cider-current-connection)))
-    ;; We can't start a ClojureScript REPL without ClojureScript
-    (cider-verify-clojurescript-is-present)
-    ;; Load variables in .dir-locals.el into the server process buffer, so
-    ;; cider-default-cljs-repl can be set for each project individually.
-    (hack-local-variables)
-    (let* ((cljs-repl-type (or cider-default-cljs-repl
-                               (cider-select-cljs-repl)))
-           (cljs-repl-form (cider-cljs-repl-form cljs-repl-type)))
-      (cider-verify-cljs-repl-requirements cljs-repl-type)
-      ;; if all the requirements are met we can finally proceed with starting
-      ;; the ClojureScript REPL for `cljs-repl-type'
-      (let* ((nrepl-repl-buffer-name-template "*cider-repl%s(cljs)*")
-             (nrepl-create-client-buffer-function #'cider-repl-create)
-             (nrepl-use-this-as-repl-buffer 'new)
-             (client-process-args (with-current-buffer client-buffer
-                                    (unless (or nrepl-server-buffer nrepl-endpoint)
-                                      (error "This is not a REPL buffer, is there a REPL active?"))
-                                    (list (car nrepl-endpoint)
-                                          (elt nrepl-endpoint 1)
-                                          (when (buffer-live-p nrepl-server-buffer)
-                                            (get-buffer-process nrepl-server-buffer)))))
-             (cljs-proc (apply #'nrepl-start-client-process client-process-args))
-             (cljs-buffer (process-buffer cljs-proc)))
-        (with-current-buffer cljs-buffer
-          ;; The new connection has now been bumped to the top, but it's still a
-          ;; Clojure REPL!  Additionally, some ClojureScript REPLs can actually take
-          ;; a while to start (some even depend on the user opening a browser).
-          ;; Meanwhile, this REPL will gladly receive requests in place of the
-          ;; original Clojure REPL.  Our solution is to bump the original REPL back
-          ;; up the list, so it takes priority on Clojure requests.
-          (cider-make-connection-default client-buffer)
-          (cider-repl-set-type "cljs")
-          (el-patch-remove
-            (pcase cider-cljs-repl-types
-              (`(,name ,_ ,info)
-               (message "Starting a %s REPL%s" name (or info "")))))
-          ;; So far we have just another Clojure REPL.  It's time to convert it
-          ;; to a ClojureScript REPL with a magic incantation.
-          (cider-nrepl-send-request
-           `("op" "eval"
-             "ns" ,(cider-current-ns)
-             "code" ,cljs-repl-form)
-           (cider-repl-handler (current-buffer)))
-          (when cider-offer-to-open-cljs-app-in-browser
-            (cider--offer-to-open-app-in-browser nrepl-server-buffer)))))))
+  (add-hook 'cider-repl-mode-hook #'radian-slow-autocomplete-mode))
 
 ;; Package `clj-refactor' provides automated refactoring commands for
 ;; Clojure code.
