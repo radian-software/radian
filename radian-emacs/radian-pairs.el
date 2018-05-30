@@ -1,5 +1,6 @@
 ;;; radian-pairs.el --- Paired delimiter handling
 
+(require 'radian-bind-key)
 (require 'radian-windowed)
 
 ;; Don't blink the cursor on the opening paren when you insert a
@@ -111,7 +112,18 @@
                      (radian-enter-and-indent-sexp "<return>")))
     (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
                    '((radian-enter-and-indent-sexp "RET")
-                     (radian-enter-and-indent-sexp "<return>")))))
+                     (radian-enter-and-indent-sexp "<return>"))))
+
+  ;; We disable pair overlays from Smartparens. Normally, pair
+  ;; overlays are dismissed by pressing C-g. Even if we disable pair
+  ;; overlays, Smartparens still swallows C-g in the relevant
+  ;; contexts. This prevents C-g from reaching Company, if a Company
+  ;; menu is active. As a consequence, two presses of C-g are
+  ;; necessary to dismiss the Company menu, if an overlay would have
+  ;; been active. Until
+  ;; https://github.com/Fuco1/smartparens/issues/889 is addressed, the
+  ;; following is a simple way to patch the UX problem.
+  (unbind-key "C-g" sp-pair-overlay-keymap))
 
 (provide 'radian-pairs)
 
