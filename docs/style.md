@@ -45,6 +45,7 @@
 * Order `use-package` keywords as follows, so that they are in the
   rough order of execution:
     * `:straight`
+    * `:commands`
     * `:init`
     * `:mode`
     * `:interpreter`
