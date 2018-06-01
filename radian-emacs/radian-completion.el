@@ -367,10 +367,6 @@ This is an `:around' advice for `yas--make-control-overlay'."
 ;; filtering in various contexts. It is not published to MELPA, so we
 ;; must define a recipe here.
 (use-package prescient
-  :straight (:host github :repo "raxod502/prescient.el"
-                   :files ("prescient.el"))
-  :demand t
-  :after ivy
   :config
 
   ;; Remember usage statistics across Emacs sessions.
@@ -379,8 +375,6 @@ This is an `:around' advice for `yas--make-control-overlay'."
 ;; Package `ivy-prescient' provides intelligent sorting and filtering
 ;; for candidates in Ivy menus.
 (use-package ivy-prescient
-  :straight (:host github :repo "raxod502/prescient.el"
-                   :files ("ivy-prescient.el"))
   :demand t
   :after ivy
   :config
@@ -391,8 +385,6 @@ This is an `:around' advice for `yas--make-control-overlay'."
 ;; Package `company-prescient' provides intelligent sorting and
 ;; filtering for candidates in Company completions.
 (use-package company-prescient
-  :straight (:host github :repo "raxod502/prescient.el"
-                   :files ("company-prescient.el"))
   :demand t
   :after company
   :config
