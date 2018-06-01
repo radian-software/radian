@@ -128,7 +128,10 @@ This runs `org-insert-heading' with
                        (condition-case x
                            (org-sort-entries nil ?a)
                          ;; Ignore any errors signalled by Org.
-                         (user-error))))))
+                         (user-error)))))
+
+  (put 'org-tags-exclude-from-inheritance 'safe-local-variable
+       #'radian-list-of-strings-p))
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.

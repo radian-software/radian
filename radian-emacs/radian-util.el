@@ -94,6 +94,13 @@ This means that FILENAME is a symlink whose target is inside
                  (apply load-orig file noerror 'nomessage args))))
      ,@body))
 
+;; Functions for safe local variables.
+
+(defun radian-list-of-strings-p (obj)
+  "Return non-nil if OBJ is a list of strings."
+  (and (listp obj)
+       (cl-every #'stringp obj)))
+
 (provide 'radian-util)
 
 ;;; radian-util.el ends here
