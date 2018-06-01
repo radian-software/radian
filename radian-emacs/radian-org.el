@@ -185,11 +185,21 @@ This is an `:around' advice for `org-agenda'. It commutes with
   (setq org-agenda-dim-blocked-tasks 'invisible))
 
 (use-feature org-clock
+  ;; We have to autoload these functions in order for the below code
+  ;; that enables clock persistence without slowing down startup to
+  ;; work.
+  :commands (org-clock-load org-clock-save)
   :init
 
-  ;; Automatically save current clock state between Emacs sessions.
+  ;; Allow clock data to be saved persistently.
   (setq org-clock-persist t)
-  (org-clock-persistence-insinuate)
+
+  ;; Actually enable clock persistence. This is taken from
+  ;; `org-clock-persistence-insinuate', but we can't use that function
+  ;; since it causes both `org' and `org-clock' to be loaded for no
+  ;; good reason.
+  (add-hook 'org-mode-hook 'org-clock-load)
+  (add-hook 'kill-emacs-hook 'org-clock-save)
 
   :config
 
