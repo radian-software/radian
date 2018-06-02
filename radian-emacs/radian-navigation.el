@@ -5,30 +5,32 @@
 (require 'radian-completion)
 (require 'radian-custom)
 
-;; Make it so that if you provide a negative prefix argument to
-;; C-SPC (i.e. like M-- C-SPC), then it will step forwards in the mark
-;; ring (whereas C-u C-SPC steps backwards). Based on [1].
-;;
-;; [1]: http://stackoverflow.com/a/14539202/3538165
+(use-feature simple
+  :config
 
-(defun radian--advice-allow-unpopping-mark
-    (set-mark-command &optional arg)
-  (interactive "P")
-  (if (< (prefix-numeric-value arg) 0)
-      ;; If we don't have any marks set, no-op.
-      (when mark-ring
-        ;; I can't remember how this code works. Sorry.
-        (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
-        (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
-        (when (null (mark t)) (ding))
-        (setq mark-ring (nbutlast mark-ring))
-        (goto-char (marker-position (car (last mark-ring)))))
-    ;; If no prefix argument, or prefix argument is nonnegative, defer
-    ;; to the original behavior.
-    (funcall set-mark-command arg)))
+  (defun radian-advice-allow-negative-pop-mark
+      (set-mark-command &optional arg)
+    "Allow \\[set-mark-command] to rotate the mark ring backwards.
+If a negative prefix argument is given (like M--
+\\[set-mark-command]), then it will step backwards by one,
+whereas C-u \\[set-mark-command] steps forwards by one."
+    ;; Based on http://stackoverflow.com/a/14539202/3538165.
+    (interactive "P")
+    (if (< (prefix-numeric-value arg) 0)
+        ;; If we don't have any marks set, no-op.
+        (when mark-ring
+          ;; I can't remember how this code works. Sorry.
+          (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+          (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
+          (when (null (mark t)) (ding))
+          (setq mark-ring (nbutlast mark-ring))
+          (goto-char (marker-position (car (last mark-ring)))))
+      ;; If no prefix argument, or prefix argument is nonnegative, defer
+      ;; to the original behavior.
+      (funcall set-mark-command arg)))
 
-(advice-add #'set-mark-command :around
-            #'radian--advice-allow-unpopping-mark)
+  (advice-add #'set-mark-command :around
+              #'radian-advice-allow-negative-pop-mark))
 
 ;; Make it so that if you provide a prefix argument to C-x C-SPC, then
 ;; it will step forwards in the global mark ring, instead of
