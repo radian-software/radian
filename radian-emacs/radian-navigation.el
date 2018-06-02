@@ -118,15 +118,8 @@ nil means no keybinding is established."
    ("c" . avy-goto-char)
    ("t" . avy-goto-char-timer)
    ("l" . avy-goto-line)
-   ("W" . avy-goto-word-1)
-   ("w" . avy-goto-word-0))
-
-  :config
-
-  ;; Use De Bruijn sequences for jump sequences. This allows you to
-  ;; fixate on a particular place you want to jump to, and just type
-  ;; whatever shows up there.
-  (setq avy-style 'de-bruijn))
+   ("w" . avy-goto-word-1)
+   ("W" . avy-goto-word-0)))
 
 ;; This package highlights matches and previews replacements in query
 ;; replace.
