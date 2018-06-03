@@ -1,3 +1,3 @@
-(let ((straight-current-profile 'radian-local))
-  (when (fboundp 'radian-after-init)
-    (radian-after-init)))
+(setq straight-current-profile 'radian-local)
+(run-hooks 'radian-after-init-hook))
+(setq straight-current-profile nil)
