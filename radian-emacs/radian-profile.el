@@ -46,6 +46,8 @@ flattened init-file if the regular one is working."
                                                    (symbol-name feat)))
                                 features)))
     (with-temp-file radian-flattened-init-file
+      (print `(defvar radian-directory ',radian-directory)
+             (current-buffer))
       (insert-file-contents-literally
        (expand-file-name "templates/init-profile-pre.el" radian-directory))
       (dolist (lib (nreverse libs))
