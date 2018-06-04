@@ -155,19 +155,25 @@ be generated automatically from the basename of FILENAME."
 ;; being saved, then offer to delete the created directory or
 ;; directories.
 
-(defun radian--advice-find-file-automatically-create-directory
-    (original-function filename &rest args)
+(defun radian-advice-find-file-create-directories
+    (find-file filename &rest args)
   "Automatically create and delete parent directories of files.
 This is an `:override' advice for `find-file' and friends. It
 automatically creates the parent directory (or directories) of
 the file being visited, if necessary. It also sets a buffer-local
 variable so that the user will be prompted to delete the newly
 created directories if they kill the buffer without saving it."
-  ;; The variable `dirs-to-delete' is a list of the directories that
-  ;; will be automatically created by `make-directory'. We will want
-  ;; to offer to delete these directories if the user kills the buffer
-  ;; without saving it.
-  (let ((dirs-to-delete ()))
+  (let ((orig-filename filename)
+        ;; For relative paths where none of the named parent
+        ;; directories exist, we might get a nil from
+        ;; `file-name-directory' below, which would be bad. Thus we
+        ;; expand the path fully.
+        (filename (expand-file-name filename))
+        ;; The variable `dirs-to-delete' is a list of the directories
+        ;; that will be automatically created by `make-directory'. We
+        ;; will want to offer to delete these directories if the user
+        ;; kills the buffer without saving it.
+        (dirs-to-delete ()))
     ;; If the file already exists, we don't need to worry about
     ;; creating any directories.
     (unless (file-exists-p filename)
@@ -206,7 +212,7 @@ created directories if they kill the buffer without saving it."
     ;; containing the file to found exists. We make sure to preserve
     ;; the return value, so as not to mess up any commands relying on
     ;; it.
-    (prog1 (apply original-function filename args)
+    (prog1 (apply find-file orig-filename args)
       ;; If there are directories we want to offer to delete later, we
       ;; have more to do.
       (when dirs-to-delete
@@ -236,20 +242,20 @@ created directories if they kill the buffer without saving it."
 
 ;; Add the advice that we just defined.
 (advice-add #'find-file :around
-            #'radian--advice-find-file-automatically-create-directory)
+            #'radian-advice-find-file-create-directories)
 
 ;; Also enable it for `find-alternate-file' (C-x C-v).
 (advice-add #'find-alternate-file :around
-            #'radian--advice-find-file-automatically-create-directory)
+            #'radian-advice-find-file-create-directories)
 
 ;; Also enable it for `write-file' (C-x C-w).
 (advice-add #'write-file :around
-            #'radian--advice-find-file-automatically-create-directory)
+            #'radian-advice-find-file-create-directories)
 
 (defun radian--kill-buffer-delete-directory-if-appropriate ()
   "Delete parent directories if appropriate.
 This is a function for `kill-buffer-hook'. If
-`radian--advice-find-file-automatically-create-directory' created
+`radian-advice-find-file-create-directories' created
 the directory containing the file for the current buffer
 automatically, then offer to delete it. Otherwise, do nothing.
 Also clean up related hooks."
