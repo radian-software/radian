@@ -131,7 +131,10 @@ This runs `org-insert-heading' with
                          (user-error)))))
 
   (put 'org-tags-exclude-from-inheritance 'safe-local-variable
-       #'radian-list-of-strings-p))
+       #'radian-list-of-strings-p)
+
+  ;; Make C-a and C-e smarter with regard to headline tags.
+  (setq org-special-ctrl-a/e t))
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
