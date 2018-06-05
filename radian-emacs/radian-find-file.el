@@ -260,6 +260,8 @@ the directory containing the file for the current buffer
 automatically, then offer to delete it. Otherwise, do nothing.
 Also clean up related hooks."
   (when (and
+         ;; Stop if the local variables have been killed.
+         (boundp 'radian--dirs-to-delete)
          ;; Stop if there aren't any directories to delete (shouldn't
          ;; happen).
          radian--dirs-to-delete
