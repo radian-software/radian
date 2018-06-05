@@ -76,6 +76,16 @@ whereas C-u \\[set-mark-command] steps forwards by one."
 ;; highlighted, because delays suck.
 (setq lazy-highlight-initial-delay 0)
 
+(use-feature bookmark
+  :config
+
+  (defalias 'radian-advice-bookmark-silence #'ignore
+    "Silence useless messages from bookmark.el.
+This is an `:override' advice for `bookmark-maybe-message'.")
+
+  (advice-add #'bookmark-maybe-message :override
+              #'radian-advice-bookmark-silence))
+
 ;; This package provides an enhanced version of Isearch that uses Ivy
 ;; to display a preview of the results.
 (use-package swiper
