@@ -135,7 +135,10 @@ This runs `org-insert-heading' with
 
   ;; Make C-a, C-e, and C-k smarter with regard to headline tags.
   (setq org-special-ctrl-a/e t)
-  (setq org-special-ctrl-k t))
+  (setq org-special-ctrl-k t)
+
+  ;; Show headlines but not content by default.
+  (setq org-startup-folded 'content))
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
