@@ -4,6 +4,9 @@
 ;; we don't tell it not to.
 (setq package-enable-at-startup nil)
 
+;; Use live modification detection. This improves startup time.
+(setq straight-check-for-modifications 'live)
+
 ;; Bootstrap the package manager, straight.el. For documentation, see
 ;; https://github.com/raxod502/straight.el. The following code loads
 ;; the package manager if it is already installed, and otherwise
