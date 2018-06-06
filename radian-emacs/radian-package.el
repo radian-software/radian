@@ -5,7 +5,7 @@
 (setq package-enable-at-startup nil)
 
 ;; Use live modification detection. This improves startup time.
-(setq straight-check-for-modifications 'live)
+(setq straight-check-for-modifications 'live-with-find)
 
 ;; Bootstrap the package manager, straight.el. For documentation, see
 ;; https://github.com/raxod502/straight.el. The following code loads
