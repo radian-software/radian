@@ -1,6 +1,5 @@
 ;;; radian-config.el --- Support for editing various config files
 
-(require 'radian-package)
 (require 'radian-regexp)
 
 ;; Edit .htaccess and friends.

@@ -1,18 +1,14 @@
 ;;; radian-check.el --- On-the-fly syntax and semantics checking
 
-(require 'radian-package)
-
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting, or more generally syntax checking. It comes
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
-  :straight (:host github :repo "raxod502/flycheck" :branch "fork/1"
+  :straight (:host github :repo "raxod502/flycheck" :branch "fork/2"
                    :upstream (:host github :repo "flycheck/flycheck"
                                     :branch "master"))
-  :init
-
-  :defer 3
+  :demand t
   :config
 
   ;; Enable `flycheck' everywhere unless otherwise specified.

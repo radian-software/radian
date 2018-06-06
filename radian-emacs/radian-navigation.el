@@ -4,7 +4,6 @@
 (require 'radian-bind-key)
 (require 'radian-completion)
 (require 'radian-custom)
-(require 'radian-package)
 
 ;; Make it so that if you provide a negative prefix argument to
 ;; C-SPC (i.e. like M-- C-SPC), then it will step forwards in the mark

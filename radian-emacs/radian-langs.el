@@ -2,37 +2,31 @@
 
 (require 'map)
 
-(require 'radian-autocomplete)
 (require 'radian-bind-key)
 (require 'radian-check)
 (require 'radian-eldoc)
 (require 'radian-indent)
 (require 'radian-os)
-(require 'radian-package)
 (require 'radian-patch)
 (require 'radian-util)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; AppleScript
+(use-feature lisp-mode
+  :config
 
-;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
+  (add-hook 'lisp-mode-hook #'aggressive-indent-mode))
 
+;; Package `apples-mode' provides a major mode for AppleScript. For
+;; more information on the language, see
+;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html.
 (use-package apples-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Go
-
-;; https://golang.org/
-
+;; Package `go-mode' provides a major mode for Go. For more
+;; information on the language, see https://golang.org/.
 (use-package go-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Haskell
-
-;; https://www.haskell.org/
-
-;; Package `haskell-mode' provides syntax highlighting, indentation,
-;; and interactive REPL integration for Haskell code.
+;; Package `haskell-mode' provides a major mode for Haskell, including
+;; REPL integration. For more information on the language, see
+;; https://www.haskell.org/.
 (use-package haskell-mode
   :config
 
@@ -49,7 +43,17 @@
   :init
 
   (with-eval-after-load 'haskell-mode
-    (add-hook 'haskell-mode-hook #'hindent-mode)))
+
+    ;; Don't enable `hindent-mode' in `literate-haskell-mode'. See
+    ;; https://github.com/commercialhaskell/hindent/issues/496.
+
+    (defun radian-haskell-maybe-hindent-mode (&optional arg)
+      "Enable `hindent-mode' if not in `literate-haskell-mode'.
+ARG is passed to `hindent-mode' toggle function."
+      (unless (derived-mode-p 'literate-haskell-mode)
+        (hindent-mode arg)))
+
+    (add-hook 'haskell-mode-hook #'radian-haskell-maybe-hindent-mode)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; HTML
@@ -188,11 +192,6 @@ This function calls `json-mode--update-auto-mode' to change the
   (el-patch-defvar json-mode--auto-mode-entry (json-mode--update-auto-mode json-mode-auto-mode-list)
     "Regexp generated from the `json-mode-auto-mode-list'."))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Markdown
-
-;;
-
 ;; Package `markdown-mode' provides syntax highlighting and structural
 ;; editing commands for Markdown. See
 ;; https://daringfireball.net/projects/markdown/ for more details on
@@ -228,10 +227,10 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
 
 ;; https://www.python.org/
 
-(use-package python
-  :straight nil
+(use-feature python
   :config
 
+  ;; Slightly less offensive Python docstring style.
   (setq python-fill-docstring-style 'pep-257-nn))
 
 ;; Integrated development environment for Python.
@@ -292,8 +291,7 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
 
 ;; http://docutils.sourceforge.net/rst.html
 
-(use-package rst-mode
-  :straight nil
+(use-feature rst-mode
   :config
 
   ;; See: https://github.com/flycheck/flycheck/issues/953
@@ -313,8 +311,7 @@ This prevents it from signalling spurious errors."
 
 ;; https://www.ruby-lang.org/
 
-(use-package ruby-mode
-  :straight nil
+(use-feature ruby-mode
   :config
 
   (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
@@ -406,6 +403,17 @@ This prevents it from signalling spurious errors."
 
   :diminish racer-mode)
 
+;; Package `scheme' provides major modes for Scheme languages. For
+;; more information on Scheme, see http://www.schemers.org/.
+(use-feature scheme
+  :config
+
+  (add-hook 'scheme-mode-hook #'aggressive-indent-mode))
+
+;; Package `geiser' provides REPL integration for several
+;; implementations of Scheme.
+(use-package geiser)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Shell
 
@@ -413,8 +421,7 @@ This prevents it from signalling spurious errors."
 ;; https://www.gnu.org/software/bash/
 ;; http://www.zsh.org/
 
-(use-package sh-script
-  :straight nil
+(use-feature sh-script
   :init
 
   (el-patch-feature sh-script)
@@ -489,8 +496,8 @@ whose value is the shell name (don't quote it)."
                         (funcall mksym "rules")
                         :forward-token  (funcall mksym "forward-token")
                         :backward-token (funcall mksym "backward-token")))
+          (setq-local parse-sexp-lookup-properties t)
           (unless sh-use-smie
-            (setq-local parse-sexp-lookup-properties t)
             (setq-local sh-kw-alist (sh-feature sh-kw))
             (let ((regexp (sh-feature sh-kws-for-done)))
               (if regexp
@@ -528,25 +535,18 @@ command `sh-reset-indent-vars-to-global-values'."
     (el-patch-remove
       (message "Indentation variables are now local."))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Swift
-
-;; https://developer.apple.com/swift/
-
+;; Package `swift-mode' provides a major mode for Swift code. For more
+;; information on Swift, see https://developer.apple.com/swift/.
 (use-package swift-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; TeX
+;; Package `auctex' provides major modes for TeX code, including
+;; compiler and viewer integration. For more information on TeX, see
+;; https://www.tug.org/begin.html.
+(straight-use-package '(auctex :host github :repo "raxod502/auctex"
+                               :branch "fork/1"
+                               :files (:defaults (:exclude "doc/*.texi"))))
 
-;; Package `auctex' provides an integrated development environment for
-;; LaTeX [1] and friends.
-;;
-;; [1]: https://www.tug.org/begin.html
-
-(use-package tex
-  :straight (auctex :host github :repo "raxod502/auctex"
-                    :branch "fork/1"
-                    :files (:defaults (:exclude "doc/*.texi")))
+(use-feature tex
   :init
 
   (el-patch-feature tex)
@@ -596,9 +596,9 @@ FORCE is not nil."
           (TeX-auto-apply))
       (run-hooks 'TeX-update-style-hook)
       (el-patch-remove
-        (message "Applying style hooks... done"))))
+        (message "Applying style hooks...done"))))
 
-  (defun radian--advice-inhibit-style-loading-message
+  (defun radian-advice-tex-inhibit-style-loading-message
       (TeX-load-style-file file)
     "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
 This is an `:around' advice for `TeX-load-style-file'."
@@ -611,7 +611,7 @@ This is an `:around' advice for `TeX-load-style-file'."
       (funcall TeX-load-style-file file)))
 
   (advice-add #'TeX-load-style-file :around
-              #'radian--advice-inhibit-style-loading-message)
+              #'radian-advice-tex-inhibit-style-loading-message)
 
   (with-eval-after-load 'flycheck
 
@@ -621,8 +621,7 @@ This is an `:around' advice for `TeX-load-style-file'."
 
     (add-hook 'TeX-mode-hook #'radian-tex-disable-checkers)))
 
-(use-package tex-buf
-  :straight auctex
+(use-feature tex-buf
   :config
 
   ;; Save buffers automatically when compiling, instead of prompting.
@@ -639,8 +638,7 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   (advice-add #'TeX-process-buffer-name :filter-return
               #'radian-advice-tex-hide-compilation-buffers))
 
-(use-package latex
-  :straight auctex
+(use-feature latex
   :config
 
   ;; Don't be afraid to break inline math between lines.
@@ -650,8 +648,7 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   ;; is to be used, via a file-local variable.
   (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
-(use-package font-latex
-  :straight auctex
+(use-feature font-latex
   :config
 
   ;; Prevent superscripts and subscripts from being displayed in a
@@ -700,9 +697,10 @@ This is a `:filter-return' advice for `TeX-process-buffer-name'."
   ;; errors, disable itself, and print a warning.
 
   (with-eval-after-load 'flycheck
-    (setf (flycheck-checker-get 'typescript-tslint 'predicate)
-          (lambda ()
-            (not (string-match-p "/node_modules/" default-directory))))))
+    (eval'
+     (setf (flycheck-checker-get 'typescript-tslint 'predicate)
+           (lambda ()
+             (not (string-match-p "/node_modules/" default-directory)))))))
 
 ;; TypeScript IDE for Emacs.
 (use-package tide

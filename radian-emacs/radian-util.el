@@ -86,6 +86,14 @@ This means that FILENAME is a symlink whose target is inside
   (md5 (format "%s%s%s%s"
                (system-name) (emacs-pid) (current-time) (random))))
 
+(defmacro radian-with-silent-load (&rest body)
+  "Execute BODY, silencing any calls to `load' within."
+  `(cl-letf* ((load-orig (symbol-function #'load))
+              ((symbol-function #'load)
+               (lambda (file &optional noerror _nomessage &rest args)
+                 (apply load-orig file noerror 'nomessage args))))
+     ,@body))
+
 (provide 'radian-util)
 
 ;;; radian-util.el ends here

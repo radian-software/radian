@@ -1,6 +1,5 @@
 ;;; radian-indent.el --- Indentation
 
-(require 'radian-package)
 (require 'radian-slow)
 
 ;; This package keeps indentation correct at all times. It can be a

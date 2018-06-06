@@ -6,7 +6,8 @@
 
 (require 'radian-bind-key)
 (require 'radian-git)
-(require 'radian-package)
+(require 'radian-patch)
+(require 'radian-util)
 
 (define-globalized-minor-mode global-outline-minor-mode
   outline-minor-mode outline-minor-mode)
@@ -47,10 +48,7 @@
          ;; otherwise there would be no easy way to invoke
          ;; `org-backward-paragraph' and `org-forward-paragraph'.)
          ([remap backward-paragraph] . org-backward-paragraph)
-         ([remap forward-paragraph] . org-forward-paragraph)
-
-         ;; Very convenient keybinding for inserting a new heading.
-         ("M-RET" . org-insert-heading))
+         ([remap forward-paragraph] . org-forward-paragraph))
   :init
 
   ;; The following is a temporary hack until straight.el supports
@@ -91,12 +89,25 @@
 
   (provide 'org-version)
 
+  :bind (:map org-mode-map
+              ("C-M-RET" . radian-org-insert-heading-at-point)
+              ("C-M-<return>" . radian-org-insert-heading-at-point))
   :config
 
   ;; If you try to insert a heading in the middle of an entry, don't
   ;; split it in half, but instead insert the new heading after the
   ;; end of the current entry.
   (setq org-insert-heading-respect-content t)
+
+  ;; But add a new keybinding for recovering the old behavior.
+
+  (defun radian-org-insert-heading-at-point ()
+    "Insert heading without respecting content.
+This runs `org-insert-heading' with
+`org-insert-heading-respect-content' bound to nil."
+    (interactive)
+    (let ((org-insert-heading-respect-content nil))
+      (org-insert-heading)))
 
   ;; When you create a sparse tree and `org-indent-mode' is enabled,
   ;; the highlighting destroys the invisibility added by
@@ -133,23 +144,22 @@
 
 ;; Org Agenda is for generating a more useful consolidated summary of
 ;; all or some of your tasks, according to their metadata.
-(use-package org-agenda
-  :straight org
+(use-feature org-agenda
   :bind (:map org-agenda-mode-map
 
-         ;; Prevent Org Agenda from overriding the bindings for
-         ;; windmove.
-         ("S-<up>" . nil)
-         ("S-<down>" . nil)
-         ("S-<left>" . nil)
-         ("S-<right>" . nil)
+              ;; Prevent Org Agenda from overriding the bindings for
+              ;; windmove.
+              ("S-<up>" . nil)
+              ("S-<down>" . nil)
+              ("S-<left>" . nil)
+              ("S-<right>" . nil)
 
-         ;; Same routine as above. Now for Org Agenda, we could use
-         ;; C-up and C-down because M-{ and M-} are bound to the same
-         ;; commands. But I think it's best to take the same approach
-         ;; as before, for consistency.
-         ("C-<left>" . org-agenda-do-date-earlier)
-         ("C-<right>" . org-agenda-do-date-later))
+              ;; Same routine as above. Now for Org Agenda, we could use
+              ;; C-up and C-down because M-{ and M-} are bound to the same
+              ;; commands. But I think it's best to take the same approach
+              ;; as before, for consistency.
+              ("C-<left>" . org-agenda-do-date-earlier)
+              ("C-<right>" . org-agenda-do-date-later))
   :config
 
   ;; Make the Org Agenda split the window horizontally (with two tall
@@ -182,6 +192,54 @@ This is an `:around' advice for `org-agenda'. It commutes with
 
   (advice-add #'org-agenda :around
               #'radian--advice-org-agenda-default-directory))
+
+(use-feature org-clock
+  :init
+
+  ;; Automatically save current clock state between Emacs sessions.
+  (setq org-clock-persist t)
+  (org-clock-persistence-insinuate)
+
+  :config
+
+  ;; Silence the messages that are usually printed when the clock data
+  ;; is loaded from disk.
+  (el-patch-defun org-clock-load ()
+    "Load clock-related data from disk, maybe resuming a stored clock."
+    (when (and org-clock-persist (not org-clock-loaded))
+      (if (not (file-readable-p org-clock-persist-file))
+	  (el-patch-swap
+            (message "Not restoring clock data; %S not found" org-clock-persist-file)
+            nil)
+        (el-patch-remove
+          (message "Restoring clock data"))
+        ;; Load history.
+        (el-patch-wrap 1
+          (radian-with-silent-load
+           (load-file org-clock-persist-file)))
+        (setq org-clock-loaded t)
+        (pcase-dolist (`(,(and file (pred file-exists-p)) . ,position)
+		       org-clock-stored-history)
+	  (org-clock-history-push position (find-file-noselect file)))
+        ;; Resume clock.
+        (pcase org-clock-stored-resume-clock
+	  (`(,(and file (pred file-exists-p)) . ,position)
+	   (with-current-buffer (find-file-noselect file)
+	     (when (or (not org-clock-persist-query-resume)
+		       (y-or-n-p (format "Resume clock (%s) "
+				         (save-excursion
+					   (goto-char position)
+					   (org-get-heading t t)))))
+	       (goto-char position)
+	       (let ((org-clock-in-resume 'auto-restart)
+		     (org-clock-auto-clock-resolution nil))
+	         (org-clock-in)
+	         (when (org-invisible-p) (org-show-context))))))
+	  (_ nil)))))
+
+  ;; Don't record a clock entry if you clocked out in less than one
+  ;; minute.
+  (setq org-clock-out-remove-zero-time-clocks t))
 
 (provide 'radian-org)
 

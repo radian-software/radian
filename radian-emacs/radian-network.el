@@ -1,7 +1,6 @@
-;;; radian-browse.el --- Browsing the web
+;;; radian-network.el --- Network connections and web browsing
 
 (require 'radian-os)
-(require 'radian-package)
 
 ;; In recent versions of macOS, there is an annoying configuration
 ;; problem wherein TLS verification does not work out of the box,
@@ -38,4 +37,4 @@
 
 (provide 'radian-network)
 
-;;; radian-browse.el ends here
+;;; radian-network.el ends here

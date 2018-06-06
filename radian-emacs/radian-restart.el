@@ -1,7 +1,6 @@
 ;;; radian-restart.el --- Restarting Emacs
 
 (require 'radian-bind-key)
-(require 'radian-package)
 (require 'radian-patch)
 
 ;; This package provides an easy way to restart Emacs from within

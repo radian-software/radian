@@ -5,8 +5,7 @@
 (require 'radian-custom)
 (require 'radian-eldoc)
 (require 'radian-indent)
-(require 'radian-lisp)
-(require 'radian-package)
+(require 'radian-langs)
 (require 'radian-patch)
 
 ;; Enable ElDoc for Elisp buffers and the *scratch* buffer.
@@ -49,7 +48,7 @@ Nil means no keybinding is established."
   (interactive)
   (message "Evaluating %s..." (buffer-name))
   (straight-transaction
-    (if (null buffer-file-name)
+    (if (or (null buffer-file-name) (buffer-modified-p))
         (eval-buffer)
       (when (string= buffer-file-name user-init-file)
         (straight-mark-transaction-as-init))
@@ -77,7 +76,8 @@ Nil means no keybinding is established."
 (bind-keys
  ("C-h C-f" . find-function)
  ("C-h C-v" . find-variable)
- ("C-h C-o" . find-symbol))
+ ("C-h C-o" . find-symbol)
+ ("C-h C-l" . find-library))
 
 ;; Show `lisp-interaction-mode' as "Lisp-Interaction" instead of "Lisp
 ;; Interaction" in the mode line.

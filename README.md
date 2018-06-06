@@ -91,7 +91,9 @@ configuration, and optionally installing local configuration.
 * Tmux: `brew install tmux` or `pacman -S tmux`
 * Git: `brew install git` or `pacman -S git`
 * Leiningen: `brew cask install java && brew install leiningen` or
-  `pacman -S jdk8-openjdk && yaourt -S leiningen`
+  `pacman -S jdk8-openjdk && git clone
+  https://aur.archlinux.org/leiningen.git ~/aur/leiningen && cd
+  ~/aur/leiningen && makepkg -si`
 
 ### Installing configuration
 

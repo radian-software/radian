@@ -4,7 +4,6 @@
 (require 'radian-bind-key)
 (require 'radian-completion)
 (require 'radian-custom)
-(require 'radian-package)
 (require 'radian-patch)
 
 (defcustom radian-find-dotfile-prefix

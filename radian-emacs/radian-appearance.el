@@ -2,7 +2,6 @@
 
 (require 'radian-bind-key)
 (require 'radian-custom)
-(require 'radian-package)
 (require 'radian-windowed)
 
 ;;; This file has appearance tweaks that are unrelated to the color

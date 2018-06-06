@@ -1,7 +1,6 @@
 ;;; radian-bind-key.el --- Utility functions for keybindings
 
 (require 'radian-custom)
-(require 'radian-package)
 
 (defcustom radian-prefix "M-P"
   "Prefix key sequence for Radian-related keybindings.

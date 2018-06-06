@@ -1,7 +1,6 @@
 ;;; radian-git.el --- Interfacing with Git
 
 (require 'radian-appearance)
-(require 'radian-package)
 (require 'radian-patch)
 
 ;; Don't show `smerge-mode' in the mode line.
@@ -43,18 +42,16 @@
            (socket (expand-file-name "git/credential/socket" xdg-config-home)))
       (setq magit-credential-cache-daemon-socket socket))))
 
-;; Allows editing Git commit messages from the command line (i.e. with
-;; emacs or emacsclient as your core.editor).
+;; Package `git-commit' allows you to use Emacsclient as a Git commit
+;; message editor, providing syntax highlighting and using
+;; `with-editor' to allow you to conveniently accept or abort the
+;; commit.
 (use-package git-commit
   :init
 
   ;; Lazy-load `git-commit'.
 
   (el-patch-feature git-commit)
-
-  (el-patch-defconst git-commit-filename-regexp "/\\(\
-\\(\\(COMMIT\\|NOTES\\|PULLREQ\\|TAG\\)_EDIT\\|MERGE_\\|\\)MSG\
-\\|BRANCH_DESCRIPTION\\)\\'")
 
   (el-patch-defun git-commit-setup-check-buffer ()
     (and buffer-file-name
@@ -79,13 +76,12 @@ provide such a commit message."
         (add-hook  'find-file-hook 'git-commit-setup-check-buffer)
       (remove-hook 'find-file-hook 'git-commit-setup-check-buffer)))
 
-  (global-git-commit-mode 1)
+  (global-git-commit-mode +1)
 
   :config
 
-  ;; Wrap summary at 50 characters as per [1].
-  ;;
-  ;; [1]: http://chris.beams.io/posts/git-commit/
+  ;; Wrap summary at 50 characters as per
+  ;; https://chris.beams.io/posts/git-commit/.
   (setq git-commit-summary-max-length 50))
 
 (provide 'radian-git)

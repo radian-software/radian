@@ -4,14 +4,13 @@
 ;; we don't tell it not to.
 (setq package-enable-at-startup nil)
 
-;; We are using a package manager called straight.el. This code, which
-;; is taken from the README [1], bootstraps the system (because
-;; obviously the package manager is unable to install and load itself,
-;; if it is not already installed and loaded).
-;;
-;; [1]: https://github.com/raxod502/straight.el
-(let ((bootstrap-file (concat user-emacs-directory "straight/repos/straight.el/bootstrap.el"))
-      (bootstrap-version 3))
+;; Bootstrap the package manager, straight.el. For documentation, see
+;; https://github.com/raxod502/straight.el. The following code loads
+;; the package manager if it is already installed, and otherwise
+;; installs it first.
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 4))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
@@ -21,26 +20,35 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; To handle a lot of useful tasks related to package configuration,
-;; we use a library called `use-package', which provides a macro by
-;; the same name. This macro automates many common tasks, like
-;; autoloading functions, binding keys, registering major modes, and
-;; lazy-loading, through the use of keyword arguments. See the README
-;; [1].
-;;
-;; [1]: https://github.com/jwiegley/use-package
+;; Package `use-package' provides a handy macro by the same name which
+;; is essentially a wrapper around `with-eval-after-load' with a lot
+;; of handy syntactic sugar and useful features. See
+;; https://github.com/jwiegley/use-package for documentation.
 (straight-use-package 'use-package)
 
-;; Install packages by default.
+;; When configuring a feature with `use-package', also tell
+;; straight.el to install a package of the same name, unless otherwise
+;; specified.
 (setq straight-use-package-by-default t)
 
-;; Tell use-package to always load packages lazily unless told
+;; Tell `use-package' to always load packages lazily unless told
 ;; otherwise. It's nicer to have this kind of thing be deterministic:
 ;; if `:demand' is present, the loading is eager; otherwise, the
-;; loading is lazy. See [1].
-;;
-;; [1]: https://github.com/jwiegley/use-package#notes-about-lazy-loading
+;; loading is lazy. See
+;; https://github.com/jwiegley/use-package#notes-about-lazy-loading.
 (setq use-package-always-defer t)
+
+;; Make a convenient macro for using `use-package' without installing
+;; a package via straight.el.
+(defmacro use-feature (name &rest args)
+  "Like `use-package', but with `straight-use-package-by-default' disabled."
+  (declare (indent 1))
+  `(use-package ,name
+     :straight nil
+     ,@args))
+
+;; Copied from definition of `use-package'.
+(put 'use-feature 'lisp-indent-function 'defun)
 
 (provide 'radian-package)
 

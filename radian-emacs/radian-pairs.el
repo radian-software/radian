@@ -1,6 +1,6 @@
 ;;; radian-pairs.el --- Paired delimiter handling
 
-(require 'radian-package)
+(require 'radian-bind-key)
 (require 'radian-windowed)
 
 ;; Don't blink the cursor on the opening paren when you insert a
@@ -23,6 +23,10 @@
 
   ;; Smartparens' Paredit emulation is missing some bindings, so we
   ;; re-add them here.
+  ;;
+  ;; This can be removed once [1] is merged.
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/pull/891
   (radian-alist-set* "M-?" #'sp-convolute-sexp sp-paredit-bindings)
   (radian-alist-set* "M-j" #'sp-join-sexp sp-paredit-bindings)
 
@@ -46,6 +50,10 @@
   ;; terminal since that messed up the escape sequences sent for the
   ;; arrows and other keys. M-{ is a no-go because it's bound to
   ;; `backward-paragraph'.
+  ;;
+  ;; The first binding can be removed once [1] is merged.
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/pull/891
   (radian-alist-set* "M-(" #'radian-sp-wrap-round sp-paredit-bindings)
   (radian-with-windowed-emacs
     (radian-alist-set* "M-[" #'radian-sp-wrap-square sp-paredit-bindings))
@@ -109,7 +117,25 @@
   (dolist (mode '(python-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian-enter-and-indent-sexp "RET")
-                     (radian-enter-and-indent-sexp "<return>")))))
+                     (radian-enter-and-indent-sexp "<return>")))
+    (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
+                   '((radian-enter-and-indent-sexp "RET")
+                     (radian-enter-and-indent-sexp "<return>"))))
+
+  ;; We disable pair overlays from Smartparens. Normally, pair
+  ;; overlays are dismissed by pressing C-g. Even if we disable pair
+  ;; overlays, Smartparens still swallows C-g in the relevant
+  ;; contexts. This prevents C-g from reaching Company, if a Company
+  ;; menu is active. As a consequence, two presses of C-g are
+  ;; necessary to dismiss the Company menu, if an overlay would have
+  ;; been active. Until [1] is addressed, the following is a simple
+  ;; way to patch the UX problem.
+  ;;
+  ;; This can be removed once [2] is merged.
+  ;;
+  ;; [1]: https://github.com/Fuco1/smartparens/issues/889
+  ;; [2]: https://github.com/Fuco1/smartparens/pull/890
+  (unbind-key "C-g" sp-pair-overlay-keymap))
 
 (provide 'radian-pairs)
 

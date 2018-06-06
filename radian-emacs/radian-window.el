@@ -1,7 +1,5 @@
 ;;; radian-window.el --- Window and buffer management
 
-(require 'radian-package)
-
 ;; Use S-left, S-right, S-up, and S-down to move between windows. This
 ;; is much more convenient and efficient than using C-x o.
 (windmove-default-keybindings)
