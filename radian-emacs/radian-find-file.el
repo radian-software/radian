@@ -372,71 +372,58 @@ This is a function for `after-save-hook'. Remove
   (put 'projectile-indexing-method 'safe-local-variable
        #'radian-projectile-indexing-method-p))
 
-;; This package provides enhanced versions of the Projectile commands
-;; that use Ivy.
+;; Package `counsel-projectile' provides alternate versions of
+;; `projectile' commands which use `counsel'.
 (use-package counsel-projectile
   :init
 
-  ;; Lazy-load `counsel-projectile'.
   (el-patch-feature counsel-projectile)
 
-  (el-patch-defun counsel-projectile-commander-bindings ()
-    (def-projectile-commander-method ?f
-      "Find file in project."
-      (counsel-projectile-find-file))
-    (def-projectile-commander-method ?d
-      "Find directory in project."
-      (counsel-projectile-find-dir))
-    (def-projectile-commander-method ?b
-      "Switch to project buffer."
-      (counsel-projectile-switch-to-buffer))
-    (def-projectile-commander-method ?A
-      (el-patch-swap
-        "Search project files with ag."
-        "Search project files with rg.")
-      (el-patch-swap
-        (counsel-projectile-ag)
-        (counsel-projectile-rg)))
-    (def-projectile-commander-method ?s
-      "Switch project."
-      (counsel-projectile-switch-project)))
+  (el-patch-defvar counsel-projectile-command-map
+    (let ((map (make-sparse-keymap)))
+      (set-keymap-parent map projectile-command-map)
+      (define-key map (kbd "s r") 'counsel-projectile-rg)
+      (define-key map (kbd "O") 'counsel-projectile-org-capture)
+      (define-key map (kbd "SPC") 'counsel-projectile)
+      map)
+    "Keymap for Counesl-Projectile commands after `projectile-keymap-prefix'.")
+  (fset 'counsel-projectile-command-map counsel-projectile-command-map)
 
-  (el-patch-defun counsel-projectile-toggle (toggle)
-    "Toggle Ivy version of Projectile commands."
-    (if (> toggle 0)
-        (progn
-          (when (eq projectile-switch-project-action #'projectile-find-file)
-            (setq projectile-switch-project-action
-                  (el-patch-swap
-                    #'counsel-projectile
-                    #'counsel-projectile-find-file)))
-          (define-key projectile-mode-map [remap projectile-find-file] #'counsel-projectile-find-file)
-          (define-key projectile-mode-map [remap projectile-find-dir] #'counsel-projectile-find-dir)
-          (define-key projectile-mode-map [remap projectile-switch-project] #'counsel-projectile-switch-project)
-          (define-key projectile-mode-map [remap projectile-ag]
-            (el-patch-swap #'counsel-projectile-ag #'counsel-projectile-rg))
-          (define-key projectile-mode-map [remap projectile-switch-to-buffer] #'counsel-projectile-switch-to-buffer)
-          (counsel-projectile-commander-bindings))
-      (progn
-        (when (eq projectile-switch-project-action
-                  (el-patch-swap
-                    #'counsel-projectile
-                    #'counsel-projectile-find-file))
-          (setq projectile-switch-project-action #'projectile-find-file))
-        (define-key projectile-mode-map [remap projectile-find-file] nil)
-        (define-key projectile-mode-map [remap projectile-find-dir] nil)
-        (define-key projectile-mode-map [remap projectile-switch-project] nil)
-        (define-key projectile-mode-map (el-patch-swap
-                                          [remap projectile-ag]
-                                          [remap projectile-rg])
-          nil)
-        (define-key projectile-mode-map [remap projectile-switch-to-buffer] nil)
-        (projectile-commander-bindings))))
+  (el-patch-defvar counsel-projectile-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map projectile-keymap-prefix 'counsel-projectile-command-map)
+      (define-key map [remap projectile-find-file] 'counsel-projectile-find-file)
+      (define-key map [remap projectile-find-dir] 'counsel-projectile-find-dir)
+      (define-key map [remap projectile-switch-to-buffer] 'counsel-projectile-switch-to-buffer)
+      (define-key map [remap projectile-grep] 'counsel-projectile-grep)
+      (define-key map [remap projectile-ag] 'counsel-projectile-ag)
+      (define-key map [remap projectile-switch-project] 'counsel-projectile-switch-project)
+      map)
+    "Keymap for Counsel-Projectile mode.")
 
-  ;; Enable the `counsel-projectile' keybindings. This does not
-  ;; actually load the package, though.
+  (define-minor-mode counsel-projectile-mode
+    "Toggle Counsel-Projectile mode on or off.
+
+With a prefix argument ARG, enable the mode if ARG is positive,
+and disable it otherwise.  If called from Lisp, enable the mode
+if ARG is omitted or nil, and toggle it if ARG is `toggle'.
+
+Counsel-Projectile mode triggers Projectile mode, remaps
+Projectile commands that have counsel replacements, and adds key
+bindings for Counsel-Projectile commands that have no Projectile
+counterpart.
+
+\\{counsel-projectile-mode-map}"
+    :group 'counsel-projectile
+    :require 'counsel-projectile
+    :keymap counsel-projectile-mode-map
+    :global t
+    (if counsel-projectile-mode
+        (projectile-mode)
+      (projectile-mode -1)))
+
   (with-eval-after-load 'projectile
-    (counsel-projectile-toggle 1)))
+    (counsel-projectile-mode +1)))
 
 (provide 'radian-find-file)
 
