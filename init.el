@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; This allows us to instead load a different Emacs configuration by
 ;; exporting USER_EMACS_DIRECTORY to another .emacs.d directory.
 (let ((alternate-user-emacs-directory (getenv "USER_EMACS_DIRECTORY")))
