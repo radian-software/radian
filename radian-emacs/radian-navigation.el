@@ -1,6 +1,5 @@
 ;;; radian-navigation.el --- Navigating within a file
 
-(require 'cl-lib)
 (require 'radian-bind-key)
 (require 'radian-completion)
 (require 'radian-custom)
@@ -10,10 +9,15 @@
 
   (defun radian-advice-allow-negative-pop-mark
       (set-mark-command &optional arg)
-    "Allow \\[set-mark-command] to rotate the mark ring backwards.
-If a negative prefix argument is given (like M--
-\\[set-mark-command]), then it will step backwards by one,
-whereas C-u \\[set-mark-command] steps forwards by one."
+    "Allow \\[set-mark-command] to step in reverse.
+If a negative prefix argument is given (like
+\\[negative-argument] \\[set-mark-command]), then it will step in
+the reverse direction from \\[universal-argument]
+\\[set-mark-command].
+
+This is an `:around' advice for `set-mark-command'.
+SET-MARK-COMMAND is the original function and ARG is its
+argument."
     ;; Based on http://stackoverflow.com/a/14539202/3538165.
     (interactive "P")
     (if (< (prefix-numeric-value arg) 0)
@@ -30,51 +34,88 @@ whereas C-u \\[set-mark-command] steps forwards by one."
       (funcall set-mark-command arg)))
 
   (advice-add #'set-mark-command :around
-              #'radian-advice-allow-negative-pop-mark))
+              #'radian-advice-allow-negative-pop-mark)
 
-;; Make it so that if you provide a prefix argument to C-x C-SPC, then
-;; it will step forwards in the global mark ring, instead of
-;; backwards. Tweaked from the implementation of `pop-global-mark'.
+  (defun radian--advice-allow-unpopping-global-mark
+      (pop-global-mark &optional arg)
+    "Allow \\[pop-global-mark] to step in reverse.
+If a negative prefix argument is given (like
+\\[negative-argument] \\[pop-global-mark]), then it will step in
+the reverse direction from \\[pop-global-mark].
 
-(defun radian--advice-allow-unpopping-global-mark
-    (pop-global-mark &optional arg)
-  (interactive "P")
-  (if arg
-      (progn
-        (or global-mark-ring
-            (error "No global mark set"))
-        ;; We need to do this earlier than `pop-global-mark' does the
-        ;; corresponding action in order to properly undo its
-        ;; behavior.
-        (setq global-mark-ring (nconc (list (car (last global-mark-ring)))
-                                      (butlast global-mark-ring)))
-        (while (and global-mark-ring (not (marker-buffer (car (last global-mark-ring)))))
-          (setq global-mark-ring (butlast global-mark-ring)))
-        (let* ((marker (car (last global-mark-ring)))
-               (buffer (marker-buffer marker))
-               (position (marker-position marker)))
-          (set-buffer buffer)
-          (or (and (>= position (point-min))
-                   (<= position (point-max)))
-              (if widen-automatically
-                  (widen)
-                (error "Global mark position is outside accessible part of buffer")))
-          (goto-char position)
-          (switch-to-buffer buffer)))
-    (funcall pop-global-mark)))
+This is an `:around' advice for `pop-global-mark'.
+POP-GLOBAL-MARK is the original function and ARG is its
+argument."
+    (interactive "P")
+    (if arg
+        ;; Tweaked from the implementation of `pop-global-mark'.
+        (progn
+          (or global-mark-ring
+              (error "No global mark set"))
+          ;; We need to do this earlier than `pop-global-mark' does the
+          ;; corresponding action in order to properly undo its
+          ;; behavior.
+          (setq global-mark-ring (nconc (list (car (last global-mark-ring)))
+                                        (butlast global-mark-ring)))
+          (while (and global-mark-ring (not (marker-buffer (car (last global-mark-ring)))))
+            (setq global-mark-ring (butlast global-mark-ring)))
+          (let* ((marker (car (last global-mark-ring)))
+                 (buffer (marker-buffer marker))
+                 (position (marker-position marker)))
+            (set-buffer buffer)
+            (or (and (>= position (point-min))
+                     (<= position (point-max)))
+                (if widen-automatically
+                    (widen)
+                  (error "Global mark position is outside accessible part of buffer")))
+            (goto-char position)
+            (switch-to-buffer buffer)))
+      (funcall pop-global-mark)))
 
-(advice-add #'pop-global-mark :around
-            #'radian--advice-allow-unpopping-global-mark)
+  (advice-add #'pop-global-mark :around
+              #'radian--advice-allow-unpopping-global-mark))
 
-;; When using M-. and friends, always prompt for the identifier (it
-;; defaults to the identifier at point). This behavior is more
-;; consistent and predictable than the default, which is to jump
-;; immediately if there is a valid symbol at point.
-(setq xref-prompt-for-identifier t)
+(use-feature isearch
+  :config
 
-;; Eliminate the quarter-second delay before I-search matches are
-;; highlighted, because delays suck.
-(setq lazy-highlight-initial-delay 0)
+  ;; Eliminate the quarter-second delay before I-search matches are
+  ;; highlighted, because delays suck.
+  (setq lazy-highlight-initial-delay 0))
+
+;; Package `visual-regexp' provides an alternate version of
+;; `query-replace' which highlights matches and replacements as you
+;; type.
+(use-package visual-regexp
+  :bind (("M-%" . vr/query-replace)))
+
+;; Package `visual-regexp-steroids' allows `visual-regexp' to use
+;; regexp engines other than Emacs'; for example, Python or Perl
+;; regexps.
+(use-package visual-regexp-steroids
+  :demand t
+  :after visual-regexp
+  :config
+
+  ;; Use Emacs-style regular expressions by default, instead of
+  ;; Python-style.
+  (setq vr/engine 'emacs))
+
+;; Package `swiper' provides an alternative to `isearch' which instead
+;; uses `ivy' to display and select from the results.
+(use-package swiper
+  :bind (("C-s" . swiper)
+         ("C-r" . swiper)))
+
+;; Package `avy' provides a quick-navigation mechanism wherein you
+;; enter some query, like the first letter of a word, and each place
+;; that query matches on-screen is assigned a sequence of keystrokes.
+;; Pressing those keystrokes moves point there.
+(use-package avy
+  :init
+
+  (radian-bind-key "l" #'avy-goto-line)
+  (radian-bind-key "w" #'avy-goto-word-1)
+  (radian-bind-key "c" #'avy-goto-char))
 
 (use-feature bookmark
   :config
@@ -86,69 +127,14 @@ This is an `:override' advice for `bookmark-maybe-message'.")
   (advice-add #'bookmark-maybe-message :override
               #'radian-advice-bookmark-silence))
 
-;; This package provides an enhanced version of Isearch that uses Ivy
-;; to display a preview of the results.
-(use-package swiper
-  :bind (("C-s" . swiper)
-         ("C-r" . swiper)))
-
-;; This package allows you to jump quickly to characters and words
-;; visible onscreen.
-(use-package avy
-  :init
-
-  ;; Create keybindings for common avy commands.
-
-  (defcustom radian-avy-prefix
-    (radian-join-keys radian-prefix "g")
-    "Prefix key sequence for Avy commands.
-Avy keybindings are placed under this prefix by default. nil
-means no keybindings are established by default."
-    :group 'radian
-    :type 'string)
-
-  (defmacro radian--establish-avy-bindings (&rest specs)
-    `(progn
-       ,@(cl-mapcan
-          (lambda (spec)
-            (cl-destructuring-bind (key . command-name) spec
-              (let ((custom-name (intern (format "radian-%S-keybinding"
-                                                 command-name))))
-                `((defcustom ,custom-name
-                    (when radian-avy-prefix
-                      (radian-join-keys radian-avy-prefix ,key))
-                    ,(format "Keybinding for `%S', as a string.
-nil means no keybinding is established."
-                             command-name)
-                    :group 'radian
-                    :type 'string)
-                  (when ,custom-name
-                    (bind-key ,custom-name #',command-name))))))
-          specs)))
-
-  (radian--establish-avy-bindings
-   ("c" . avy-goto-char)
-   ("t" . avy-goto-char-timer)
-   ("l" . avy-goto-line)
-   ("w" . avy-goto-word-1)
-   ("W" . avy-goto-word-0)))
-
-;; This package highlights matches and previews replacements in query
-;; replace.
-(use-package visual-regexp
-  :bind (;; Replace the regular query replace with the regexp query
-         ;; replace provided by this package.
-         ("M-%" . vr/query-replace)))
-
-;; This package allows the use of other regexp engines for
-;; visual-regexp.
-(use-package visual-regexp-steroids
-  :demand t
-  :after visual-regexp
+(use-feature xref
   :config
 
-  ;; Use Emacs-style regular expressions by default.
-  (setq vr/engine 'emacs))
+  ;; When using M-. and friends, always prompt for the identifier (it
+  ;; defaults to the identifier at point). This behavior is more
+  ;; consistent and predictable than the default, which is to jump
+  ;; immediately if there is a valid symbol at point.
+  (setq xref-prompt-for-identifier t))
 
 (provide 'radian-navigation)
 

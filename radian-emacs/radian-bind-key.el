@@ -1,4 +1,4 @@
-;;; radian-bind-key.el --- Utility functions for keybindings
+;; -*- lexical-binding: t -*-
 
 (require 'radian-custom)
 
@@ -16,11 +16,16 @@ This is a string as would be passed to `kbd'."
   (string-join (remove "" (mapcar #'string-trim (remove nil keys))) " "))
 
 ;; Package `bind-key' provides a macro by the same name, as well as a
-;; few others, that provides a much prettier API than `define-key' and
-;; `global-set-key' do. It's also the same API that the `:bind' and
-;; similar keywords in `use-package' use.
-(use-package bind-key)
+;; few others, that provides a much prettier API for manipulating
+;; keymaps than `define-key' and `global-set-key' do. It's also the
+;; same API that the `:bind' and similar keywords in `use-package'
+;; use.
+(use-package bind-key
+  :init
+
+  (defmacro radian-bind-key (key-name command &optional keymap predicate)
+    "Bind a key under `radian-prefix'."
+    `(bind-key (radian-join-keys radian-prefix ,key-name)
+               ,command ,keymap ,predicate)))
 
 (provide 'radian-bind-key)
-
-;;; radian-bind-key.el ends here
