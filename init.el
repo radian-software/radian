@@ -126,6 +126,11 @@ code.")
         ;; Make the Radian libraries available.
         (add-to-list 'load-path (directory-file-name radian-lib-directory))
 
+        ;; Declare `straight-current-profile' as a special variable,
+        ;; so we can dynamically bind it even though straight.el is
+        ;; not yet loaded.
+        (defvar straight-current-profile)
+
         ;; Load the Radian libraries.
         (let ((preloaded-features
                '(;; Compatibility functions may be needed
