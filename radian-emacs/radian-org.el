@@ -1,4 +1,4 @@
-;;; radian-org.el -- Org mode customizations
+;; -*- lexical-binding: t -*-
 
 ;; Org is a hugely expansive framework (a.k.a. collection of hacks)
 ;; for organizing information, notes, tasks, calendars, and anything
@@ -253,5 +253,3 @@ This is an `:around' advice for `org-agenda'. It commutes with
   (setq org-clock-out-remove-zero-time-clocks t))
 
 (provide 'radian-org)
-
-;;; radian-org.el ends here

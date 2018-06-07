@@ -1,4 +1,4 @@
-;;; radian-find-file.el --- Finding files
+;; -*- lexical-binding: t -*-
 
 (require 'cl-lib)
 (require 'radian-bind-key)
@@ -426,5 +426,3 @@ counterpart.
     (counsel-projectile-mode +1)))
 
 (provide 'radian-find-file)
-
-;;; radian-find-file.el ends here

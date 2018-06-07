@@ -1,4 +1,4 @@
-;;; radian-yank.el --- Killing and yanking
+;; -*- lexical-binding: t -*-
 
 ;; If you start typing when you have something selected, then the
 ;; selection will be deleted. If you press DEL while you have
@@ -17,5 +17,3 @@
 (setq kill-do-not-save-duplicates t)
 
 (provide 'radian-yank)
-
-;;; radian-yank.el ends here

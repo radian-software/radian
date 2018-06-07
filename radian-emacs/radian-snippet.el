@@ -1,4 +1,4 @@
-;;; radian-snippet.el --- Configuring snippet tools
+;; -*- lexical-binding: t -*-
 
 (require 'radian-appearance)
 
@@ -27,5 +27,3 @@
   :diminish yas-minor-mode)
 
 (provide 'radian-snippet)
-
-;;; radian-snippet.el ends here

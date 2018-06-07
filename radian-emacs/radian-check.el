@@ -1,4 +1,4 @@
-;;; radian-check.el --- On-the-fly syntax and semantics checking
+;; -*- lexical-binding: t -*-
 
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting, or more generally syntax checking. It comes
@@ -34,5 +34,3 @@
   (setq flycheck-mode-line nil))
 
 (provide 'radian-check)
-
-;;; radian-check.el ends here

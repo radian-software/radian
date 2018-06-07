@@ -1,4 +1,4 @@
-;;; radian-patch.el --- Patching functions in other packages
+;; -*- lexical-binding: t -*-
 
 ;; Occasionally you need to customize a small part of a large function
 ;; defined by another package. This library provides an elegant,
@@ -15,5 +15,3 @@
   (setq el-patch-use-aggressive-defvar t))
 
 (provide 'radian-patch)
-
-;;; radian-patch.el ends here

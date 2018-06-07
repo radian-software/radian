@@ -1,4 +1,4 @@
-;;; radian-package.el --- Package management
+;; -*- lexical-binding: t -*-
 
 ;; We aren't using package.el, but Emacs will initialize it for us if
 ;; we don't tell it not to.
@@ -54,5 +54,3 @@
 (put 'use-feature 'lisp-indent-function 'defun)
 
 (provide 'radian-package)
-
-;;; radian-package.el ends here

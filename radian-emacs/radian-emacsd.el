@@ -1,4 +1,4 @@
-;;; radian-emacsd.el --- Organizing ~/.emacs.d
+;; -*- lexical-binding: t -*-
 
 ;; This package changes the default paths for lots of different
 ;; packages, with the net result that the ~/.emacs.d folder is much
@@ -9,5 +9,3 @@
   :demand t)
 
 (provide 'radian-emacsd)
-
-;;; radian-emacsd.el ends here

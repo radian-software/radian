@@ -1,4 +1,4 @@
-;;; radian-save-file.el --- Saving files
+;; -*- lexical-binding: t -*-
 
 ;; Don't make backup files.
 (setq make-backup-files nil)
@@ -7,5 +7,3 @@
 (setq auto-save-default nil)
 
 (provide 'radian-save-file)
-
-;;; radian-save-file.el ends here

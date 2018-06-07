@@ -1,4 +1,4 @@
-;;; radian-windowed.el --- Checking the window system
+;; -*- lexical-binding: t -*-
 
 (defmacro radian-with-windowed-emacs (&rest body)
   "Eval BODY if Emacs is windowed, else return nil."
@@ -13,5 +13,3 @@
      ,@body))
 
 (provide 'radian-windowed)
-
-;;; radian-windowed.el ends here

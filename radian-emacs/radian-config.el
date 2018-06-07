@@ -1,4 +1,4 @@
-;;; radian-config.el --- Support for editing various config files
+;; -*- lexical-binding: t -*-
 
 (require 'radian-regexp)
 
@@ -70,5 +70,3 @@
   (add-hook 'yaml-mode-hook #'radian--disable-auto-fill-mode))
 
 (provide 'radian-config)
-
-;;; radian-config.el ends here

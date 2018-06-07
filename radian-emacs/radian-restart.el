@@ -1,4 +1,4 @@
-;;; radian-restart.el --- Restarting Emacs
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-patch)
@@ -55,5 +55,3 @@ with which Emacs should be restarted."
         (restart-emacs--launch-other-emacs restart-args)))))
 
 (provide 'radian-restart)
-
-;;; radian-restart.el ends here

@@ -1,4 +1,4 @@
-;;; radian-revert.el --- Configure automatic buffer reverting
+;; -*- lexical-binding: t -*-
 
 (require 'cl-lib)
 (require 'radian-patch)
@@ -123,5 +123,3 @@ the timer when no buffers need to be checked."
   (setq auto-revert-mode-text nil))
 
 (provide 'radian-revert)
-
-;;; radian-revert.el ends here

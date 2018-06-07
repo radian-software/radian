@@ -1,4 +1,4 @@
-;;; radian-warnings.el --- Disable warnings
+;; -*- lexical-binding: t -*-
 
 ;; Enable all disabled commands.
 (setq disabled-command-function nil)
@@ -9,5 +9,3 @@
 (setq ad-redefinition-action 'accept)
 
 (provide 'radian-warnings)
-
-;;; radian-warnings.el ends here

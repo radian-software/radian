@@ -1,4 +1,4 @@
-;;; radian-network.el --- Network connections and web browsing
+;; -*- lexical-binding: t -*-
 
 (require 'radian-os)
 
@@ -36,5 +36,3 @@
 (use-package webpaste)
 
 (provide 'radian-network)
-
-;;; radian-network.el ends here

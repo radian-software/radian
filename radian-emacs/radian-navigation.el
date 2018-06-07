@@ -1,4 +1,4 @@
-;;; radian-navigation.el --- Navigating within a file
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-completion)
@@ -137,5 +137,3 @@ This is an `:override' advice for `bookmark-maybe-message'.")
   (setq xref-prompt-for-identifier t))
 
 (provide 'radian-navigation)
-
-;;; radian-navigation.el ends here

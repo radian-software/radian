@@ -1,4 +1,4 @@
-;;; radian-cc.el --- Support for C-like languages
+;; -*- lexical-binding: t -*-
 
 (require 'map)
 
@@ -169,5 +169,3 @@ This is an `:override' advice for `c-update-modeline'.")
   (flycheck-add-next-checker 'irony '(warning . c/c++-cppcheck)))
 
 (provide 'radian-cc)
-
-;;; radian-cc.el ends here

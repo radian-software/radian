@@ -1,4 +1,4 @@
-;;; radian-eldoc.el --- Eldoc customizations
+;; -*- lexical-binding: t -*-
 
 (require 'radian-slow)
 
@@ -30,5 +30,3 @@ This is done in `radian-slow-autocomplete-mode'."
 (add-hook 'radian-slow-autocomplete-mode-hook #'radian-eldoc-toggle-slow)
 
 (provide 'radian-eldoc)
-
-;;; radian-eldoc.el ends here

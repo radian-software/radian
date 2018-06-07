@@ -1,4 +1,4 @@
-;;; radian-util.el --- Miscellaneous utility functions
+;; -*- lexical-binding: t -*-
 
 (require 'radian-os)
 (require 'subr-x)
@@ -102,5 +102,3 @@ This means that FILENAME is a symlink whose target is inside
        (cl-every #'stringp obj)))
 
 (provide 'radian-util)
-
-;;; radian-util.el ends here

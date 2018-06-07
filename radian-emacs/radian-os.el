@@ -1,4 +1,4 @@
-;;; radian-os.el --- Operating system detection
+;; -*- lexical-binding: t -*-
 
 (require 'radian-custom)
 
@@ -26,5 +26,3 @@ which should not be quoted."
      ,@body))
 
 (provide 'radian-os)
-
-;;; radian-os.el ends here

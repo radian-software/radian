@@ -1,4 +1,4 @@
-;;; radian-indent.el --- Indentation
+;; -*- lexical-binding: t -*-
 
 (require 'radian-slow)
 
@@ -39,5 +39,3 @@ This is done in `radian-slow-indent-mode'."
   :diminish "AggrIndent")
 
 (provide 'radian-indent)
-
-;;; radian-indent.el ends here

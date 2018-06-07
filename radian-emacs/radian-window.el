@@ -1,4 +1,4 @@
-;;; radian-window.el --- Window and buffer management
+;; -*- lexical-binding: t -*-
 
 ;; Use S-left, S-right, S-up, and S-down to move between windows. This
 ;; is much more convenient and efficient than using C-x o.
@@ -63,5 +63,3 @@ This is a `:before-while' advice for `iflipb-message'. See also
   :bind (("C-x C-b" . ibuffer)))
 
 (provide 'radian-window)
-
-;;; radian-window.el ends here

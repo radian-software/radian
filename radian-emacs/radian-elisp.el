@@ -1,4 +1,4 @@
-;;; radian-elisp.el --- Support for Emacs Lisp
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-check)
@@ -98,5 +98,3 @@ Nil means no keybinding is established."
   (add-hook 'emacs-lisp-mode-hook #'radian--disable-flycheck-for-emacs-lisp))
 
 (provide 'radian-elisp)
-
-;;; radian-elisp.el ends here

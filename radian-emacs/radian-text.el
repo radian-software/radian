@@ -1,4 +1,4 @@
-;;; radian-text.el --- Formatting and editing text
+;; -*- lexical-binding: t -*-
 
 (require 'radian-appearance)
 
@@ -91,5 +91,3 @@ that were passed to it."
   :diminish whitespace-mode)
 
 (provide 'radian-text)
-
-;;; radian-text.el ends here

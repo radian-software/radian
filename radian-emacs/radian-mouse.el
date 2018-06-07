@@ -1,4 +1,4 @@
-;;; radian-mouse.el --- Making the mouse work as expected
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-os)
@@ -33,5 +33,3 @@
                ("<mouse-5>" . radian-scroll-up))))
 
 (provide 'radian-mouse)
-
-;;; radian-mouse.el ends here

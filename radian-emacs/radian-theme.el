@@ -1,4 +1,4 @@
-;;; radian-theme.el --- Loading color themes
+;; -*- lexical-binding: t -*-
 
 (require 'radian-custom)
 
@@ -104,5 +104,3 @@ If there is an error, report it as a warning."
     (load-theme radian-color-theme 'no-confirm)))
 
 (provide 'radian-theme)
-
-;;; radian-theme.el ends here

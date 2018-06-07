@@ -1,4 +1,4 @@
-;;; radian-compile.el --- M-x compile and friends
+;; -*- lexical-binding: t -*-
 
 (use-package compile
   :straight nil
@@ -9,5 +9,3 @@
   (setq compilation-scroll-output 'first-error))
 
 (provide 'radian-compile)
-
-;;; radian-compile.el ends here

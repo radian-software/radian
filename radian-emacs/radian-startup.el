@@ -1,4 +1,4 @@
-;;; radian-startup.el --- Cleaning up Emacs startup
+;; -*- lexical-binding: t -*-
 
 ;; Disable the "For information about GNU Emacs..." message at
 ;; startup, for *all* users. (Because FSF is crazy about copyright
@@ -25,5 +25,3 @@ This is an `:override' advice for
 (setq initial-scratch-message nil)
 
 (provide 'radian-startup)
-
-;;; radian-startup.el ends here

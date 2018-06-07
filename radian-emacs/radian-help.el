@@ -1,4 +1,4 @@
-;;; radian-help.el --- Improve the Emacs help system
+;; -*- lexical-binding: t -*-
 
 (use-feature help
   :config
@@ -41,5 +41,3 @@ This is an `:around' advice for `help-mode-revert-buffer'."
   (setq custom-search-field nil))
 
 (provide 'radian-help)
-
-;;; radian-help.el ends here

@@ -1,4 +1,4 @@
-;;; radian-appearance.el --- Non-color-theme appearance tweaks
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-custom)
@@ -294,5 +294,3 @@ This is scheduled repeatedly at intervals after
 (setq echo-keystrokes 1e-6)
 
 (provide 'radian-appearance)
-
-;;; radian-appearance.el ends here

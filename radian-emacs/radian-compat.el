@@ -1,4 +1,4 @@
-;;; radian-compat.el --- Compatibility for older Emacs versions
+;; -*- lexical-binding: t -*-
 
 (require 'subr-x)
 
@@ -11,5 +11,3 @@
   (defalias 'when-let* #'when-let))
 
 (provide 'radian-compat)
-
-;;; radian-compat.el ends here

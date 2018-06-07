@@ -1,4 +1,4 @@
-;;; radian-dired.el --- Filesystem management via Dired
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-os)
@@ -64,5 +64,3 @@ This is a `:before' advice for `dired-insert-directory'."
          ("C-x 4 C-j" . dired-jump-other-window)))
 
 (provide 'radian-dired)
-
-;;; radian-dired.el ends here

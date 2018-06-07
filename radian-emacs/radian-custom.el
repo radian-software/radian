@@ -1,4 +1,4 @@
-;;; radian-custom.el --- Customizing Radian Emacs
+;; -*- lexical-binding: t -*-
 
 ;; Here we define a customization group for Radian. This allows users
 ;; to customize the variables declared here in a user-friendly way
@@ -8,5 +8,3 @@
   :group 'emacs)
 
 (provide 'radian-custom)
-
-;;; radian-custom.el ends here

@@ -1,4 +1,4 @@
-;;; radian-git.el --- Interfacing with Git
+;; -*- lexical-binding: t -*-
 
 (require 'radian-appearance)
 (require 'radian-patch)
@@ -85,5 +85,3 @@ provide such a commit message."
   (setq git-commit-summary-max-length 50))
 
 (provide 'radian-git)
-
-;;; radian-git.el ends here

@@ -1,4 +1,4 @@
-;;; radian-langs.el --- Support for miscellaneous languages
+;; -*- lexical-binding: t -*-
 
 (require 'map)
 
@@ -721,5 +721,3 @@ This is an `:after' advice for `tide-setup'."
   :diminish tide-mode)
 
 (provide 'radian-langs)
-
-;;; radian-langs.el ends here

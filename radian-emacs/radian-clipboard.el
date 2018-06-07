@@ -1,4 +1,4 @@
-;;; radian-clipboard.el --- Integration with the system clipboard
+;; -*- lexical-binding: t -*-
 
 (require 'radian-os)
 (require 'radian-windowed)
@@ -72,5 +72,3 @@ This is used to prevent duplicate entries in the kill ring.")
 (setq save-interprogram-paste-before-kill t)
 
 (provide 'radian-clipboard)
-
-;;; radian-clipboard.el ends here

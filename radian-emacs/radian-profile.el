@@ -1,4 +1,4 @@
-;;; radian-profile.el --- Profile Emacs startup
+;; -*- lexical-binding: t -*-
 
 (defvar radian-flattened-init-file
   (when user-init-file
@@ -60,5 +60,3 @@ flattened init-file if the regular one is working."
     (message "Wrote %s" radian-flattened-init-file)))
 
 (provide 'radian-profile)
-
-;;; radian-profile.el ends here

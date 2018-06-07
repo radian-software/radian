@@ -1,4 +1,4 @@
-;;; radian-completion.el --- Completion systems
+;; -*- lexical-binding: t -*-
 
 (require 'radian-patch)
 (require 'radian-slow)
@@ -385,5 +385,3 @@ This is an `:around' advice for `yas--make-control-overlay'."
   (company-prescient-mode +1))
 
 (provide 'radian-completion)
-
-;;; radian-completion.el ends here

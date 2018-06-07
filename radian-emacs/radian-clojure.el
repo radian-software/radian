@@ -1,4 +1,4 @@
-;;; radian-clojure.el --- Support for Clojure(Script)
+;; -*- lexical-binding: t -*-
 
 (require 'map)
 
@@ -311,5 +311,3 @@ This is an `:override' advice for `cljr--post-command-message'.")
   :diminish clj-refactor-mode)
 
 (provide 'radian-clojure)
-
-;;; radian-clojure.el ends here

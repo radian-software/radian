@@ -1,4 +1,4 @@
-;;; radian-pairs.el --- Paired delimiter handling
+;; -*- lexical-binding: t -*-
 
 (require 'radian-bind-key)
 (require 'radian-windowed)
@@ -123,5 +123,3 @@
                      (radian-enter-and-indent-sexp "<return>")))))
 
 (provide 'radian-pairs)
-
-;;; radian-pairs.el ends here

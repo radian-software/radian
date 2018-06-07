@@ -1,4 +1,4 @@
-;;; radian-env.el --- Environment variables
+;; -*- lexical-binding: t -*-
 
 (require 'radian-util)
 

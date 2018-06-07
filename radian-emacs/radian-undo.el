@@ -1,4 +1,4 @@
-;;; radian-undo.el --- Undo and redo
+;; -*- lexical-binding: t -*-
 
 ;; This package provides undo/redo commands that are both more
 ;; intuitive and more powerful than the Emacs defaults. It also allows
@@ -56,5 +56,3 @@ loaded since the file was changed outside of Emacs."
   (setq undo-tree-enable-undo-in-region nil))
 
 (provide 'radian-undo)
-
-;;; radian-undo.el ends here
