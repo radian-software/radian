@@ -71,14 +71,6 @@ Minibuffer bindings:
          ("C-x C-r" . ivy-resume))
   :config
 
-  ;; Allow arbitrary substring matching (not requiring matches to
-  ;; start at the beginning of a candidate) for all commands, by
-  ;; default. (This is particularly useful in light of the fact that
-  ;; `prescient', configured below, does not support using a leading
-  ;; caret (^) to match the beginning of a string, so having a caret
-  ;; as the initial input is pretty useless.)
-  (setq ivy-initial-inputs-alist nil)
-
   ;; With enough packages loaded, it is easy to get commands like
   ;; `describe-symbol' to offer more than 30,000 candidates. Allow
   ;; sorting in these cases.
