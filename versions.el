@@ -32,7 +32,7 @@
  ("epl" . "78ab7a85c08222cd15582a298a364774e3282ce6")
  ("esup" . "1182c490a7ddc275318c9eb25b8d5bbdf9b78d2b")
  ("f.el" . "de6d4d40ddc844eee643e92d47b9d6a63fbebb48")
- ("flycheck" . "0fd709e0e56a2c157d3a04c11ff521f4090f3036")
+ ("flycheck" . "a5a80dff327845cae554a204987f8de0a5166830")
  ("flycheck-irony" . "34940ae5ab8f4c721d9c1118ebfc3496d7e67a84")
  ("geiser" . "ec3d0ea34081789da44f0b11b2cf05627a1e9b8e")
  ("ghub" . "4831933da059ee084a16016558b9ccd8c581a8ff")
