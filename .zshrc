@@ -17,11 +17,6 @@ else
     export ZPLUG_INSTALL=/usr/share/zsh/scripts/zplug
 fi
 
-### Plugin configuration
-
-# Have wdx generate a function by the name 'wd' instead of 'wdx'.
-export WDX_NAME=wd
-
 ### Plugin list
 
 RADIAN_PLUGINS=(
@@ -320,6 +315,9 @@ alias 6='cd -6'
 alias 7='cd -7'
 alias 8='cd -8'
 alias 9='cd -9'
+
+# Less typing for directory jumping.
+alias wd=wdx
 
 #### dirs
 
