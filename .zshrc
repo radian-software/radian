@@ -357,8 +357,8 @@ fi
 
 #### wdx
 
-if command -v $WDX_NAME &>/dev/null; then
-    alias ws="$WDX_NAME set"
+if command -v wdx &>/dev/null; then
+    alias ws='wdx set'
 fi
 
 ### Filesystem management
