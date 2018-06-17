@@ -158,7 +158,7 @@ be generated automatically from the basename of FILENAME."
 (defun radian-advice-find-file-create-directories
     (find-file filename &rest args)
   "Automatically create and delete parent directories of files.
-This is an `:override' advice for `find-file' and friends. It
+This is an `:around' advice for `find-file' and friends. It
 automatically creates the parent directory (or directories) of
 the file being visited, if necessary. It also sets a buffer-local
 variable so that the user will be prompted to delete the newly
