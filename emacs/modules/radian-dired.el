@@ -61,6 +61,10 @@ This is a `:before' advice for `dired-insert-directory'."
 (use-feature dired-x
   :bind (;; Bindings for jumping to the current directory in Dired.
          ("C-x C-j" . dired-jump)
-         ("C-x 4 C-j" . dired-jump-other-window)))
+         ("C-x 4 C-j" . dired-jump-other-window))
+  :config
+
+  ;; Prevent annoying "Omitted N lines" messages when auto-reverting.
+  (setq dired-omit-verbose nil))
 
 (provide 'radian-dired)
