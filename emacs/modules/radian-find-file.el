@@ -48,7 +48,7 @@ If PRETTY-FILENAME, a string, is non-nil, then it will be used in
 place of \"init-el\" in this example. Otherwise, that string will
 be generated automatically from the basename of FILENAME."
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
-         (full-filename (concat "~/" filename))
+         (full-filename (expand-file-name filename "~"))
          (defun-name (intern
                       (replace-regexp-in-string
                        "-+"
