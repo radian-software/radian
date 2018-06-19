@@ -128,7 +128,6 @@ be generated automatically from the basename of FILENAME."
 
 ;; Zsh
 (radian-register-dotfile ".zshrc" "z r")
-(radian-register-dotfile ".zshrc.before.local" "z b")
 (radian-register-dotfile ".zshrc.local" "z l")
 
 ;; Follow symlinks when opening files. This has the concrete impact,
