@@ -45,45 +45,38 @@
         (require 'cl-lib)
         (require 'subr-x)
 
-        (defvar radian-directory
-          (let ((link-target
-                 ;; This function returns the target of the link.
-                 ;; If the init-file is not a symlink, then we
-                 ;; abort.
-                 (file-symlink-p
-                  (or
-                   ;; If we are loading the init-file normally,
-                   ;; then the filename is in `load-file-name'.
-                   load-file-name
-                   ;; Otherwise, that's nil and the filename is in
-                   ;; `buffer-file-name' (this will happen if you
-                   ;; `eval-buffer' for example).
-                   buffer-file-name))))
-            ;; We identify a directory as the Radian repository by
-            ;; the existence of a "radian-emacs" folder inside it.
-            ;; Note that the previous check does disallow copying
-            ;; the init-file and radian-emacs folder into
-            ;; ~/.emacs.d, which is fine as that is a ridiculous
-            ;; use case.
-            (when (and
-                   link-target
-                   (file-directory-p (expand-file-name
-                                      "radian-emacs/"
-                                      (file-name-directory link-target))))
-              (file-name-directory
-               (file-truename link-target))))
-          "Path to the Radian repository, or nil if not found.
-This is an absolute path.")
+        (let* ((this-file
+                (or
+                 ;; If we are loading the init-file normally, then the
+                 ;; filename is in `load-file-name'.
+                 load-file-name
+                 ;; Otherwise, that's nil and the filename is in
+                 ;; `buffer-file-name' (this will happen if you
+                 ;; `eval-buffer' for example).
+                 buffer-file-name))
+               (link-target
+                ;; This function returns the target of the link. If the
+                ;; init-file is not a symlink, then we abort.
+                (file-symlink-p this-file)))
 
-        (defvar radian-lib-directory
-          (and radian-directory
-               (expand-file-name "radian-emacs/" radian-directory))
-          "Path to the Radian Emacs libraries, or nil if not found.
-This is an absolute path.")
+          (unless link-target
+            (error "File %S is not a symlink" this-file))
 
-        ;; Fail fast if we can't find the Radian libraries.
-        (unless radian-directory
-          (error "Couldn't find Radian repository"))
+          (let* ((lib-directory (expand-file-name
+                                 "modules/"
+                                 (file-name-directory link-target))))
+
+            (unless (file-directory-p lib-directory)
+              (error "Modules directory %S does not exist" lib-directory))
+
+            (defvar radian-directory (file-name-directory
+                                      (directory-file-name
+                                       (file-name-directory
+                                        link-target)))
+              "Path to the Radian Git repository.")
+
+            (defvar radian-lib-directory lib-directory
+              "Path to the Radian Emacs modules directory.")))
 
         ;; Tell straight.el about the profiles we are going to be
         ;; using.

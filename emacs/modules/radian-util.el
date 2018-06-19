@@ -74,12 +74,11 @@ done with TESTFN, which defaults to `eq'. See also
   "Return non-nil if FILENAME is managed by Radian.
 This means that FILENAME is a symlink whose target is inside
 `radian-directory'."
-  (and radian-directory
-       (string-prefix-p radian-directory (file-truename filename)
-                        ;; The filesystem on macOS is case-insensitive
-                        ;; but case-preserving, so we have to compare
-                        ;; case-insensitively in that situation.
-                        (eq radian-operating-system 'macOS))))
+  (string-prefix-p radian-directory (file-truename filename)
+                   ;; The filesystem on macOS is case-insensitive
+                   ;; but case-preserving, so we have to compare
+                   ;; case-insensitively in that situation.
+                   (eq radian-operating-system 'macOS)))
 
 (defun radian-random-string ()
   "Return a random string designed to be globally unique."

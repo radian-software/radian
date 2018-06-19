@@ -44,6 +44,7 @@
   or silly. For partial lazy-loading, use `el-patch`.
 * Order `use-package` keywords as follows, so that they are in the
   rough order of execution:
+    * `:preface`
     * `:straight`
     * `:commands`
     * `:init`

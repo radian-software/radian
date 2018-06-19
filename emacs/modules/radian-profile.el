@@ -49,14 +49,14 @@ flattened init-file if the regular one is working."
       (print `(defvar radian-directory ',radian-directory)
              (current-buffer))
       (insert-file-contents-literally
-       (expand-file-name "templates/init-profile-pre.el" radian-directory))
+       (expand-file-name "emacs/templates/init-profile-pre.el" radian-directory))
       (dolist (lib (nreverse libs))
         (goto-char (point-max))
         (insert-file-contents-literally
          (expand-file-name (format "%S.el" lib) radian-lib-directory)))
       (goto-char (point-max))
       (insert-file-contents-literally
-       (expand-file-name "templates/init-profile-post.el" radian-directory)))
+       (expand-file-name "emacs/templates/init-profile-post.el" radian-directory)))
     (message "Wrote %s" radian-flattened-init-file)))
 
 (provide 'radian-profile)
