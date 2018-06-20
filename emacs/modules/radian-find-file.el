@@ -123,9 +123,6 @@ be generated automatically from the basename of FILENAME."
 (radian-register-dotfile ".tmux.conf" "t c")
 (radian-register-dotfile ".tmux.local.conf" "t l")
 
-;; Vim
-(radian-register-dotfile ".config/nvim/init.vim" "v i")
-
 ;; Zsh
 (radian-register-dotfile ".zshrc" "z r")
 (radian-register-dotfile ".zshrc.local" "z l")
