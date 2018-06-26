@@ -1,0 +1,29 @@
+;; -*- lexical-binding: t -*-
+
+(require 'radian-appearance)
+
+;; Don't show `abbrev-mode' in the mode line.
+(with-eval-after-load 'abbrev
+  (diminish 'abbrev-mode))
+
+;; YASnippet allows the expansion of user-defined abbreviations into
+;; fillable templates. It is also used by `clj-refactor' for some of
+;; its refactorings.
+(use-package yasnippet
+  :demand t
+  :bind (:map yas-minor-mode-map
+
+         ;; Disable TAB from expanding snippets, as I don't use it and
+         ;; it's annoying.
+         ("TAB" . nil)
+         ("<tab>" . nil))
+  :config
+
+  ;; Reduce verbosity. The default value is 3. Bumping it down to 2
+  ;; eliminates a message about successful snippet lazy-loading setup
+  ;; on every(!) Emacs init. Errors should still be shown.
+  (setq yas-verbosity 2)
+
+  :diminish yas-minor-mode)
+
+(provide 'radian-snippet)
