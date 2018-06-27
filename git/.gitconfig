@@ -43,6 +43,8 @@
 	default = current
 [rebase]
 	autosquash = true
+[receive]
+	denyCurrentBranch = updateInstead
 [rerere]
 	enabled = true
 [status]
