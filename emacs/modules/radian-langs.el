@@ -145,17 +145,12 @@ ARG is passed to `hindent-mode' toggle function."
   (add-to-list 'company-backends 'company-tern))
 
 (use-package json-mode
-  :init
+  :init/el-patch
 
-  ;; Lazy-load json-mode. This requires some gymnastics. It concerns
-  ;; me somewhat that this kind of stuff now seems routine to me.
-
-  (el-patch-feature json-mode)
-
-  (el-patch-defconst json-mode-standard-file-ext '(".json" ".jsonld")
+  (defconst json-mode-standard-file-ext '(".json" ".jsonld")
     "List of JSON file extensions.")
 
-  (el-patch-defsubst json-mode--update-auto-mode (filenames)
+  (defsubst json-mode--update-auto-mode (filenames)
     "Update the `json-mode' entry of `auto-mode-alist'.
 
 FILENAMES should be a list of file as string.
@@ -173,7 +168,7 @@ Return the new `auto-mode-alist' entry"
       (add-to-list 'auto-mode-alist new-entry)
       new-entry))
 
-  (el-patch-defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
+  (defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
     "List of filename as string to pass for the JSON entry of
 `auto-mode-alist'.
 
@@ -189,7 +184,7 @@ This function calls `json-mode--update-auto-mode' to change the
            (set-default symbol value)
            (setq json-mode--auto-mode-entry (json-mode--update-auto-mode value))))
 
-  (el-patch-defvar json-mode--auto-mode-entry (json-mode--update-auto-mode json-mode-auto-mode-list)
+  (defvar json-mode--auto-mode-entry (json-mode--update-auto-mode json-mode-auto-mode-list)
     "Regexp generated from the `json-mode-auto-mode-list'."))
 
 ;; Package `markdown-mode' provides syntax highlighting and structural
@@ -236,8 +231,6 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
 ;; Integrated development environment for Python.
 (use-package anaconda-mode
   :init
-
-  (el-patch-feature anaconda-mode)
 
   ;; Enable the functionality of anaconda-mode in Python buffers, as
   ;; suggested in the README [1].
@@ -313,10 +306,7 @@ This prevents it from signalling spurious errors."
 
 ;; When you type "do", insert a paired "end".
 (use-package ruby-electric
-  :init
-
-  ;; Enable `ruby-electric' when editing Ruby code.
-  (add-hook 'ruby-mode-hook #'ruby-electric-mode)
+  :init/el-patch
 
   ;; We already have paired delimiter support from Smartparens.
   ;; However, `ruby-electric' provides its own copy of this
@@ -333,11 +323,9 @@ This prevents it from signalling spurious errors."
   ;; This is so that the modification will actually affect the
   ;; definition of `ruby-electric-mode', which gets whatever value
   ;; `ruby-electric-mode-map' happens to have at definition time. (The
-  ;; alternative is to also patch `ruby-electric-mode-map'.)
+  ;; alternative is to also patch `ruby-electric-mode'.)
 
-  (el-patch-feature ruby-electric)
-
-  (el-patch-defvar ruby-electric-mode-map
+  (defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
       (define-key map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
@@ -356,7 +344,14 @@ This prevents it from signalling spurious errors."
             (if closing
                 (define-key map (char-to-string closing) 'ruby-electric-closing-char)))))
       map)
-    "Keymap used in ruby-electric-mode")
+    (el-patch-concat
+      "Keymap used in ruby-electric-mode"
+      (el-patch-add ".\n\nThe single-character bindings have been removed.")))
+
+  :init
+
+  ;; Enable `ruby-electric' when editing Ruby code.
+  (add-hook 'ruby-mode-hook #'ruby-electric-mode)
 
   :diminish ruby-electric-mode)
 
@@ -408,15 +403,12 @@ This prevents it from signalling spurious errors."
 ;; http://www.zsh.org/
 
 (use-feature sh-script
-  :init
-
-  (el-patch-feature sh-script)
-
-  :config
+  :config/el-patch
 
   ;; Inhibit the "Indentation setup for shell type *sh" message.
-  (el-patch-defun sh-set-shell (shell &optional no-query-flag insert-flag)
-    "Set this buffer's shell to SHELL (a string).
+  (defun sh-set-shell (shell &optional no-query-flag insert-flag)
+    (el-patch-concat
+      "Set this buffer's shell to SHELL (a string).
 When used interactively, insert the proper starting #!-line,
 and make the visited file executable via `executable-set-magic',
 perhaps querying depending on the value of `executable-query'.
@@ -431,6 +423,8 @@ Calls the value of `sh-set-shell-hook' if set.
 Shell script files can cause this function be called automatically
 when the file is visited by having a `sh-shell' file-local variable
 whose value is the shell name (don't quote it)."
+      (el-patch-add
+        "\n\nThis function does not print superfluous messages."))
     (interactive (list (completing-read
                         (format "Shell (default %s): "
                                 sh-shell-file)
@@ -509,13 +503,16 @@ whose value is the shell name (don't quote it)."
     (run-hooks 'sh-set-shell-hook))
 
   ;; Inhibit the "Indentation variables are now local" message.
-  (el-patch-defun sh-make-vars-local ()
-    "Make the indentation variables local to this buffer.
+  (defun sh-make-vars-local ()
+    (el-patch-concat
+      "Make the indentation variables local to this buffer.
 Normally they already are local.  This command is provided in case
 variable `sh-make-vars-local' has been set to nil.
 
 To revert all these variables to the global values, use
 command `sh-reset-indent-vars-to-global-values'."
+      (el-patch-add
+        "\n\nThis function does not print superfluous messages."))
     (interactive)
     (mapc 'make-local-variable sh-var-list)
     (el-patch-remove
@@ -533,35 +530,19 @@ command `sh-reset-indent-vars-to-global-values'."
                                :files (:defaults (:exclude "doc/*.texi"))))
 
 (use-feature tex
-  :init
-
-  (el-patch-feature tex)
-
-  :config
-
-  ;; The following configuration is recommended in the manual [1].
-  ;;
-  ;; [1]: https://www.gnu.org/software/auctex/manual/auctex/Quick-Start.html
-  (setq TeX-auto-save t)
-  (setq TeX-parse-self t)
-
-  (radian-with-operating-system macOS
-    ;; Use TeXShop for previewing LaTeX, rather than Preview. This
-    ;; means we have to define the command to run TeXShop as a "viewer
-    ;; program", and then tell AUCTeX to use the TeXShop viewer when
-    ;; opening PDFs.
-
-    (add-to-list 'TeX-view-program-list
-                 '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-    (map-put TeX-view-program-selection 'output-pdf '("TeXShop")))
+  :config/el-patch
 
   ;; Remove annoying messages when opening *.tex files.
 
-  (el-patch-defun TeX-update-style (&optional force)
-    "Run style specific hooks for the current document.
+  (defun TeX-update-style (&optional force)
+    (el-patch-concat
+      "Run style specific hooks"
+      (el-patch-add
+        ", silently,")
+      " for the current document.
 
 Only do this if it has not been done before, or if optional argument
-FORCE is not nil."
+FORCE is not nil.")
     (unless (or (and (boundp 'TeX-auto-update)
                      (eq TeX-auto-update 'BibTeX)) ; Not a real TeX buffer
                 (and (not force)
@@ -583,6 +564,24 @@ FORCE is not nil."
       (run-hooks 'TeX-update-style-hook)
       (el-patch-remove
         (message "Applying style hooks...done"))))
+
+  :config
+
+  ;; The following configuration is recommended in the manual [1].
+  ;;
+  ;; [1]: https://www.gnu.org/software/auctex/manual/auctex/Quick-Start.html
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
+
+  (radian-with-operating-system macOS
+    ;; Use TeXShop for previewing LaTeX, rather than Preview. This
+    ;; means we have to define the command to run TeXShop as a "viewer
+    ;; program", and then tell AUCTeX to use the TeXShop viewer when
+    ;; opening PDFs.
+
+    (add-to-list 'TeX-view-program-list
+                 '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+    (map-put TeX-view-program-selection 'output-pdf '("TeXShop")))
 
   (defun radian-advice-tex-inhibit-style-loading-message
       (TeX-load-style-file file)

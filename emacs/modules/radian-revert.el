@@ -7,34 +7,21 @@
   :demand t
   :init
 
-  (el-patch-feature autorevert)
-
   ;; Make a useful function for putting on hooks in modes where
   ;; `auto-revert-mode' need not print messages.
   (defun radian-revert-silence ()
     "Silence `auto-revert-mode' in the current buffer."
     (setq-local auto-revert-verbose nil))
 
-  :config
-
-  ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
-  ;; We have to do this before turning on `auto-revert-mode' for the
-  ;; change to take effect, unless we do it through
-  ;; `customize-set-variable' (which is slow enough to show up in
-  ;; startup profiling).
-  (setq auto-revert-interval 1)
-
-  ;; Automatically reload files that were changed on disk, if they
-  ;; have not been modified in Emacs since the last time they were
-  ;; saved.
-  (global-auto-revert-mode +1)
+  :config/el-patch
 
   ;; Only automatically revert buffers that are visible. This should
   ;; improve performance (because if you have 200 buffers open...).
   ;; This code is originally based on
   ;; https://emacs.stackexchange.com/a/28899/12534.
-  (el-patch-defun auto-revert-buffers ()
-    "Revert buffers as specified by Auto-Revert and Global Auto-Revert Mode.
+  (defun auto-revert-buffers ()
+    (el-patch-concat
+      "Revert buffers as specified by Auto-Revert and Global Auto-Revert Mode.
 
 Should `global-auto-revert-mode' be active all file buffers are checked.
 
@@ -56,6 +43,8 @@ are checked first the next time this function is called.
 This function is also responsible for removing buffers no longer in
 Auto-Revert Mode from `auto-revert-buffer-list', and for canceling
 the timer when no buffers need to be checked."
+      (el-patch-add
+        "\n\nOnly currently displayed buffers are reverted."))
 
     (setq auto-revert-buffers-counter
           (1+ auto-revert-buffers-counter))
@@ -108,6 +97,20 @@ the timer when no buffers need to be checked."
                    (null auto-revert-buffer-list))
           (cancel-timer auto-revert-timer)
           (setq auto-revert-timer nil)))))
+
+  :config
+
+  ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
+  ;; We have to do this before turning on `auto-revert-mode' for the
+  ;; change to take effect, unless we do it through
+  ;; `customize-set-variable' (which is slow enough to show up in
+  ;; startup profiling).
+  (setq auto-revert-interval 1)
+
+  ;; Automatically reload files that were changed on disk, if they
+  ;; have not been modified in Emacs since the last time they were
+  ;; saved.
+  (global-auto-revert-mode +1)
 
   ;; Auto-revert all buffers, not only file-visiting buffers. The
   ;; docstring warns about potential performance problems but this

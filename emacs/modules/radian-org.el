@@ -211,12 +211,14 @@ This is an `:around' advice for `org-agenda'. It commutes with
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save)
 
-  :config
+  :config/el-patch
 
   ;; Silence the messages that are usually printed when the clock data
   ;; is loaded from disk.
-  (el-patch-defun org-clock-load ()
-    "Load clock-related data from disk, maybe resuming a stored clock."
+  (defun org-clock-load ()
+    (el-patch-concat
+      "Load clock-related data from disk, maybe resuming a stored clock."
+      (el-patch-add "\n\nDo so without emitting any superfluous messages."))
     (when (and org-clock-persist (not org-clock-loaded))
       (if (not (file-readable-p org-clock-persist-file))
 	  (el-patch-swap
@@ -247,6 +249,8 @@ This is an `:around' advice for `org-agenda'. It commutes with
 	         (org-clock-in)
 	         (when (org-invisible-p) (org-show-context))))))
 	  (_ nil)))))
+
+  :config
 
   ;; Don't record a clock entry if you clocked out in less than one
   ;; minute.

@@ -20,7 +20,7 @@
  ("diminish.el" . "565a983a39d2e2cffab5df13b34f3b6116723208")
  ("dockerfile-mode" . "818e6946fcf2d58438ab78ea06761a372cc5435a")
  ("edn.el" . "be9e32d1b49e35247b263b0243df7cfdc8d413ab")
- ("el-patch" . "3a082a68c380888a5230a70fe12b07b451bb6041")
+ ("el-patch" . "b533811abaff49cd1798d04db83c91e312a78b2b")
  ("elpa" . "0b3e2299e6923cf97e4fc099859e2751716465c5")
  ("emacs-async" . "6fa6a866b4b31908166e010ac60e77927bdbfc5a")
  ("emacs-hcl-mode" . "0f2c5ec7e7bcf77c8548e8cac8721ea935ca1b5e")

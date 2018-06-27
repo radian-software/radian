@@ -9,6 +9,7 @@
   :straight (:host github
                    :repo "raxod502/el-patch"
                    :branch "develop")
+  :demand t
   :config
 
   ;; When patching variable definitions, override the original values.

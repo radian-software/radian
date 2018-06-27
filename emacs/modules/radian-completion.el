@@ -19,13 +19,9 @@
                                "doc/ivy-help.org")
              :branch "fork/1"
              :upstream (:host github :repo "abo-abo/swiper"))
-  :init
+  :init/el-patch
 
-  ;; Lazy-load `ivy'.
-
-  (el-patch-feature ivy)
-
-  (el-patch-defvar ivy-mode-map
+  (defvar ivy-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map [remap switch-to-buffer]
         'ivy-switch-buffer)
@@ -34,8 +30,9 @@
       map)
     "Keymap for `ivy-mode'.")
 
-  (el-patch-define-minor-mode ivy-mode
-    "Toggle Ivy mode on or off.
+  (define-minor-mode ivy-mode
+    (el-patch-concat
+      "Toggle Ivy mode on or off.
 Turn Ivy mode on if ARG is positive, off otherwise.
 Turning on Ivy mode sets `completing-read-function' to
 `ivy-completing-read'.
@@ -45,6 +42,10 @@ Global bindings:
 
 Minibuffer bindings:
 \\{ivy-minibuffer-map}"
+      (el-patch-add
+        "\n\nTo make it easier to lazy-load `ivy', this function
+sets `completion-in-region-function' regardless of the value of
+`ivy-do-completion-in-region'."))
     :group 'ivy
     :global t
     :keymap ivy-mode-map
@@ -57,6 +58,8 @@ Minibuffer bindings:
               (setq completion-in-region-function 'ivy-completion-in-region))))
       (setq completing-read-function 'completing-read-default)
       (setq completion-in-region-function 'completion--in-region)))
+
+  :init
 
   ;; Use Ivy for `completing-read'.
   (ivy-mode +1)
@@ -82,11 +85,9 @@ Minibuffer bindings:
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
 ;; to provide extra features.
 (use-package counsel
-  :init
+  :init/el-patch
 
-  ;; Lazy-load `counsel'.
-
-  (el-patch-defvar counsel-mode-map
+  (defvar counsel-mode-map
     (let ((map (make-sparse-keymap)))
       (dolist (binding
                '((execute-extended-command . counsel-M-x)
@@ -109,12 +110,12 @@ Minibuffer bindings:
     "Map for `counsel-mode'.
 Remaps built-in functions to counsel replacements.")
 
-  (el-patch-defcustom counsel-mode-override-describe-bindings nil
+  (defcustom counsel-mode-override-describe-bindings nil
     "Whether to override `describe-bindings' when `counsel-mode' is active."
     :group 'ivy
     :type 'boolean)
 
-  (el-patch-define-minor-mode counsel-mode
+  (define-minor-mode counsel-mode
     "Toggle Counsel mode on or off.
 Turn Counsel mode on if ARG is positive, off otherwise. Counsel
 mode remaps built-in emacs functions that have counsel
@@ -132,6 +133,8 @@ replacements. "
             'counsel-minibuffer-history))
       (when (fboundp 'advice-remove)
         (advice-remove #'describe-bindings #'counsel-descbinds))))
+
+  :init
 
   ;; Use customized Ivy configurations for built-in Emacs commands.
   (counsel-mode +1)

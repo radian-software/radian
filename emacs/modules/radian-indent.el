@@ -12,29 +12,7 @@
   ;; file-local or directory-local variable list.
   (put 'aggressive-indent-mode 'safe-local-variable #'booleanp)
 
-  :config
-
-  ;; Register `aggressive-indent' in `radian-slow-indent-mode'.
-
-  (defun radian-aggressive-indent-toggle-slow ()
-    "Slow down `aggressive-indent' by disabling reindentation on save.
-This is done in `radian-slow-indent-mode'."
-    ;; If `aggressive-indent' hasn't been enabled yet, we might have
-    ;; to wait to do the following code, so defer it using the mode
-    ;; hook. Running this function is supposed to be idempotent and
-    ;; generally safe, so we can do it whenever.
-    (add-hook 'aggressive-indent-mode-hook
-              #'radian-aggressive-indent-toggle-slow)
-    (if (or radian-slow-indent-mode (not aggressive-indent-mode))
-        (remove-hook 'before-save-hook
-                     ;; Yes, this is a typo in `aggressive-indent'.
-                     #'aggressive-indent--proccess-changed-list-and-indent
-                     'local)
-      (add-hook 'before-save-hook
-                #'aggressive-indent--proccess-changed-list-and-indent
-                nil 'local)))
-
-  (add-hook 'radian-slow-indent-mode #'radian-aggressive-indent-toggle-slow)
+  :config/el-patch
 
   ;; Fix an extremely annoying bug in `while-no-input' that causes
   ;; `aggressive-indent' to sometimes swallow keyboard input events
@@ -43,11 +21,15 @@ This is done in `radian-slow-indent-mode'."
   ;; fix the bug on older versions.
   ;;
   ;; [1]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692
-  (el-patch-defmacro while-no-input (&rest body)
-    "Execute BODY only as long as there's no pending input.
+  (defmacro while-no-input (&rest body)
+    (el-patch-concat
+      "Execute BODY only as long as there's no pending input.
 If input arrives, that ends the execution of BODY,
 and `while-no-input' returns t.  Quitting makes it return nil.
 If BODY finishes, `while-no-input' returns whatever value BODY produced."
+      (el-patch-add
+        "\n\nThis function includes a backported fix for bug#31692;
+see https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692."))
     (declare (debug t) (indent 0))
     (let ((catch-sym (make-symbol "input")))
       `(with-local-quit
@@ -79,6 +61,30 @@ If BODY finishes, `while-no-input' returns whatever value BODY produced."
                 (quit-flag
                  nil)
                 (t val))))))))
+
+  :config
+
+  ;; Register `aggressive-indent' in `radian-slow-indent-mode'.
+
+  (defun radian-aggressive-indent-toggle-slow ()
+    "Slow down `aggressive-indent' by disabling reindentation on save.
+This is done in `radian-slow-indent-mode'."
+    ;; If `aggressive-indent' hasn't been enabled yet, we might have
+    ;; to wait to do the following code, so defer it using the mode
+    ;; hook. Running this function is supposed to be idempotent and
+    ;; generally safe, so we can do it whenever.
+    (add-hook 'aggressive-indent-mode-hook
+              #'radian-aggressive-indent-toggle-slow)
+    (if (or radian-slow-indent-mode (not aggressive-indent-mode))
+        (remove-hook 'before-save-hook
+                     ;; Yes, this is a typo in `aggressive-indent'.
+                     #'aggressive-indent--proccess-changed-list-and-indent
+                     'local)
+      (add-hook 'before-save-hook
+                #'aggressive-indent--proccess-changed-list-and-indent
+                nil 'local)))
+
+  (add-hook 'radian-slow-indent-mode #'radian-aggressive-indent-toggle-slow)
 
   :diminish "AggrIndent")
 
