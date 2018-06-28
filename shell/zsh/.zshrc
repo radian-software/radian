@@ -96,8 +96,9 @@ autoload -U colors && colors
 # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/master/themes/mgutz.zsh-theme
 # [2]: https://github.com/robbyrussell/oh-my-zsh/blob/3705d47bb3f3229234cba992320eadc97a221caf/lib/git.zsh
 
-# Change the color and then display the working directory.
-radian_prompt_prefix='%(?.%{$fg[blue]%}.%{$fg[red]%})%c'
+# Display the user@hostname. Then change the color and display the
+# working directory.
+radian_prompt_prefix='%{$fg[yellow]%}{%n@%M} %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 
 # Change the color and then display a '%' or '#', then reset the color
 # for the user's input.
