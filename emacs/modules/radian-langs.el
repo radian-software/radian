@@ -262,7 +262,7 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
           (lambda (candidate)
             (concat
              " "
-             (company-anaconda-description-in-chevrons
+             (company-anaconda-annotation
               candidate))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
