@@ -78,7 +78,7 @@
  ("ssh-config-mode-el" . "5429a02b8f7431c40e4a50e5d1ac2cd2d08c6511")
  ("straight.el" . "a59c77eb81ef99b4d8b36fe8166aa7c01de93878")
  ("swift-mode" . "7ea1d4e3b0430644b2e2b2e1025f442a10bfa523")
- ("swiper" . "c6d42923472dffeb82b2fb2d1838ed952614edfb")
+ ("swiper" . "0cf0e6da85a72991afe8e08a0514dad6485cbf76")
  ("sx.el" . "46d9498e8f501697920c79437909cdddc93d5ec6")
  ("tern" . "ae83725819286d3f134a6b9956f1117b341e1040")
  ("tide" . "7c5ee3052153b6ab6e56bba569f792101725e307")
