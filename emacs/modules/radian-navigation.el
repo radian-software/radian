@@ -115,7 +115,13 @@ argument."
 
   (radian-bind-key "l" #'avy-goto-line)
   (radian-bind-key "w" #'avy-goto-word-1)
-  (radian-bind-key "c" #'avy-goto-char))
+  (radian-bind-key "c" #'avy-goto-char)
+
+  :config
+
+  ;; Show the whole key sequence even when matches are right next to
+  ;; each other.
+  (setq avy-style 'de-bruijn))
 
 (use-feature bookmark
   :config
