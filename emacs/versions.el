@@ -76,7 +76,7 @@
  ("sesman" . "fb4d2784f3c4c11d8bacc488c5534da32f330e61")
  ("smartparens" . "b8fdee3fa66a8a8bef973ec302072aa14e13a3ec")
  ("ssh-config-mode-el" . "5429a02b8f7431c40e4a50e5d1ac2cd2d08c6511")
- ("straight.el" . "a59c77eb81ef99b4d8b36fe8166aa7c01de93878")
+ ("straight.el" . "adce2699a6b6d56d53b33064b350687c0ba28973")
  ("swift-mode" . "7ea1d4e3b0430644b2e2b2e1025f442a10bfa523")
  ("swiper" . "0cf0e6da85a72991afe8e08a0514dad6485cbf76")
  ("sx.el" . "46d9498e8f501697920c79437909cdddc93d5ec6")
