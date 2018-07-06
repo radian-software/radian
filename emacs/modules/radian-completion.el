@@ -349,8 +349,7 @@ This is an `:around' advice for `yas--make-control-overlay'."
   (global-company-mode +1))
 
 ;; Package `prescient' is a library for intelligent sorting and
-;; filtering in various contexts. It is not published to MELPA, so we
-;; must define a recipe here.
+;; filtering in various contexts.
 (use-package prescient
   :config
 
