@@ -54,7 +54,7 @@
  ("jump.el" . "e4f1372cf22e811faca52fc86bdd5d817498a4d8")
  ("magit" . "bc8b275e06e40d9c439f2ccda78f330d488c84a1")
  ("magit-popup" . "e2060ccb3105555f55992a995587221820341b24")
- ("markdown-mode" . "e45b35b220d9505c138ec692d623a133aeb524d5")
+ ("markdown-mode" . "b274cb9c062f4ba1f630d44c0394e47a2dd2519b")
  ("melpa" . "2304869fc297723b84505b8a80d6d05854ea69c4")
  ("multiple-cursors.el" . "9c49874fa444a4e7255ec05f62c01daed31c7b09")
  ("no-littering" . "f1ac5274ba49e3533c356c4cd6d5f8ebed0ec517")

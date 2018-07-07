@@ -192,18 +192,6 @@ This function calls `json-mode--update-auto-mode' to change the
 ;; https://daringfireball.net/projects/markdown/ for more details on
 ;; Markdown.
 (use-package markdown-mode
-  :init
-
-  ;; Redefine the `auto-mode-alist' entries provided by
-  ;; `markdown-mode', because `markdown-mode' adds them to the end of
-  ;; the list, and in Emacs 26 an earlier entry takes precedence to
-  ;; cause files named "CHANGELOG.md" to open in ChangeLog mode
-  ;; instead of Markdown mode.
-  (dolist (regex '("\\.md\\'" "\\.markdown\\'"))
-    (setq auto-mode-alist
-          (cl-remove regex auto-mode-alist :test #'equal :key #'car))
-    (add-to-list 'auto-mode-alist `(,regex . markdown-mode)))
-
   :mode (;; Extension used by Hugo.
          ("\\.mmark\\'" . markdown-mode))
   :config
