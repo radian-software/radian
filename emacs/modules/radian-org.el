@@ -16,39 +16,41 @@
 (diminish 'outline-minor-mode)
 
 (use-package org
-  :bind (;; Add the global keybindings for accessing Org Agenda and
-         ;; Org Capture that are recommended in the Org manual.
-         ("C-c a" . org-agenda)
-         ("C-c c" . org-capture)
+  :bind (:map org-mode-map
 
-         :map org-mode-map
+              ;; Prevent Org from overriding the bindings for
+              ;; windmove. By default, these keys are mapped to
+              ;; `org-shiftleft', etc.
+              ("S-<left>" . nil)
+              ("S-<right>" . nil)
+              ("S-<up>" . nil)
+              ("S-<down>" . nil)
 
-         ;; Prevent Org from overriding the bindings for windmove. By
-         ;; default, these keys are mapped to `org-shiftleft', etc.
-         ("S-<left>" . nil)
-         ("S-<right>" . nil)
-         ("S-<up>" . nil)
-         ("S-<down>" . nil)
+              ;; Add replacements for the keybindings we just removed.
+              ;; C-<left> and C-<right> are unused by Org. C-<up> and
+              ;; C-<down> are bound to `org-backward-paragraph', etc.
+              ;; (but see below).
+              ("C-<left>" . org-shiftleft)
+              ("C-<right>" . org-shiftright)
+              ("C-<up>" . org-shiftup)
+              ("C-<down>" . org-shiftdown)
 
-         ;; Add replacements for the keybindings we just removed.
-         ;; C-<left> and C-<right> are unused by Org. C-<up> and
-         ;; C-<down> are bound to `org-backward-paragraph', etc. (but
-         ;; see below).
-         ("C-<left>" . org-shiftleft)
-         ("C-<right>" . org-shiftright)
-         ("C-<up>" . org-shiftup)
-         ("C-<down>" . org-shiftdown)
-
-         ;; By default, Org maps C-<up> to `org-backward-paragraph'
-         ;; instead of `backward-paragraph' (and analogously for
-         ;; C-<down>). However, it doesn't do the same remapping for
-         ;; the other bindings of `backward-paragraph' (e.g. M-{).
-         ;; Here we establish that remapping. (This is important since
-         ;; we remap C-<up> and C-<down> to other things, above. So
-         ;; otherwise there would be no easy way to invoke
-         ;; `org-backward-paragraph' and `org-forward-paragraph'.)
-         ([remap backward-paragraph] . org-backward-paragraph)
-         ([remap forward-paragraph] . org-forward-paragraph))
+              ;; By default, Org maps C-<up> to
+              ;; `org-backward-paragraph' instead of
+              ;; `backward-paragraph' (and analogously for C-<down>).
+              ;; However, it doesn't do the same remapping for the
+              ;; other bindings of `backward-paragraph' (e.g. M-{).
+              ;; Here we establish that remapping. (This is important
+              ;; since we remap C-<up> and C-<down> to other things,
+              ;; above. So otherwise there would be no easy way to
+              ;; invoke `org-backward-paragraph' and
+              ;; `org-forward-paragraph'.)
+              ([remap backward-paragraph] . org-backward-paragraph)
+              ([remap forward-paragraph] . org-forward-paragraph))
+  :bind* (;; Add the global keybindings for accessing Org Agenda and
+          ;; Org Capture that are recommended in the Org manual.
+          ("C-c a" . org-agenda)
+          ("C-c c" . org-capture))
   :init
 
   ;; The following is a temporary hack until straight.el supports
