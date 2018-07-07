@@ -9,6 +9,11 @@
 ;; improvement over the default Emacs interface for candidate
 ;; selection.
 (use-package ivy
+  :straight (:host github :repo "raxod502/swiper" :branch "fork/1"
+                   :files (:defaults
+                           (:exclude "swiper.el" "counsel.el" "ivy-hydra.el")
+                           "doc/ivy-help.org")
+                   :upstream (:host github :repo "abo-abo/swiper"))
   :init/el-patch
 
   (defvar ivy-mode-map
