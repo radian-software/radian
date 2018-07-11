@@ -203,7 +203,15 @@ This is an `:override' advice for
 https://github.com/jrblevin/markdown-mode/issues/328.")
 
   (advice-add #'markdown-match-generic-metadata :override
-              #'radian-advice-markdown-disable-metadata-fontification))
+              #'radian-advice-markdown-disable-metadata-fontification)
+
+  (defun radian--flycheck-markdown-disable ()
+    "Disable several syntax checkers for Markdown."
+    (setq-local flycheck-disabled-checkers
+                '(markdown-markdownlint-cli
+                  markdown-mdl)))
+
+  (add-hook 'markdown-mode-hook #'radian--flycheck-markdown-disable))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Python
