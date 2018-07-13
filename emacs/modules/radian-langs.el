@@ -209,7 +209,8 @@ https://github.com/jrblevin/markdown-mode/issues/328.")
     "Disable several syntax checkers for Markdown."
     (setq-local flycheck-disabled-checkers
                 '(markdown-markdownlint-cli
-                  markdown-mdl)))
+                  markdown-mdl
+                  proselint)))
 
   (add-hook 'markdown-mode-hook #'radian--flycheck-markdown-disable))
 

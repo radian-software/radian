@@ -73,7 +73,14 @@ that were passed to it."
   (setq require-final-newline t))
 
 (use-feature text-mode
-  :hook ((text-mode . auto-fill-mode)))
+  :hook ((text-mode . auto-fill-mode))
+  :config
+
+  (defun radian--flycheck-text-disable ()
+    "Disable bad syntax checkers for plain text."
+    (setq-local flycheck-disabled-checkers '(proselint)))
+
+  (add-hook 'text-mode-hook #'radian--flycheck-text-disable))
 
 (use-feature whitespace-mode
   :init
