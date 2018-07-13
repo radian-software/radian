@@ -18,7 +18,7 @@
 [color]
 	ui = auto
 [core]
-	autocrlf = input
+	autocrlf = false
 	editor = emacsclient --alternate-editor="" -nw
 	excludesfile = ~/.gitexclude
 	pager = less -FRSX
