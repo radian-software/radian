@@ -9,6 +9,9 @@
 (unless (boundp 'straight-check-for-modifications)
   (setq straight-check-for-modifications 'live-with-find))
 
+;; Use GNU ELPA mirror to get packages like AUCTeX to work.
+(setq straight-recipes-gnu-elpa-use-mirror t)
+
 ;; Bootstrap the package manager, straight.el. For documentation, see
 ;; https://github.com/raxod502/straight.el. The following code loads
 ;; the package manager if it is already installed, and otherwise
