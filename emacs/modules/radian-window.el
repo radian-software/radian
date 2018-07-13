@@ -1,5 +1,75 @@
 ;; -*- lexical-binding: t -*-
 
+;; Split windows horizontally (into tall subwindows) rather than
+;; vertically (into wide subwindows) by default.
+(el-patch-defun split-window-sensibly (&optional window)
+  "Split WINDOW in a way suitable for `display-buffer'.
+WINDOW defaults to the currently selected window.
+If `split-height-threshold' specifies an integer, WINDOW is at
+least `split-height-threshold' lines tall and can be split
+vertically, split WINDOW into two windows one above the other and
+return the lower window.  Otherwise, if `split-width-threshold'
+specifies an integer, WINDOW is at least `split-width-threshold'
+columns wide and can be split horizontally, split WINDOW into two
+windows side by side and return the window on the right.  If this
+can't be done either and WINDOW is the only window on its frame,
+try to split WINDOW vertically disregarding any value specified
+by `split-height-threshold'.  If that succeeds, return the lower
+window.  Return nil otherwise.
+
+By default `display-buffer' routines call this function to split
+the largest or least recently used window.  To change the default
+customize the option `split-window-preferred-function'.
+
+You can enforce this function to not split WINDOW horizontally,
+by setting (or binding) the variable `split-width-threshold' to
+nil.  If, in addition, you set `split-height-threshold' to zero,
+chances increase that this function does split WINDOW vertically.
+
+In order to not split WINDOW vertically, set (or bind) the
+variable `split-height-threshold' to nil.  Additionally, you can
+set `split-width-threshold' to zero to make a horizontal split
+more likely to occur.
+
+Have a look at the function `window-splittable-p' if you want to
+know how `split-window-sensibly' determines whether WINDOW can be
+split."
+  (let ((window (or window (selected-window))))
+    (or (el-patch-let
+            (($fst (and (window-splittable-p window)
+                        ;; Split window vertically.
+                        (with-selected-window window
+                          (split-window-below))))
+             ($snd (and (window-splittable-p window t)
+                        ;; Split window horizontally.
+                        (with-selected-window window
+                          (split-window-right)))))
+          (el-patch-swap $fst $snd)
+          (el-patch-swap $snd $fst))
+        (and
+         ;; If WINDOW is the only usable window on its frame (it
+         ;; is the only one or, not being the only one, all the
+         ;; other ones are dedicated) and is not the minibuffer
+         ;; window, try to split it s/vertically/horizontally
+         ;; disregarding the value of `split-height-threshold'.
+         (let ((frame (window-frame window)))
+           (or
+            (eq window (frame-root-window frame))
+            (catch 'done
+              (walk-window-tree (lambda (w)
+                                  (unless (or (eq w window)
+                                              (window-dedicated-p w))
+                                    (throw 'done nil)))
+                                frame)
+              t)))
+         (not (window-minibuffer-p window))
+         (let (((el-patch-swap split-height-threshold
+                               split-width-threshold)
+                0))
+           (when (window-splittable-p window)
+             (with-selected-window window
+               ((el-patch-swap split-window-below split-window-right)))))))))
+
 ;; Use S-left, S-right, S-up, and S-down to move between windows. This
 ;; is much more convenient and efficient than using C-x o.
 (windmove-default-keybindings)

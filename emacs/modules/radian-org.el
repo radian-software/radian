@@ -162,20 +162,6 @@ This runs `org-insert-heading' with
               ("C-<right>" . org-agenda-do-date-later))
   :config
 
-  ;; Make the Org Agenda split the window horizontally (with two tall
-  ;; windows) rather than vertically (with two wide windows) by
-  ;; default.
-
-  (defun radian--advice-org-agenda-split-horizontally (org-agenda &rest args)
-    "Make `org-agenda' split horizontally, not vertically, by default.
-This is an `:around' advice for `org-agenda'. It commutes with
-`radian--advice-org-agenda-default-directory'."
-    (let ((split-height-threshold nil))
-      (apply org-agenda args)))
-
-  (advice-add #'org-agenda :around
-              #'radian--advice-org-agenda-split-horizontally)
-
   ;; If the `org-directory' exists, set `default-directory' to it when
   ;; opening the Org agenda. This makes the behavior of things like
   ;; `find-file' more reasonable.
