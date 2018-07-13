@@ -19,11 +19,53 @@
          ;; [1]: https://magit.vc/manual/magit.html#Getting-Started
          ("C-x g" . magit-status)
          ("C-x M-g" . magit-dispatch-popup))
+
   :init
 
   ;; Suppress the message we get about "Turning on
   ;; magit-auto-revert-mode" when loading Magit.
   (setq magit-no-message '("Turning on magit-auto-revert-mode..."))
+
+  :config/el-patch
+
+  ;; Prevent Emacs asking if we're sure we want to exit, if a
+  ;; Magit-spawned git-credential-cache process is running.
+  (defun magit-maybe-start-credential-cache-daemon ()
+    "Maybe start a `git-credential-cache--daemon' process.
+
+If such a process is already running or if the value of option
+`magit-credential-cache-daemon-socket' is nil, then do nothing.
+Otherwise start the process passing the value of that options
+as argument."
+    (unless (or (not magit-credential-cache-daemon-socket)
+                (process-live-p magit-credential-cache-daemon-process)
+                (memq magit-credential-cache-daemon-process
+                      (list-system-processes)))
+      (setq magit-credential-cache-daemon-process
+            (or (--first (-let (((&alist 'comm comm 'user user)
+                                 (process-attributes it)))
+                           (and (string= comm "git-credential-cache--daemon")
+                                (string= user user-login-name)))
+                         (list-system-processes))
+                (condition-case nil
+                    (el-patch-wrap 2
+                      (with-current-buffer
+                          (get-buffer-create " *git-credential-cache--daemon*")
+                        (start-process "git-credential-cache--daemon"
+                                       (el-patch-swap
+                                         " *git-credential-cache--daemon*"
+                                         (current-buffer))
+                                       magit-git-executable
+                                       "credential-cache--daemon"
+                                       magit-credential-cache-daemon-socket)
+                        (el-patch-add
+                          (set-process-query-on-exit-flag
+                           (get-buffer-process (current-buffer)) nil))))
+                  ;; Some Git implementations (e.g. Windows) won't have
+                  ;; this program; if we fail the first time, stop trying.
+                  ((debug error)
+                   (remove-hook 'magit-credential-hook
+                                #'magit-maybe-start-credential-cache-daemon)))))))
 
   :config
 
