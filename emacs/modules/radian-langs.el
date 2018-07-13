@@ -5,15 +5,9 @@
 (require 'radian-bind-key)
 (require 'radian-check)
 (require 'radian-eldoc)
-(require 'radian-indent)
 (require 'radian-os)
 (require 'radian-patch)
 (require 'radian-util)
-
-(use-feature lisp-mode
-  :config
-
-  (add-hook 'lisp-mode-hook #'aggressive-indent-mode))
 
 ;; Package `apples-mode' provides a major mode for AppleScript. For
 ;; more information on the language, see
@@ -287,11 +281,6 @@ This prevents it from signalling spurious errors."
 
 ;; https://www.ruby-lang.org/
 
-(use-feature ruby-mode
-  :config
-
-  (add-hook 'ruby-mode-hook #'aggressive-indent-mode))
-
 ;; Autocompletion for Ruby.
 (use-package robe
   :init
@@ -380,13 +369,6 @@ This prevents it from signalling spurious errors."
   (add-hook 'racer-mode-hook #'radian--reduce-racer-lag)
 
   :diminish racer-mode)
-
-;; Package `scheme' provides major modes for Scheme languages. For
-;; more information on Scheme, see http://www.schemers.org/.
-(use-feature scheme
-  :config
-
-  (add-hook 'scheme-mode-hook #'aggressive-indent-mode))
 
 ;; Package `geiser' provides REPL integration for several
 ;; implementations of Scheme.

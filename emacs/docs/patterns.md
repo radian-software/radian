@@ -60,11 +60,6 @@ We enable `eldoc-mode` explicitly in all modes where it has an effect,
 since if you enable `eldoc-mode` globally then it will print a warning
 when a buffer does not support it.
 
-We also enable `aggressive-indent-mode` in modes where it makes sense.
-This generally means languages that have a strictly enforced standard
-indentation that does not change wildly when you are in the middle of
-typing a line -- basically just Lisps.
-
 ## Keybindings
 
 `RET` is the keybinding for return in terminal Emacs, which is

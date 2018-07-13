@@ -31,12 +31,12 @@ I write my dotfiles with an eye to:
     * Emacsclient as a Git commit message editor
     * Lots of packages for pushing around windows and buffers in
       interesting ways
-    * Configured packages: [aggressive-indent-mode], [Autorevert],
-      [Company], [Counsel], [delete-selection-mode], [EasyPG],
-      [ElDoc], [Flycheck], [Ivy], [Magit], [no-littering], [Org],
-      [Projectile], [Smartparens], [Swiper], [undo-tree],
-      [use-package], [visual-regexp], [YASnippet] (... and dozens
-      more, but these are the biggest ones)
+    * Configured packages: [Autorevert], [Company], [Counsel],
+      [delete-selection-mode], [EasyPG], [ElDoc], [Flycheck], [Ivy],
+      [Magit], [no-littering], [Org], [Projectile], [Smartparens],
+      [Swiper], [undo-tree], [use-package], [visual-regexp],
+      [YASnippet] (... and dozens more, but these are the biggest
+      ones)
     * Supported languages: C/C++, [Clojure], JavaScript, [LaTeX],
       [Markdown], [Python], [Racket], [Ruby], [Rust], [TypeScript]
       (... and dozens more, but these are the biggest ones with the
@@ -144,7 +144,6 @@ cheatsheet][patterns].
 [style]: docs/style.md
 
 [1.0]: https://github.com/raxod502/radian/milestone/1
-[aggressive-indent-mode]: https://github.com/Malabarba/aggressive-indent-mode
 [alembic]: https://github.com/pallet/alembic
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [clojure]: https://clojure.org/

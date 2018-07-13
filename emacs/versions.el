@@ -1,5 +1,4 @@
-(("aggressive-indent-mode" . "8e70039c7190639c43794cb75eae118c2faaa0d1")
- ("all-the-icons.el" . "52d1f2d36468146c93aaf11399f581401a233306")
+(("all-the-icons.el" . "52d1f2d36468146c93aaf11399f581401a233306")
  ("anaconda-mode" . "c8360c931d78b3785b2265cbfbcafb0e89329dc9")
  ("apache-mode" . "0906559e0cb2997405d98ea6b2195954e3935d3b")
  ("apples-mode" . "83a9ab0d6ba82496e2f7df386909b1a55701fccb")

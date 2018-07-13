@@ -16,6 +16,8 @@
   ;; forms for more specific configurations in other modes.
   (require 'smartparens-config)
 
+  :bind* (("C-M-q" . sp-indent-defun))
+
   :config
 
   ;; Enable the functionality of Smartparens everywhere.

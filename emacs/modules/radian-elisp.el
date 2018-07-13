@@ -4,16 +4,11 @@
 (require 'radian-check)
 (require 'radian-custom)
 (require 'radian-eldoc)
-(require 'radian-indent)
 (require 'radian-langs)
 (require 'radian-patch)
 
 ;; Enable ElDoc for Elisp buffers and the *scratch* buffer.
 (add-hook 'emacs-lisp-mode-hook #'eldoc-mode)
-
-;; Enable Aggressive Indent for Elisp buffers and the *scratch*
-;; buffer.
-(add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode)
 
 (defcustom radian-reload-init-keybinding
   (radian-join-keys radian-prefix "r")

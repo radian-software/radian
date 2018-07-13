@@ -3,7 +3,6 @@
 (require 'map)
 
 (require 'radian-eldoc)
-(require 'radian-indent)
 (require 'radian-langs)
 (require 'radian-patch)
 (require 'radian-util)
@@ -50,9 +49,6 @@
          ("<return>" . newline-and-indent)
          ("RET" . newline-and-indent))
   :config
-
-  ;; Enable Aggressive Indent in Clojure mode.
-  (add-hook 'clojure-mode-hook #'aggressive-indent-mode)
 
   ;;; Customize indentation like this:
   ;;;
@@ -113,8 +109,7 @@
   ;; Unfortunately, `clojure-in-docstring-p' is defined as an inline
   ;; function, so we can't override it. Instead, we replace
   ;; `clojure-indent-line'. But inside a new minor mode, so that the
-  ;; user can toggle it if they need to use `aggressive-indent-mode'
-  ;; and multiline strings that are not docstrings at the same time.
+  ;; user can toggle it if is annoying.
   (define-minor-mode radian-clojure-strings-as-docstrings-mode
     "Treat all Clojure strings as docstrings.
 You want to turn this on if you want to treat strings like
@@ -256,9 +251,6 @@ projects.")
 
   ;; CIDER makes indentation and autocomplete slow, because it gets
   ;; data from the live REPL connection.
-
-  (add-hook 'cider-mode-hook #'radian-slow-indent-mode)
-  (add-hook 'cider-repl-mode-hook #'radian-slow-indent-mode)
 
   (add-hook 'cider-mode-hook #'radian-slow-autocomplete-mode)
   (add-hook 'cider-repl-mode-hook #'radian-slow-autocomplete-mode))
