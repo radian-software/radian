@@ -11,6 +11,49 @@
 ;; tool. It is meant to be used as a library.
 (use-package git)
 
+;; Package `with-editor' provides infrastructure for using Emacs as an
+;; external editor for programs like Git. It is used by Magit.
+(use-package with-editor
+  :config/el-patch
+
+  ;; Make sure that `with-editor' always starts a server with a
+  ;; nonstandard name, instead of using the default one, so that
+  ;; emacsclient from a tty never picks it up (which messes up the
+  ;; color theme).
+  (defun with-editor--setup ()
+    (if (or (not with-editor-emacsclient-executable)
+            (file-remote-p default-directory))
+        (push (concat with-editor--envvar "=" with-editor-sleeping-editor)
+              process-environment)
+      ;; Make sure server-use-tcp's value is valid.
+      (unless (featurep 'make-network-process '(:family local))
+        (setq server-use-tcp t))
+      ;; Make sure the server is running.
+      (unless (process-live-p server-process)
+        (el-patch-splice 2
+          (when (server-running-p server-name)
+            (setq server-name (format "server%s" (emacs-pid)))
+            (when (server-running-p server-name)
+              (server-force-delete server-name))))
+        (server-start))
+      ;; Tell $EDITOR to use the Emacsclient.
+      (push (concat with-editor--envvar "="
+                    (shell-quote-argument with-editor-emacsclient-executable)
+                    ;; Tell the process where the server file is.
+                    (and (not server-use-tcp)
+                         (concat " --socket-name="
+                                 (shell-quote-argument
+                                  (expand-file-name server-name
+                                                    server-socket-dir)))))
+            process-environment)
+      (when server-use-tcp
+        (push (concat "EMACS_SERVER_FILE="
+                      (expand-file-name server-name server-auth-dir))
+              process-environment))
+      ;; As last resort fallback to the sleeping editor.
+      (push (concat "ALTERNATE_EDITOR=" with-editor-sleeping-editor)
+            process-environment))))
+
 ;; A Git Porcelain inside Emacs.
 (use-package magit
   :bind (;; Add important keybindings for Magit as described in the
