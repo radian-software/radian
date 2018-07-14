@@ -47,18 +47,14 @@
 ;; `with-editor' to allow you to conveniently accept or abort the
 ;; commit.
 (use-package git-commit
-  :init
+  :init/el-patch
 
-  ;; Lazy-load `git-commit'.
-
-  (el-patch-feature git-commit)
-
-  (el-patch-defun git-commit-setup-check-buffer ()
+  (defun git-commit-setup-check-buffer ()
     (and buffer-file-name
          (string-match-p git-commit-filename-regexp buffer-file-name)
          (git-commit-setup)))
 
-  (el-patch-define-minor-mode global-git-commit-mode
+  (define-minor-mode global-git-commit-mode
     "Edit Git commit messages.
 This global mode arranges for `git-commit-setup' to be called
 when a Git commit message file is opened.  That usually happens
@@ -75,6 +71,8 @@ provide such a commit message."
     (if global-git-commit-mode
         (add-hook  'find-file-hook 'git-commit-setup-check-buffer)
       (remove-hook 'find-file-hook 'git-commit-setup-check-buffer)))
+
+  :init
 
   (global-git-commit-mode +1)
 

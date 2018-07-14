@@ -316,6 +316,8 @@ This is a function for `after-save-hook'. Remove
 ;; Inhibit the message that is usually printed when the `saveplace'
 ;; file is written.
 (el-patch-defun save-place-alist-to-file ()
+  (el-patch-add
+    "Write `save-place-alist' to a file, but do so silently.")
   (let ((file (expand-file-name save-place-file))
         (coding-system-for-write 'utf-8))
     (with-current-buffer (get-buffer-create " *Saved Places*")
@@ -371,11 +373,9 @@ This is a function for `after-save-hook'. Remove
 ;; Package `counsel-projectile' provides alternate versions of
 ;; `projectile' commands which use `counsel'.
 (use-package counsel-projectile
-  :init
+  :init/el-patch
 
-  (el-patch-feature counsel-projectile)
-
-  (el-patch-defvar counsel-projectile-command-map
+  (defvar counsel-projectile-command-map
     (let ((map (make-sparse-keymap)))
       (set-keymap-parent map projectile-command-map)
       (define-key map (kbd "s r") 'counsel-projectile-rg)
@@ -385,7 +385,7 @@ This is a function for `after-save-hook'. Remove
     "Keymap for Counesl-Projectile commands after `projectile-keymap-prefix'.")
   (fset 'counsel-projectile-command-map counsel-projectile-command-map)
 
-  (el-patch-defvar counsel-projectile-mode-map
+  (defvar counsel-projectile-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map projectile-keymap-prefix 'counsel-projectile-command-map)
       (define-key map [remap projectile-find-file] 'counsel-projectile-find-file)
@@ -417,6 +417,8 @@ counterpart.
     (if counsel-projectile-mode
         (projectile-mode)
       (projectile-mode -1)))
+
+  :init
 
   (with-eval-after-load 'projectile
     (counsel-projectile-mode +1)))

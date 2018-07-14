@@ -40,9 +40,11 @@
 [protocol "hg"]
 	allow = always
 [push]
-	default = tracking
+	default = current
 [rebase]
 	autosquash = true
+[receive]
+	denyCurrentBranch = updateInstead
 [rerere]
 	enabled = true
 [status]

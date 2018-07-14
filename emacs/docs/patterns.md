@@ -49,11 +49,10 @@ configuration.
 
 ## `el-patch`
 
-We patch unloaded functions in a `with-eval-after-load` for the
-feature in question (i.e. in the `:config` section of the
-`use-package` declaration for that feature), and then put a
-`el-patch-feature` directive in the `:init` section so that the patch
-can be found via `el-patch-validate-all`.
+We use the `:init/el-patch` and `:config/el-patch` keywords in
+`use-package` when possible. Otherwise we make sure to use
+`el-patch-feature`, `el-patch-pre-validate-hook`, and
+`el-patch-post-validate-hook` appropriately.
 
 ## Common modes
 

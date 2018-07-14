@@ -8,20 +8,16 @@ I write my dotfiles with an eye to:
   code
 * harnessing the full power of software while staying true to its
   original spirit (and keybindings!)
-* fully automatic installation and management, but with full support
-  for a partially or fully manual configuration
 * first-class support for local customization without the need for
   forking
 
 ## Software configured, features
 
 * [Emacs]
-    * Next-generation package manager, [straight.el]
-    * Future-proof customizations using [el-patch]
-    * Extensive use of deferred installation: no need to
-      install [`markdown-mode`][markdown-mode] until you open a
-      Markdown file
-    * Sorting by frecency and usage on all commands using [Historian]
+    * Next-generation package manager, [`straight.el`][straight.el]
+    * Future-proof customizations using [`el-patch`][el-patch]
+    * Sorting by frecency and usage on all commands using
+      [`prescient.el`][prescient.el]
     * Informative but minimal mode-line showing file modification
       status, buffer name, point position, current project, Git
       branch, and active modes
@@ -36,10 +32,9 @@ I write my dotfiles with an eye to:
     * Lots of packages for pushing around windows and buffers in
       interesting ways
     * Configured packages: [aggressive-indent-mode], [Autorevert],
-      [Company], [company-statistics], [Counsel],
-      [delete-selection-mode], [EasyPG], [ElDoc], [Flx], [Flycheck],
-      [Historian], [Ivy], [Magit], [no-littering], [Org],
-      [Projectile], [Smartparens], [Smex], [Swiper], [undo-tree],
+      [Company], [Counsel], [delete-selection-mode], [EasyPG],
+      [ElDoc], [Flycheck], [Ivy], [Magit], [no-littering], [Org],
+      [Projectile], [Smartparens], [Swiper], [undo-tree],
       [use-package], [visual-regexp], [YASnippet] (... and dozens
       more, but these are the biggest ones)
     * Supported languages: C/C++, [Clojure], JavaScript, [LaTeX],
@@ -84,60 +79,57 @@ Setup is in three parts: installing the software, installing the
 configuration, and optionally installing local configuration.
 
 ### Installing software
+#### macOS
 
-* Emacs: `brew cask install emacs` or `pacman -S emacs`
-* Zsh: `brew install zsh` or `pacman -S zsh` (also recommended: `brew
-  install zplug`)
-* Tmux: `brew install tmux` or `pacman -S tmux`
-* Git: `brew install git` or `pacman -S git`
-* Leiningen: `brew cask install java && brew install leiningen` or
-  `pacman -S jdk8-openjdk && git clone
-  https://aur.archlinux.org/leiningen.git ~/aur/leiningen && cd
-  ~/aur/leiningen && makepkg -si`
+* Emacs: `brew install emacs --with-cocoa`, version 26.1 minimum.
+* Zsh: `brew install zsh`; `brew install zplug`
+* Tmux: `brew install tmux`
+* Git: `brew install git`
+* Leiningen: `brew cask install java`; `brew install leiningen`
+
+#### Arch Linux
+
+* Emacs: `pacman -S emacs`
+* Zsh: `pacman -S zsh`
+* Tmux: `pacman -S tmux`
+* Git: `pacman -S git`
+* Leiningen: `pacman -S jdk8-openjdk`; install `leiningen` from AUR
 
 ### Installing configuration
 
-* Emacs: create `~/.emacs.d/` and `~/.emacs.d/straight/versions/`;
-  link `init.el` into `~/.emacs.d/` and `versions.el` into
-  `~/.emacs.d/straight/versions/` (with the link named `radian.el`)
-* Zsh: link `.zshrc` and `.profile` into `~/`
-* Tmux: link `.tmux.conf` into `~/`
-* Git: link `.gitconfig` and `.gitexclude` into `~/`
-* Leiningen: create `~/.lein/` and link `profiles.clj` into `~/.lein/`
+Use symbolic links:
+
+    ./emacs/init.el => ~/.emacs.d/init.el
+    ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
+    ./git/.gitconfig => ~/.gitconfig
+    ./git/.gitexclude => ~/.gitexclude
+    ./leiningen/profiles.clj => ~/.lein/profiles.clj
+    ./shell/bash/.bashrc => ~/.bashrc
+    ./shell/shared/.profile => ~/.profile
+    ./shell/zsh/.zshrc => ~/.zshrc
+    ./tmux/.tmux.conf => ~/.tmux.conf
 
 ### Installing local configuration
 
-* Emacs: create `~/.emacs.d/init.local.el`
-* Zsh: create `~/.zshrc.local` and `~/.profile.local`
-* Tmux: create `~/.tmux.local.conf`
-* Git: create `~/.gitconfig.local` (highly recommended)
+* Emacs: `~/.emacs.d/init.local.el`,
+  `~/.emacs.d/straight/versions/radian-local.el`
+* All shells: `~/.profile.local`
+* Zsh: `~/.zshrc.local`
+* Tmux: `~/.tmux.local.conf`
+* Git: `~/.gitconfig.local`
 
 ### Tips and tricks
 
 In order to get `$PATH`, `ssh-agent`, and `gpg-agent` working
-correctly in graphical applications, use
+correctly in graphical applications on macOS, use
 `scripts/patch-macos-app.zsh`.
-
-## Release 1.0
-
-Check out [the issue tracker][1.0] to see what I have planned for the
-first stable release of Radian. The biggest tasks still remaining are:
-
-* Creating a stable release of my Emacs package manager,
-  [straight.el], upon which Radian depends.
-* Creating a stable release of my generalized dotfile, installation,
-  and system manager, [Dotman], which will provide for a fully
-  automated setup experience.
-* Writing an exhaustive user manual covering all commonly used
-  features of the software Radian configures.
 
 ## Contributing
 
 Please feel free to contribute in any way that you would like. If you
-find a bug or have a question about how to use
-Radian, [report it][issues]. If you want to contribute
-code, [please do][prs]. (See the [style guide][style]
-and [design pattern cheatsheet][patterns].)
+find a bug or have a question about how to use Radian, [report
+it][issues]. If you want to contribute code, [please do][prs]. (See
+the [style guide][style] and [design pattern cheatsheet][patterns].)
 
 ### Reading the source code
 
@@ -145,8 +137,8 @@ Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* has a comment, no exceptions.
 There are a couple of things that are done often enough that it would
 be silly to repeat the same comment over and over again, so these
-patterns are instead documented in
-the [design pattern cheatsheet][patterns].
+patterns are instead documented in the [design pattern
+cheatsheet][patterns].
 
 [patterns]: docs/patterns.md
 [style]: docs/style.md
@@ -180,6 +172,7 @@ the [design pattern cheatsheet][patterns].
 [no-littering]: https://github.com/tarsius/no-littering
 [org]: http://orgmode.org/
 [powerline]: https://github.com/powerline/powerline
+[prescient.el]: https://github.com/raxod502/prescient.el
 [projectile]: http://batsov.com/projectile/
 [prs]: https://github.com/raxod502/radian/pulls
 [python]: https://www.python.org/

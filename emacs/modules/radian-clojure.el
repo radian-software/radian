@@ -125,7 +125,10 @@ docstrings."
     (if radian-clojure-strings-as-docstrings-mode
         (progn
           (el-patch-defsubst clojure-in-docstring-p ()
-            "Check whether point is in a docstring."
+            (el-patch-concat
+              "Check whether point is in "
+              (el-patch-swap "a docstring" "any type of string")
+              ".")
             (let ((ppss (syntax-ppss)))
               ;; are we in a string?
               (when (nth 3 ppss)
@@ -172,10 +175,6 @@ projects.")
 ;; connection to retrieve completion candidates, and documentation and
 ;; source lookups.
 (use-package cider
-  :init
-
-  (el-patch-feature cider)
-
   :config
 
   (add-hook 'cider-mode-hook #'eldoc-mode)

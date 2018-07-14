@@ -47,6 +47,7 @@
     * `:preface`
     * `:straight`
     * `:commands`
+    * `:init/el-patch`
     * `:init`
     * `:mode`
     * `:interpreter`
@@ -56,5 +57,6 @@
     * `:bind-keymap*`
     * `:demand`
     * `:after`
+    * `:config/el-patch`
     * `:config`
     * `:diminish`

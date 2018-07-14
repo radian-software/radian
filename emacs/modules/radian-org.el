@@ -16,39 +16,41 @@
 (diminish 'outline-minor-mode)
 
 (use-package org
-  :bind (;; Add the global keybindings for accessing Org Agenda and
-         ;; Org Capture that are recommended in the Org manual.
-         ("C-c a" . org-agenda)
-         ("C-c c" . org-capture)
+  :bind (:map org-mode-map
 
-         :map org-mode-map
+              ;; Prevent Org from overriding the bindings for
+              ;; windmove. By default, these keys are mapped to
+              ;; `org-shiftleft', etc.
+              ("S-<left>" . nil)
+              ("S-<right>" . nil)
+              ("S-<up>" . nil)
+              ("S-<down>" . nil)
 
-         ;; Prevent Org from overriding the bindings for windmove. By
-         ;; default, these keys are mapped to `org-shiftleft', etc.
-         ("S-<left>" . nil)
-         ("S-<right>" . nil)
-         ("S-<up>" . nil)
-         ("S-<down>" . nil)
+              ;; Add replacements for the keybindings we just removed.
+              ;; C-<left> and C-<right> are unused by Org. C-<up> and
+              ;; C-<down> are bound to `org-backward-paragraph', etc.
+              ;; (but see below).
+              ("C-<left>" . org-shiftleft)
+              ("C-<right>" . org-shiftright)
+              ("C-<up>" . org-shiftup)
+              ("C-<down>" . org-shiftdown)
 
-         ;; Add replacements for the keybindings we just removed.
-         ;; C-<left> and C-<right> are unused by Org. C-<up> and
-         ;; C-<down> are bound to `org-backward-paragraph', etc. (but
-         ;; see below).
-         ("C-<left>" . org-shiftleft)
-         ("C-<right>" . org-shiftright)
-         ("C-<up>" . org-shiftup)
-         ("C-<down>" . org-shiftdown)
-
-         ;; By default, Org maps C-<up> to `org-backward-paragraph'
-         ;; instead of `backward-paragraph' (and analogously for
-         ;; C-<down>). However, it doesn't do the same remapping for
-         ;; the other bindings of `backward-paragraph' (e.g. M-{).
-         ;; Here we establish that remapping. (This is important since
-         ;; we remap C-<up> and C-<down> to other things, above. So
-         ;; otherwise there would be no easy way to invoke
-         ;; `org-backward-paragraph' and `org-forward-paragraph'.)
-         ([remap backward-paragraph] . org-backward-paragraph)
-         ([remap forward-paragraph] . org-forward-paragraph))
+              ;; By default, Org maps C-<up> to
+              ;; `org-backward-paragraph' instead of
+              ;; `backward-paragraph' (and analogously for C-<down>).
+              ;; However, it doesn't do the same remapping for the
+              ;; other bindings of `backward-paragraph' (e.g. M-{).
+              ;; Here we establish that remapping. (This is important
+              ;; since we remap C-<up> and C-<down> to other things,
+              ;; above. So otherwise there would be no easy way to
+              ;; invoke `org-backward-paragraph' and
+              ;; `org-forward-paragraph'.)
+              ([remap backward-paragraph] . org-backward-paragraph)
+              ([remap forward-paragraph] . org-forward-paragraph))
+  :bind* (;; Add the global keybindings for accessing Org Agenda and
+          ;; Org Capture that are recommended in the Org manual.
+          ("C-c a" . org-agenda)
+          ("C-c c" . org-capture))
   :init
 
   ;; The following is a temporary hack until straight.el supports
@@ -211,12 +213,14 @@ This is an `:around' advice for `org-agenda'. It commutes with
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save)
 
-  :config
+  :config/el-patch
 
   ;; Silence the messages that are usually printed when the clock data
   ;; is loaded from disk.
-  (el-patch-defun org-clock-load ()
-    "Load clock-related data from disk, maybe resuming a stored clock."
+  (defun org-clock-load ()
+    (el-patch-concat
+      "Load clock-related data from disk, maybe resuming a stored clock."
+      (el-patch-add "\n\nDo so without emitting any superfluous messages."))
     (when (and org-clock-persist (not org-clock-loaded))
       (if (not (file-readable-p org-clock-persist-file))
 	  (el-patch-swap
@@ -247,6 +251,8 @@ This is an `:around' advice for `org-agenda'. It commutes with
 	         (org-clock-in)
 	         (when (org-invisible-p) (org-show-context))))))
 	  (_ nil)))))
+
+  :config
 
   ;; Don't record a clock entry if you clocked out in less than one
   ;; minute.

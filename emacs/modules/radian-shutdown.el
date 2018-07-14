@@ -9,8 +9,6 @@
   :commands (radian-new-emacs)
   :init
 
-  (el-patch-feature restart-emacs)
-
   (defvar radian-shutdown-restart-in-progress nil
     "Used to prevent infinite recursion.
 This is non-nil if `radian-advice-kill-emacs-dispatch' has called
@@ -46,37 +44,33 @@ argument."
   (advice-add #'save-buffers-kill-emacs :around
               #'radian-advice-kill-emacs-dispatch)
 
-  :config
+  :config/el-patch
 
-  (el-patch-defun (el-patch-swap restart-emacs radian-new-emacs)
-    (&optional args)
-    (el-patch-swap
-      "Restart Emacs.
+  (defun (el-patch-swap restart-emacs radian-new-emacs)
+      (&optional args)
+    (el-patch-concat
+      (el-patch-swap
+        "Restart Emacs."
+        "Start a new Emacs session without killing the current one.")
+      "
 
 When called interactively ARGS is interpreted as follows
 
-- with a single `universal-argument' (`C-u') Emacs is restarted
+- with a single `universal-argument' (`C-u') Emacs is "
+      (el-patch-swap "restarted" "started")
+      "
   with `--debug-init' flag
-- with two `universal-argument' (`C-u') Emacs is restarted with
+- with two `universal-argument' (`C-u') Emacs is "
+      (el-patch-swap "restarted" "started")
+      " with
   `-Q' flag
 - with three `universal-argument' (`C-u') the user prompted for
   the arguments
 
 When called non-interactively ARGS should be a list of arguments
-with which Emacs should be restarted."
-      "Start a new Emacs session without killing the current one.
-
-When called interactively ARGS is interpreted as follows
-
-- with a single `universal-argument' (`C-u') Emacs is started
-  with `--debug-init' flag
-- with two `universal-argument' (`C-u') Emacs is started with
-  `-Q' flag
-- with three `universal-argument' (`C-u') the user prompted for
-  the arguments
-
-When called non-interactively ARGS should be a list of arguments
-with which Emacs should be started.")
+with which Emacs should be "
+      (el-patch-swap "restarted" "started")
+      ".")
     (interactive "P")
     ;; Do not trigger a restart unless we are sure, we can restart emacs
     (restart-emacs--ensure-can-restart)

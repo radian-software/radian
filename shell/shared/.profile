@@ -5,6 +5,20 @@ if [ -f ~/.profile.local ]; then
     . ~/.profile.local
 fi
 
+## gpg-agent
+
+if command -v gpg-connect-agent >/dev/null 2>&1; then
+
+    gpg_restart() {
+        gpg-connect-agent reloadagent /bye
+    }
+
+    gpg_forget() {
+        gpg-connect-agent reloadagent /bye
+    }
+
+fi
+
 ## ssh-agent
 
 if command -v ssh-agent >/dev/null 2>&1; then

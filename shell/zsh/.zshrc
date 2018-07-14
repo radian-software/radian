@@ -96,8 +96,9 @@ autoload -U colors && colors
 # [1]: https://github.com/robbyrussell/oh-my-zsh/blob/master/themes/mgutz.zsh-theme
 # [2]: https://github.com/robbyrussell/oh-my-zsh/blob/3705d47bb3f3229234cba992320eadc97a221caf/lib/git.zsh
 
-# Change the color and then display the working directory.
-radian_prompt_prefix='%(?.%{$fg[blue]%}.%{$fg[red]%})%c'
+# Display the user@hostname. Then change the color and display the
+# working directory.
+radian_prompt_prefix='%{$fg[yellow]%}{%n@%M} %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 
 # Change the color and then display a '%' or '#', then reset the color
 # for the user's input.
@@ -268,6 +269,10 @@ setopt pushdminus
 # case-insensitive filesystem.
 setopt chaselinks
 
+# If you just type in a directory name, cd to it (unless it's also a
+# valid executable name).
+setopt autocd
+
 ### Help system
 
 # By default, run-help is an alias to man. We want to turn that off so
@@ -290,35 +295,6 @@ autoload -Uz run-help-svn
 
 ## Aliases
 ### Filesystem navigation
-#### cd
-
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
-alias .......='cd ../../../../../..'
-alias ........='cd ../../../../../../..'
-alias .........='cd ../../../../../../../..'
-alias ..........='cd ../../../../../../../../..'
-
-# These are some aliases for moving to previously visited directories.
-# The first alias uses "--" so that we can alias "-" without it being
-# interpreted as a flag for the alias command.
-alias -- -='cd -'
-alias 1='cd -'
-alias 2='cd -2'
-alias 3='cd -3'
-alias 4='cd -4'
-alias 5='cd -5'
-alias 6='cd -6'
-alias 7='cd -7'
-alias 8='cd -8'
-alias 9='cd -9'
-
-# Less typing for directory jumping.
-alias wd=wdx
-
 #### dirs
 
 # This alias is a convenient way to list the last few directories
@@ -358,6 +334,7 @@ fi
 #### wdx
 
 if command -v wdx &>/dev/null; then
+    alias wd='wdx'
     alias ws='wdx set'
 fi
 

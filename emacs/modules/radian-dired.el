@@ -20,10 +20,6 @@
     (setq insert-directory-program "gls")))
 
 (use-feature dired
-  :init
-
-  (el-patch-feature dired)
-
   :config
 
   ;; Prevent Dired from printing a message if your ls does not support

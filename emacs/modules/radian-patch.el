@@ -8,7 +8,8 @@
 (use-package el-patch
   :straight (:host github
                    :repo "raxod502/el-patch"
-                   :branch "master")
+                   :branch "develop")
+  :demand t
   :config
 
   ;; When patching variable definitions, override the original values.
