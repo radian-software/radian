@@ -129,18 +129,14 @@ correctly in graphical applications on macOS, use
 Please feel free to contribute in any way that you would like. If you
 find a bug or have a question about how to use Radian, [report
 it][issues]. If you want to contribute code, [please do][prs]. (See
-the [style guide][style] and [design pattern cheatsheet][patterns].)
+the [style guide][style].)
 
 ### Reading the source code
 
 Please do! It will probably be informative in one way or another. The
-goal is that *absolutely everything* has a comment, no exceptions.
-There are a couple of things that are done often enough that it would
-be silly to repeat the same comment over and over again, so these
-patterns are instead documented in the [design pattern
-cheatsheet][patterns].
+goal is that *absolutely everything* should be either obvious or
+commented.
 
-[patterns]: docs/patterns.md
 [style]: docs/style.md
 
 [1.0]: https://github.com/raxod502/radian/milestone/1
