@@ -62,7 +62,7 @@
  ("pip-requirements.el" . "4eff2953317272e145649effb1956081a31645ee")
  ("pkg-info.el" . "76ba7415480687d05a4353b27fea2ae02b8d9d61")
  ("pos-tip" . "051e08fec5cf30b7574bdf439f79fef7d42d689d")
- ("prescient.el" . "f9ac261eb45faef9a87c36b997d9a496fe63d1cd")
+ ("prescient.el" . "a1464272d62f4054c314d1a3196f7b7673325752")
  ("projectile" . "ed47f7de30f40cab6e8f688ccd577cca26994865")
  ("pythonic" . "838eaf47c23628c5e88a59796bbe4653c57bf5c0")
  ("queue" . "52206c0f78afc0dfb9a287cb928c1e725103336d")
