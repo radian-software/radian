@@ -1681,7 +1681,7 @@ the timer when no buffers need to be checked."
   :demand t
   :init
 
-  (defvar radian-company-backends-global
+  (defvar radian--company-backends-global
     '(company-capf
       company-files
       (company-dabbrev-code company-keywords)
@@ -2069,7 +2069,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
     "Configure Company to use Irony as a backend."
     (setq-local company-backends
                 (cons (list #'company-irony #'company-irony-c-headers)
-                      radian-company-backends-global))))
+                      radian--company-backends-global))))
 
 ;; Package `irony-eldoc' provides an ElDoc backend that uses Irony to
 ;; display function signatures.
@@ -2442,7 +2442,7 @@ ARG is passed to `hindent-mode' toggle function."
   (defun radian--company-tern-enable ()
     "Enable `company-tern' in the current buffer."
     (setq-local company-backends
-                (cons 'company-tern radian--company-global-backends)))
+                (cons 'company-tern radian--company-backends-global)))
 
   (add-hook 'js2-mode-hook #'radian--company-tern-enable))
 
@@ -2492,7 +2492,7 @@ ARG is passed to `hindent-mode' toggle function."
     anaconda-mode-hook
     "Configure Company to use Anaconda as a backend."
     (setq-local company-backends (cons #'company-anaconda
-                                       radian-company-backends-global))))
+                                       radian--company-backends-global))))
 
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
