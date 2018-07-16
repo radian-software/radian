@@ -731,12 +731,10 @@ split."
                                 frame)
               t)))
          (not (window-minibuffer-p window))
-         (let (((el-patch-swap split-height-threshold
-                               split-width-threshold)
-                0))
+         (let ((split-height-threshold 0))
            (when (window-splittable-p window)
              (with-selected-window window
-               ((el-patch-swap split-window-below split-window-right)))))))))
+               (split-window-below))))))))
 
 ;; Feature `windmove' provides keybindings S-left, S-right, S-up, and
 ;; S-down to move between windows. This is much more convenient and
