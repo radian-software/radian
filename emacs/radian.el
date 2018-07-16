@@ -2464,7 +2464,16 @@ ARG is passed to `hindent-mode' toggle function."
     (make-local-variable 'flycheck-disabled-checkers)
     (cl-pushnew 'markdown-markdownlint-cli flycheck-disabled-checkers)
     (cl-pushnew 'markdown-mdl flycheck-disabled-checkers)
-    (cl-pushnew 'proselint flycheck-disabled-checkers)))
+    (cl-pushnew 'proselint flycheck-disabled-checkers))
+
+  (radian-defadvice radian--disable-markdown-metadata-fontification (&rest _)
+    :override markdown-match-generic-metadata
+    "Prevent fontification of YAML metadata blocks in `markdown-mode'.
+This prevents a mis-feature wherein if the first line of a
+Markdown document has a colon in it, then it's distractingly and
+usually wrongly fontified as a metadata block. See
+https://github.com/jrblevin/markdown-mode/issues/328."
+    (prog1 nil (goto-char (point-max)))))
 
 ;;;; Python
 ;; https://www.python.org/
