@@ -1190,18 +1190,6 @@ Interactively, reverse the characters in the current region."
 ;; rather than two.
 (setq sentence-end-double-space nil)
 
-;; Feature `text-mode' provides a major mode for editing plain text.
-(use-feature text-mode
-  :config
-
-  (add-hook 'text-mode-hook #'auto-fill-mode)
-
-  (radian-defhook radian--flycheck-text-setup ()
-    text-mode-hook
-    "Disable some Flycheck checkers for plain text."
-    (make-local-variable 'flycheck-disabled-checkers)
-    (cl-pushnew 'proselint flycheck-disabled-checkers)))
-
 ;; Trigger auto-fill after punctutation characters, not just
 ;; whitespace.
 (mapcar
@@ -1832,7 +1820,19 @@ backends will still be included.")
   :straight (:host github :repo "raxod502/flycheck" :branch "fork/4"
                    :upstream (:host github :repo "flycheck/flycheck"
                                     :branch "master"))
-  :demand t
+  :defer 3
+  :init
+
+  (defun radian--flycheck-disable-checkers (&rest checkers)
+    "Disable the given Flycheck syntax CHECKERS, symbols.
+This function affects only the current buffer, and neither causes
+nor requires Flycheck to be loaded."
+    (unless (boundp 'flycheck-disabled-checkers)
+      (setq flycheck-disabled-checkers nil))
+    (make-local-variable 'flycheck-disabled-checkers)
+    (dolist (checker checkers)
+      (cl-pushnew checker flycheck-disabled-checkers)))
+
   :config
 
   (global-flycheck-mode +1)
@@ -1971,6 +1971,19 @@ currently active.")
   :delight (yas-minor-mode nil "yasnippet"))
 
 ;;; Language support
+;;;; Text-based languages
+
+;; Feature `text-mode' provides a major mode for editing plain text.
+(use-feature text-mode
+  :config
+
+  (add-hook 'text-mode-hook #'auto-fill-mode)
+
+  (radian-defhook radian--flycheck-text-setup ()
+    text-mode-hook
+    "Disable some Flycheck checkers for plain text."
+    (radian--flycheck-disable-checkers 'proselint)))
+
 ;;;; AppleScript
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
 
@@ -2021,11 +2034,9 @@ currently active.")
   (defun radian--flycheck-c/c++-setup ()
     "Disable some Flycheck checkers for CC modes.
 This function is for use in `c-mode-hook' and `c++-mode-hook'."
-    (make-local-variable 'flycheck-disabled-checkers)
     ;; These checkers are usually not accurate enough to find proper
     ;; headers and such. Disable them by default.
-    (cl-pushnew 'c/c++-clang flycheck-disabled-checkers)
-    (cl-pushnew 'c/c++-gcc flycheck-disabled-checkers))
+    (radian--flycheck-disable-checkers 'c/c++-clang 'c/c++-gcc))
 
   (add-hook 'c-mode #'radian--flycheck-c/c++-setup)
   (add-hook 'c++-mode #'radian--flycheck-c/c++-setup))
@@ -2085,7 +2096,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
 ;; uses Irony to display compilation errors and warnings.
 (use-package flycheck-irony
   :demand t
-  :after irony
+  :after (:all flycheck irony)
   :config
 
   ;; This setup is global, so no need to run it on a mode hook.
@@ -2459,10 +2470,10 @@ ARG is passed to `hindent-mode' toggle function."
   (radian-defhook radian--flycheck-markdown-setup ()
     markdown-mode-hook
     "Disable some Flycheck checkers for Markdown."
-    (make-local-variable 'flycheck-disabled-checkers)
-    (cl-pushnew 'markdown-markdownlint-cli flycheck-disabled-checkers)
-    (cl-pushnew 'markdown-mdl flycheck-disabled-checkers)
-    (cl-pushnew 'proselint flycheck-disabled-checkers))
+    (radian--flycheck-disable-checkers
+     'markdown-markdownlint-cli
+     'markdown-mdl
+     'proselint))
 
   (radian-defadvice radian--disable-markdown-metadata-fontification (&rest _)
     :override markdown-match-generic-metadata
@@ -2517,8 +2528,7 @@ https://github.com/jrblevin/markdown-mode/issues/328."
 This prevents it from signalling spurious errors. See also
 https://github.com/flycheck/flycheck/issues/953."
     (when (locate-dominating-file default-directory "conf.py")
-      (make-local-variable 'flycheck-disabled-checkers)
-      (cl-pushnew 'rst flycheck-disabled-checkers))))
+      (radian--flycheck-disable-checkers 'rst))))
 
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
@@ -2818,9 +2828,7 @@ This is an `:around' advice for `TeX-load-style-file'."
     TeX-mode-hook
     "Disable some Flycheck checkers in TeX buffers.
 This function is for use on `TeX-mode-hook'."
-    (make-local-variable 'flycheck-disabled-checkers)
-    (cl-pushnew 'tex-chktex flycheck-disabled-checkers)
-    (cl-pushnew 'tex-lacheck flycheck-disabled-checkers)))
+    (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck)))
 
 ;; Feature `tex-buf' from package `auctex' provides support for
 ;; running TeX commands and displaying their output.
@@ -2892,8 +2900,7 @@ This prevents them from getting in the way of buffer selection."
 If we don't disable it, then it will generally just generate
 several thousand errors, disable itself, and print a warning."
     (when (locate-dominating-file "node_modules")
-      (make-local-variable 'flycheck-disabled-checkers)
-      (cl-pushnew 'typescript-tslint flycheck-disabled-checkers)))
+      (radian--flycheck-disable-checkers 'typescript-tslint)))
 
   ;; Fix capitalization. It's TypeScript, not typescript.
   :delight (typescript-mode "TypeScript" :major))
@@ -3096,11 +3103,9 @@ unhelpful."
   (radian-defhook radian--flycheck-elisp-setup ()
     emacs-lisp-mode-hook
     "Disable some Flycheck checkers for Emacs Lisp."
-    (make-local-variable 'flycheck-disabled-checkers)
     ;; These checkers suck at reporting error locations, so they're
     ;; actually quite distracting to work with.
-    (cl-pushnew 'emacs-lisp flycheck-disabled-checkers)
-    (cl-pushnew 'emacs-lisp-checkdoc flycheck-disabled-checkers))
+    (radian--flycheck-disable-checkers 'emacs-lisp 'emacs-lisp-checkdoc))
 
   ;; The default mode lighter has a space instead of a hyphen.
   ;; Disgusting!
