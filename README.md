@@ -128,16 +128,14 @@ correctly in graphical applications on macOS, use
 
 Please feel free to contribute in any way that you would like. If you
 find a bug or have a question about how to use Radian, [report
-it][issues]. If you want to contribute code, [please do][prs]. (See
-the [style guide][style].)
+it][issues]. If you want to contribute code, [please do][prs]. (Try to
+follow the style of the surrounding code.)
 
 ### Reading the source code
 
 Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* should be either obvious or
 commented.
-
-[style]: docs/style.md
 
 [1.0]: https://github.com/raxod502/radian/milestone/1
 [alembic]: https://github.com/pallet/alembic
