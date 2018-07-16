@@ -1143,6 +1143,9 @@ unquote it using a comma."
    "emacs/radian.el"
    radian-directory)
  "e r")
+(radian-register-dotfile
+ ".emacs.d/straight/versions/radian.el"
+ "e v" "radian-versions-el")
 (radian-register-dotfile ".emacs.d/init.local.el" "e l")
 
 ;; Git
