@@ -37,19 +37,10 @@
                        "but you are running Emacs %s")
                radian-minimum-emacs-version emacs-version)
 
-      (let* ((this-file
-              (or
-               ;; If we are loading the init-file normally, then the
-               ;; filename is in `load-file-name'.
-               load-file-name
-               ;; Otherwise, that's nil and the filename is in
-               ;; `buffer-file-name' (this will happen if you
-               ;; `eval-buffer' for example).
-               buffer-file-name))
-             (link-target
-              ;; This function returns the target of the link. If the
-              ;; init-file is not a symlink, then we abort.
-              (file-symlink-p this-file)))
+      (let ((link-target
+             ;; This function returns the target of the link. If the
+             ;; init-file is not a symlink, then we abort.
+             (file-symlink-p user-init-file)))
 
         (unless link-target
           (error "Init-file %S is not a symlink" this-file))

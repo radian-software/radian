@@ -3110,22 +3110,28 @@ unhelpful."
 (defun radian-eval-buffer-or-region (&optional start end)
   "Evaluate the current region, or the whole buffer if no region is active.
 In Lisp code, START and END denote the region to be evaluated;
-they default to `point-min' and `point-max' respectively."
+they default to `point-min' and `point-max' respectively.
+
+If evaluating a buffer visiting this file, then delegate instead
+to `radian-reload-init'."
   (interactive)
-  (let ((name nil))
-    (if (region-active-p)
-        (progn
-          (setq start (region-beginning))
-          (setq end (region-end))
-          (setq name "region"))
-      (setq start (point-min))
-      (setq end (point-max))
-      (setq name (buffer-name)))
-    (let ((load-file-name (buffer-file-name)))
-      (message "Evaluating %s..." name)
-      (straight-transaction
-        (eval-region start end))
-      (message "Evaluating %s...done" name))))
+  (if (and (string= buffer-file-name radian-lib-file)
+           (not (region-active-p)))
+      (radian-reload-init)
+    (let ((name nil))
+      (if (region-active-p)
+          (progn
+            (setq start (region-beginning))
+            (setq end (region-end))
+            (setq name "region"))
+        (setq start (point-min))
+        (setq end (point-max))
+        (setq name (buffer-name)))
+      (let ((load-file-name (buffer-file-name)))
+        (message "Evaluating %s..." name)
+        (straight-transaction
+          (eval-region start end))
+        (message "Evaluating %s...done" name)))))
 
 ;; This keybinding is used for evaluating a buffer of Clojure code in
 ;; CIDER, and for evaluating a buffer of Scheme code in Geiser.
