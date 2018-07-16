@@ -3619,6 +3619,8 @@ provide such a commit message."
 ;; profiling functionality, and to collect timing results for each
 ;; form in your init-file.
 (use-package esup
+  :straight (:host github :repo "raxod502/esup" :branch "fork/2"
+                   :upstream (:host github :repo "jschaf/esup"))
   :config
 
   ;; Work around a bug where esup tries to step into the byte-compiled
@@ -3631,25 +3633,36 @@ provide such a commit message."
     "Help `esup' to work with the Radian init-file."
     (if init-file
         (funcall esup init-file)
-      (let ((fname (make-temp-file "esup-init")))
+      (let ((fname (expand-file-name "esup-init.el" temporary-file-directory)))
         (with-temp-file fname
           (print
-           '(progn
+           `(progn
+              ;; We need this for `string-trim', but it's not
+              ;; `require'd until the beginning of radian.el.
+              (require 'subr-x)
+
               ;; Prevent indentation from being lost in the profiling
               ;; results.
               (advice-add #'esup-child-chomp :override #'string-trim)
 
+              ;; esup does not set `user-init-file'.
+              (setq user-init-file ,radian-lib-file)
+
+              ;; If there's an error, let me see where it is.
+              (setq debug-on-error t)
+
               ;; Abbreviated (and flattened) version of init.el.
               (defvar radian-minimum-emacs-version "26.1")
-              (defvar radian-local-init-file "~/.emacs.d/init.el")
+              (defvar radian-local-init-file "~/.emacs.d/init.local.el")
               (setq package-enable-at-startup nil)
               (setq custom-file (expand-file-name
                                  (format "custom-%d-%d.el" (emacs-pid) (random))
                                  temporary-file-directory))
-              (defvar radian-lib-file load-file-name)
+              (defvar radian-lib-file ,radian-lib-file)
               (defvar radian--finalize-init-hook nil))
            (current-buffer))
-          (insert-file-contents-literally user-init-file)
+          (insert-file-contents-literally radian-lib-file)
+          (goto-char (point-max))
           (print
            '(run-hooks 'radian--finalize-init-hook)
            (current-buffer)))
