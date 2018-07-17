@@ -74,6 +74,7 @@ Allowable values for OS (not quoted):
 - windows
 - unix
 - linux"
+  (declare (indent 1))
   (let ((check
          (pcase os
            (`unix (not (memq system-type '(ms-dos windows-nt cygwin))))
@@ -96,10 +97,25 @@ This means that FILENAME is a symlink whose target is inside
 
 (defmacro radian--with-silent-load (&rest body)
   "Execute BODY, silencing any calls to `load' within."
+  (declare (indent 0))
   `(cl-letf* ((load-orig (symbol-function #'load))
               ((symbol-function #'load)
                (lambda (file &optional noerror _nomessage &rest args)
                  (apply load-orig file noerror 'nomessage args))))
+     ,@body))
+
+(defmacro radian--with-silent-write (&rest body)
+  "Execute BODY, silencing any calls to `write-region' within."
+  (declare (indent 0))
+  `(cl-letf* ((write-region-orig (symbol-function #'write-region))
+              ((symbol-function #'write-region)
+               (lambda (start end filename &optional append visit lockname
+                              mustbenew)
+                 (funcall write-region-orig start end filename append 0
+                          lockname mustbenew)
+                 (set-buffer-modified-p nil)
+                 (set-visited-file-modtime)))
+              ((symbol-function #'message) #'ignore))
      ,@body))
 
 (defun radian--random-string ()
@@ -677,6 +693,18 @@ replacements. "
 
 ;;; Window management
 
+(radian-defadvice radian--advice-keyboard-quit-minibuffer-first
+    (keyboard-quit)
+  :around keyboard-quit
+  "Cause \\[keyboard-quit] to exit the minibuffer, if it is active.
+Normally, \\[keyboard-quit] will just act in the current buffer.
+This advice modifies the behavior so that it will instead exit an
+active minibuffer, even if the minibuffer is not selected."
+  (if-let ((minibuffer (active-minibuffer-window)))
+      (with-current-buffer (window-buffer minibuffer)
+        (minibuffer-keyboard-quit))
+    (funcall keyboard-quit)))
+
 ;; Split windows horizontally (into tall subwindows) rather than
 ;; vertically (into wide subwindows) by default.
 (el-patch-defun split-window-sensibly (&optional window)
@@ -1183,6 +1211,9 @@ unquote it using a comma."
 ;; Don't make autosave files.
 (setq auto-save-default nil)
 
+;; Don't make lockfiles.
+(setq create-lockfiles nil)
+
 ;;; Editing
 ;;;; Text formatting
 
@@ -1287,6 +1318,13 @@ that were passed to it."
 ;; older entries in the kill ring.
 (setq kill-do-not-save-duplicates t)
 
+(radian-defadvice radian--advice-disallow-password-copying (func &rest args)
+  :around read-passwd
+  "Don't allow copying a password to the kill ring."
+  (cl-letf (((symbol-function #'kill-new) #'ignore)
+            ((symbol-function #'kill-append) #'ignore))
+    (apply func args)))
+
 ;; Feature `delsel' provides an alternative behavior for certain
 ;; actions when you have a selection active. Namely: if you start
 ;; typing when you have something selected, then the selection will be
@@ -1337,6 +1375,18 @@ loaded since the file was changed outside of Emacs."
   :delight (undo-tree-mode nil "undo-tree"))
 
 ;;;; Navigation
+
+;; Feature `subword' provides a minor mode which causes the
+;; `forward-word' and `backward-word' commands to stop at
+;; capitalization changes within a word, so that you can step through
+;; the components of CamelCase symbols one at a time.
+(use-feature subword
+  :demand t
+  :config
+
+  (global-subword-mode +1)
+
+  :delight (subword-mode nil "subword"))
 
 (radian-defadvice radian--advice-allow-unpopping-mark
     (set-mark-command &optional arg)
@@ -1992,6 +2042,16 @@ currently active.")
     text-mode-hook
     "Disable some Flycheck checkers for plain text."
     (radian--flycheck-disable-checkers 'proselint)))
+
+;;;; Lisp languages
+
+;; Feature `lisp-mode' provides a base major mode for Lisp languages,
+;; and supporting functions for dealing with Lisp code.
+(use-feature lisp-mode
+  :init
+
+  (add-to-list 'safe-local-variable-values
+               '(lisp-indent-function . common-lisp-indent-function)))
 
 ;;;; AppleScript
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
@@ -3203,6 +3263,24 @@ to `radian-reload-init'."
  ("C-h C-o" . radian-find-symbol)
  ("C-h C-l" . find-library))
 
+;; Feature `checkdoc' provides some tools for validating Elisp
+;; docstrings against common conventions.
+(use-feature checkdoc
+  :init
+
+  ;; Not sure why this isn't included by default.
+  (put 'checkdoc-package-keywords-flag 'safe-local-variable #'booleanp))
+
+;; Package `elisp-lint', not installed, provides a linting framework
+;; for Elisp code.
+(use-feature elisp-lint
+  :init
+
+  ;; From the package. We need this because some packages set this as
+  ;; a file-local variable, but we don't install the package so Emacs
+  ;; doesn't know the variable is safe.
+  (put 'elisp-lint-indent-specs 'safe-local-variable #'listp))
+
 ;;; Applications
 ;;;; Organization
 
@@ -3362,7 +3440,7 @@ This makes the behavior of `find-file' more reasonable."
         ;; Load history.
         (el-patch-wrap 1
           (radian--with-silent-load
-           (load-file org-clock-persist-file)))
+            (load-file org-clock-persist-file)))
         (setq org-clock-loaded t)
         (pcase-dolist (`(,(and file (pred file-exists-p)) . ,position)
 		       org-clock-stored-history)
@@ -3450,7 +3528,17 @@ the problematic case.)"
   :config
 
   ;; Prevent annoying "Omitted N lines" messages when auto-reverting.
-  (setq dired-omit-verbose nil))
+  (setq dired-omit-verbose nil)
+
+  (radian-with-operating-system macOS
+    (radian-defadvice radian--advice-dired-guess-open-on-macos
+        (orig-fun &rest args)
+      :override dired-guess-default
+      "Cause Dired's '!' command to use open(1).
+This advice is only activated on macOS, where it is helpful since
+most of the Linux utilities in `dired-guess-shell-alist-default'
+are probably not going to be installed."
+      "open")))
 
 ;;;; Version control
 
@@ -3631,6 +3719,10 @@ provide such a commit message."
 ;; and view the output in real time, with errors and warnings
 ;; highlighted and hyperlinked.
 (use-feature compile
+  :init
+
+  (radian-bind-key "m" #'compile)
+
   :config
 
   ;; Automatically scroll the Compilation buffer as output appears,
@@ -3639,7 +3731,19 @@ provide such a commit message."
 
 ;;;; Internet applications
 
-(put 'bug-reference-bug-regexp 'safe-local-variable #'stringp)
+;; Feature `browse-url' provides commands for opening URLs in
+;; browsers.
+(use-feature browse-url
+  :init
+
+  (defun radian--browse-url-predicate ()
+    "Return non-nil if \\[browse-url-at-point] should be rebound."
+    ;; All of these major modes provide more featureful bindings for
+    ;; C-c C-o than `browse-url-at-point'.
+    (not (derived-mode-p 'markdown-mode 'org-mode 'org-agenda-mode)))
+
+  :bind* (:filter (radian--browse-url-predicate)
+                  ("C-c C-o" . browse-url-at-point)))
 
 ;; Package `webpaste' provides Emacs support for many different
 ;; command-line pastebins.
@@ -3878,7 +3982,12 @@ This is passed to `set-frame-font'."
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
-  (set-face-attribute 'fixed-pitch nil :family 'unspecified))
+  (set-face-attribute 'fixed-pitch nil :family 'unspecified)
+
+  ;; On macOS, set the title bar to match the frame background.
+  (when (eq window-system 'ns)
+    (add-to-list 'default-frame-alist '(ns-appearance . dark))
+    (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))))
 
 ;; Feature `menu-bar' provides the annoying menu bar which we will
 ;; disable immediately.
@@ -3922,7 +4031,9 @@ this variable is set to nil.
 
 This variable is actually only a cached value; it is set by
 `radian-mode-line-compute-project-and-branch' for performance
-reasons.")
+reasons.
+
+See also `radian-show-git-mode'.")
 
 ;; Don't clear the cache when switching major modes (or using M-x
 ;; normal-mode).
@@ -3944,8 +4055,10 @@ buffer-local."
                     (project-name (unless (equal project-name "-")
                                     project-name))
                     ;; Check if we are actually in a Git repo, and Git
-                    ;; is available.
+                    ;; is available, and we want to show the Git
+                    ;; status.
                     (git (and
+                          radian-show-git-mode
                           (executable-find "git")
                           (locate-dominating-file default-directory ".git")))
                     (branch-name
@@ -4088,6 +4201,18 @@ This is scheduled repeatedly at intervals after
 
 ;; Make `mode-line-position' show the column, not just the row.
 (column-number-mode +1)
+
+(define-minor-mode radian-show-git-mode
+  "Minor mode for showing Git status in mode line.
+
+If enabled, then both the current Projectile project and the
+current Git branch are shown in the mode line. Otherwise, only
+the former is shown.")
+
+(define-globalized-minor-mode radian-show-git-global-mode
+  radian-show-git-mode radian-show-git-mode)
+
+(radian-show-git-global-mode +1)
 
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
