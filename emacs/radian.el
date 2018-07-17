@@ -238,9 +238,10 @@ binding the variable dynamically over the entire init-file."
 (radian--run-hook 'radian-before-straight-hook)
 
 ;; Bootstrap the package manager, straight.el.
+(defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 4))
+      (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
