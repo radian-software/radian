@@ -3695,6 +3695,12 @@ spam. This advice, however, inhibits the message for everyone.")
 
 ;;; Shutdown
 
+(defun radian-really-kill-emacs ()
+  "Kill Emacs immediately, bypassing `kill-emacs-hook'."
+  (interactive)
+  (let ((kill-emacs-hook nil))
+    (kill-emacs)))
+
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
 ;; inside of Emacs, both in the terminal and in windowed mode.
 (use-package restart-emacs
