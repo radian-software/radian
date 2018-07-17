@@ -2201,13 +2201,16 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; Ideally, we would be able to set the identation rules for *all*
   ;; keywords at the same time. But until we figure out how to do
   ;; that, we just have to deal with every keyword individually. See
-  ;; https://github.com/raxod502/radian/issues/26.
-  (define-clojure-indent
-    (-> 1)
-    (->> 1)
-    (:import 0)
-    (:require 0)
-    (:use 0))
+  ;; https://github.com/raxod502/radian/issues/26. Avoid using
+  ;; `define-clojure-indent' because it's a macro defined in the
+  ;; package, so we would have to `el-patch' it to use it here
+  ;; correctly.
+  (dolist (spec '((-> 1)
+                  (->> 1)
+                  (:import 0)
+                  (:require 0)
+                  (:use 0)))
+    (apply #'put-clojure-indent spec))
 
   (define-minor-mode radian-clojure-strings-as-docstrings-mode
     "Treat all Clojure strings as docstrings.
@@ -2326,7 +2329,7 @@ the `clj-refactor' keybindings need to be installed."
   ;; Make clj-refactor show its messages right away, instead of
   ;; waiting for you to do another command.
 
-  (radian-defadvice 'radian--advice-clj-refactor-message-eagerly (&rest args)
+  (radian-defadvice radian--advice-clj-refactor-message-eagerly (&rest args)
     :override cljr--post-command-message
     "Make `clj-refactor' show messages right away.
 Otherwise, it waits for you to do another command, and then
