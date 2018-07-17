@@ -604,8 +604,9 @@ sets `completion-in-region-function' regardless of the value of
       (dolist (binding
                '((execute-extended-command . counsel-M-x)
                  (describe-bindings . counsel-descbinds)
-                 (describe-function . counsel-describe-function)
-                 (describe-variable . counsel-describe-variable)
+                 (el-patch-remove
+                   (describe-function . counsel-describe-function)
+                   (describe-variable . counsel-describe-variable))
                  (describe-face . counsel-describe-face)
                  (list-faces-display . counsel-faces)
                  (find-file . counsel-find-file)
@@ -619,8 +620,11 @@ sets `completion-in-region-function' regardless of the value of
                  (bookmark-jump . counsel-bookmark)))
         (define-key map (vector 'remap (car binding)) (cdr binding)))
       map)
-    "Map for `counsel-mode'.
-Remaps built-in functions to counsel replacements.")
+    (el-patch-concat
+      "Map for `counsel-mode'.
+Remaps built-in functions to counsel replacements."
+      (el-patch-add
+        "\n\nBindings that are remapped by `helpful' have been removed.")))
 
   (defcustom counsel-mode-override-describe-bindings nil
     "Whether to override `describe-bindings' when `counsel-mode' is active."
@@ -3088,6 +3092,27 @@ keymaps."
 Otherwise, it will try to find a TAGS file using etags, which is
 unhelpful."
     (add-hook 'xref-backend-functions #'elisp--xref-backend nil 'local)))
+
+;; Package `helpful' provides a complete replacement for the built-in
+;; Emacs help facility which provides much more contextual information
+;; in a better format.
+(use-package helpful
+  :bind (;; Remap standard commands.
+         ([remap describe-function] . helpful-callable)
+         ([remap describe-variable] . helpful-variable)
+         ([remap describe-symbol]   . helpful-symbol)
+         ([remap describe-key]      . helpful-key)
+
+         ;; Suggested bindings from the documentation at
+         ;; https://github.com/Wilfred/helpful.
+
+         :map help-map
+         ("F" . helpful-function)
+         ("M-f" . helpful-macro)
+         ("C" . helpful-command)
+
+         :map global-map
+         ("C-c C-d" . helpful-at-point)))
 
 ;;;; Custom
 
