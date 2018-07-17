@@ -303,6 +303,10 @@ binding the variable dynamically over the entire init-file."
 ;; functions `org-git-version' and `org-release', and the feature
 ;; `org-version'. We provide all three of those ourself, therefore.
 
+;; Package `git' is a library providing convenience functions for
+;; running Git.
+(use-package git)
+
 (defun org-git-version ()
   "The Git version of org-mode.
   Inserted by installing org-mode or when a release is made."
