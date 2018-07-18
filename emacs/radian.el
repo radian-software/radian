@@ -299,6 +299,15 @@ binding the variable dynamically over the entire init-file."
 ;; natively by `use-package'.
 (use-package delight)
 
+;;;; straight.el configuration
+
+;; Feature `straight-x' from package `straight' provides
+;; experimental/unstable extensions to straight.el which are not yet
+;; ready for official inclusion.
+(use-feature straight-x
+  ;; Add an autoload for this extremely useful command.
+  :commands (straight-x-fetch-all))
+
 ;;; Configure ~/.emacs.d paths
 
 ;; Package `no-littering' changes the default paths for lots of
@@ -671,6 +680,10 @@ replacements. "
 
   (counsel-mode +1)
 
+  :bind* (;; Keybinding suggested by the documentation of Counsel, see
+          ;; https://github.com/abo-abo/swiper.
+          ("C-c k" . counsel-rg))
+
   :delight (counsel-mode nil "counsel"))
 
 ;; Package `prescient' is a library for intelligent sorting and
@@ -873,6 +886,11 @@ split."
 (use-package projectile
   :demand t
   :config
+
+  ;; Occasionally prune nonexistent projects.
+  (unless (bound-and-true-p radian--currrently-profiling-p)
+    (when (= 0 (random 100))
+      (projectile-cleanup-known-projects)))
 
   (projectile-mode +1)
 
@@ -1509,7 +1527,14 @@ argument."
 ;; uses `ivy' to display and select from the results.
 (use-package swiper
   :bind (([remap isearch-forward] . swiper)
-         ([remap isearch-backward] . swiper)))
+         ([remap isearch-backward] . swiper))
+  :config
+
+  ;; Use only one color for subgroups in Swiper highlighting.
+  (setq swiper-faces '(swiper-match-face-1
+                       swiper-match-face-2
+                       swiper-match-face-2
+                       swiper-match-face-2)))
 
 ;;; Electricity: automatic things
 ;;;; Autorevert
@@ -2204,7 +2229,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; `clojure-indent-line'. That is done in an advice in the
   ;; `radian-clojure-strings-as-docstrings-mode' minor mode.
 
-  (el-patch-defsubst (el-patch-swap clojure-in-docstring-p
+  (defsubst (el-patch-swap clojure-in-docstring-p
                                     radian--clojure-in-string-p)
     ()
     (el-patch-concat
@@ -2220,8 +2245,8 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
          (el-patch-wrap 1
            ('font-lock-string-face 'font-lock-doc-face))))))
 
-  (el-patch-defun (el-patch-swap clojure-indent-line
-                                 radian--advice-clojure-strings-as-docstrings)
+  (defun (el-patch-swap clojure-indent-line
+                        radian--advice-clojure-strings-as-docstrings)
     ()
     (el-patch-concat
       "Indent current line as Clojure code."
@@ -2428,7 +2453,46 @@ overwrites the message from *that* command."
   (setq haskell-process-show-overlays nil)
 
   ;; Enable REPL integration.
-  (add-hook 'haskell-mode-hook #'interactive-haskell-mode))
+  (add-hook 'haskell-mode-hook #'interactive-haskell-mode)
+
+  ;; Work around upstream bug, see
+  ;; https://github.com/haskell/haskell-mode/issues/1553.
+
+  (setq haskell-process-args-ghci
+        '("-ferror-spans" "-fshow-loaded-modules"))
+
+  (setq haskell-process-args-cabal-repl
+        '("--ghc-options=-ferror-spans -fshow-loaded-modules"))
+
+  (setq haskell-process-args-stack-ghci
+        '("--ghci-options=-ferror-spans -fshow-loaded-modules"
+          "--no-build" "--no-load"))
+
+  (setq haskell-process-args-cabal-new-repl
+        '("--ghc-options=-ferror-spans -fshow-loaded-modules"))
+
+  ;; Allow `haskell-mode' to use Stack with the global project instead
+  ;; of trying to invoke GHC directly, if not inside any sort of
+  ;; project.
+  (setq haskell-process-type 'stack-ghci)
+
+  (radian-defadvice radian--advice-haskell-fix-back-to-indentation
+      (back-to-indentation)
+    :around back-to-indentation
+    "Fix `back-to-indentation' in `literate-haskell-mode'.
+Otherwise, it just moves point to column 0, which is wrong.
+
+This works around an upstream bug; see
+https://github.com/haskell/haskell-mode/issues/1594."
+    (if (derived-mode-p 'literate-haskell-mode)
+        (progn
+          (beginning-of-line 1)
+          (when-let ((c (char-after)))
+            (when (= c ? )
+              (forward-char)))
+          (skip-syntax-forward " " (line-end-position))
+          (backward-prefix-chars))
+      (funcall back-to-indentation))))
 
 ;; Package `hindent' provides a way to invoke the Haskell code
 ;; formatter of the same name as a `fill-paragraph' replacement. You
@@ -2563,8 +2627,23 @@ https://github.com/jrblevin/markdown-mode/issues/328."
 (use-feature python
   :config
 
-  ;; Slightly less offensive Python docstring style.
-  (setq python-fill-docstring-style 'pep-257-nn))
+  ;; The only consistent style.
+  (setq python-fill-docstring-style 'django)
+
+  (radian-defhook radian--python-fix-outline-mode-config ()
+    python-mode-hook
+    "Prevent `python-mode' from overriding `outline-minor-mode' config.
+If this hook is not used, then `python-mode' will override even a
+file-local setting of e.g. `outline-regexp' with its own setting."
+    (kill-local-variable 'outline-regexp)
+    (kill-local-variable 'outline-level)
+    (kill-local-variable 'outline-heading-end-regexp))
+
+  (radian-defhook radian--python-no-reindent-on-colon ()
+    python-mode-hook
+    "Don't reindent on typing a colon.
+See https://emacs.stackexchange.com/a/3338/12534."
+    (setq electric-indent-chars (delq ?: electric-indent-chars))))
 
 ;; Package `anaconda-mode' provides a language server which uses the
 ;; (Python) Jedi package to support symbol autocompletion and source
@@ -3022,6 +3101,9 @@ several thousand errors, disable itself, and print a warning."
 ;; similar files.
 (use-package apache-mode)
 
+;; Package `crontab-mode' provides a major mode for crontab files.
+(use-package crontab-mode)
+
 ;; Package `dockerfile-mode' provides a major mode for Dockerfiles.
 (use-package dockerfile-mode)
 
@@ -3263,6 +3345,8 @@ to `radian-reload-init'."
  ("C-h C-o" . radian-find-symbol)
  ("C-h C-l" . find-library))
 
+;;;;; Emacs Lisp linting
+
 ;; Feature `checkdoc' provides some tools for validating Elisp
 ;; docstrings against common conventions.
 (use-feature checkdoc
@@ -3280,6 +3364,10 @@ to `radian-reload-init'."
   ;; a file-local variable, but we don't install the package so Emacs
   ;; doesn't know the variable is safe.
   (put 'elisp-lint-indent-specs 'safe-local-variable #'listp))
+
+;; Package `package-lint' provides a command that lets you check for
+;; common package.el packaging problems in your packages.
+(use-package package-lint)
 
 ;;; Applications
 ;;;; Organization
@@ -3362,6 +3450,13 @@ This runs `org-insert-heading' with
   (put 'org-tags-exclude-from-inheritance 'safe-local-variable
        #'radian--list-of-strings-p))
 
+;; Feature `org-indent' provides an alternative view for Org files in
+;; which sub-headings are indented.
+(use-feature org-indent
+  :init
+
+  (add-hook 'org-mode-hook #'org-indent-mode))
+
 ;; Feature `org-agenda' from package `org' provides the agenda view
 ;; functionality, which allows for collating TODO items from your Org
 ;; files into a single buffer.
@@ -3380,7 +3475,12 @@ This runs `org-insert-heading' with
               ;; commands. But I think it's best to take the same approach
               ;; as before, for consistency.
               ("C-<left>" . org-agenda-do-date-earlier)
-              ("C-<right>" . org-agenda-do-date-later))
+              ("C-<right>" . org-agenda-do-date-later)
+
+              ;; Add a binding for `org-clock-cancel'. This only
+              ;; overrides a slight variation of the binding for `q',
+              ;; so I'm not too worried about it.
+              ("Q" . org-clock-cancel))
   :config
 
   (radian-defadvice radian--advice-org-agenda-default-directory
@@ -3395,13 +3495,6 @@ This makes the behavior of `find-file' more reasonable."
 
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
-
-;; Feature `org-indent' provides an alternative view for Org files in
-;; which sub-headings are indented.
-(use-feature org-indent
-  :init
-
-  (add-hook 'org-mode-hook #'org-indent-mode))
 
 ;; Feature `org-clock' from package `org' provides the task clocking
 ;; functionality.
@@ -3421,6 +3514,13 @@ This makes the behavior of `find-file' more reasonable."
   ;; good reason.
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save)
+
+  :bind* (;; Make some `org-mode-map' bindings global instead.
+          ("C-c C-x C-i" . org-clock-in)
+          ("C-c C-x C-o" . org-clock-out)
+          ("C-c C-x C-x" . org-clock-in-last)
+          ("C-c C-x C-j" . org-clock-goto)
+          ("C-c C-x C-q" . org-clock-cancel))
 
   :config/el-patch
 
@@ -3465,9 +3565,46 @@ This makes the behavior of `find-file' more reasonable."
 
   ;; Don't record a clock entry if you clocked out in less than one
   ;; minute.
-  (setq org-clock-out-remove-zero-time-clocks t))
+  (setq org-clock-out-remove-zero-time-clocks t)
+
+  (defun radian--advice-org-clock-load-automatically (&rest _)
+    "Run `org-clock-load'.
+This is a `:before' advice for various Org functions which might
+be invoked before `org-mode-hook' is run."
+    (org-clock-load))
+
+  (dolist (fun '(org-clock-in
+                 org-clock-out
+                 org-clock-in-last
+                 org-clock-goto))
+    (advice-add fun :before #'radian--advice-org-clock-load-automatically)))
 
 ;;;; Filesystem management
+
+;; When deleting a file interactively, move it to the trash instead.
+(setq delete-by-moving-to-trash t)
+
+;; Package `osx-trash' provides functionality that allows Emacs to
+;; place files in the trash on macOS.
+(use-package osx-trash
+  :commands (osx-trash-move-file-to-trash)
+  :init/el-patch
+
+  (defun osx-trash-setup ()
+    "Provide trash support for OS X.
+
+Provide `system-move-file-to-trash' as an alias for
+`osx-trash-move-file-to-trash'.
+
+Note that you still need to set `delete-by-moving-to-trash' to a
+non-nil value to enable trashing for file operations."
+    (when (and (eq system-type 'darwin)
+               (not (fboundp 'system-move-file-to-trash)))
+      (defalias 'system-move-file-to-trash
+        'osx-trash-move-file-to-trash)))
+
+  (osx-trash-setup))
+
 ;;;;; Dired
 
 ;; For some reason, the autoloads from `dired-aux' and `dired-x' are
@@ -3539,6 +3676,104 @@ This advice is only activated on macOS, where it is helpful since
 most of the Linux utilities in `dired-guess-shell-alist-default'
 are probably not going to be installed."
       "open")))
+
+;;;;; Sunrise Commander
+
+;; Package `sunrise-commander' offers an improved two-pane version of
+;; Dired for efficient filesystem management. Unfortunately, the UX is
+;; sometimes a bit clunky, so some things will have to be fixed in
+;; future (or the package will need to be replaced).
+(use-package sunrise-commander
+  :preface
+
+  ;; Prevent extensions from being loaded. We have to do this in
+  ;; `:preface' because for some stupid reason the extensions are
+  ;; loaded in the autoloads(!!!).
+  (setq sr-autoload-extensions nil)
+
+  ;; Use my fork until
+  ;; https://github.com/escherdragon/sunrise-commander/pull/58 and
+  ;; https://github.com/escherdragon/sunrise-commander/pull/59 are
+  ;; merged.
+  :straight (:host github :repo "raxod502/sunrise-commander" :branch "fork/1"
+                   :upstream (:host github
+                                    :repo "emacsmirror/sunrise-commander"))
+  :init
+
+  ;; Add integration with wdx, see https://github.com/raxod502/wdx.
+
+  (defun radian--wdx-location ()
+    "Return the path to the wdx binary.
+Signal an error if it doesn't exist."
+    (let ((path "~/.zplug/repos/raxod502/wdx/bin/wdx"))
+      (if (file-executable-p path)
+          path
+        (user-error "wdx is not installed"))))
+
+  (defun radian-sunrise-wdx ()
+    "Prompt for wdx warp point and go there."
+    (interactive)
+    (let ((wdx (radian--wdx-location)))
+      (with-temp-buffer
+        (unless (= 0 (call-process wdx nil t nil "ls"))
+          (error "Unexpected error from wdx"))
+        (let ((point (completing-read
+                      "Go to warp point: " (split-string (buffer-string) "\n")
+                      nil 'require-match)))
+          (erase-buffer)
+          (unless (= 0 (call-process wdx nil t nil "show" "--" point))
+            (error "Unexpected error from wdx"))
+          (let ((path (string-remove-suffix "\n" (buffer-string))))
+            (sr-goto-dir path))))))
+
+  (defun radian-sunrise-wdx-set-or-remove (&optional remove)
+    "Prompt for wdx warp point name and set it at the current directory.
+With prefix argument, prompt for warp point to remove."
+    (interactive "P")
+    (let ((wdx (radian--wdx-location)))
+      (if remove
+          (with-temp-buffer
+            (unless (= 0 (call-process wdx nil t nil "ls"))
+              (error "Unexpected error from wdx"))
+            (let ((point (completing-read
+                          "Delete warp point: "
+                          (split-string (buffer-string) "\n"))))
+              (unless (= 0 (call-process wdx nil t nil "rm" "--" point))
+                (error "Unexpected error from wdx"))
+              (message "Deleted warp point %S" point)))
+        (let ((point (read-from-minibuffer "Set warp point: ")))
+          (unless (= 0 (call-process wdx nil t nil "set" "--" point))
+            (error "Unexpected error from wdx"))
+          (message "Set warp point %S" point)))))
+
+  (cl-defun radian-sunrise-cd ()
+    "Like `sunrise-cd' but after you've already run `sunrise'."
+    (interactive)
+    (dolist (buf (buffer-list))
+      (let ((path nil))
+        (with-current-buffer buf
+          (unless (derived-mode-p 'sr-mode)
+            (setq path (or buffer-file-name default-directory))))
+        (when path
+          (sr-dired path)
+          (cl-return-from radian-sunrise-cd))))
+    (user-error "No buffers to show in Sunrise Commander"))
+
+  :bind (:map sr-mode-map
+              ("j" . radian-sunrise-wdx)
+              ("k" . radian-sunrise-wdx-set-or-remove)
+              ("o" . radian-sunrise-cd))
+  :bind* (("C-c s" . sunrise)))
+
+;;;; Terminal emulator
+
+;; Feature `term' provides a workable, though slow, terminal emulator
+;; within Emacs.
+(use-feature term
+  :bind (;; Allow usage of more commands from within the terminal.
+         :map term-raw-map
+         ("M-x" . execute-extended-command)
+         ("C-h" . help-command)))
 
 ;;;; Version control
 
@@ -3673,6 +3908,25 @@ as argument."
            (socket (expand-file-name "git/credential/socket" xdg-config-home)))
       (setq magit-credential-cache-daemon-socket socket))))
 
+;; Package `magit-gh-pulls' adds a section to Magit which displays
+;; open pull requests on a corresponding GitHub repository, if any,
+;; and allows you to check them out locally.
+(use-package magit-gh-pulls
+  :demand t
+  :after magit
+  :config
+
+  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
+
+  (radian-defadvice radian--advice-hide-magit-gh-pulls-when-not-cached ()
+    :before-while magit-gh-pulls-insert-gh-pulls
+    "Hide the \"Pull Requests\" section when the list is not cached."
+    (when-let ((repo (magit-gh-pulls-guess-repo)))
+      (magit-gh-pulls-requests-cached-p
+       (magit-gh-pulls-get-api) (car repo) (cdr repo))))
+
+  :delight (magit-gh-pulls-mode nil "magit-gh-pulls"))
+
 ;; Package `git-commit' allows you to use Emacsclient as a Git commit
 ;; message editor, providing syntax highlighting and using
 ;; `with-editor' to allow you to conveniently accept or abort the
@@ -3713,7 +3967,7 @@ provide such a commit message."
   ;; https://chris.beams.io/posts/git-commit/.
   (setq git-commit-summary-max-length 50))
 
-;;;; Compilation
+;;;; External commands
 
 ;; Feature `compile' provides a way to run a shell command from Emacs
 ;; and view the output in real time, with errors and warnings
@@ -3728,6 +3982,10 @@ provide such a commit message."
   ;; Automatically scroll the Compilation buffer as output appears,
   ;; but stop at the first error.
   (setq compilation-scroll-output 'first-error))
+
+;; Package `rg' just provides an interactive command `rg' to run the
+;; search tool of the same name.
+(use-package rg)
 
 ;;;; Internet applications
 
@@ -3744,6 +4002,62 @@ provide such a commit message."
 
   :bind* (:filter (radian--browse-url-predicate)
                   ("C-c C-o" . browse-url-at-point)))
+
+;; Package `atomic-chrome' provides a way for you to edit textareas in
+;; Chrome or Firefox using Emacs. See
+;; https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc
+;; for the Chrome extension.
+(use-package atomic-chrome
+  ;; Use my fork until
+  ;; https://github.com/alpha22jp/atomic-chrome/issues/42 is fixed.
+  :straight (:host github :repo "raxod502/atomic-chrome"
+                   :branch "fork/1"
+                   :upstream (:host github :repo "alpha22jp/atomic-chrome"))
+  :demand t
+  :bind (:map atomic-chrome-edit-mode-map
+              :filter (not radian-atomic-chrome-allow-filling)
+              ("M-q" . ignore))
+  :config
+
+  (defvar-local radian-atomic-chrome-url nil
+    "The URL of the text area being edited.")
+
+  (defvar-local radian-atomic-chrome-allow-filling nil
+    "Non-nil means that hard line wrapping may be used.")
+
+  (defcustom radian-atomic-chrome-setup-hook nil
+    "Hook run while setting up an `atomic-chrome' buffer.
+You can set `radian-atomic-chrome-allow-filling' based on the
+value of `radian-atomic-chrome-url' in this hook."
+    :type 'hook)
+
+  (radian-defadvice radian--advice-atomic-chrome-setup (url)
+    :after atomic-chrome-set-major-mode
+    "Save the URL in `radian-atomic-chrome-url'.
+Also set up filling correctly based on
+`radian-atomic-chrome-allow-filling', after running
+`radian-atomic-chrome-setup-hook'."
+    (setq radian-atomic-chrome-url url)
+    (run-hooks 'radian-atomic-chrome-setup-hook)
+    (unless radian-atomic-chrome-allow-filling
+      (auto-fill-mode -1)
+      (visual-line-mode +1)))
+
+  ;; Edit in Markdown by default, because many sites support it and
+  ;; it's not a big deal if the text area doesn't actually support
+  ;; Markdown.
+  (setq atomic-chrome-default-major-mode 'markdown-mode)
+
+  (radian-defhook radian--atomic-chrome-switch-back ()
+    atomic-chrome-edit-done-hook
+    "Switch back to Google Chrome after finishing with `atomic-chrome'.
+This only works on macOS currently."
+    (radian-with-operating-system macOS
+      (when (file-directory-p "/Applications/Google Chrome.app")
+        (call-process "open" nil nil nil "-a" "Google Chrome"))))
+
+  ;; Listen for requests from the Chrome/Firefox extension.
+  (atomic-chrome-start-server))
 
 ;; Package `webpaste' provides Emacs support for many different
 ;; command-line pastebins.
@@ -3792,6 +4106,10 @@ provide such a commit message."
 
               ;; If there's an error, let me see where it is.
               (setq debug-on-error t)
+
+              ;; Make it possible to detect whether the init-file is
+              ;; being profiled.
+              (defvar radian--currently-profiling-p t)
 
               ;; Abbreviated (and flattened) version of init.el.
               (defvar radian-minimum-emacs-version "26.1")
@@ -4257,6 +4575,12 @@ your local configuration."
 ;; growing too large. Do this after the final hook to prevent packages
 ;; installed there from being pruned.
 (straight-prune-build-cache)
+
+;; Occasionally prune the build directory as well. For similar reasons
+;; as above, we need to do this after local configuration.
+(unless (bound-and-true-p radian--currently-profiling-p)
+  (when (= 0 (random 100))
+    (straight-prune-build-directory)))
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil
