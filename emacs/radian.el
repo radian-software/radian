@@ -4577,7 +4577,13 @@ your local configuration."
 
 ;; Package `zerodark-theme' provides a good-looking color theme that
 ;; works in both windowed and tty Emacs.
-(straight-register-package 'zerodark-theme)
+;;
+;; Use my fork until
+;; https://github.com/NicolasPetton/zerodark-theme/pull/54 is merged.
+(straight-register-package
+ '(zerodark-theme :host github :repo "raxod502/zerodark-theme" :branch "fork/2"
+                  :upstream (:host github
+                                   :repo "NicolasPetton/zerodark-theme")))
 (when radian-color-theme-enable
   (use-package zerodark-theme
     :demand t
