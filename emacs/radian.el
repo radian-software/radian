@@ -3919,6 +3919,13 @@ as argument."
            (socket (expand-file-name "git/credential/socket" xdg-config-home)))
       (setq magit-credential-cache-daemon-socket socket))))
 
+;; Package `gh' provides an Elisp interface to the GitHub API.
+(use-package gh
+  ;; Disable autoloads because this package autoloads *way* too much
+  ;; code. See https://github.com/sigma/gh.el/issues/95.
+  :straight (:host github :repo "sigma/gh.el"
+                   :no-autoloads t))
+
 ;; Package `magit-gh-pulls' adds a section to Magit which displays
 ;; open pull requests on a corresponding GitHub repository, if any,
 ;; and allows you to check them out locally.
