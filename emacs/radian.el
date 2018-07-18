@@ -2112,7 +2112,6 @@ nor requires Flycheck to be loaded."
 ;; abbreviations into fillable templates. It is also used by
 ;; `clj-refactor' for some of its refactorings.
 (use-package yasnippet
-  :demand t
   :bind (:map yas-minor-mode-map
 
               ;; Disable TAB from expanding snippets, as I don't use it and
