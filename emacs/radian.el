@@ -901,7 +901,9 @@ split."
   ;; Occasionally prune nonexistent projects.
   (unless (bound-and-true-p radian--currrently-profiling-p)
     (when (= 0 (random 100))
-      (projectile-cleanup-known-projects)))
+      (let ((inhibit-message t)
+            (message-log-max nil))
+        (projectile-cleanup-known-projects))))
 
   (projectile-mode +1)
 
