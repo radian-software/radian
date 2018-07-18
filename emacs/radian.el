@@ -4713,11 +4713,7 @@ your local configuration."
                   :upstream (:host github
                                    :repo "NicolasPetton/zerodark-theme")))
 (when radian-color-theme-enable
-  (use-package zerodark-theme
-    :demand t
-    :config
-
-    (load-theme 'zerodark 'no-confirm)))
+  (use-package zerodark-theme))
 
 ;;; Closing
 
@@ -4733,6 +4729,15 @@ your local configuration."
 (unless (bound-and-true-p radian--currently-profiling-p)
   (when (= 0 (random 100))
     (straight-prune-build-directory)))
+
+;; Enable color theme as late as is humanly possible. This reduces
+;; frame flashing and other artifacts during startup.
+(when radian-color-theme-enable
+  (use-feature zerodark-theme
+    :demand t
+    :config
+
+    (load-theme 'zerodark 'no-confirm)))
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil
