@@ -209,27 +209,23 @@ pile up, and then interrupt Emacs shutdown.)"
 ;; over the init-file. We do this to avoid having straight.el
 ;; configuration mentioned in the top-level init-file.
 
-(defun radian--reset-straight-current-profile ()
+(radian-defhook radian--reset-straight-current-profile ()
+  radian--finalize-init-hook
   "Reset `straight-current-profile' to nil.
 This function is used on `radian--finalize-init-hook' to emulate
 binding the variable dynamically over the entire init-file."
   (setq straight-current-profile nil))
-
-(add-hook 'radian--finalize-init-hook
-          #'radian--reset-straight-current-profile)
 
 (setq straight-current-profile 'radian)
 
 ;; Treat loading the init-file as a transaction. See the straight.el
 ;; documentation for more information about this.
 
-(defun radian--finalize-straight-transaction ()
+(radian-defhook radian--finalize-straight-transaction ()
+  radian--finalize-init-hook
   "Finalize the init-file's straight.el transaction."
   (setq straight-treat-as-init nil)
   (straight-finalize-transaction))
-
-(add-hook 'radian--finalize-init-hook
-          #'radian--finalize-straight-transaction)
 
 (setq straight-treat-as-init t)
 
@@ -2502,15 +2498,14 @@ https://github.com/haskell/haskell-mode/issues/1594."
   :after haskell-mode
   :config
 
-  (defun radian--hindent-enable-maybe (&optional arg)
+  (radian-defhook radian--hindent-enable-maybe (&optional arg)
+    haskell-mode-hook
     "Enable `hindent-mode' if not in `literate-haskell-mode'.
 ARG is passed to `hindent-mode' toggle function."
     ;; Don't enable `hindent-mode' in `literate-haskell-mode'. See
     ;; https://github.com/commercialhaskell/hindent/issues/496.
     (unless (derived-mode-p 'literate-haskell-mode)
-      (hindent-mode arg)))
-
-  (add-hook 'haskell-mode-hook #'radian--hindent-enable-maybe))
+      (hindent-mode arg))))
 
 ;;;; HTML
 ;; https://www.w3.org/TR/html5/
@@ -2587,12 +2582,11 @@ ARG is passed to `hindent-mode' toggle function."
   :after (:all js2-mode company tern)
   :config
 
-  (defun radian--company-tern-enable ()
+  (radian-defhook radian--company-tern-enable ()
+    js2-mode-hook
     "Enable `company-tern' in the current buffer."
     (setq-local company-backends
-                (cons 'company-tern radian--company-backends-global)))
-
-  (add-hook 'js2-mode-hook #'radian--company-tern-enable))
+                (cons 'company-tern radian--company-backends-global))))
 
 ;;;; Markdown
 ;; https://daringfireball.net/projects/markdown/
