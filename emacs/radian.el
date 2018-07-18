@@ -1557,7 +1557,7 @@ argument."
 ;; optionally reverting the buffer to match the file (unless it has
 ;; unsaved changes).
 (use-feature autorevert
-  :defer 7
+  :defer 1
   :init
 
   (defun radian--autorevert-silence ()
@@ -1764,7 +1764,7 @@ the timer when no buffers need to be checked."
 ;; Company allows for multiple frontends to display the candidates,
 ;; such as a tooltip menu. Company stands for "Complete Anything".
 (use-package company
-  :demand t
+  :defer 2
   :init
 
   (defvar radian--company-backends-global
@@ -4031,7 +4031,7 @@ provide such a commit message."
   :straight (:host github :repo "raxod502/atomic-chrome"
                    :branch "fork/1"
                    :upstream (:host github :repo "alpha22jp/atomic-chrome"))
-  :defer 5
+  :defer 4
   :bind (:map atomic-chrome-edit-mode-map
               :filter (not radian-atomic-chrome-allow-filling)
               ("M-q" . ignore))
