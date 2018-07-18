@@ -462,7 +462,12 @@ This keymap is bound under M-P.")
                      profile-file
                      buf-name)))))))
 
-(radian-source-profile)
+(defvar radian--source-profile-timer
+  (run-at-time 1 nil #'radian-source-profile)
+  "Timer used to run `radian-source-profile'.
+We shouldn't need environment variables to be set correctly
+during init, so deferring their processing saves some time at
+startup.")
 
 ;;;; Clipboard integration
 
