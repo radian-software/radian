@@ -4031,7 +4031,7 @@ provide such a commit message."
   :straight (:host github :repo "raxod502/atomic-chrome"
                    :branch "fork/1"
                    :upstream (:host github :repo "alpha22jp/atomic-chrome"))
-  :demand t
+  :defer 5
   :bind (:map atomic-chrome-edit-mode-map
               :filter (not radian-atomic-chrome-allow-filling)
               ("M-q" . ignore))
