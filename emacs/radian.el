@@ -1557,7 +1557,7 @@ argument."
 ;; optionally reverting the buffer to match the file (unless it has
 ;; unsaved changes).
 (use-feature autorevert
-  :demand t
+  :defer 7
   :init
 
   (defun radian--autorevert-silence ()
