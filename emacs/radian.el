@@ -59,6 +59,8 @@ function. DOCSTRING and BODY are as in `defun'."
            (doc-string 4))
   (unless (string-match-p "-hook$" (symbol-name hook))
     (error "Symbol `%S' is not a hook" hook))
+  (unless (stringp docstring)
+    (error "radian-defhook: no docstring provided"))
   `(progn
      (defun ,name ,arglist
        ,(format "%s\n\nThis function is for use in `%S'."
@@ -173,6 +175,8 @@ appropriately."
 
 (radian-defhook radian--reenable-gc ()
   radian--finalize-init-hook
+  "Reset `gc-cons-threshold' to its original value.
+Otherwise, Emacs will just get slower and slower over time."
   (setq gc-cons-threshold radian--orig-gc-cons-threshold))
 
 (setq gc-cons-threshold (* 5 1000 1000))
