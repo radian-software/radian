@@ -162,6 +162,21 @@ appropriately."
   ;; Load local customizations.
   (load radian-local-init-file 'noerror 'nomessage))
 
+;;; Disable GC during startup
+
+;; Disabling GC (by setting `gc-cons-threshold' to a very large value,
+;; in this case 500MB) during startup is said to improve startup time
+;; by reducing the number of GC runs.
+
+(defvar radian--orig-gc-cons-threshold gc-cons-threshold
+  "Original value of `gc-cons-threshold'.")
+
+(radian-defhook radian--reenable-gc ()
+  radian--finalize-init-hook
+  (setq gc-cons-threshold radian--orig-gc-cons-threshold))
+
+(setq gc-cons-threshold (* 5 1000 1000))
+
 ;;; Networking
 
 ;; Use `with-eval-after-load' instead of `use-feature' because we have
