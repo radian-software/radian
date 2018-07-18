@@ -895,16 +895,147 @@ split."
 ;; projects, etc. It then provides commands for quickly navigating
 ;; between and within these projects.
 (use-package projectile
-  :demand t
+  :init/el-patch
+
+  (defgroup projectile nil
+    "Manage and navigate projects easily."
+    :group 'tools
+    :group 'convenience
+    :link '(url-link :tag "Github" "https://github.com/bbatsov/projectile")
+    :link '(url-link :tag "Online Manual" "https://projectile.readthedocs.io/")
+    :link '(emacs-commentary-link :tag "Commentary" "projectile"))
+
+  (defcustom projectile-keymap-prefix (kbd "C-c p")
+    "Projectile keymap prefix."
+    :group 'projectile
+    :type 'string)
+
+  (defvar projectile-command-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "4 a") #'projectile-find-other-file-other-window)
+      (define-key map (kbd "4 b") #'projectile-switch-to-buffer-other-window)
+      (define-key map (kbd "4 C-o") #'projectile-display-buffer)
+      (define-key map (kbd "4 d") #'projectile-find-dir-other-window)
+      (define-key map (kbd "4 D") #'projectile-dired-other-window)
+      (define-key map (kbd "4 f") #'projectile-find-file-other-window)
+      (define-key map (kbd "4 g") #'projectile-find-file-dwim-other-window)
+      (define-key map (kbd "4 t") #'projectile-find-implementation-or-test-other-window)
+      (define-key map (kbd "5 a") #'projectile-find-other-file-other-frame)
+      (define-key map (kbd "5 b") #'projectile-switch-to-buffer-other-frame)
+      (define-key map (kbd "5 d") #'projectile-find-dir-other-frame)
+      (define-key map (kbd "5 D") #'projectile-dired-other-frame)
+      (define-key map (kbd "5 f") #'projectile-find-file-other-frame)
+      (define-key map (kbd "5 g") #'projectile-find-file-dwim-other-frame)
+      (define-key map (kbd "5 t") #'projectile-find-implementation-or-test-other-frame)
+      (define-key map (kbd "!") #'projectile-run-shell-command-in-root)
+      (define-key map (kbd "&") #'projectile-run-async-shell-command-in-root)
+      (define-key map (kbd "a") #'projectile-find-other-file)
+      (define-key map (kbd "b") #'projectile-switch-to-buffer)
+      (define-key map (kbd "C") #'projectile-configure-project)
+      (define-key map (kbd "c") #'projectile-compile-project)
+      (define-key map (kbd "d") #'projectile-find-dir)
+      (define-key map (kbd "D") #'projectile-dired)
+      (define-key map (kbd "e") #'projectile-recentf)
+      (define-key map (kbd "E") #'projectile-edit-dir-locals)
+      (define-key map (kbd "f") #'projectile-find-file)
+      (define-key map (kbd "g") #'projectile-find-file-dwim)
+      (define-key map (kbd "F") #'projectile-find-file-in-known-projects)
+      (define-key map (kbd "i") #'projectile-invalidate-cache)
+      (define-key map (kbd "I") #'projectile-ibuffer)
+      (define-key map (kbd "j") #'projectile-find-tag)
+      (define-key map (kbd "k") #'projectile-kill-buffers)
+      (define-key map (kbd "l") #'projectile-find-file-in-directory)
+      (define-key map (kbd "m") #'projectile-commander)
+      (define-key map (kbd "o") #'projectile-multi-occur)
+      (define-key map (kbd "p") #'projectile-switch-project)
+      (define-key map (kbd "q") #'projectile-switch-open-project)
+      (define-key map (kbd "P") #'projectile-test-project)
+      (define-key map (kbd "r") #'projectile-replace)
+      (define-key map (kbd "R") #'projectile-regenerate-tags)
+      (define-key map (kbd "s g") #'projectile-grep)
+      (define-key map (kbd "s r") #'projectile-ripgrep)
+      (define-key map (kbd "s s") #'projectile-ag)
+      (define-key map (kbd "S") #'projectile-save-project-buffers)
+      (define-key map (kbd "t") #'projectile-toggle-between-implementation-and-test)
+      (define-key map (kbd "T") #'projectile-find-test-file)
+      (define-key map (kbd "u") #'projectile-run-project)
+      (define-key map (kbd "v") #'projectile-vc)
+      (define-key map (kbd "V") #'projectile-browse-dirty-projects)
+      (define-key map (kbd "x e") #'projectile-run-eshell)
+      (define-key map (kbd "x t") #'projectile-run-term)
+      (define-key map (kbd "x s") #'projectile-run-shell)
+      (define-key map (kbd "z") #'projectile-cache-current-file)
+      (define-key map (kbd "ESC") #'projectile-project-buffers-other-buffer)
+      map)
+    "Keymap for Projectile commands after `projectile-keymap-prefix'.")
+  (fset 'projectile-command-map projectile-command-map)
+
+  (defvar projectile-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map projectile-keymap-prefix 'projectile-command-map)
+      map)
+    "Keymap for Projectile mode.")
+
+  (define-minor-mode projectile-mode
+    "Minor mode to assist project management and navigation.
+
+When called interactively, toggle `projectile-mode'.  With prefix
+ARG, enable `projectile-mode' if ARG is positive, otherwise disable
+it.
+
+When called from Lisp, enable `projectile-mode' if ARG is omitted,
+nil or positive.  If ARG is `toggle', toggle `projectile-mode'.
+Otherwise behave as if called interactively.
+
+\\{projectile-mode-map}"
+    (el-patch-remove
+      :lighter projectile-mode-line)
+    :keymap projectile-mode-map
+    :group 'projectile
+    :require 'projectile
+    :global t
+    (cond
+     (projectile-mode
+      (el-patch-remove
+        ;; initialize the projects cache if needed
+        (unless projectile-projects-cache
+          (setq projectile-projects-cache
+                (or (projectile-unserialize projectile-cache-file)
+                    (make-hash-table :test 'equal))))
+        (unless projectile-projects-cache-time
+          (setq projectile-projects-cache-time
+                (make-hash-table :test 'equal)))
+        ;; update the list of known projects
+        (projectile-cleanup-known-projects)
+        (projectile-discover-projects-in-search-path)
+        (add-hook 'find-file-hook 'projectile-find-file-hook-function)
+        (add-hook 'projectile-find-dir-hook #'projectile-track-known-projects-find-file-hook t)
+        (add-hook 'dired-before-readin-hook #'projectile-track-known-projects-find-file-hook t t)
+        (ad-activate 'compilation-find-file)
+        (ad-activate 'delete-file)))
+     (el-patch-remove
+       (t
+        (remove-hook 'find-file-hook #'projectile-find-file-hook-function)
+        (remove-hook 'dired-before-readin-hook #'projectile-track-known-projects-find-file-hook t)
+        (ad-deactivate 'compilation-find-file)
+        (ad-deactivate 'delete-file)))))
+
+  :init
+
+  (projectile-mode +1)
+
+  :defer 1
   :config
 
-  ;; Occasionally prune nonexistent projects.
-  (unless (bound-and-true-p radian--currrently-profiling-p)
-    (when (= 0 (random 100))
-      (let ((inhibit-message t)
-            (message-log-max nil))
-        (projectile-cleanup-known-projects))))
+  (radian-defadvice radian--projectile-silence-cleanup (orig-func &rest args)
+    :around projectile-cleanup-known-projects
+    "Eliminate useless messages from `projectile-cleanup-known-projects'."
+    (let ((inhibit-message t)
+          (message-log-max nil))
+      (apply orig-func args)))
 
+  ;; Enable the mode again now that we have all the supporting hooks
+  ;; and stuff defined.
   (projectile-mode +1)
 
   (defun radian--projectile-indexing-method-p (method)
@@ -966,10 +1097,7 @@ counterpart.
 
   :init
 
-  (use-feature projectile
-    :config
-
-    (counsel-projectile-mode +1)))
+  (counsel-projectile-mode +1))
 
 (defun radian--advice-find-file-create-directories
     (find-file filename &rest args)
@@ -1557,7 +1685,7 @@ argument."
 ;; optionally reverting the buffer to match the file (unless it has
 ;; unsaved changes).
 (use-feature autorevert
-  :defer 1
+  :defer 2
   :init
 
   (defun radian--autorevert-silence ()
@@ -1764,7 +1892,7 @@ the timer when no buffers need to be checked."
 ;; Company allows for multiple frontends to display the candidates,
 ;; such as a tooltip menu. Company stands for "Complete Anything".
 (use-package company
-  :defer 2
+  :defer 3
   :init
 
   (defvar radian--company-backends-global
@@ -1917,7 +2045,7 @@ backends will still be included.")
   :straight (:host github :repo "raxod502/flycheck" :branch "fork/4"
                    :upstream (:host github :repo "flycheck/flycheck"
                                     :branch "master"))
-  :defer 3
+  :defer 4
   :init
 
   (defun radian--flycheck-disable-checkers (&rest checkers)
@@ -4031,7 +4159,7 @@ provide such a commit message."
   :straight (:host github :repo "raxod502/atomic-chrome"
                    :branch "fork/1"
                    :upstream (:host github :repo "alpha22jp/atomic-chrome"))
-  :defer 4
+  :defer 5
   :bind (:map atomic-chrome-edit-mode-map
               :filter (not radian-atomic-chrome-allow-filling)
               ("M-q" . ignore))

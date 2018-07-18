@@ -13,6 +13,7 @@ Use the following ordering for `use-package` keywords:
 * `:bind-keymap`
 * `:bind-keymap*`
 * `:demand`
+* `:defer`
 * `:after`
 * `:config/el-patch`
 * `:config`
