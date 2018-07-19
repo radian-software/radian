@@ -2806,7 +2806,22 @@ file-local setting of e.g. `outline-regexp' with its own setting."
     python-mode-hook
     "Don't reindent on typing a colon.
 See https://emacs.stackexchange.com/a/3338/12534."
-    (setq electric-indent-chars (delq ?: electric-indent-chars))))
+    (setq electric-indent-chars (delq ?: electric-indent-chars)))
+
+  (radian-defhook radian--python-use-correct-flycheck-executable ()
+    python-mode-hook
+    "Use the correct Python executable for Flycheck."
+    (let ((executable "python3"))
+      (save-excursion
+        (save-match-data
+          (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
+                    (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
+            (setq executable (substring-no-properties (match-string 1))))))
+      (dolist (var '(flycheck-python-flake8-executable
+                     flycheck-python-pycompile-executable
+                     flycheck-python-pylint-executable))
+        (make-local-variable var)
+        (set var executable)))))
 
 ;; Package `anaconda-mode' provides a language server which uses the
 ;; (Python) Jedi package to support symbol autocompletion and source
