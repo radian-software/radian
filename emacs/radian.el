@@ -703,6 +703,22 @@ replacements. "
   :bind* (;; Keybinding suggested by the documentation of Counsel, see
           ;; https://github.com/abo-abo/swiper.
           ("C-c k" . counsel-rg))
+  :config/el-patch
+
+  (defcustom counsel-rg-base-command
+    (el-patch-concat
+      "rg -S --no-heading --line-number --color never "
+      (el-patch-add
+        "-z ")
+      "%s .")
+    (el-patch-concat
+      "Alternative to `counsel-ag-base-command' using ripgrep.
+
+Note: don't use single quotes for the regex."
+      "\n\nSupport for searching compressed files has been added
+by `el-patch'.")
+    :type 'string
+    :group 'ivy)
 
   :delight (counsel-mode nil "counsel"))
 
