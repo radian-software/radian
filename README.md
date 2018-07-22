@@ -4,17 +4,18 @@
 
 I write my dotfiles with an eye to:
 
-* extensive documentation and commentary within and outside of the
-  code
+* extensive documentation and commentary in the code
 * harnessing the full power of software while staying true to its
-  original spirit (and keybindings!)
+  original spirit (and keybindings, usually)
 * first-class support for local customization without the need for
-  forking
+  forking (when this is possible)
 
 ## Software configured, features
 
 * [Emacs]
     * Next-generation package manager, [`straight.el`][straight.el]
+    * Clean and DRY package customizations using
+      [`use-package`][use-package]
     * Future-proof customizations using [`el-patch`][el-patch]
     * Sorting by frecency and usage on all commands using
       [`prescient.el`][prescient.el]
@@ -22,32 +23,38 @@ I write my dotfiles with an eye to:
       status, buffer name, point position, current project, Git
       branch, and active modes
     * Extremely clean mode lighters
-    * Delightful color scheme that works in the terminal
-    * Clipboard, mouse, and PATH integration with macOS
+    * Delightful color scheme that works in the terminal ([Zerodark])
+    * Clipboard, mouse, and PATH integration for macOS
     * Automatic creation and interactive removal of parent directories
       when finding files
     * Extensible system for defining mnemonic key sequences to jump to
       dotfiles
     * Emacsclient as a Git commit message editor
-    * Lots of packages for pushing around windows and buffers in
+    * Several packages for pushing around windows and buffers in
       interesting ways
-    * Configured packages: [Autorevert], [Company], [Counsel],
-      [delete-selection-mode], [EasyPG], [ElDoc], [Flycheck], [Ivy],
-      [Magit], [no-littering], [Org], [Projectile], [Smartparens],
-      [Swiper], [undo-tree], [use-package], [visual-regexp],
-      [YASnippet] (... and dozens more, but these are the biggest
-      ones)
-    * Supported languages: C/C++, [Clojure], JavaScript, [LaTeX],
-      [Markdown], [Python], [Racket], [Ruby], [Rust], [TypeScript]
-      (... and dozens more, but these are the biggest ones with the
-      most sophisticated support)
+    * Better contextual information in `*Help*` buffers using
+      [Helpful]
+    * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
+      partly on [`restart-emacs`][restart-emacs]
+    * Configured packages: [Atomic Chrome][atomic-chrome],
+      [Autorevert], [Company], [Counsel], [delete-selection-mode],
+      [Dired], [EasyPG], [ElDoc], [ESUP], [Flycheck], [Ivy], [Magit],
+      [no-littering], [Org], [Projectile], [Smartparens], [Sunrise
+      Commander][sunrise-commander], [Swiper], [undo-tree],
+      [use-package], [visual-regexp], [webpaste.el], [YASnippet] (...
+      and dozens more, but these are the biggest ones)
+    * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
+      [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript] (...
+      and dozens more, but these are the biggest ones with the most
+      sophisticated support)
+    * Major modes for editing many configuration file types
 * [Zsh]
     * Next-generation package manager, [zplug]
-    * No-nonsense prompt showing working directory and Git status,
-      colored by exit code
+    * No-nonsense prompt showing username, hostname, working
+      directory, and Git status, colored by exit code
     * Substring completion everywhere
     * Aliases for [Exa], a modern replacement for `ls`
-    * GUI-like copy/paste functions on the command line
+    * GUI-like file/directory copy/paste functions on the command line
     * Extensive library of clean and consistent [Git] aliases
     * Colored man pages
 * [Tmux]
@@ -139,24 +146,30 @@ commented.
 
 [1.0]: https://github.com/raxod502/radian/milestone/1
 [alembic]: https://github.com/pallet/alembic
+[atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [clojure]: https://clojure.org/
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
 [counsel]: https://github.com/abo-abo/swiper#counsel
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
+[dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [dotman]: https://github.com/raxod502/dotman
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html
 [el-patch]: https://github.com/raxod502/el-patch
 [eldoc]: https://www.emacswiki.org/emacs/ElDoc
 [emacs]: https://www.gnu.org/software/emacs/
+[esup]: https://github.com/jschaf/esup
 [exa]: https://the.exa.website/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [git]: https://git-scm.com/
+[haskell]: https://www.haskell.org/
+[helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [issues]: https://github.com/raxod502/radian/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
+[javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [latex]: https://www.latex-project.org/
 [leiningen]: http://leiningen.org/
 [magit]: https://magit.vc/
@@ -171,11 +184,13 @@ commented.
 [python]: https://www.python.org/
 [racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
+[restart-emacs]: https://github.com/iqbalansari/restart-emacs
 [ruby]: https://www.ruby-lang.org/
 [rust]: https://www.rust-lang.org/
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
+[sunrise-commander]: https://github.com/escherdragon/sunrise-commander
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
 [tools.namespace]: https://github.com/clojure/tools.namespace
@@ -184,6 +199,8 @@ commented.
 [use-package]: https://github.com/jwiegley/use-package
 [vinyasa]: http://docs.caudate.me/lucidity/
 [visual-regexp]: https://github.com/benma/visual-regexp.el
+[webpaste.el]: https://github.com/etu/webpaste.el
 [yasnippet]: https://github.com/joaotavora/yasnippet
+[zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [zplug]: https://github.com/zplug/zplug
 [zsh]: http://zsh.sourceforge.net/
