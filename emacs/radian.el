@@ -4085,7 +4085,12 @@ as argument."
     (let* ((xdg-config-home (or (getenv "XDG_CONFIG_HOME")
                                 (expand-file-name "~/.config/")))
            (socket (expand-file-name "git/credential/socket" xdg-config-home)))
-      (setq magit-credential-cache-daemon-socket socket))))
+      (setq magit-credential-cache-daemon-socket socket)))
+
+  ;; Allow pulling with --rebase just once, without needing to
+  ;; configure pull.rebase permanently. See
+  ;; https://github.com/magit/magit/issues/2597#issuecomment-201392835.
+  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase"))
 
 ;; Package `gh' provides an Elisp interface to the GitHub API.
 (use-package gh
