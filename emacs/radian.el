@@ -715,8 +715,9 @@ replacements. "
       "Alternative to `counsel-ag-base-command' using ripgrep.
 
 Note: don't use single quotes for the regex."
-      "\n\nSupport for searching compressed files has been added
-by `el-patch'.")
+      (el-patch-add
+        "\n\nSupport for searching compressed files has been added
+by `el-patch'."))
     :type 'string
     :group 'ivy)
 
