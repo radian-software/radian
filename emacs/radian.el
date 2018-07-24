@@ -4723,22 +4723,42 @@ the former is shown.")
 
 (radian-show-git-global-mode +1)
 
+;; https://emacs.stackexchange.com/a/7542/12534
+(defun radian--mode-line-align (left right)
+  "Render a left/right aligned string for the mode line.
+LEFT and RIGHT are strings, and the return value is a string that
+displays them left- and right-aligned respectively, separated by
+spaces."
+  (let ((width (- (window-width) (length left))))
+    (format (format "%%s%%%ds" width) left right)))
+
+(defvar radian--mode-line-left
+  '(;; Show [*] if the buffer is modified.
+    (:eval (radian--mode-line-buffer-modified-status))
+    " "
+    ;; Show the name of the current buffer.
+    mode-line-buffer-identification
+    "   "
+    ;; Show the row and column of point.
+    mode-line-position
+    ;; Show the current Projectile project and Git branch.
+    radian--mode-line-project-and-branch
+    ;; Show the active major and minor modes.
+    "  "
+    mode-line-modes)
+  "Composite mode line construct to be shown left-aligned.")
+
+(defvar radian--mode-line-right nil
+  "Composite mode line construct to be shown right-aligned.")
+
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
 (setq-default mode-line-format
-              '(;; Show [*] if the buffer is modified.
-                (:eval (radian--mode-line-buffer-modified-status))
-                " "
-                ;; Show the name of the current buffer.
-                mode-line-buffer-identification
-                "   "
-                ;; Show the row and column of point.
-                mode-line-position
-                ;; Show the current Projectile project and Git branch.
-                radian--mode-line-project-and-branch
-                ;; Show the active major and minor modes.
-                "  "
-                mode-line-modes))
+              '(:eval (replace-regexp-in-string "%" "%%"
+                       (radian--mode-line-align
+                        (format-mode-line radian--mode-line-left)
+                        (format-mode-line radian--mode-line-right))
+                       'fixedcase 'literal)))
 
 ;;;; Color theme
 
