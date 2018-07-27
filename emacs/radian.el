@@ -4267,8 +4267,6 @@ This only works on macOS currently."
 ;; profiling functionality, and to collect timing results for each
 ;; form in your init-file.
 (use-package esup
-  :straight (:host github :repo "raxod502/esup" :branch "fork/2"
-                   :upstream (:host github :repo "jschaf/esup"))
   :config
 
   ;; Work around a bug where esup tries to step into the byte-compiled

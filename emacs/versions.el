@@ -32,7 +32,7 @@
  ("emacs-websocket" . "0d96ba2ff5a25c6cd6c66f417cc9b5f38a4308ba")
  ("epkgs" . "59ca0b0ae4b09d45579232ed4e729d514ab49747")
  ("epl" . "78ab7a85c08222cd15582a298a364774e3282ce6")
- ("esup" . "4cd55ac68e0f687eefbc2b52a87dfd9c09c24f7f")
+ ("esup" . "5acb60e8d7a8fef854178f325682765820522b10")
  ("f.el" . "de6d4d40ddc844eee643e92d47b9d6a63fbebb48")
  ("flycheck" . "6b2a02215af54a40e2059487a1924f0d64b1cf23")
  ("flycheck-irony" . "42dbecd4a865cabeb301193bb4d660e26ae3befe")
