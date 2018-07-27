@@ -3755,7 +3755,8 @@ be invoked before `org-mode-hook' is run."
   (dolist (fun '(org-clock-in
                  org-clock-out
                  org-clock-in-last
-                 org-clock-goto))
+                 org-clock-goto
+                 org-clock-cancel))
     (advice-add fun :before #'radian--advice-org-clock-load-automatically)))
 
 ;;;; Filesystem management
