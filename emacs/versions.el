@@ -67,7 +67,7 @@
  ("melpa" . "2304869fc297723b84505b8a80d6d05854ea69c4")
  ("multiple-cursors.el" . "9c49874fa444a4e7255ec05f62c01daed31c7b09")
  ("no-littering" . "f1ac5274ba49e3533c356c4cd6d5f8ebed0ec517")
- ("org" . "5057e398911daada95958a907cc75285ceb09729")
+ ("org" . "732aa477b031772c3694023cbf34eec6bdc08d61")
  ("osx-trash.el" . "0f1dc052d0a750b8c75f14530a4897f5d4324b4e")
  ("package-lint" . "318a608ff94229dfd2e953e4fd6f37bab27adfaa")
  ("paredit" . "acbe10fdd85d2e91831adf70b6a828bc7e900da0")
