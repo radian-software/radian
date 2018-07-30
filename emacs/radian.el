@@ -312,7 +312,14 @@ binding the variable dynamically over the entire init-file."
 ;; mode lighters. Unlike the similar package `diminish', the `delight'
 ;; package handles both minor and major modes. It is supported
 ;; natively by `use-package'.
-(use-package delight)
+(use-package delight
+  :config
+
+  ;; Prevent `delight' from inhibiting its effects within
+  ;; `format-mode-line', since firstly we use `format-mode-line' to
+  ;; construct the mode line that's actually displayed to the user and
+  ;; secondly that behavior just plain doesn't make sense.
+  (setq inhibit-mode-name-delight nil))
 
 ;;;; straight.el configuration
 
