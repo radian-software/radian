@@ -931,7 +931,7 @@ split."
     :link '(url-link :tag "Online Manual" "https://projectile.readthedocs.io/")
     :link '(emacs-commentary-link :tag "Commentary" "projectile"))
 
-  (defcustom projectile-keymap-prefix (kbd "C-c p")
+  (defcustom projectile-keymap-prefix (kbd "C-c C-p")
     "Projectile keymap prefix."
     :group 'projectile
     :type 'string)
@@ -988,6 +988,7 @@ split."
       (define-key map (kbd "v") #'projectile-vc)
       (define-key map (kbd "V") #'projectile-browse-dirty-projects)
       (define-key map (kbd "x e") #'projectile-run-eshell)
+      (define-key map (kbd "x i") #'projectile-run-ielm)
       (define-key map (kbd "x t") #'projectile-run-term)
       (define-key map (kbd "x s") #'projectile-run-shell)
       (define-key map (kbd "z") #'projectile-cache-current-file)
@@ -1032,7 +1033,7 @@ Otherwise behave as if called interactively.
           (setq projectile-projects-cache-time
                 (make-hash-table :test 'equal)))
         ;; update the list of known projects
-        (projectile-cleanup-known-projects)
+        (projectile--cleanup-known-projects)
         (projectile-discover-projects-in-search-path)
         (add-hook 'find-file-hook 'projectile-find-file-hook-function)
         (add-hook 'projectile-find-dir-hook #'projectile-track-known-projects-find-file-hook t)
@@ -1048,14 +1049,16 @@ Otherwise behave as if called interactively.
 
   :init
 
+  (setq projectile-keymap-prefix (kbd "C-c p"))
+
   (projectile-mode +1)
 
   :defer 1
   :config
 
   (radian-defadvice radian--projectile-silence-cleanup (orig-func &rest args)
-    :around projectile-cleanup-known-projects
-    "Eliminate useless messages from `projectile-cleanup-known-projects'."
+    :around projectile--cleanup-known-projects
+    "Eliminate useless messages from `projectile--cleanup-known-projects'."
     (let ((inhibit-message t)
           (message-log-max nil))
       (apply orig-func args)))
@@ -1082,7 +1085,8 @@ Otherwise behave as if called interactively.
     (let ((map (make-sparse-keymap)))
       (set-keymap-parent map projectile-command-map)
       (define-key map (kbd "s r") 'counsel-projectile-rg)
-      (define-key map (kbd "O") 'counsel-projectile-org-capture)
+      (define-key map (kbd "O c") 'counsel-projectile-org-capture)
+      (define-key map (kbd "O a") 'counsel-projectile-org-agenda)
       (define-key map (kbd "SPC") 'counsel-projectile)
       map)
     "Keymap for Counesl-Projectile commands after `projectile-keymap-prefix'.")
@@ -4045,8 +4049,9 @@ as argument."
                 (memq magit-credential-cache-daemon-process
                       (list-system-processes)))
       (setq magit-credential-cache-daemon-process
-            (or (--first (-let (((&alist 'comm comm 'user user)
-                                 (process-attributes it)))
+            (or (--first (let* ((attr (process-attributes it))
+                                (comm (cdr (assq 'comm attr)))
+                                (user (cdr (assq 'user attr))))
                            (and (string= comm "git-credential-cache--daemon")
                                 (string= user user-login-name)))
                          (list-system-processes))
