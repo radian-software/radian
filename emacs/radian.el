@@ -2066,6 +2066,18 @@ backends will still be included.")
   ;; variable with a multiline docstring.
   (setq eldoc-echo-area-use-multiline-p nil)
 
+  ;; Original code from
+  ;; https://github.com/PythonNut/emacs-config/blob/1a92a1ff1d563fa6a9d7281bbcaf85059c0c40d4/modules/config-intel.el#L130-L137,
+  ;; thanks!
+  (radian-defadvice radian--advice-disable-eldoc-on-flycheck
+      (&rest _)
+    :after-while eldoc-display-message-no-interference-p
+    "Disable ElDoc when point is on a Flycheck overlay.
+This prevents ElDoc and Flycheck from fighting over the echo
+area."
+    (not (and (bound-and-true-p flycheck-mode)
+              (flycheck-overlay-errors-at (point)))))
+
   :delight (eldoc-mode nil "eldoc"))
 
 ;;;; Automatic syntax checking
@@ -2113,6 +2125,9 @@ nor requires Flycheck to be loaded."
   ;; check state for several buffers quickly after e.g. changing a
   ;; config file.
   (setq flycheck-buffer-switch-check-intermediate-buffers t)
+
+  ;; Display errors in the echo area after only 0.2 seconds, not 0.9.
+  (setq flycheck-display-errors-delay 0.2)
 
   :delight (flycheck-mode nil "flycheck"))
 
