@@ -1661,17 +1661,6 @@ argument."
   ;; each other.
   (setq avy-style 'de-bruijn))
 
-;; Feature `xref' provides a framework for jumping to definitions of
-;; symbols.
-(use-feature xref
-  :config
-
-  ;; When using M-. and friends, always prompt for the identifier (it
-  ;; defaults to the identifier at point). This behavior is more
-  ;; consistent and predictable than the default, which is to jump
-  ;; immediately if there is a valid symbol at point.
-  (setq xref-prompt-for-identifier t))
-
 ;; Feature `bookmark' provides a way to mark places in a buffer. I
 ;; don't use it, but some other packages do.
 (use-feature bookmark
@@ -2848,28 +2837,40 @@ See https://emacs.stackexchange.com/a/3338/12534."
                      flycheck-python-pycompile-executable
                      flycheck-python-pylint-executable))
         (make-local-variable var)
-        (set var executable)))))
+        (set var executable))))
 
-;; Package `anaconda-mode' provides a language server which uses the
-;; (Python) Jedi package to support symbol autocompletion and source
-;; location.
-(use-package anaconda-mode
-  :hook python-mode
+  ;; Default to Python 3. Prefer the versioned Python binaries since
+  ;; there was this one time where Homebrew decided not to install an
+  ;; unversioned binary and then /usr/bin/python was first on the
+  ;; PATH.
+  (cond
+   ((executable-find "python3")
+    (setq python-shell-interpreter "python3"))
+   ((executable-find "python2")
+    (setq python-shell-interpreter "python2"))
+   (_
+    (setq python-shell-interpreter "python"))))
 
-  :delight (anaconda-mode nil "anaconda-mode"))
-
-;; Package `company-anaconda' provides a Company backend that uses
-;; Anaconda.
-(use-package company-anaconda
+;; Package `elpy' provides a language server for Python, including
+;; integration with most other packages that need to draw information
+;; from it (e.g. Company).
+(use-package elpy
   :demand t
-  :after (:all company anaconda-mode)
+  :after python
   :config
 
-  (radian-defhook radian--company-anaconda-setup ()
-    anaconda-mode-hook
-    "Configure Company to use Anaconda as a backend."
-    (setq-local company-backends (cons #'company-anaconda
-                                       radian--company-backends-global))))
+  ;; Don't highlight indentation levels, as it looks rather weird.
+  (setq elpy-modules (remq 'elpy-module-highlight-indentation elpy-modules))
+
+  ;; Don't use Flymake, since we use Flycheck instead.
+  (setq elpy-modules (remq 'elpy-module-flymake elpy-modules))
+
+  ;; Use the correct version of Python.
+  (setq elpy-rpc-python-command python-shell-interpreter)
+
+  (elpy-enable)
+
+  :delight (elpy-mode nil "elpy"))
 
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
@@ -3532,7 +3533,11 @@ to `radian-reload-init'."
 (defun radian-find-symbol (&optional symbol)
   "Same as `xref-find-definitions' but only for Elisp symbols."
   (interactive)
-  (let ((xref-backend-functions '(elisp--xref-backend)))
+  (let ((xref-backend-functions '(elisp--xref-backend))
+        ;; Make this command behave the same as `find-function' and
+        ;; `find-variable', i.e. always prompt for an identifier,
+        ;; defaulting to the one at point.
+        (xref-prompt-for-identifier t))
     (if symbol
         (xref-find-definitions symbol)
       (call-interactively 'xref-find-definitions))))
