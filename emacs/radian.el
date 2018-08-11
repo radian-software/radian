@@ -3973,7 +3973,10 @@ With prefix argument, prompt for warp point to remove."
   :bind (:map sr-mode-map
               ("j" . radian-sunrise-wdx)
               ("k" . radian-sunrise-wdx-set-or-remove)
-              ("o" . radian-sunrise-cd))
+              ("o" . radian-sunrise-cd)
+              ;; See
+              ;; https://github.com/escherdragon/sunrise-commander/issues/61.
+              ("C-e" . move-end-of-line))
   :bind* (("C-c s" . sunrise)))
 
 ;;;; Terminal emulator
