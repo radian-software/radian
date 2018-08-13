@@ -308,18 +308,14 @@ binding the variable dynamically over the entire init-file."
      :straight nil
      ,@args))
 
-;; Package `delight' provides a convenient function for customizing
-;; mode lighters. Unlike the similar package `diminish', the `delight'
-;; package handles both minor and major modes. It is supported
-;; natively by `use-package'.
-(use-package delight
-  :config
-
-  ;; Prevent `delight' from inhibiting its effects within
-  ;; `format-mode-line', since firstly we use `format-mode-line' to
-  ;; construct the mode line that's actually displayed to the user and
-  ;; secondly that behavior just plain doesn't make sense.
-  (setq inhibit-mode-name-delight nil))
+;; Package `blackout' provides a convenient function for customizing
+;; mode lighters. It supports both major and minor modes with the same
+;; interface, and includes `use-package' integration. The features are
+;; a strict superset of those provided by similar packages `diminish',
+;; `delight', and `dim'.
+(use-package blackout
+  :straight (:host github :repo "raxod502/blackout")
+  :demand t)
 
 ;;;; straight.el configuration
 
@@ -643,7 +639,7 @@ sets `completion-in-region-function' regardless of the value of
   ;; sorting in these cases.
   (setq ivy-sort-max-size 50000)
 
-  :delight (ivy-mode nil "ivy"))
+  :blackout t)
 
 ;; Package `counsel' provides purpose-built replacements for many
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
@@ -728,7 +724,7 @@ by `el-patch'."))
     :type 'string
     :group 'ivy)
 
-  :delight (counsel-mode nil "counsel"))
+  :blackout t)
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
@@ -1081,7 +1077,7 @@ Otherwise behave as if called interactively.
   (put 'projectile-indexing-method 'safe-local-variable
        #'radian--projectile-indexing-method-p)
 
-  :delight (projectile-mode nil "projectile"))
+  :blackout t)
 
 ;; Package `counsel-projectile' provides alternate versions of
 ;; Projectile commands which use Counsel.
@@ -1474,7 +1470,7 @@ newline."
       (kill-local-variable 'whitespace-style)
       (kill-local-variable 'whitespace-line-column)))
 
-  :delight (whitespace-mode nil "whitespace"))
+  :blackout t)
 
 ;; Feature `outline' provides major and minor modes for collapsing
 ;; sections of a buffer into an outline-like format.
@@ -1487,7 +1483,7 @@ newline."
 
   (global-outline-minor-mode +1)
 
-  :delight (outline-minor-mode nil "outline"))
+  :blackout outline-minor-mode)
 
 ;;;; Kill and yank
 
@@ -1568,7 +1564,7 @@ loaded since the file was changed outside of Emacs."
   ;; you to lose your undo history if you use it by accident.
   (setq undo-tree-enable-undo-in-region nil)
 
-  :delight (undo-tree-mode nil "undo-tree"))
+  :blackout t)
 
 ;;;; Navigation
 
@@ -1582,7 +1578,7 @@ loaded since the file was changed outside of Emacs."
 
   (global-subword-mode +1)
 
-  :delight (subword-mode nil "subword"))
+  :blackout t)
 
 (radian-defadvice radian--advice-allow-unpopping-mark
     (set-mark-command &optional arg)
@@ -1820,7 +1816,7 @@ the timer when no buffers need to be checked."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
-  :delight (auto-revert-mode nil "autorevert"))
+  :blackout auto-revert-mode)
 
 ;;;; Automatic delimiter pairing
 
@@ -1908,7 +1904,7 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  :delight (smartparens-mode nil "smartparens"))
+  :blackout t)
 
 ;;;; Autocompletion
 
@@ -2029,7 +2025,7 @@ backends will still be included.")
 
   (global-company-mode +1)
 
-  :delight (company-mode nil "company"))
+  :blackout t)
 
 ;; Package `company-prescient' provides intelligent sorting and
 ;; filtering for candidates in Company completions.
@@ -2067,7 +2063,7 @@ area."
     (not (and (bound-and-true-p flycheck-mode)
               (flycheck-overlay-errors-at (point)))))
 
-  :delight (eldoc-mode nil "eldoc"))
+  :blackout t)
 
 ;;;; Automatic syntax checking
 
@@ -2118,7 +2114,7 @@ nor requires Flycheck to be loaded."
   ;; Display errors in the echo area after only 0.2 seconds, not 0.9.
   (setq flycheck-display-errors-delay 0.2)
 
-  :delight (flycheck-mode nil "flycheck"))
+  :blackout t)
 
 ;;;; Indentation
 
@@ -2147,7 +2143,7 @@ nor requires Flycheck to be loaded."
 ;; Feature `abbrev' provides functionality for expanding user-defined
 ;; abbreviations. We prefer to use `yasnippet' instead, though.
 (use-feature abbrev
-  :delight (abbrev-mode nil "abbrev"))
+  :blackout t)
 
 ;; Package `yasnippet' allows the expansion of user-defined
 ;; abbreviations into fillable templates. It is also used by
@@ -2233,7 +2229,7 @@ currently active.")
       (let ((yas-keymap radian--yasnippet-then-company-keymap))
         (apply yas--make-control-overlay args))))
 
-  :delight (yas-minor-mode nil "yasnippet"))
+  :blackout yas-minor-mode)
 
 ;;; Language support
 ;;;; Text-based languages
@@ -2335,7 +2331,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; [1]: https://github.com/Sarcasm/irony-mode#configuration
   (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
 
-  :delight (irony-mode nil "irony"))
+  :blackout t)
 
 ;; Package `company-irony' provides a Company backend that uses Irony
 ;; to complete symbols. See also `company-irony-c-headers'.
@@ -2572,7 +2568,7 @@ docstrings."
   (figwheel-sidecar.repl-api/start-figwheel!)
   (figwheel-sidecar.repl-api/cljs-repl))")
 
-  :delight (cider-mode nil "cider"))
+  :blackout t)
 
 ;; Package `clj-refactor' provides automated refactoring commands for
 ;; Clojure code.
@@ -2613,7 +2609,7 @@ overwrites the message from *that* command."
   ;; context.
   (setq cljr-suppress-no-project-warning t)
 
-  :delight (clj-refactor-mode nil "clj-refactor"))
+  :blackout t)
 
 ;;;; Go
 ;; https://golang.org/
@@ -2746,9 +2742,8 @@ ARG is passed to `hindent-mode' toggle function."
   ;; Replace the mode lighters. By default they are Javascript-IDE and
   ;; JSX-IDE, which are not only improperly capitalized but also
   ;; excessively wordy.
-  :delight
-  (js2-mode "JavaScript" :major)
-  (js2-jsx-mode "JSX" :major))
+  :blackout ((js2-mode . "JavaScript")
+             (js2-jsx-mode . "JSX")))
 
 ;; Package `tern' provides a static code analyzer for JavaScript. This
 ;; includes ElDoc and jump-to-definition out of the box.
@@ -2759,7 +2754,7 @@ ARG is passed to `hindent-mode' toggle function."
 
   (add-hook 'js2-mode-hook #'tern-mode)
 
-  :delight (tern-mode nil "tern"))
+  :blackout t)
 
 ;; Package `company-tern' provides a Company backend which uses Tern.
 (use-package company-tern
@@ -2870,7 +2865,7 @@ See https://emacs.stackexchange.com/a/3338/12534."
 
   (elpy-enable)
 
-  :delight (elpy-mode nil "elpy"))
+  :blackout t)
 
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
@@ -2898,7 +2893,7 @@ https://github.com/flycheck/flycheck/issues/953."
 
   (add-hook 'ruby-mode-hook #'robe-mode)
 
-  :delight (robe-mode nil "robe"))
+  :blackout t)
 
 ;; Package `ruby-electric' allows you to have Emacs insert a paired
 ;; "end" when you type "do", and analogously for other paired
@@ -2950,7 +2945,7 @@ https://github.com/flycheck/flycheck/issues/953."
 
   (add-hook 'ruby-mode #'ruby-electric-mode)
 
-  :delight (ruby-electric-mode nil "ruby-electric"))
+  :blackout t)
 
 ;;;; Rust
 ;; https://www.rust-lang.org/
@@ -2966,7 +2961,7 @@ https://github.com/flycheck/flycheck/issues/953."
 
   (add-hook 'rust-mode #'racer-mode)
 
-  :delight (racer-mode nil "racer"))
+  :blackout t)
 
 ;;;; Scheme
 
@@ -3260,7 +3255,7 @@ several thousand errors, disable itself, and print a warning."
       (radian--flycheck-disable-checkers 'typescript-tslint)))
 
   ;; Fix capitalization. It's TypeScript, not typescript.
-  :delight (typescript-mode "TypeScript" :major))
+  :blackout "TypeScript")
 
 ;; Package `tide' provides integration with the tsserver TypeScript
 ;; language server in order to provide source navigation, a Company
@@ -3284,7 +3279,7 @@ several thousand errors, disable itself, and print a warning."
   ;; Maintain standard TypeScript indent width.
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
 
-  :delight (tide-mode nil "tide"))
+  :blackout t)
 
 ;;;; VimScript
 ;; http://vimdoc.sourceforge.net/htmldoc/usr_41.html
@@ -3373,7 +3368,7 @@ This function calls `json-mode--update-auto-mode' to change the
 (use-package pip-requirements
 
   ;; The default mode lighter is "pip-require". Ew.
-  :delight (pip-requirements-mode "Requirements" :major))
+  :blackout "Requirements")
 
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
 (use-package ssh-config-mode)
@@ -3385,7 +3380,7 @@ This function calls `json-mode--update-auto-mode' to change the
 ;; Package `toml-mode' provides a major mode for TOML.
 (use-package toml-mode
   ;; Correct the capitalization from "Toml" to "TOML".
-  :delight (toml-mode "TOML" :major))
+  :blackout "TOML")
 
 ;; Package `yaml-mode' provides a major mode for YAML.
 (use-package yaml-mode
@@ -3490,7 +3485,7 @@ unhelpful."
 
   ;; The default mode lighter has a space instead of a hyphen.
   ;; Disgusting!
-  :delight (lisp-interaction-mode "Lisp-Interaction" :major))
+  :blackout (lisp-interaction-mode . "Lisp-Interaction"))
 
 (defun radian-reload-init ()
   (interactive)
@@ -4004,7 +3999,7 @@ With prefix argument, prompt for warp point to remove."
 ;; Feature `smerge-mode' provides an interactive mode for visualizing
 ;; and resolving Git merge conflicts.
 (use-feature smerge-mode
-  :delight (smerge-mode nil "smerge-mode"))
+  :blackout t)
 
 ;; Package `with-editor' provides infrastructure for using Emacs as an
 ;; external editor for programs like Git. It is used by Magit.
@@ -4152,7 +4147,7 @@ as argument."
       (magit-gh-pulls-requests-cached-p
        (magit-gh-pulls-get-api) (car repo) (cdr repo))))
 
-  :delight (magit-gh-pulls-mode nil "magit-gh-pulls"))
+  :blackout t)
 
 ;; Package `git-commit' allows you to use Emacsclient as a Git commit
 ;; message editor, providing syntax highlighting and using
