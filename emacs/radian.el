@@ -2114,6 +2114,11 @@ nor requires Flycheck to be loaded."
   ;; Display errors in the echo area after only 0.2 seconds, not 0.9.
   (setq flycheck-display-errors-delay 0.2)
 
+  :config
+
+  (radian-bind-key "p" #'flycheck-previous-error)
+  (radian-bind-key "n" #'flycheck-next-error)
+
   :blackout t)
 
 ;;;; Indentation
