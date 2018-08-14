@@ -3839,6 +3839,10 @@ non-nil value to enable trashing for file operations."
 
 ;; Feature `dired' provides a simplistic filesystem manager in Emacs.
 (use-feature dired
+  :bind (:map dired-mode-map
+              ;; This binding is way nicer than ^. It's inspired by
+              ;; Sunrise Commander.
+              ("J" . dired-up-directory))
   :config
 
   (radian-defadvice radian-advice-dired-check-for-ls-dired (&rest _)
