@@ -349,6 +349,7 @@ fi
 if command -v wdx &>/dev/null; then
     alias wd='wdx'
     alias ws='wdx set'
+    alias wsf='wdx set -f'
 fi
 
 ### Filesystem management
