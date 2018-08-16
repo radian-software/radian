@@ -3920,7 +3920,7 @@ are probably not going to be installed."
   (defun radian--wdx-location ()
     "Return the path to the wdx binary.
 Signal an error if it doesn't exist."
-    (let ((path "~/.zplug/repos/raxod502/wdx/bin/wdx"))
+    (let ((path "~/.zplugin/plugins/raxod502---wdx/bin/wdx"))
       (if (file-executable-p path)
           path
         (user-error "wdx is not installed"))))
