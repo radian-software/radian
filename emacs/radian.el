@@ -1059,13 +1059,6 @@ Otherwise behave as if called interactively.
   :defer 1
   :config
 
-  (radian-defadvice radian--projectile-silence-cleanup (orig-func &rest args)
-    :around projectile--cleanup-known-projects
-    "Eliminate useless messages from `projectile--cleanup-known-projects'."
-    (let ((inhibit-message t)
-          (message-log-max nil))
-      (apply orig-func args)))
-
   ;; Enable the mode again now that we have all the supporting hooks
   ;; and stuff defined.
   (projectile-mode +1)
