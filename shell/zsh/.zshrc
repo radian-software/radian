@@ -147,16 +147,14 @@ fi
 
 ### Command line
 
-# When no arguments are provided to "." or "source", they default to
-# sourcing .zshrc. Based on [1], thanks @PythonNut!
+# Allow a very fast way (just typing ".") to reload the shell
+# configuration. Based on [1].
 #
-# [1]: http://unix.stackexchange.com/a/326948/176805
+# [1]: https://unix.stackexchange.com/a/326948/176805
 function _accept-line {
     emulate -LR zsh
     if [[ $BUFFER == "." ]]; then
-        BUFFER=". ~/.zshrc"
-    elif [[ $BUFFER == "source" ]]; then
-        BUFFER="source ~/.zshrc"
+        BUFFER="exec zsh"
     fi
     zle .accept-line
 }
