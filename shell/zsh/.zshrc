@@ -1,5 +1,4 @@
-## Preliminary configuration
-### Radian repository
+## Locate Radian repository
 
 # Set $RADIAN to the location of the Radian repository, if found.
 if [[ -L $0 && -d ${0:A:h}/radian-emacs ]]; then
@@ -7,47 +6,6 @@ if [[ -L $0 && -d ${0:A:h}/radian-emacs ]]; then
 else
     unset RADIAN
 fi
-
-### zplug configuration
-
-# Identify the location of zplug.
-if [[ $OSTYPE == darwin* ]]; then
-    export ZPLUG_INSTALL=/usr/local/opt/zplug
-else
-    export ZPLUG_INSTALL=/usr/share/zsh/scripts/zplug
-fi
-
-### Plugin list
-
-RADIAN_PLUGINS=(
-    # Quickly jump to directories.
-    "raxod502/wdx"
-    # Display autosuggestions from history.
-    "zsh-users/zsh-autosuggestions"
-    # Completion definitions for lots of additional commands.
-    "zsh-users/zsh-completions"
-)
-
-# Usage: radian_add_plugin <zplug-args>
-#
-# Add a plugin to $RADIAN_PLUGINS. Word splitting will be performed on
-# zplug-args to determine the arguments that will be passed to zplug.
-function radian_add_plugin {
-    emulate -LR zsh
-    if ! (( ${RADIAN_PLUGINS[(I)$1]} )); then
-        RADIAN_PLUGINS+=($1)
-    fi
-}
-
-# Usage: radian_remove_plugin <zplug-args>
-#
-# Remove a plugin from $RADIAN_PLUGINS by name. The name should be
-# exactly the same as it appears in $plugins, with spaces if
-# necessary.
-function radian_remove_plugin {
-    emulate -LR zsh
-    RADIAN_PLUGINS=("${(@)RADIAN_PLUGINS:#$1}")
-}
 
 ## External configuration
 ### ~/.zshrc.local
@@ -62,20 +20,25 @@ if [[ -f ~/.profile ]]; then
     . ~/.profile
 fi
 
-## zplug
+## zplugin
 
-if [[ -f $ZPLUG_INSTALL/init.zsh ]]; then
-    . $ZPLUG_INSTALL/init.zsh
+if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
 
-    for plugin in $RADIAN_PLUGINS; do
-        zplug $=plugin
-    done
+    # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
+    . ~/.zplugin/bin/zplugin.zsh
+    autoload -Uz _zplugin
+    (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
-    if ! zplug check; then
-        zplug install
-    fi
+    # Provides the 'wdx' function to set warp points to directories
+    # and quickly jump to them.
+    zplugin light raxod502/wdx
 
-    zplug load
+    # If a previous command starts with what you have typed, show it
+    # in dimmied color after the cursor, and allow completing it.
+    zplugin light zsh-users/zsh-autosuggestions
+
+    # Configure tab-completions for many external commands.
+    zplugin light zsh-users/zsh-completions
 fi
 
 ## Shell configuration
