@@ -38,7 +38,14 @@ if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
     zplugin light zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
+    #
+    # Not sure exactly what the blockf does here, but it's used in the
+    # docs for zplugin so...
+    zplugin ice blockf
     zplugin light zsh-users/zsh-completions
+
+    autoload -Uz compinit
+    compinit
 fi
 
 ## Shell configuration
