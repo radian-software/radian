@@ -3768,10 +3768,6 @@ This makes the behavior of `find-file' more reasonable."
 
   :config
 
-  ;; Don't record a clock entry if you clocked out in less than one
-  ;; minute.
-  (setq org-clock-out-remove-zero-time-clocks t)
-
   (defun radian--advice-org-clock-load-automatically (&rest _)
     "Run `org-clock-load'.
 This is a `:before' advice for various Org functions which might
