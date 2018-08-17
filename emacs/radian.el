@@ -1682,8 +1682,10 @@ argument."
 ;; Package `swiper' provides an alternative to `isearch' which instead
 ;; uses `ivy' to display and select from the results.
 (use-package swiper
-  :bind (([remap isearch-forward] . swiper)
-         ([remap isearch-backward] . swiper))
+  :init
+
+  (radian-bind-key "g" #'swiper)
+
   :config
 
   ;; Use only one color for subgroups in Swiper highlighting.
