@@ -3718,7 +3718,13 @@ This makes the behavior of `find-file' more reasonable."
   ;; since it causes both `org' and `org-clock' to be loaded for no
   ;; good reason.
   (add-hook 'org-mode-hook 'org-clock-load)
-  (add-hook 'kill-emacs-hook 'org-clock-save)
+  (radian-defhook radian--org-clock-save ()
+    kill-emacs-hook
+    "Run `org-clock-save', but only if Org has been loaded.
+Using this on `kill-emacs-hook' instead of `org-clock-save'
+prevents a delay on killing Emacs when Org was not yet loaded."
+    (when (featurep 'org)
+      (org-clock-save)))
 
   :bind* (;; Make some `org-mode-map' bindings global instead.
           ("C-c C-x C-i" . org-clock-in)
