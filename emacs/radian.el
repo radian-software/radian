@@ -2843,7 +2843,7 @@ See https://emacs.stackexchange.com/a/3338/12534."
     (setq python-shell-interpreter "python3"))
    ((executable-find "python2")
     (setq python-shell-interpreter "python2"))
-   (_
+   (t
     (setq python-shell-interpreter "python"))))
 
 ;; Package `elpy' provides a language server for Python, including
