@@ -1679,6 +1679,16 @@ argument."
   ;; Python-style.
   (setq vr/engine 'emacs))
 
+;; Feature `isearch' provides a basic and fast mechanism for jumping
+;; forward or backward to occurrences of a given search string.
+(use-feature isearch
+  :config
+
+  ;; Eliminate the 0.25s idle delay for isearch highlighting, as in my
+  ;; opinion it usually produces a rather disjointed and distracting
+  ;; UX.
+  (setq isearch-lazy-highlight-initial-delay 0))
+
 ;; Package `swiper' provides an alternative to `isearch' which instead
 ;; uses `ivy' to display and select from the results.
 (use-package swiper
