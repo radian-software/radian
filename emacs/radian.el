@@ -4494,7 +4494,7 @@ with which Emacs should be "
 This is passed to `set-frame-font'."
   :type '(choice string (const :tag "Default" nil)))
 
-(defcustom radian-font-size 140
+(defcustom radian-font-size nil
   "Default font size, in pixels. Nil means use the default."
   :type '(choice integer (const :tag "Default" nil)))
 
