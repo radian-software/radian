@@ -3715,6 +3715,12 @@ This makes the behavior of `find-file' more reasonable."
                                default-directory)))
       (apply org-agenda args)))
 
+  (radian-defadvice radian--advice-blackout-org-agenda
+      (&rest _)
+    :override org-agenda-set-mode-name
+    "Override the `org-agenda' mode lighter to just \"Org-Agenda\"."
+    "Org-Agenda")
+
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
 
