@@ -27,6 +27,15 @@
                             radian-lib-file)))
   "Path to the Radian Git repository.")
 
+(defmacro radian-protect-macros (&rest body)
+  "Eval BODY, protecting macros from incorrect expansion.
+Any code in a `with-eval-after-load' form that uses macros
+defined in the form being `with-eval-after-load'ed should be
+wrapped in this macro; otherwise, its correct evaluation is not
+guaranteed by Elisp."
+  (declare (indent 0))
+  `(eval '(progn ,@body)))
+
 (defmacro radian-defadvice (name arglist where place docstring &rest body)
   "Define an advice called NAME and add it to a function.
 ARGLIST is as in `defun'. WHERE is a keyword as passed to
@@ -2477,16 +2486,14 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; Ideally, we would be able to set the identation rules for *all*
   ;; keywords at the same time. But until we figure out how to do
   ;; that, we just have to deal with every keyword individually. See
-  ;; https://github.com/raxod502/radian/issues/26. Avoid using
-  ;; `define-clojure-indent' because it's a macro defined in the
-  ;; package, so we would have to `el-patch' it to use it here
-  ;; correctly.
-  (dolist (spec '((-> 1)
-                  (->> 1)
-                  (:import 0)
-                  (:require 0)
-                  (:use 0)))
-    (apply #'put-clojure-indent spec))
+  ;; https://github.com/raxod502/radian/issues/26.
+  (radian-protect-macros
+    (define-clojure-indent
+      (-> 1)
+      (->> 1)
+      (:import 0)
+      (:require 0)
+      (:use 0)))
 
   (define-minor-mode radian-clojure-strings-as-docstrings-mode
     "Treat all Clojure strings as docstrings.
