@@ -2417,7 +2417,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; `radian-clojure-strings-as-docstrings-mode' minor mode.
 
   (defsubst (el-patch-swap clojure-in-docstring-p
-                                    radian--clojure-in-string-p)
+                           radian--clojure-in-string-p)
     ()
     (el-patch-concat
       "Check whether point is in "
@@ -2434,7 +2434,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
 
   (defun (el-patch-swap clojure-indent-line
                         radian--advice-clojure-strings-as-docstrings)
-    ()
+      ()
     (el-patch-concat
       "Indent current line as Clojure code."
       (el-patch-add
@@ -4799,7 +4799,8 @@ spaces."
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
 (setq-default mode-line-format
-              '(:eval (replace-regexp-in-string "%" "%%"
+              '(:eval (replace-regexp-in-string
+                       "%" "%%"
                        (radian--mode-line-align
                         (format-mode-line radian--mode-line-left)
                         (format-mode-line radian--mode-line-right))
