@@ -4001,7 +4001,13 @@ With prefix argument, prompt for warp point to remove."
               ;; See
               ;; https://github.com/escherdragon/sunrise-commander/issues/61.
               ("C-e" . move-end-of-line))
-  :bind* (("C-c s" . sunrise)))
+  :bind* (("C-c s" . sunrise))
+  :config
+
+  ;; Prevent Sunrise Commander from doing anything when you move the
+  ;; mouse. Otherwise it becomes rather annoying when you have to move
+  ;; the mouse across the Emacs frame.
+  (setq sr-cursor-follows-mouse nil))
 
 ;;;; Terminal emulator
 
