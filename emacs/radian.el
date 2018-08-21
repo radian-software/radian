@@ -395,11 +395,7 @@ binding the variable dynamically over the entire init-file."
   :straight (:host github
                    :repo "raxod502/el-patch"
                    :branch "develop")
-  :demand t
-  :config
-
-  ;; When patching variable definitions, override the original values.
-  (setq el-patch-use-aggressive-defvar t))
+  :demand t)
 
 ;;; Keybindings
 
