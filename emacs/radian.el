@@ -922,6 +922,12 @@ split."
 (use-package projectile
   :init/el-patch
 
+  ;; We customize this because C-c C-p p is one of the most stupidly
+  ;; unergonomic bindings for a common operation that I've ever seen.
+  ;; And we do it up here because it needs to happen before the
+  ;; `el-patch-defvar' of `projectile-mode-map' below.
+  (setq projectile-keymap-prefix (kbd "C-c p"))
+
   (defgroup projectile nil
     "Manage and navigate projects easily."
     :group 'tools
@@ -1047,8 +1053,6 @@ Otherwise behave as if called interactively.
         (ad-deactivate 'delete-file)))))
 
   :init
-
-  (setq projectile-keymap-prefix (kbd "C-c p"))
 
   (projectile-mode +1)
 
