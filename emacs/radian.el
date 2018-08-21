@@ -3407,13 +3407,13 @@ This function calls `json-mode--update-auto-mode' to change the
               ("M-k" . radian-describe-keymap))
   :config
 
-  (radian-defadvice radian-advice-help-inhibit-hints (&rest _)
+  (radian-defadvice radian--advice-help-inhibit-hints (&rest _)
     :override help-window-display-message
     "Inhibit the \"Type q in help window to delete it\" hints.
 Normally these are printed in the echo area whenever you open a
 help buffer.")
 
-  (radian-defadvice radian-advice-help-disable-revert-prompt
+  (radian-defadvice radian--advice-help-disable-revert-prompt
       (help-mode-revert-buffer ignore-auto _noconfirm)
     :around help-mode-revert-buffer
     "Don't ask for confirmation before reverting help buffers.
@@ -3852,7 +3852,7 @@ non-nil value to enable trashing for file operations."
               ("J" . dired-up-directory))
   :config
 
-  (radian-defadvice radian-advice-dired-check-for-ls-dired (&rest _)
+  (radian-defadvice radian--advice-dired-check-for-ls-dired (&rest _)
     :before dired-insert-directory
     "Check if ls --dired is supported ahead of time, and silently.
 
