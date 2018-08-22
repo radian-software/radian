@@ -307,11 +307,14 @@ binding the variable dynamically over the entire init-file."
      :straight nil
      ,@args))
 
-;; Package `delight' provides a convenient function for customizing
-;; mode lighters. Unlike the similar package `diminish', the `delight'
-;; package handles both minor and major modes. It is supported
-;; natively by `use-package'.
-(use-package delight)
+;; Package `blackout' provides a convenient function for customizing
+;; mode lighters. It supports both major and minor modes with the same
+;; interface, and includes `use-package' integration. The features are
+;; a strict superset of those provided by similar packages `diminish',
+;; `delight', and `dim'.
+(use-package blackout
+  :straight (:host github :repo "raxod502/blackout")
+  :demand t)
 
 ;;;; straight.el configuration
 
@@ -637,7 +640,7 @@ sets `completion-in-region-function' regardless of the value of
   ;; sorting in these cases.
   (setq ivy-sort-max-size 50000)
 
-  :delight (ivy-mode nil "ivy"))
+  :blackout t)
 
 ;; Package `counsel' provides purpose-built replacements for many
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
@@ -722,7 +725,7 @@ by `el-patch'."))
     :type 'string
     :group 'ivy)
 
-  :delight (counsel-mode nil "counsel"))
+  :blackout t)
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
@@ -932,7 +935,7 @@ split."
     :link '(url-link :tag "Online Manual" "https://projectile.readthedocs.io/")
     :link '(emacs-commentary-link :tag "Commentary" "projectile"))
 
-  (defcustom projectile-keymap-prefix (kbd "C-c p")
+  (defcustom projectile-keymap-prefix (kbd "C-c C-p")
     "Projectile keymap prefix."
     :group 'projectile
     :type 'string)
@@ -989,6 +992,7 @@ split."
       (define-key map (kbd "v") #'projectile-vc)
       (define-key map (kbd "V") #'projectile-browse-dirty-projects)
       (define-key map (kbd "x e") #'projectile-run-eshell)
+      (define-key map (kbd "x i") #'projectile-run-ielm)
       (define-key map (kbd "x t") #'projectile-run-term)
       (define-key map (kbd "x s") #'projectile-run-shell)
       (define-key map (kbd "z") #'projectile-cache-current-file)
@@ -1033,7 +1037,7 @@ Otherwise behave as if called interactively.
           (setq projectile-projects-cache-time
                 (make-hash-table :test 'equal)))
         ;; update the list of known projects
-        (projectile-cleanup-known-projects)
+        (projectile--cleanup-known-projects)
         (projectile-discover-projects-in-search-path)
         (add-hook 'find-file-hook 'projectile-find-file-hook-function)
         (add-hook 'projectile-find-dir-hook #'projectile-track-known-projects-find-file-hook t)
@@ -1049,14 +1053,16 @@ Otherwise behave as if called interactively.
 
   :init
 
+  (setq projectile-keymap-prefix (kbd "C-c p"))
+
   (projectile-mode +1)
 
   :defer 1
   :config
 
   (radian-defadvice radian--projectile-silence-cleanup (orig-func &rest args)
-    :around projectile-cleanup-known-projects
-    "Eliminate useless messages from `projectile-cleanup-known-projects'."
+    :around projectile--cleanup-known-projects
+    "Eliminate useless messages from `projectile--cleanup-known-projects'."
     (let ((inhibit-message t)
           (message-log-max nil))
       (apply orig-func args)))
@@ -1072,7 +1078,7 @@ Otherwise behave as if called interactively.
   (put 'projectile-indexing-method 'safe-local-variable
        #'radian--projectile-indexing-method-p)
 
-  :delight (projectile-mode nil "projectile"))
+  :blackout t)
 
 ;; Package `counsel-projectile' provides alternate versions of
 ;; Projectile commands which use Counsel.
@@ -1083,7 +1089,8 @@ Otherwise behave as if called interactively.
     (let ((map (make-sparse-keymap)))
       (set-keymap-parent map projectile-command-map)
       (define-key map (kbd "s r") 'counsel-projectile-rg)
-      (define-key map (kbd "O") 'counsel-projectile-org-capture)
+      (define-key map (kbd "O c") 'counsel-projectile-org-capture)
+      (define-key map (kbd "O a") 'counsel-projectile-org-agenda)
       (define-key map (kbd "SPC") 'counsel-projectile)
       map)
     "Keymap for Counesl-Projectile commands after `projectile-keymap-prefix'.")
@@ -1464,7 +1471,7 @@ newline."
       (kill-local-variable 'whitespace-style)
       (kill-local-variable 'whitespace-line-column)))
 
-  :delight (whitespace-mode nil "whitespace"))
+  :blackout t)
 
 ;; Feature `outline' provides major and minor modes for collapsing
 ;; sections of a buffer into an outline-like format.
@@ -1477,7 +1484,7 @@ newline."
 
   (global-outline-minor-mode +1)
 
-  :delight (outline-minor-mode nil "outline"))
+  :blackout outline-minor-mode)
 
 ;;;; Kill and yank
 
@@ -1558,7 +1565,7 @@ loaded since the file was changed outside of Emacs."
   ;; you to lose your undo history if you use it by accident.
   (setq undo-tree-enable-undo-in-region nil)
 
-  :delight (undo-tree-mode nil "undo-tree"))
+  :blackout t)
 
 ;;;; Navigation
 
@@ -1572,7 +1579,7 @@ loaded since the file was changed outside of Emacs."
 
   (global-subword-mode +1)
 
-  :delight (subword-mode nil "subword"))
+  :blackout t)
 
 (radian-defadvice radian--advice-allow-unpopping-mark
     (set-mark-command &optional arg)
@@ -1650,17 +1657,6 @@ argument."
   ;; Show the whole key sequence even when matches are right next to
   ;; each other.
   (setq avy-style 'de-bruijn))
-
-;; Feature `xref' provides a framework for jumping to definitions of
-;; symbols.
-(use-feature xref
-  :config
-
-  ;; When using M-. and friends, always prompt for the identifier (it
-  ;; defaults to the identifier at point). This behavior is more
-  ;; consistent and predictable than the default, which is to jump
-  ;; immediately if there is a valid symbol at point.
-  (setq xref-prompt-for-identifier t))
 
 ;; Feature `bookmark' provides a way to mark places in a buffer. I
 ;; don't use it, but some other packages do.
@@ -1821,7 +1817,7 @@ the timer when no buffers need to be checked."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
-  :delight (auto-revert-mode nil "autorevert"))
+  :blackout auto-revert-mode)
 
 ;;;; Automatic delimiter pairing
 
@@ -1909,7 +1905,7 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  :delight (smartparens-mode nil "smartparens"))
+  :blackout t)
 
 ;;;; Autocompletion
 
@@ -2030,7 +2026,7 @@ backends will still be included.")
 
   (global-company-mode +1)
 
-  :delight (company-mode nil "company"))
+  :blackout t)
 
 ;; Package `company-prescient' provides intelligent sorting and
 ;; filtering for candidates in Company completions.
@@ -2056,7 +2052,19 @@ backends will still be included.")
   ;; variable with a multiline docstring.
   (setq eldoc-echo-area-use-multiline-p nil)
 
-  :delight (eldoc-mode nil "eldoc"))
+  ;; Original code from
+  ;; https://github.com/PythonNut/emacs-config/blob/1a92a1ff1d563fa6a9d7281bbcaf85059c0c40d4/modules/config-intel.el#L130-L137,
+  ;; thanks!
+  (radian-defadvice radian--advice-disable-eldoc-on-flycheck
+      (&rest _)
+    :after-while eldoc-display-message-no-interference-p
+    "Disable ElDoc when point is on a Flycheck overlay.
+This prevents ElDoc and Flycheck from fighting over the echo
+area."
+    (not (and (bound-and-true-p flycheck-mode)
+              (flycheck-overlay-errors-at (point)))))
+
+  :blackout t)
 
 ;;;; Automatic syntax checking
 
@@ -2104,7 +2112,15 @@ nor requires Flycheck to be loaded."
   ;; config file.
   (setq flycheck-buffer-switch-check-intermediate-buffers t)
 
-  :delight (flycheck-mode nil "flycheck"))
+  ;; Display errors in the echo area after only 0.2 seconds, not 0.9.
+  (setq flycheck-display-errors-delay 0.2)
+
+  :config
+
+  (radian-bind-key "p" #'flycheck-previous-error)
+  (radian-bind-key "n" #'flycheck-next-error)
+
+  :blackout t)
 
 ;;;; Indentation
 
@@ -2133,7 +2149,7 @@ nor requires Flycheck to be loaded."
 ;; Feature `abbrev' provides functionality for expanding user-defined
 ;; abbreviations. We prefer to use `yasnippet' instead, though.
 (use-feature abbrev
-  :delight (abbrev-mode nil "abbrev"))
+  :blackout t)
 
 ;; Package `yasnippet' allows the expansion of user-defined
 ;; abbreviations into fillable templates. It is also used by
@@ -2219,7 +2235,7 @@ currently active.")
       (let ((yas-keymap radian--yasnippet-then-company-keymap))
         (apply yas--make-control-overlay args))))
 
-  :delight (yas-minor-mode nil "yasnippet"))
+  :blackout yas-minor-mode)
 
 ;;; Language support
 ;;;; Text-based languages
@@ -2321,7 +2337,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; [1]: https://github.com/Sarcasm/irony-mode#configuration
   (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
 
-  :delight (irony-mode nil "irony"))
+  :blackout t)
 
 ;; Package `company-irony' provides a Company backend that uses Irony
 ;; to complete symbols. See also `company-irony-c-headers'.
@@ -2558,7 +2574,7 @@ docstrings."
   (figwheel-sidecar.repl-api/start-figwheel!)
   (figwheel-sidecar.repl-api/cljs-repl))")
 
-  :delight (cider-mode nil "cider"))
+  :blackout t)
 
 ;; Package `clj-refactor' provides automated refactoring commands for
 ;; Clojure code.
@@ -2599,7 +2615,7 @@ overwrites the message from *that* command."
   ;; context.
   (setq cljr-suppress-no-project-warning t)
 
-  :delight (clj-refactor-mode nil "clj-refactor"))
+  :blackout t)
 
 ;;;; Go
 ;; https://golang.org/
@@ -2732,9 +2748,8 @@ ARG is passed to `hindent-mode' toggle function."
   ;; Replace the mode lighters. By default they are Javascript-IDE and
   ;; JSX-IDE, which are not only improperly capitalized but also
   ;; excessively wordy.
-  :delight
-  (js2-mode "JavaScript" :major)
-  (js2-jsx-mode "JSX" :major))
+  :blackout ((js2-mode . "JavaScript")
+             (js2-jsx-mode . "JSX")))
 
 ;; Package `tern' provides a static code analyzer for JavaScript. This
 ;; includes ElDoc and jump-to-definition out of the box.
@@ -2745,7 +2760,7 @@ ARG is passed to `hindent-mode' toggle function."
 
   (add-hook 'js2-mode-hook #'tern-mode)
 
-  :delight (tern-mode nil "tern"))
+  :blackout t)
 
 ;; Package `company-tern' provides a Company backend which uses Tern.
 (use-package company-tern
@@ -2823,28 +2838,40 @@ See https://emacs.stackexchange.com/a/3338/12534."
                      flycheck-python-pycompile-executable
                      flycheck-python-pylint-executable))
         (make-local-variable var)
-        (set var executable)))))
+        (set var executable))))
 
-;; Package `anaconda-mode' provides a language server which uses the
-;; (Python) Jedi package to support symbol autocompletion and source
-;; location.
-(use-package anaconda-mode
-  :hook python-mode
+  ;; Default to Python 3. Prefer the versioned Python binaries since
+  ;; there was this one time where Homebrew decided not to install an
+  ;; unversioned binary and then /usr/bin/python was first on the
+  ;; PATH.
+  (cond
+   ((executable-find "python3")
+    (setq python-shell-interpreter "python3"))
+   ((executable-find "python2")
+    (setq python-shell-interpreter "python2"))
+   (_
+    (setq python-shell-interpreter "python"))))
 
-  :delight (anaconda-mode nil "anaconda-mode"))
-
-;; Package `company-anaconda' provides a Company backend that uses
-;; Anaconda.
-(use-package company-anaconda
+;; Package `elpy' provides a language server for Python, including
+;; integration with most other packages that need to draw information
+;; from it (e.g. Company).
+(use-package elpy
   :demand t
-  :after (:all company anaconda-mode)
+  :after python
   :config
 
-  (radian-defhook radian--company-anaconda-setup ()
-    anaconda-mode-hook
-    "Configure Company to use Anaconda as a backend."
-    (setq-local company-backends (cons #'company-anaconda
-                                       radian--company-backends-global))))
+  ;; Don't highlight indentation levels, as it looks rather weird.
+  (setq elpy-modules (remq 'elpy-module-highlight-indentation elpy-modules))
+
+  ;; Don't use Flymake, since we use Flycheck instead.
+  (setq elpy-modules (remq 'elpy-module-flymake elpy-modules))
+
+  ;; Use the correct version of Python.
+  (setq elpy-rpc-python-command python-shell-interpreter)
+
+  (elpy-enable)
+
+  :blackout t)
 
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
@@ -2872,7 +2899,7 @@ https://github.com/flycheck/flycheck/issues/953."
 
   (add-hook 'ruby-mode-hook #'robe-mode)
 
-  :delight (robe-mode nil "robe"))
+  :blackout t)
 
 ;; Package `ruby-electric' allows you to have Emacs insert a paired
 ;; "end" when you type "do", and analogously for other paired
@@ -2924,7 +2951,7 @@ https://github.com/flycheck/flycheck/issues/953."
 
   (add-hook 'ruby-mode #'ruby-electric-mode)
 
-  :delight (ruby-electric-mode nil "ruby-electric"))
+  :blackout t)
 
 ;;;; Rust
 ;; https://www.rust-lang.org/
@@ -2940,7 +2967,7 @@ https://github.com/flycheck/flycheck/issues/953."
 
   (add-hook 'rust-mode #'racer-mode)
 
-  :delight (racer-mode nil "racer"))
+  :blackout t)
 
 ;;;; Scheme
 
@@ -3234,7 +3261,7 @@ several thousand errors, disable itself, and print a warning."
       (radian--flycheck-disable-checkers 'typescript-tslint)))
 
   ;; Fix capitalization. It's TypeScript, not typescript.
-  :delight (typescript-mode "TypeScript" :major))
+  :blackout "TypeScript")
 
 ;; Package `tide' provides integration with the tsserver TypeScript
 ;; language server in order to provide source navigation, a Company
@@ -3258,7 +3285,7 @@ several thousand errors, disable itself, and print a warning."
   ;; Maintain standard TypeScript indent width.
   (setq tide-format-options '(:indentSize 2 :tabSize 2))
 
-  :delight (tide-mode nil "tide"))
+  :blackout t)
 
 ;;;; VimScript
 ;; http://vimdoc.sourceforge.net/htmldoc/usr_41.html
@@ -3347,7 +3374,7 @@ This function calls `json-mode--update-auto-mode' to change the
 (use-package pip-requirements
 
   ;; The default mode lighter is "pip-require". Ew.
-  :delight (pip-requirements-mode "Requirements" :major))
+  :blackout "Requirements")
 
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
 (use-package ssh-config-mode)
@@ -3359,7 +3386,7 @@ This function calls `json-mode--update-auto-mode' to change the
 ;; Package `toml-mode' provides a major mode for TOML.
 (use-package toml-mode
   ;; Correct the capitalization from "Toml" to "TOML".
-  :delight (toml-mode "TOML" :major))
+  :blackout "TOML")
 
 ;; Package `yaml-mode' provides a major mode for YAML.
 (use-package yaml-mode
@@ -3464,7 +3491,7 @@ unhelpful."
 
   ;; The default mode lighter has a space instead of a hyphen.
   ;; Disgusting!
-  :delight (lisp-interaction-mode "Lisp-Interaction" :major))
+  :blackout (lisp-interaction-mode . "Lisp-Interaction"))
 
 (defun radian-reload-init ()
   (interactive)
@@ -3507,7 +3534,11 @@ to `radian-reload-init'."
 (defun radian-find-symbol (&optional symbol)
   "Same as `xref-find-definitions' but only for Elisp symbols."
   (interactive)
-  (let ((xref-backend-functions '(elisp--xref-backend)))
+  (let ((xref-backend-functions '(elisp--xref-backend))
+        ;; Make this command behave the same as `find-function' and
+        ;; `find-variable', i.e. always prompt for an identifier,
+        ;; defaulting to the one at point.
+        (xref-prompt-for-identifier t))
     (if symbol
         (xref-find-definitions symbol)
       (call-interactively 'xref-find-definitions))))
@@ -3756,7 +3787,8 @@ be invoked before `org-mode-hook' is run."
   (dolist (fun '(org-clock-in
                  org-clock-out
                  org-clock-in-last
-                 org-clock-goto))
+                 org-clock-goto
+                 org-clock-cancel))
     (advice-add fun :before #'radian--advice-org-clock-load-automatically)))
 
 ;;;; Filesystem management
@@ -3808,6 +3840,10 @@ non-nil value to enable trashing for file operations."
 
 ;; Feature `dired' provides a simplistic filesystem manager in Emacs.
 (use-feature dired
+  :bind (:map dired-mode-map
+              ;; This binding is way nicer than ^. It's inspired by
+              ;; Sunrise Commander.
+              ("J" . dired-up-directory))
   :config
 
   (radian-defadvice radian-advice-dired-check-for-ls-dired (&rest _)
@@ -3942,7 +3978,10 @@ With prefix argument, prompt for warp point to remove."
   :bind (:map sr-mode-map
               ("j" . radian-sunrise-wdx)
               ("k" . radian-sunrise-wdx-set-or-remove)
-              ("o" . radian-sunrise-cd))
+              ("o" . radian-sunrise-cd)
+              ;; See
+              ;; https://github.com/escherdragon/sunrise-commander/issues/61.
+              ("C-e" . move-end-of-line))
   :bind* (("C-c s" . sunrise)))
 
 ;;;; Terminal emulator
@@ -3970,7 +4009,7 @@ With prefix argument, prompt for warp point to remove."
 ;; Feature `smerge-mode' provides an interactive mode for visualizing
 ;; and resolving Git merge conflicts.
 (use-feature smerge-mode
-  :delight (smerge-mode nil "smerge-mode"))
+  :blackout t)
 
 ;; Package `with-editor' provides infrastructure for using Emacs as an
 ;; external editor for programs like Git. It is used by Magit.
@@ -4045,8 +4084,9 @@ as argument."
                 (memq magit-credential-cache-daemon-process
                       (list-system-processes)))
       (setq magit-credential-cache-daemon-process
-            (or (--first (-let (((&alist 'comm comm 'user user)
-                                 (process-attributes it)))
+            (or (--first (let* ((attr (process-attributes it))
+                                (comm (cdr (assq 'comm attr)))
+                                (user (cdr (assq 'user attr))))
                            (and (string= comm "git-credential-cache--daemon")
                                 (string= user user-login-name)))
                          (list-system-processes))
@@ -4117,7 +4157,7 @@ as argument."
       (magit-gh-pulls-requests-cached-p
        (magit-gh-pulls-get-api) (car repo) (cdr repo))))
 
-  :delight (magit-gh-pulls-mode nil "magit-gh-pulls"))
+  :blackout t)
 
 ;; Package `git-commit' allows you to use Emacsclient as a Git commit
 ;; message editor, providing syntax highlighting and using
@@ -4267,8 +4307,6 @@ This only works on macOS currently."
 ;; profiling functionality, and to collect timing results for each
 ;; form in your init-file.
 (use-package esup
-  :straight (:host github :repo "raxod502/esup" :branch "fork/2"
-                   :upstream (:host github :repo "jschaf/esup"))
   :config
 
   ;; Work around a bug where esup tries to step into the byte-compiled
@@ -4724,22 +4762,42 @@ the former is shown.")
 
 (radian-show-git-global-mode +1)
 
+;; https://emacs.stackexchange.com/a/7542/12534
+(defun radian--mode-line-align (left right)
+  "Render a left/right aligned string for the mode line.
+LEFT and RIGHT are strings, and the return value is a string that
+displays them left- and right-aligned respectively, separated by
+spaces."
+  (let ((width (- (window-width) (length left))))
+    (format (format "%%s%%%ds" width) left right)))
+
+(defvar radian--mode-line-left
+  '(;; Show [*] if the buffer is modified.
+    (:eval (radian--mode-line-buffer-modified-status))
+    " "
+    ;; Show the name of the current buffer.
+    mode-line-buffer-identification
+    "   "
+    ;; Show the row and column of point.
+    mode-line-position
+    ;; Show the current Projectile project and Git branch.
+    radian--mode-line-project-and-branch
+    ;; Show the active major and minor modes.
+    "  "
+    mode-line-modes)
+  "Composite mode line construct to be shown left-aligned.")
+
+(defvar radian--mode-line-right nil
+  "Composite mode line construct to be shown right-aligned.")
+
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
 (setq-default mode-line-format
-              '(;; Show [*] if the buffer is modified.
-                (:eval (radian--mode-line-buffer-modified-status))
-                " "
-                ;; Show the name of the current buffer.
-                mode-line-buffer-identification
-                "   "
-                ;; Show the row and column of point.
-                mode-line-position
-                ;; Show the current Projectile project and Git branch.
-                radian--mode-line-project-and-branch
-                ;; Show the active major and minor modes.
-                "  "
-                mode-line-modes))
+              '(:eval (replace-regexp-in-string "%" "%%"
+                       (radian--mode-line-align
+                        (format-mode-line radian--mode-line-left)
+                        (format-mode-line radian--mode-line-right))
+                       'fixedcase 'literal)))
 
 ;;;; Color theme
 
