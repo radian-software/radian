@@ -2,13 +2,15 @@
 
 ## Summary
 
-I write my dotfiles with an eye to:
+These dotfiles attempt to achieve the following goals:
 
-* extensive documentation and commentary in the code
-* harnessing the full power of software while staying true to its
-  original spirit (and keybindings, usually)
-* first-class support for local customization without the need for
-  forking (when this is possible)
+* aggressively using best practices, or creating them if none exist
+  already
+* extensively documenting and commenting all code
+* remaining as simple as possible while maximizing usability (in
+  particular, not rebinding keys unnecessarily)
+* supporting local configuration without the need to fork this
+  repository (my local Emacs configuration is almost 500 lines)
 
 ## Software configured, features
 
@@ -22,38 +24,36 @@ I write my dotfiles with an eye to:
     * Informative but minimal mode-line showing file modification
       status, buffer name, point position, current project, Git
       branch, and active modes
-    * Extremely clean mode lighters
+    * Extremely clean mode lighters thanks to [Blackout]
+    * Aggressive startup optimization: 0.6s or less for a fully
+      configured graphical frame
+    * Aggressively consistent coding style and documentation,
+      including heavy use of macros to automate and foolproof common
+      operations
     * Delightful color scheme that works in the terminal ([Zerodark])
     * Clipboard, mouse, and PATH integration for macOS
     * Automatic creation and interactive removal of parent directories
       when finding files
     * Extensible system for defining mnemonic key sequences to jump to
       dotfiles
-    * Emacsclient as a Git commit message editor
-    * Several packages for pushing around windows and buffers in
-      interesting ways
-    * Better contextual information in `*Help*` buffers using
-      [Helpful]
     * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
       partly on [`restart-emacs`][restart-emacs]
     * Configured packages: [Atomic Chrome][atomic-chrome],
-      [Autorevert], [Company], [Counsel], [delete-selection-mode],
-      [Dired], [EasyPG], [ElDoc], [ESUP], [Flycheck], [Ivy], [Magit],
-      [no-littering], [Org], [Projectile], [Smartparens], [Sunrise
-      Commander][sunrise-commander], [Swiper], [undo-tree],
-      [use-package], [visual-regexp], [webpaste.el], [YASnippet] (...
-      and dozens more, but these are the biggest ones)
+      [Autorevert], [Avy], [buffer-move], [Company], [Counsel],
+      [delete-selection-mode], [Dired], [ElDoc], [ESUP], [Flycheck],
+      [Helpful], [Ivy], [Magit], [no-littering], [Org], [Projectile],
+      [Smartparens], [Sunrise Commander][sunrise-commander], [Swiper],
+      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
+      [webpaste.el], and more
     * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
-      [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript] (...
-      and dozens more, but these are the biggest ones with the most
-      sophisticated support)
+      [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
+      more
     * Major modes for editing many configuration file types
 * [Zsh]
-    * Next-generation package manager, [zplug]
+    * Extremely fast and flexible package manager, [zplugin]
     * No-nonsense prompt showing username, hostname, working
       directory, and Git status, colored by exit code
     * Substring completion everywhere
-    * Aliases for [Exa], a modern replacement for `ls`
     * GUI-like file/directory copy/paste functions on the command line
     * Extensive library of clean and consistent [Git] aliases
     * Colored man pages
@@ -89,7 +89,8 @@ configuration, and optionally installing local configuration.
 #### macOS
 
 * Emacs: `brew install emacs --with-cocoa`, version 26.1 minimum.
-* Zsh: `brew install zsh`; `brew install zplug`
+* Zsh: `brew install zsh`; `mkdir ~/.zplugin`; `git clone
+  git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
 * Tmux: `brew install tmux`
 * Git: `brew install git`
 * Leiningen: `brew cask install java`; `brew install leiningen`
@@ -97,7 +98,8 @@ configuration, and optionally installing local configuration.
 #### Arch Linux
 
 * Emacs: `pacman -S emacs`
-* Zsh: `pacman -S zsh`
+* Zsh: `pacman -S zsh`; `mkdir ~/.zplugin`; `git clone
+  git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
 * Tmux: `pacman -S tmux`
 * Git: `pacman -S git`
 * Leiningen: `pacman -S jdk8-openjdk`; install `leiningen` from AUR
@@ -129,7 +131,8 @@ Use symbolic links:
 
 In order to get `$PATH`, `ssh-agent`, and `gpg-agent` working
 correctly in graphical applications on macOS, use
-`scripts/patch-macos-app.zsh`.
+`scripts/patch-macos-app.zsh`. Note however that Emacs already sources
+`~/.profile` (and thereby `~/.profile.local`) during startup.
 
 ## Contributing
 
@@ -148,6 +151,9 @@ commented.
 [alembic]: https://github.com/pallet/alembic
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
+[avy]: https://github.com/abo-abo/avy
+[blackout]: https://github.com/raxod502/blackout
+[buffer-move]: https://github.com/lukhas/buffer-move
 [clojure]: https://clojure.org/
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
@@ -194,6 +200,7 @@ commented.
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
 [tools.namespace]: https://github.com/clojure/tools.namespace
+[transpose-frame]: https://www.emacswiki.org/emacs/TransposeFrame
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
@@ -202,5 +209,5 @@ commented.
 [webpaste.el]: https://github.com/etu/webpaste.el
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
-[zplug]: https://github.com/zplug/zplug
+[zplugin]: https://github.com/zdharma/zplugin
 [zsh]: http://zsh.sourceforge.net/
