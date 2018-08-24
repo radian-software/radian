@@ -58,7 +58,8 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
                       (cadr place)
                     place)))
        ,@body)
-     (advice-add ',place ',where #',name)))
+     (advice-add ',place ',where #',name)
+     ',name))
 
 (defmacro radian-defhook (name arglist hook docstring &rest body)
   "Define a function called NAME and add it to a hook.
