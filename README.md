@@ -88,7 +88,9 @@ configuration, and optionally installing local configuration.
 ### Installing software
 #### macOS
 
-* Emacs: `brew install emacs --with-cocoa`, version 26.1 minimum.
+* Emacs: `brew install emacs --with-cocoa`, version 26.1 minimum;
+  `brew install python`; (optional for improved startup time) `brew
+  install watchexec`
 * Zsh: `brew install zsh`; `mkdir ~/.zplugin`; `git clone
   git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
 * Tmux: `brew install tmux`
@@ -97,7 +99,8 @@ configuration, and optionally installing local configuration.
 
 #### Arch Linux
 
-* Emacs: `pacman -S emacs`
+* Emacs: `pacman -S emacs python`; (optional for improved startup
+  time) install `watchexec` from AUR
 * Zsh: `pacman -S zsh`; `mkdir ~/.zplugin`; `git clone
   git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
 * Tmux: `pacman -S tmux`
