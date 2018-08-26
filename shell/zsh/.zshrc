@@ -615,6 +615,7 @@ fi
 if (( $+commands[tmux] )); then
     alias ta='tmux attach'
     alias ts='tmux new-session -s'
+    alias tl='tmux list-sessions'
 fi
 
 #### Vi, Vim, Neovim
