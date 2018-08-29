@@ -2837,32 +2837,35 @@ file-local setting of e.g. `outline-regexp' with its own setting."
 See https://emacs.stackexchange.com/a/3338/12534."
     (setq electric-indent-chars (delq ?: electric-indent-chars)))
 
-  (radian-defhook radian--python-use-correct-flycheck-executable ()
-    python-mode-hook
-    "Use the correct Python executable for Flycheck."
-    (let ((executable "python3"))
-      (save-excursion
-        (save-match-data
-          (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
-                    (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
-            (setq executable (substring-no-properties (match-string 1))))))
-      (dolist (var '(flycheck-python-flake8-executable
-                     flycheck-python-pycompile-executable
-                     flycheck-python-pylint-executable))
-        (make-local-variable var)
-        (set var executable))))
-
   ;; Default to Python 3. Prefer the versioned Python binaries since
-  ;; there was this one time where Homebrew decided not to install an
-  ;; unversioned binary and then /usr/bin/python was first on the
-  ;; PATH.
+  ;; some systems stupidly make the unversioned one point at Python 2.
   (cond
    ((executable-find "python3")
     (setq python-shell-interpreter "python3"))
    ((executable-find "python2")
     (setq python-shell-interpreter "python2"))
    (t
-    (setq python-shell-interpreter "python"))))
+    (setq python-shell-interpreter "python")))
+
+  (radian-defhook radian--python-use-correct-flycheck-executable ()
+    python-mode-hook
+    "Use the correct Python executable for Flycheck."
+    (let ((executable python-shell-interpreter))
+      (save-excursion
+        (save-match-data
+          (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
+                    (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
+            (setq executable (substring-no-properties (match-string 1))))))
+      ;; We actually want to run Python here.
+      (dolist (var '(flycheck-python-pycompile-executable))
+        (make-local-variable var)
+        (set var executable))
+      ;; In this case we want to run the modules, which can only be
+      ;; done using Python 3.
+      (dolist (var '(flycheck-python-pylint-executable
+                     flycheck-python-flake8-executable))
+        (make-local-variable var)
+        (set var python-shell-interpreter)))))
 
 ;; Package `elpy' provides a language server for Python, including
 ;; integration with most other packages that need to draw information
