@@ -590,11 +590,11 @@ This is used to prevent duplicate entries in the kill ring.")
 (use-package ivy
   ;; Use my fork until https://github.com/abo-abo/swiper/issues/1632
   ;; is fixed.
-  :straight (:host github :repo "raxod502/swiper" :branch "fork/1"
+  :straight (:host github :repo "abo-abo/swiper"
                    :files (:defaults
                            (:exclude "swiper.el" "counsel.el" "ivy-hydra.el")
                            "doc/ivy-help.org")
-                   :upstream (:host github :repo "abo-abo/swiper"))
+                   :fork (:repo "raxod502/swiper" :branch "fork/1"))
   :init/el-patch
 
   (defvar ivy-mode-map
@@ -2099,9 +2099,8 @@ area."
   ;; switching buffers until [1] is merged.
   ;;
   ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :straight (:host github :repo "raxod502/flycheck" :branch "fork/4"
-                   :upstream (:host github :repo "flycheck/flycheck"
-                                    :branch "master"))
+  :straight (:host github :repo "flycheck/flycheck"
+                   :fork (:repo "raxod502/flycheck" :branch "fork/4"))
   :defer 4
   :init
 
@@ -2603,9 +2602,8 @@ docstrings."
 (use-package clj-refactor
   ;; Use my fork which has support for automatically sorting project
   ;; dependencies after adding them to the project.clj.
-  :straight (:host github :repo "raxod502/clj-refactor.el" :branch "fork/3"
-                   :upstream (:host github :repo "clojure-emacs/clj-refactor.el"
-                                    :branch "master")
+  :straight (:host github :repo "clojure-emacs/clj-refactor.el"
+                   :fork (:repo "raxod502/clj-refactor.el" :branch "fork/3")
                    :files (:defaults "CHANGELOG.md"))
   :init
 
@@ -3950,9 +3948,8 @@ are probably not going to be installed."
   ;; https://github.com/escherdragon/sunrise-commander/pull/58 and
   ;; https://github.com/escherdragon/sunrise-commander/pull/59 are
   ;; merged.
-  :straight (:host github :repo "raxod502/sunrise-commander" :branch "fork/1"
-                   :upstream (:host github
-                                    :repo "emacsmirror/sunrise-commander"))
+  :straight (:host github :repo "escherdragon/sunrise-commander"
+                   :fork (:repo "raxod502/sunrise-commander" :branch "fork/1"))
   :init
 
   ;; Add integration with wdx, see https://github.com/raxod502/wdx.
@@ -4287,9 +4284,8 @@ provide such a commit message."
 (use-package atomic-chrome
   ;; Use my fork until
   ;; https://github.com/alpha22jp/atomic-chrome/issues/42 is fixed.
-  :straight (:host github :repo "raxod502/atomic-chrome"
-                   :branch "fork/1"
-                   :upstream (:host github :repo "alpha22jp/atomic-chrome"))
+  :straight (:host github :repo "alpha22jp/atomic-chrome"
+                   :fork (:repo "raxod502/atomic-chrome" :branch "fork/1"))
   :defer 5
   :bind (:map atomic-chrome-edit-mode-map
               :filter (not radian-atomic-chrome-allow-filling)
@@ -4859,9 +4855,8 @@ your local configuration."
 ;; Use my fork until
 ;; https://github.com/NicolasPetton/zerodark-theme/pull/54 is merged.
 (straight-register-package
- '(zerodark-theme :host github :repo "raxod502/zerodark-theme" :branch "fork/2"
-                  :upstream (:host github
-                                   :repo "NicolasPetton/zerodark-theme")))
+ '(zerodark-theme :host github :repo "NicolasPetton/zerodark-theme"
+                  :fork (:repo "raxod502/zerodark-theme" :branch "fork/2")))
 (when radian-color-theme-enable
   (use-package zerodark-theme))
 
