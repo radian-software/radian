@@ -4566,8 +4566,8 @@ This is passed to `set-frame-font'."
     (set-face-attribute 'default nil :height radian-font-size))
 
   ;; Set the default font.
-  (when radian-font-size
-    (set-frame-font radian-font))
+  (when radian-font
+    (set-frame-font radian-font 'keep-size t))
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
