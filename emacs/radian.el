@@ -3718,12 +3718,7 @@ This runs `org-insert-heading' with
               ;; commands. But I think it's best to take the same approach
               ;; as before, for consistency.
               ("C-<left>" . org-agenda-do-date-earlier)
-              ("C-<right>" . org-agenda-do-date-later)
-
-              ;; Add a binding for `org-clock-cancel'. This only
-              ;; overrides a slight variation of the binding for `q',
-              ;; so I'm not too worried about it.
-              ("Q" . org-clock-cancel))
+              ("C-<right>" . org-agenda-do-date-later))
   :config
 
   (radian-defadvice radian--advice-org-agenda-default-directory
