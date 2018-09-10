@@ -27,6 +27,15 @@
                             radian-lib-file)))
   "Path to the Radian Git repository.")
 
+(defmacro radian-protect-macros (&rest body)
+  "Eval BODY, protecting macros from incorrect expansion.
+Any code in a `with-eval-after-load' form that uses macros
+defined in the form being `with-eval-after-load'ed should be
+wrapped in this macro; otherwise, its correct evaluation is not
+guaranteed by Elisp."
+  (declare (indent 0))
+  `(eval '(progn ,@body)))
+
 (defmacro radian-defadvice (name arglist where place docstring &rest body)
   "Define an advice called NAME and add it to a function.
 ARGLIST is as in `defun'. WHERE is a keyword as passed to
@@ -49,7 +58,8 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
                       (cadr place)
                     place)))
        ,@body)
-     (advice-add ',place ',where #',name)))
+     (advice-add ',place ',where #',name)
+     ',name))
 
 (defmacro radian-defhook (name arglist hook docstring &rest body)
   "Define a function called NAME and add it to a hook.
@@ -396,11 +406,7 @@ binding the variable dynamically over the entire init-file."
   :straight (:host github
                    :repo "raxod502/el-patch"
                    :branch "develop")
-  :demand t
-  :config
-
-  ;; When patching variable definitions, override the original values.
-  (setq el-patch-use-aggressive-defvar t))
+  :demand t)
 
 ;;; Keybindings
 
@@ -656,6 +662,7 @@ sets `completion-in-region-function' regardless of the value of
                  (el-patch-remove
                    (describe-function . counsel-describe-function)
                    (describe-variable . counsel-describe-variable))
+                 (apropos-command . counsel-apropos)
                  (describe-face . counsel-describe-face)
                  (list-faces-display . counsel-faces)
                  (find-file . counsel-find-file)
@@ -684,7 +691,10 @@ Remaps built-in functions to counsel replacements."
     "Toggle Counsel mode on or off.
 Turn Counsel mode on if ARG is positive, off otherwise. Counsel
 mode remaps built-in emacs functions that have counsel
-replacements. "
+replacements.
+
+Local bindings (`counsel-mode-map'):
+\\{counsel-mode-map}"
     :group 'ivy
     :global t
     :keymap counsel-mode-map
@@ -927,15 +937,7 @@ split."
 (use-package projectile
   :init/el-patch
 
-  (defgroup projectile nil
-    "Manage and navigate projects easily."
-    :group 'tools
-    :group 'convenience
-    :link '(url-link :tag "Github" "https://github.com/bbatsov/projectile")
-    :link '(url-link :tag "Online Manual" "https://projectile.readthedocs.io/")
-    :link '(emacs-commentary-link :tag "Commentary" "projectile"))
-
-  (defcustom projectile-keymap-prefix (kbd "C-c C-p")
+  (defcustom projectile-keymap-prefix nil
     "Projectile keymap prefix."
     :group 'projectile
     :type 'string)
@@ -1003,7 +1005,8 @@ split."
 
   (defvar projectile-mode-map
     (let ((map (make-sparse-keymap)))
-      (define-key map projectile-keymap-prefix 'projectile-command-map)
+      (when projectile-keymap-prefix
+        (define-key map projectile-keymap-prefix 'projectile-command-map))
       map)
     "Keymap for Projectile mode.")
 
@@ -1053,19 +1056,15 @@ Otherwise behave as if called interactively.
 
   :init
 
-  (setq projectile-keymap-prefix (kbd "C-c p"))
+  ;; Defining the prefix key must be done manually as per
+  ;; documentation for recent versions of Projectile, see
+  ;; https://projectile.readthedocs.io/en/latest/installation/.
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
   (projectile-mode +1)
 
   :defer 1
   :config
-
-  (radian-defadvice radian--projectile-silence-cleanup (orig-func &rest args)
-    :around projectile--cleanup-known-projects
-    "Eliminate useless messages from `projectile--cleanup-known-projects'."
-    (let ((inhibit-message t)
-          (message-log-max nil))
-      (apply orig-func args)))
 
   ;; Enable the mode again now that we have all the supporting hooks
   ;; and stuff defined.
@@ -1085,28 +1084,29 @@ Otherwise behave as if called interactively.
 (use-package counsel-projectile
   :init/el-patch
 
-  (defvar counsel-projectile-command-map
-    (let ((map (make-sparse-keymap)))
-      (set-keymap-parent map projectile-command-map)
-      (define-key map (kbd "s r") 'counsel-projectile-rg)
-      (define-key map (kbd "O c") 'counsel-projectile-org-capture)
-      (define-key map (kbd "O a") 'counsel-projectile-org-agenda)
-      (define-key map (kbd "SPC") 'counsel-projectile)
-      map)
-    "Keymap for Counesl-Projectile commands after `projectile-keymap-prefix'.")
-  (fset 'counsel-projectile-command-map counsel-projectile-command-map)
+  (defcustom counsel-projectile-key-bindings
+    '((projectile-find-file        . counsel-projectile-find-file)
+      (projectile-find-file-dwim   . counsel-projectile-find-file-dwim)
+      (projectile-find-dir         . counsel-projectile-find-dir)
+      (projectile-switch-to-buffer . counsel-projectile-switch-to-buffer)
+      (projectile-grep             . counsel-projectile-grep)
+      (projectile-ag               . counsel-projectile-ag)
+      (projectile-ripgrep          . counsel-projectile-rg)
+      (projectile-switch-project   . counsel-projectile-switch-project)
+      (" "                         . counsel-projectile)
+      ("si"                        . counsel-projectile-git-grep)
+      ("Oc"                        . counsel-projectile-org-capture)
+      ("Oa"                        . counsel-projectile-org-agenda))
+    "Alist of counsel-projectile key bindings.
 
-  (defvar counsel-projectile-mode-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map projectile-keymap-prefix 'counsel-projectile-command-map)
-      (define-key map [remap projectile-find-file] 'counsel-projectile-find-file)
-      (define-key map [remap projectile-find-dir] 'counsel-projectile-find-dir)
-      (define-key map [remap projectile-switch-to-buffer] 'counsel-projectile-switch-to-buffer)
-      (define-key map [remap projectile-grep] 'counsel-projectile-grep)
-      (define-key map [remap projectile-ag] 'counsel-projectile-ag)
-      (define-key map [remap projectile-switch-project] 'counsel-projectile-switch-project)
-      map)
-    "Keymap for Counsel-Projectile mode.")
+Each element is of the form \(KEY . DEF\) where KEY is either a
+key sequence to bind in `projectile-command-map' or a projectile
+command to remap in `projectile-mode-map', and DEF is the
+counsel-projectile command to which KEY is remapped or bound."
+    :type '(alist :key-type (choice (function :tag "Projectile command")
+                                    key-sequence)
+                  :value-type (function :tag "Counsel-projectile command"))
+    :group 'counsel-projectile)
 
   (define-minor-mode counsel-projectile-mode
     "Toggle Counsel-Projectile mode on or off.
@@ -1115,19 +1115,30 @@ With a prefix argument ARG, enable the mode if ARG is positive,
 and disable it otherwise.  If called from Lisp, enable the mode
 if ARG is omitted or nil, and toggle it if ARG is `toggle'.
 
-Counsel-Projectile mode triggers Projectile mode, remaps
-Projectile commands that have counsel replacements, and adds key
-bindings for Counsel-Projectile commands that have no Projectile
-counterpart.
+Counsel-Projectile mode turns on Projectile mode, thus enabling
+all projectile key bindings, and adds the counsel-projectile key
+bindings on top of them.
 
-\\{counsel-projectile-mode-map}"
+The counsel-projectile key bindings either remap existing
+projectile commands to their counsel-projectile replacements or
+bind keys to counsel-projectile commands that have no projectile
+counterparts."
     :group 'counsel-projectile
     :require 'counsel-projectile
-    :keymap counsel-projectile-mode-map
     :global t
-    (if counsel-projectile-mode
-        (projectile-mode)
-      (projectile-mode -1)))
+    (cond
+     (counsel-projectile-mode
+      (projectile-mode)
+      (dolist (binding counsel-projectile-key-bindings)
+        (if (functionp (car binding))
+            (define-key projectile-mode-map `[remap ,(car binding)] (cdr binding))
+          (define-key projectile-command-map (car binding) (cdr binding)))))
+     (t
+      (dolist (binding counsel-projectile-key-bindings)
+        (if (functionp (car binding))
+            (define-key projectile-mode-map `[remap ,(car binding)] nil)
+          (define-key projectile-command-map (car binding) nil)))
+      (projectile-mode -1))))
 
   :init
 
@@ -1687,11 +1698,23 @@ argument."
   ;; Python-style.
   (setq vr/engine 'emacs))
 
+;; Feature `isearch' provides a basic and fast mechanism for jumping
+;; forward or backward to occurrences of a given search string.
+(use-feature isearch
+  :config
+
+  ;; Eliminate the 0.25s idle delay for isearch highlighting, as in my
+  ;; opinion it usually produces a rather disjointed and distracting
+  ;; UX.
+  (setq isearch-lazy-highlight-initial-delay 0))
+
 ;; Package `swiper' provides an alternative to `isearch' which instead
 ;; uses `ivy' to display and select from the results.
 (use-package swiper
-  :bind (([remap isearch-forward] . swiper)
-         ([remap isearch-backward] . swiper))
+  :init
+
+  (radian-bind-key "g" #'swiper)
+
   :config
 
   ;; Use only one color for subgroups in Swiper highlighting.
@@ -2093,6 +2116,8 @@ nor requires Flycheck to be loaded."
     (dolist (checker checkers)
       (cl-pushnew checker flycheck-disabled-checkers)))
 
+  :bind-keymap (("C-c !" . flycheck-mode-map))
+
   :config
 
   (global-flycheck-mode +1)
@@ -2413,7 +2438,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; `radian-clojure-strings-as-docstrings-mode' minor mode.
 
   (defsubst (el-patch-swap clojure-in-docstring-p
-                                    radian--clojure-in-string-p)
+                           radian--clojure-in-string-p)
     ()
     (el-patch-concat
       "Check whether point is in "
@@ -2430,7 +2455,7 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
 
   (defun (el-patch-swap clojure-indent-line
                         radian--advice-clojure-strings-as-docstrings)
-    ()
+      ()
     (el-patch-concat
       "Indent current line as Clojure code."
       (el-patch-add
@@ -2473,16 +2498,14 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
   ;; Ideally, we would be able to set the identation rules for *all*
   ;; keywords at the same time. But until we figure out how to do
   ;; that, we just have to deal with every keyword individually. See
-  ;; https://github.com/raxod502/radian/issues/26. Avoid using
-  ;; `define-clojure-indent' because it's a macro defined in the
-  ;; package, so we would have to `el-patch' it to use it here
-  ;; correctly.
-  (dolist (spec '((-> 1)
-                  (->> 1)
-                  (:import 0)
-                  (:require 0)
-                  (:use 0)))
-    (apply #'put-clojure-indent spec))
+  ;; https://github.com/raxod502/radian/issues/26.
+  (radian-protect-macros
+    (define-clojure-indent
+      (-> 1)
+      (->> 1)
+      (:import 0)
+      (:require 0)
+      (:use 0)))
 
   (define-minor-mode radian-clojure-strings-as-docstrings-mode
     "Treat all Clojure strings as docstrings.
@@ -2825,32 +2848,35 @@ file-local setting of e.g. `outline-regexp' with its own setting."
 See https://emacs.stackexchange.com/a/3338/12534."
     (setq electric-indent-chars (delq ?: electric-indent-chars)))
 
-  (radian-defhook radian--python-use-correct-flycheck-executable ()
-    python-mode-hook
-    "Use the correct Python executable for Flycheck."
-    (let ((executable "python3"))
-      (save-excursion
-        (save-match-data
-          (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
-                    (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
-            (setq executable (substring-no-properties (match-string 1))))))
-      (dolist (var '(flycheck-python-flake8-executable
-                     flycheck-python-pycompile-executable
-                     flycheck-python-pylint-executable))
-        (make-local-variable var)
-        (set var executable))))
-
   ;; Default to Python 3. Prefer the versioned Python binaries since
-  ;; there was this one time where Homebrew decided not to install an
-  ;; unversioned binary and then /usr/bin/python was first on the
-  ;; PATH.
+  ;; some systems stupidly make the unversioned one point at Python 2.
   (cond
    ((executable-find "python3")
     (setq python-shell-interpreter "python3"))
    ((executable-find "python2")
     (setq python-shell-interpreter "python2"))
-   (_
-    (setq python-shell-interpreter "python"))))
+   (t
+    (setq python-shell-interpreter "python")))
+
+  (radian-defhook radian--python-use-correct-flycheck-executable ()
+    python-mode-hook
+    "Use the correct Python executable for Flycheck."
+    (let ((executable python-shell-interpreter))
+      (save-excursion
+        (save-match-data
+          (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
+                    (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
+            (setq executable (substring-no-properties (match-string 1))))))
+      ;; We actually want to run Python here.
+      (dolist (var '(flycheck-python-pycompile-executable))
+        (make-local-variable var)
+        (set var executable))
+      ;; In this case we want to run the modules, which can only be
+      ;; done using Python 3.
+      (dolist (var '(flycheck-python-pylint-executable
+                     flycheck-python-flake8-executable))
+        (make-local-variable var)
+        (set var python-shell-interpreter)))))
 
 ;; Package `elpy' provides a language server for Python, including
 ;; integration with most other packages that need to draw information
@@ -3403,13 +3429,13 @@ This function calls `json-mode--update-auto-mode' to change the
               ("M-k" . radian-describe-keymap))
   :config
 
-  (radian-defadvice radian-advice-help-inhibit-hints (&rest _)
+  (radian-defadvice radian--advice-help-inhibit-hints (&rest _)
     :override help-window-display-message
     "Inhibit the \"Type q in help window to delete it\" hints.
 Normally these are printed in the echo area whenever you open a
 help buffer.")
 
-  (radian-defadvice radian-advice-help-disable-revert-prompt
+  (radian-defadvice radian--advice-help-disable-revert-prompt
       (help-mode-revert-buffer ignore-auto _noconfirm)
     :around help-mode-revert-buffer
     "Don't ask for confirmation before reverting help buffers.
@@ -3659,7 +3685,13 @@ This runs `org-insert-heading' with
   (setq org-special-ctrl-k t)
 
   (put 'org-tags-exclude-from-inheritance 'safe-local-variable
-       #'radian--list-of-strings-p))
+       #'radian--list-of-strings-p)
+
+  ;; When you create a sparse tree and `org-indent-mode' is enabled,
+  ;; the highlighting destroys the invisibility added by
+  ;; `org-indent-mode'. Therefore, don't highlight when creating a
+  ;; sparse tree.
+  (setq org-highlight-sparse-tree-matches nil))
 
 ;; Feature `org-indent' provides an alternative view for Org files in
 ;; which sub-headings are indented.
@@ -3704,6 +3736,12 @@ This makes the behavior of `find-file' more reasonable."
                                default-directory)))
       (apply org-agenda args)))
 
+  (radian-defadvice radian--advice-blackout-org-agenda
+      (&rest _)
+    :override org-agenda-set-mode-name
+    "Override the `org-agenda' mode lighter to just \"Org-Agenda\"."
+    "Org-Agenda")
+
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
 
@@ -3724,7 +3762,13 @@ This makes the behavior of `find-file' more reasonable."
   ;; since it causes both `org' and `org-clock' to be loaded for no
   ;; good reason.
   (add-hook 'org-mode-hook 'org-clock-load)
-  (add-hook 'kill-emacs-hook 'org-clock-save)
+  (radian-defhook radian--org-clock-save ()
+    kill-emacs-hook
+    "Run `org-clock-save', but only if Org has been loaded.
+Using this on `kill-emacs-hook' instead of `org-clock-save'
+prevents a delay on killing Emacs when Org was not yet loaded."
+    (when (featurep 'org)
+      (org-clock-save)))
 
   :bind* (;; Make some `org-mode-map' bindings global instead.
           ("C-c C-x C-i" . org-clock-in)
@@ -3773,10 +3817,6 @@ This makes the behavior of `find-file' more reasonable."
 	  (_ nil)))))
 
   :config
-
-  ;; Don't record a clock entry if you clocked out in less than one
-  ;; minute.
-  (setq org-clock-out-remove-zero-time-clocks t)
 
   (defun radian--advice-org-clock-load-automatically (&rest _)
     "Run `org-clock-load'.
@@ -3846,7 +3886,7 @@ non-nil value to enable trashing for file operations."
               ("J" . dired-up-directory))
   :config
 
-  (radian-defadvice radian-advice-dired-check-for-ls-dired (&rest _)
+  (radian-defadvice radian--advice-dired-check-for-ls-dired (&rest _)
     :before dired-insert-directory
     "Check if ls --dired is supported ahead of time, and silently.
 
@@ -3921,7 +3961,7 @@ are probably not going to be installed."
   (defun radian--wdx-location ()
     "Return the path to the wdx binary.
 Signal an error if it doesn't exist."
-    (let ((path "~/.zplug/repos/raxod502/wdx/bin/wdx"))
+    (let ((path "~/.zplugin/plugins/raxod502---wdx/bin/wdx"))
       (if (file-executable-p path)
           path
         (user-error "wdx is not installed"))))
@@ -3982,7 +4022,13 @@ With prefix argument, prompt for warp point to remove."
               ;; See
               ;; https://github.com/escherdragon/sunrise-commander/issues/61.
               ("C-e" . move-end-of-line))
-  :bind* (("C-c s" . sunrise)))
+  :bind* (("C-c s" . sunrise))
+  :config
+
+  ;; Prevent Sunrise Commander from doing anything when you move the
+  ;; mouse. Otherwise it becomes rather annoying when you have to move
+  ;; the mouse across the Emacs frame.
+  (setq sr-cursor-follows-mouse nil))
 
 ;;;; Terminal emulator
 
@@ -4488,7 +4534,7 @@ with which Emacs should be "
 This is passed to `set-frame-font'."
   :type '(choice string (const :tag "Default" nil)))
 
-(defcustom radian-font-size 140
+(defcustom radian-font-size nil
   "Default font size, in pixels. Nil means use the default."
   :type '(choice integer (const :tag "Default" nil)))
 
@@ -4793,7 +4839,8 @@ spaces."
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
 (setq-default mode-line-format
-              '(:eval (replace-regexp-in-string "%" "%%"
+              '(:eval (replace-regexp-in-string
+                       "%" "%%"
                        (radian--mode-line-align
                         (format-mode-line radian--mode-line-left)
                         (format-mode-line radian--mode-line-right))
