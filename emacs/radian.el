@@ -4171,7 +4171,11 @@ as argument."
   ;; Allow pulling with --rebase just once, without needing to
   ;; configure pull.rebase permanently. See
   ;; https://github.com/magit/magit/issues/2597#issuecomment-201392835.
-  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase"))
+  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase")
+
+  ;; Allow merging unrelated histories.
+  (magit-define-popup-switch 'magit-merge-popup ?u
+    "Allow unrelated" "--allow-unrelated-histories"))
 
 ;; Package `gh' provides an Elisp interface to the GitHub API.
 (use-package gh
