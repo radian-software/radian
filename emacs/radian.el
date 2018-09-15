@@ -3735,6 +3735,17 @@ This makes the behavior of `find-file' more reasonable."
     "Override the `org-agenda' mode lighter to just \"Org-Agenda\"."
     "Org-Agenda")
 
+  (radian-defhook radian--org-agenda-setup ()
+    org-agenda-mode-hook
+    "Disable `visual-line-mode' locally."
+    ;; See https://superuser.com/a/531670/326239.
+    (visual-line-mode -1)
+    (let ((inhibit-message t)
+          (message-log-max nil))
+      ;; I'm not exactly sure why this is necessary. More research is
+      ;; needed.
+      (toggle-truncate-lines +1)))
+
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
 
