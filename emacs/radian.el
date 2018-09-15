@@ -3004,8 +3004,6 @@ https://github.com/flycheck/flycheck/issues/953."
 (use-package geiser)
 
 ;;;; Shell
-
-;;;; Shell
 ;; http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
 ;; https://www.gnu.org/software/bash/
 ;; http://www.zsh.org/
