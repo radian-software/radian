@@ -4,7 +4,6 @@
  ("apples-mode" . "83a9ab0d6ba82496e2f7df386909b1a55701fccb")
  ("atomic-chrome" . "d8bff0b7db228b8a428f0db621702c665fb33570")
  ("auctex" . "94981bd97e5ca914053c5a5a596828b2de8ebd4b")
- ("avy" . "157486aeb1c4947f2727ce3fe1fdeafee946d746")
  ("blackout" . "5739f72ac288302a92d888e9bffb23635713c93b")
  ("buffer-move" . "cb517ecf8409b5fdcda472d7190c6021f0c49751")
  ("cider" . "b68eb5346d5cac2d51b2092e564b861154c84d9b")

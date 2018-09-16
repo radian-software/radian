@@ -1654,23 +1654,6 @@ argument."
           (switch-to-buffer buffer)))
     (funcall pop-global-mark)))
 
-;; Package `avy' provides a quick-navigation mechanism wherein you
-;; enter some query, like the first letter of a word, and each place
-;; that query matches on-screen is assigned a sequence of keystrokes.
-;; Pressing those keystrokes moves point there.
-(use-package avy
-  :init
-
-  (radian-bind-key "l" #'avy-goto-line)
-  (radian-bind-key "w" #'avy-goto-word-1)
-  (radian-bind-key "c" #'avy-goto-char)
-
-  :config
-
-  ;; Show the whole key sequence even when matches are right next to
-  ;; each other.
-  (setq avy-style 'de-bruijn))
-
 ;; Feature `bookmark' provides a way to mark places in a buffer. I
 ;; don't use it, but some other packages do.
 (use-feature bookmark
