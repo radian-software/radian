@@ -93,7 +93,7 @@
  ("smartparens" . "10e2a7f1690b5466fd373fd5f808cf9b733eabcd")
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
  ("ssh-config-mode-el" . "5429a02b8f7431c40e4a50e5d1ac2cd2d08c6511")
- ("straight.el" . "6abe699e1ecf9431e65f044f1ce07f0ab0ca2247")
+ ("straight.el" . "e1031c15a1e02c22b1819f1bbf02deab5835b96a")
  ("sunrise-commander" . "a98c5c77e6d49d906919f4a9ab6192ea391a5255")
  ("swift-mode" . "d2f2f1da6085c6fad2709b951d6891dd139a6080")
  ("swiper" . "56e0a873d7b242618e27b34bc1c7c4ad19bf561c")
