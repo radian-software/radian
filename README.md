@@ -39,7 +39,7 @@ These dotfiles attempt to achieve the following goals:
     * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
       partly on [`restart-emacs`][restart-emacs]
     * Configured packages: [Atomic Chrome][atomic-chrome],
-      [Autorevert], [Avy], [buffer-move], [Company], [Counsel],
+      [Autorevert], [buffer-move], [Company], [Counsel],
       [delete-selection-mode], [Dired], [ElDoc], [ESUP], [Flycheck],
       [Helpful], [Ivy], [Magit], [no-littering], [Org], [Projectile],
       [Smartparens], [Sunrise Commander][sunrise-commander], [Swiper],
@@ -154,7 +154,6 @@ commented.
 [alembic]: https://github.com/pallet/alembic
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
-[avy]: https://github.com/abo-abo/avy
 [blackout]: https://github.com/raxod502/blackout
 [buffer-move]: https://github.com/lukhas/buffer-move
 [clojure]: https://clojure.org/
