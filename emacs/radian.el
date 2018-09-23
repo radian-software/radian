@@ -2792,8 +2792,13 @@ ARG is passed to `hindent-mode' toggle function."
 
 ;; Package `markdown-mode' provides a major mode for Markdown.
 (use-package markdown-mode
+
   :mode (;; Extension used by Hugo.
          ("\\.mmark\\'" . markdown-mode))
+
+  :bind (;; C-c C-s p is a really dumb binding, we prefer C-c C-s C-p.
+         :map markdown-mode-style-map
+              ("C-p" . markdown-insert-pre))
   :config
 
   (radian-defhook radian--flycheck-markdown-setup ()
