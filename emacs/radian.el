@@ -2705,7 +2705,9 @@ ARG is passed to `hindent-mode' toggle function."
     ;; Don't enable `hindent-mode' in `literate-haskell-mode'. See
     ;; https://github.com/commercialhaskell/hindent/issues/496.
     (unless (derived-mode-p 'literate-haskell-mode)
-      (hindent-mode arg))))
+      (hindent-mode arg)))
+
+  :blackout t)
 
 ;;;; HTML
 ;; https://www.w3.org/TR/html5/
