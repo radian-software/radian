@@ -2688,7 +2688,9 @@ https://github.com/haskell/haskell-mode/issues/1594."
               (forward-char)))
           (skip-syntax-forward " " (line-end-position))
           (backward-prefix-chars))
-      (funcall back-to-indentation))))
+      (funcall back-to-indentation)))
+
+  :blackout interactive-haskell-mode)
 
 ;; Package `hindent' provides a way to invoke the Haskell code
 ;; formatter of the same name as a `fill-paragraph' replacement. You
