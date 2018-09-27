@@ -292,15 +292,15 @@ alias ds='dirs -v | head -10'
 if (( $+commands[exa] )); then
     alias l='exa --all --header --long --color-scale'
     alias lg='exa --all --grid --header --long --color-scale'
-    alias lt='exa --all --header --long --tree --color-scale --ignore-glob .git'
+    alias lt='exa --all --header --long --tree --color-scale --ignore-glob ".git|.svn"'
     function lti {
         emulate -LR zsh
-        exa --all --header --long --tree --color-scale --ignore-glob ".git|$1" ${@:2}
+        exa --all --header --long --tree --color-scale --ignore-glob ".git|.svn|$1" ${@:2}
     }
-    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob .git --level'
+    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob ".git|.svn" --level'
     function ltli {
         emulate -LR zsh
-        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|$2" ${@:3}
+        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|.svn|$2" ${@:3}
     }
 else
     # We alias gls to a git command elsewhere, so we use "command"
