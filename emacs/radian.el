@@ -1713,7 +1713,7 @@ argument."
 (use-package swiper
   :init
 
-  (radian-bind-key "g" #'swiper)
+  (bind-key "C-s" #'swiper)
 
   :config
 
