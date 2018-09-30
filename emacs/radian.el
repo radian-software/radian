@@ -591,11 +591,11 @@ This is used to prevent duplicate entries in the kill ring.")
 (use-package ivy
   ;; Use my fork until https://github.com/abo-abo/swiper/issues/1632
   ;; is fixed.
-  :straight (:host github :repo "raxod502/swiper" :branch "fork/1"
+  :straight (:host github :repo "abo-abo/swiper"
                    :files (:defaults
                            (:exclude "swiper.el" "counsel.el" "ivy-hydra.el")
                            "doc/ivy-help.org")
-                   :upstream (:host github :repo "abo-abo/swiper"))
+                   :fork (:repo "raxod502/swiper" :branch "fork/1"))
   :init/el-patch
 
   (defvar ivy-mode-map
@@ -1386,6 +1386,9 @@ unquote it using a comma."
  ".emacs.d/straight/versions/radian.el"
  "e v" "radian-versions-el")
 (radian-register-dotfile ".emacs.d/init.local.el" "e l")
+(radian-register-dotfile
+ ".emacs.d/straight/versions/radian-local.el"
+ "e V" "radian-local-versions-el")
 
 ;; Git
 (radian-register-dotfile ".gitconfig" "g c")
@@ -1651,23 +1654,6 @@ argument."
           (goto-char position)
           (switch-to-buffer buffer)))
     (funcall pop-global-mark)))
-
-;; Package `avy' provides a quick-navigation mechanism wherein you
-;; enter some query, like the first letter of a word, and each place
-;; that query matches on-screen is assigned a sequence of keystrokes.
-;; Pressing those keystrokes moves point there.
-(use-package avy
-  :init
-
-  (radian-bind-key "l" #'avy-goto-line)
-  (radian-bind-key "w" #'avy-goto-word-1)
-  (radian-bind-key "c" #'avy-goto-char)
-
-  :config
-
-  ;; Show the whole key sequence even when matches are right next to
-  ;; each other.
-  (setq avy-style 'de-bruijn))
 
 ;; Feature `bookmark' provides a way to mark places in a buffer. I
 ;; don't use it, but some other packages do.
@@ -2100,9 +2086,8 @@ area."
   ;; switching buffers until [1] is merged.
   ;;
   ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :straight (:host github :repo "raxod502/flycheck" :branch "fork/4"
-                   :upstream (:host github :repo "flycheck/flycheck"
-                                    :branch "master"))
+  :straight (:host github :repo "flycheck/flycheck"
+                   :fork (:repo "raxod502/flycheck" :branch "fork/4"))
   :defer 4
   :init
 
@@ -2604,9 +2589,8 @@ docstrings."
 (use-package clj-refactor
   ;; Use my fork which has support for automatically sorting project
   ;; dependencies after adding them to the project.clj.
-  :straight (:host github :repo "raxod502/clj-refactor.el" :branch "fork/3"
-                   :upstream (:host github :repo "clojure-emacs/clj-refactor.el"
-                                    :branch "master")
+  :straight (:host github :repo "clojure-emacs/clj-refactor.el"
+                   :fork (:repo "raxod502/clj-refactor.el" :branch "fork/3")
                    :files (:defaults "CHANGELOG.md"))
   :init
 
@@ -3002,8 +2986,6 @@ https://github.com/flycheck/flycheck/issues/953."
 ;; Package `geiser' provides REPL integration for several
 ;; implementations of Scheme.
 (use-package geiser)
-
-;;;; Shell
 
 ;;;; Shell
 ;; http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
@@ -3718,12 +3700,7 @@ This runs `org-insert-heading' with
               ;; commands. But I think it's best to take the same approach
               ;; as before, for consistency.
               ("C-<left>" . org-agenda-do-date-earlier)
-              ("C-<right>" . org-agenda-do-date-later)
-
-              ;; Add a binding for `org-clock-cancel'. This only
-              ;; overrides a slight variation of the binding for `q',
-              ;; so I'm not too worried about it.
-              ("Q" . org-clock-cancel))
+              ("C-<right>" . org-agenda-do-date-later))
   :config
 
   (radian-defadvice radian--advice-org-agenda-default-directory
@@ -3741,6 +3718,17 @@ This makes the behavior of `find-file' more reasonable."
     :override org-agenda-set-mode-name
     "Override the `org-agenda' mode lighter to just \"Org-Agenda\"."
     "Org-Agenda")
+
+  (radian-defhook radian--org-agenda-setup ()
+    org-agenda-mode-hook
+    "Disable `visual-line-mode' locally."
+    ;; See https://superuser.com/a/531670/326239.
+    (visual-line-mode -1)
+    (let ((inhibit-message t)
+          (message-log-max nil))
+      ;; I'm not exactly sure why this is necessary. More research is
+      ;; needed.
+      (toggle-truncate-lines +1)))
 
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
@@ -3951,9 +3939,8 @@ are probably not going to be installed."
   ;; https://github.com/escherdragon/sunrise-commander/pull/58 and
   ;; https://github.com/escherdragon/sunrise-commander/pull/59 are
   ;; merged.
-  :straight (:host github :repo "raxod502/sunrise-commander" :branch "fork/1"
-                   :upstream (:host github
-                                    :repo "emacsmirror/sunrise-commander"))
+  :straight (:host github :repo "escherdragon/sunrise-commander"
+                   :fork (:repo "raxod502/sunrise-commander" :branch "fork/1"))
   :init
 
   ;; Add integration with wdx, see https://github.com/raxod502/wdx.
@@ -4177,7 +4164,11 @@ as argument."
   ;; Allow pulling with --rebase just once, without needing to
   ;; configure pull.rebase permanently. See
   ;; https://github.com/magit/magit/issues/2597#issuecomment-201392835.
-  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase"))
+  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase")
+
+  ;; Allow merging unrelated histories.
+  (magit-define-popup-switch 'magit-merge-popup ?u
+    "Allow unrelated" "--allow-unrelated-histories"))
 
 ;; Package `gh' provides an Elisp interface to the GitHub API.
 (use-package gh
@@ -4288,9 +4279,8 @@ provide such a commit message."
 (use-package atomic-chrome
   ;; Use my fork until
   ;; https://github.com/alpha22jp/atomic-chrome/issues/42 is fixed.
-  :straight (:host github :repo "raxod502/atomic-chrome"
-                   :branch "fork/1"
-                   :upstream (:host github :repo "alpha22jp/atomic-chrome"))
+  :straight (:host github :repo "alpha22jp/atomic-chrome"
+                   :fork (:repo "raxod502/atomic-chrome" :branch "fork/1"))
   :defer 5
   :bind (:map atomic-chrome-edit-mode-map
               :filter (not radian-atomic-chrome-allow-filling)
@@ -4571,8 +4561,8 @@ This is passed to `set-frame-font'."
     (set-face-attribute 'default nil :height radian-font-size))
 
   ;; Set the default font.
-  (when radian-font-size
-    (set-frame-font radian-font))
+  (when radian-font
+    (set-frame-font radian-font 'keep-size t))
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
@@ -4860,9 +4850,8 @@ your local configuration."
 ;; Use my fork until
 ;; https://github.com/NicolasPetton/zerodark-theme/pull/54 is merged.
 (straight-register-package
- '(zerodark-theme :host github :repo "raxod502/zerodark-theme" :branch "fork/2"
-                  :upstream (:host github
-                                   :repo "NicolasPetton/zerodark-theme")))
+ '(zerodark-theme :host github :repo "NicolasPetton/zerodark-theme"
+                  :fork (:repo "raxod502/zerodark-theme" :branch "fork/2")))
 (when radian-color-theme-enable
   (use-package zerodark-theme))
 

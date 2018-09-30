@@ -29,6 +29,10 @@ if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
+    # Allow sourcing this file more than once without producing
+    # warnings about the plugins being re-loaded.
+    ZPLGM[MUTE_WARNINGS]=1
+
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
     zplugin light raxod502/wdx
