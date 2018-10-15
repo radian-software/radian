@@ -20,7 +20,7 @@
  ("dash.el" . "6514359b8606a6a9a94068ccd601fcd6379d6584")
  ("dockerfile-mode" . "9f4381178aa03212cd3400c60c0f48ff306a0994")
  ("edn.el" . "be9e32d1b49e35247b263b0243df7cfdc8d413ab")
- ("el-patch" . "15b3e84ab7001d42acd621cd6572ffdca839ea33")
+ ("el-patch" . "cb1ab3a687b7fd5c6cbbb3b589c152bad42a2960")
  ("elisp-refs" . "226ea71373930a5b4a8b4e45243ac16f58bb739c")
  ("elpy" . "a8d542b8c3d990480e72448b8eb98fc79f43420b")
  ("emacs-async" . "d17c11e6082aa51f421bb037b828bdb15f405618")
@@ -94,7 +94,7 @@
  ("smartparens" . "14a4d62b18da022bb7a4db4584dd82cda6d2f779")
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
  ("ssh-config-mode-el" . "1ec676c021269c7b9cf814cf1d12f6acdcc25588")
- ("straight.el" . "d31d52f4eaef65d00e1294fdd6e3dd1159fc8f63")
+ ("straight.el" . "a791b8e9439df3cf1879bb0ac81b95225559e8fa")
  ("sunrise-commander" . "a98c5c77e6d49d906919f4a9ab6192ea391a5255")
  ("swift-mode" . "07939dffa5cd443dd502fd420f2443c27c0f6a40")
  ("swiper" . "56e0a873d7b242618e27b34bc1c7c4ad19bf561c")
@@ -116,4 +116,4 @@
  ("yaml-mode" . "40067a10ac1360f0b9533f0bbbb2eea128e2574d")
  ("yasnippet" . "7a178a2ca016ae205df4b6dc191fd42debc99c8d")
  ("zerodark-theme" . "2391e094bf4e44bf7ec37e17456aae7df1bcd8fb"))
-:jupiter
+:saturn
