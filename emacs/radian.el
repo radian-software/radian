@@ -1007,6 +1007,50 @@ split."
     (let ((map (make-sparse-keymap)))
       (when projectile-keymap-prefix
         (define-key map projectile-keymap-prefix 'projectile-command-map))
+      (easy-menu-define projectile-mode-menu map
+        "Menu for Projectile"
+        '("Projectile"
+          ["Find file" projectile-find-file]
+          ["Find file in known projects" projectile-find-file-in-known-projects]
+          ["Find test file" projectile-find-test-file]
+          ["Find directory" projectile-find-dir]
+          ["Find file in directory" projectile-find-file-in-directory]
+          ["Find other file" projectile-find-other-file]
+          ["Switch to buffer" projectile-switch-to-buffer]
+          ["Jump between implementation file and test file" projectile-toggle-between-implementation-and-test]
+          ["Kill project buffers" projectile-kill-buffers]
+          ["Recent files" projectile-recentf]
+          "--"
+          ["Toggle project wide read-only" projectile-toggle-project-read-only]
+          ["Edit .dir-locals.el" projectile-edit-dir-locals]
+          "--"
+          ["Switch to project" projectile-switch-project]
+          ["Switch to open project" projectile-switch-open-project]
+          ["Discover projects in directory" projectile-discover-projects-in-directory]
+          ["Browse dirty projects" projectile-browse-dirty-projects]
+          ["Open project in dired" projectile-dired]
+          "--"
+          ["Search in project (grep)" projectile-grep]
+          ["Search in project (ag)" projectile-ag]
+          ["Replace in project" projectile-replace]
+          ["Multi-occur in project" projectile-multi-occur]
+          "--"
+          ["Run shell" projectile-run-shell]
+          ["Run eshell" projectile-run-eshell]
+          ["Run ielm" projectile-run-ielm]
+          ["Run term" projectile-run-term]
+          "--"
+          ["Cache current file" projectile-cache-current-file]
+          ["Invalidate cache" projectile-invalidate-cache]
+          ["Regenerate [e|g]tags" projectile-regenerate-tags]
+          "--"
+          ["Configure project" projectile-configure-project]
+          ["Compile project" projectile-compile-project]
+          ["Test project" projectile-test-project]
+          ["Run project" projectile-run-project]
+          "--"
+          ["Project info" projectile-project-info]
+          ["About" projectile-version]))
       map)
     "Keymap for Projectile mode.")
 
@@ -1023,7 +1067,7 @@ Otherwise behave as if called interactively.
 
 \\{projectile-mode-map}"
     (el-patch-remove
-      :lighter projectile-mode-line)
+      :lighter projectile--mode-line)
     :keymap projectile-mode-map
     :group 'projectile
     :require 'projectile
@@ -1031,6 +1075,8 @@ Otherwise behave as if called interactively.
     (cond
      (projectile-mode
       (el-patch-remove
+        ;; setup the commander bindings
+        (projectile-commander-bindings)
         ;; initialize the projects cache if needed
         (unless projectile-projects-cache
           (setq projectile-projects-cache
@@ -1039,6 +1085,8 @@ Otherwise behave as if called interactively.
         (unless projectile-projects-cache-time
           (setq projectile-projects-cache-time
                 (make-hash-table :test 'equal)))
+        ;; load the known projects
+        (projectile-load-known-projects)
         ;; update the list of known projects
         (projectile--cleanup-known-projects)
         (projectile-discover-projects-in-search-path)
@@ -1152,84 +1200,91 @@ the file being visited, if necessary. It also sets a buffer-local
 variable so that the user will be prompted to delete the newly
 created directories if they kill the buffer without saving it.
 
+This advice has no effect for remote files.
+
 This is an `:around' advice for `find-file' and similar
 functions."
-  (let ((orig-filename filename)
-        ;; For relative paths where none of the named parent
-        ;; directories exist, we might get a nil from
-        ;; `file-name-directory' below, which would be bad. Thus we
-        ;; expand the path fully.
-        (filename (expand-file-name filename))
-        ;; The variable `dirs-to-delete' is a list of the directories
-        ;; that will be automatically created by `make-directory'. We
-        ;; will want to offer to delete these directories if the user
-        ;; kills the buffer without saving it.
-        (dirs-to-delete ()))
-    ;; If the file already exists, we don't need to worry about
-    ;; creating any directories.
-    (unless (file-exists-p filename)
-      ;; It's easy to figure out how to invoke `make-directory',
-      ;; because it will automatically create all parent directories.
-      ;; We just need to ask for the directory immediately containing
-      ;; the file to be created.
-      (let* ((dir-to-create (file-name-directory filename))
-             ;; However, to find the exact set of directories that
-             ;; might need to be deleted afterward, we need to iterate
-             ;; upward through the directory tree until we find a
-             ;; directory that already exists, starting at the
-             ;; directory containing the new file.
-             (current-dir dir-to-create))
-        ;; If the directory containing the new file already exists,
-        ;; nothing needs to be created, and therefore nothing needs to
-        ;; be destroyed, either.
-        (while (not (file-exists-p current-dir))
-          ;; Otherwise, we'll add that directory onto the list of
-          ;; directories that are going to be created.
-          (push current-dir dirs-to-delete)
-          ;; Now we iterate upwards one directory. The
-          ;; `directory-file-name' function removes the trailing slash
-          ;; of the current directory, so that it is viewed as a file,
-          ;; and then the `file-name-directory' function returns the
-          ;; directory component in that path (which means the parent
-          ;; directory).
-          (setq current-dir (file-name-directory
-                             (directory-file-name current-dir))))
-        ;; Only bother trying to create a directory if one does not
-        ;; already exist.
-        (unless (file-exists-p dir-to-create)
-          ;; Make the necessary directory and its parents.
-          (make-directory dir-to-create 'parents))))
-    ;; Call the original `find-file', now that the directory
-    ;; containing the file to found exists. We make sure to preserve
-    ;; the return value, so as not to mess up any commands relying on
-    ;; it.
-    (prog1 (apply find-file orig-filename args)
-      ;; If there are directories we want to offer to delete later, we
-      ;; have more to do.
-      (when dirs-to-delete
-        ;; Since we already called `find-file', we're now in the buffer
-        ;; for the new file. That means we can transfer the list of
-        ;; directories to possibly delete later into a buffer-local
-        ;; variable. But we pushed new entries onto the beginning of
-        ;; `dirs-to-delete', so now we have to reverse it (in order to
-        ;; later offer to delete directories from innermost to
-        ;; outermost).
-        (setq-local radian--dirs-to-delete (reverse dirs-to-delete))
-        ;; Now we add a buffer-local hook to offer to delete those
-        ;; directories when the buffer is killed, but only if it's
-        ;; appropriate to do so (for instance, only if the directories
-        ;; still exist and the file still doesn't exist).
-        (add-hook 'kill-buffer-hook
-                  #'radian--kill-buffer-delete-directory-if-appropriate
-                  'append 'local)
-        ;; The above hook removes itself when it is run, but that will
-        ;; only happen when the buffer is killed (which might never
-        ;; happen). Just for cleanliness, we automatically remove it
-        ;; when the buffer is saved. This hook also removes itself when
-        ;; run, in addition to removing the above hook.
-        (add-hook 'after-save-hook
-                  #'radian--remove-kill-buffer-delete-directory-hook
-                  'append 'local)))))
+  (if (file-remote-p filename)
+      (apply find-file filename args)
+    (let ((orig-filename filename)
+          ;; For relative paths where none of the named parent
+          ;; directories exist, we might get a nil from
+          ;; `file-name-directory' below, which would be bad. Thus we
+          ;; expand the path fully.
+          (filename (expand-file-name filename))
+          ;; The variable `dirs-to-delete' is a list of the
+          ;; directories that will be automatically created by
+          ;; `make-directory'. We will want to offer to delete these
+          ;; directories if the user kills the buffer without saving
+          ;; it.
+          (dirs-to-delete ()))
+      ;; If the file already exists, we don't need to worry about
+      ;; creating any directories.
+      (unless (file-exists-p filename)
+        ;; It's easy to figure out how to invoke `make-directory',
+        ;; because it will automatically create all parent
+        ;; directories. We just need to ask for the directory
+        ;; immediately containing the file to be created.
+        (let* ((dir-to-create (file-name-directory filename))
+               ;; However, to find the exact set of directories that
+               ;; might need to be deleted afterward, we need to
+               ;; iterate upward through the directory tree until we
+               ;; find a directory that already exists, starting at
+               ;; the directory containing the new file.
+               (current-dir dir-to-create))
+          ;; If the directory containing the new file already exists,
+          ;; nothing needs to be created, and therefore nothing needs
+          ;; to be destroyed, either.
+          (while (not (file-exists-p current-dir))
+            ;; Otherwise, we'll add that directory onto the list of
+            ;; directories that are going to be created.
+            (push current-dir dirs-to-delete)
+            ;; Now we iterate upwards one directory. The
+            ;; `directory-file-name' function removes the trailing
+            ;; slash of the current directory, so that it is viewed as
+            ;; a file, and then the `file-name-directory' function
+            ;; returns the directory component in that path (which
+            ;; means the parent directory).
+            (setq current-dir (file-name-directory
+                               (directory-file-name current-dir))))
+          ;; Only bother trying to create a directory if one does not
+          ;; already exist.
+          (unless (file-exists-p dir-to-create)
+            ;; Make the necessary directory and its parents.
+            (make-directory dir-to-create 'parents))))
+      ;; Call the original `find-file', now that the directory
+      ;; containing the file to found exists. We make sure to preserve
+      ;; the return value, so as not to mess up any commands relying
+      ;; on it.
+      (prog1 (apply find-file orig-filename args)
+        ;; If there are directories we want to offer to delete later,
+        ;; we have more to do.
+        (when dirs-to-delete
+          ;; Since we already called `find-file', we're now in the
+          ;; buffer for the new file. That means we can transfer the
+          ;; list of directories to possibly delete later into a
+          ;; buffer-local variable. But we pushed new entries onto the
+          ;; beginning of `dirs-to-delete', so now we have to reverse
+          ;; it (in order to later offer to delete directories from
+          ;; innermost to outermost).
+          (setq-local radian--dirs-to-delete (reverse dirs-to-delete))
+          ;; Now we add a buffer-local hook to offer to delete those
+          ;; directories when the buffer is killed, but only if it's
+          ;; appropriate to do so (for instance, only if the
+          ;; directories still exist and the file still doesn't
+          ;; exist).
+          (add-hook 'kill-buffer-hook
+                    #'radian--kill-buffer-delete-directory-if-appropriate
+                    'append 'local)
+          ;; The above hook removes itself when it is run, but that
+          ;; will only happen when the buffer is killed (which might
+          ;; never happen). Just for cleanliness, we automatically
+          ;; remove it when the buffer is saved. This hook also
+          ;; removes itself when run, in addition to removing the
+          ;; above hook.
+          (add-hook 'after-save-hook
+                    #'radian--remove-kill-buffer-delete-directory-hook
+                    'append 'local))))))
 
 (defun radian--kill-buffer-delete-directory-if-appropriate ()
   "Delete parent directories if appropriate.
@@ -2682,7 +2737,9 @@ https://github.com/haskell/haskell-mode/issues/1594."
               (forward-char)))
           (skip-syntax-forward " " (line-end-position))
           (backward-prefix-chars))
-      (funcall back-to-indentation))))
+      (funcall back-to-indentation)))
+
+  :blackout interactive-haskell-mode)
 
 ;; Package `hindent' provides a way to invoke the Haskell code
 ;; formatter of the same name as a `fill-paragraph' replacement. You
@@ -2699,7 +2756,9 @@ ARG is passed to `hindent-mode' toggle function."
     ;; Don't enable `hindent-mode' in `literate-haskell-mode'. See
     ;; https://github.com/commercialhaskell/hindent/issues/496.
     (unless (derived-mode-p 'literate-haskell-mode)
-      (hindent-mode arg))))
+      (hindent-mode arg)))
+
+  :blackout t)
 
 ;;;; HTML
 ;; https://www.w3.org/TR/html5/
@@ -2786,8 +2845,13 @@ ARG is passed to `hindent-mode' toggle function."
 
 ;; Package `markdown-mode' provides a major mode for Markdown.
 (use-package markdown-mode
+
   :mode (;; Extension used by Hugo.
          ("\\.mmark\\'" . markdown-mode))
+
+  :bind (;; C-c C-s p is a really dumb binding, we prefer C-c C-s C-p.
+         :map markdown-mode-style-map
+              ("C-p" . markdown-insert-pre))
   :config
 
   (radian-defhook radian--flycheck-markdown-setup ()
