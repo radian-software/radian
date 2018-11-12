@@ -2693,12 +2693,41 @@ overwrites the message from *that* command."
 (use-package haskell-mode
   :config
 
+  ;; Enable REPL integration.
+  (add-hook 'haskell-mode-hook #'interactive-haskell-mode)
+
+  (radian-defadvice radian--advice-haskell-fix-back-to-indentation
+      (back-to-indentation)
+    :around back-to-indentation
+    "Fix `back-to-indentation' in `literate-haskell-mode'.
+Otherwise, it just moves point to column 0, which is wrong.
+
+This works around an upstream bug; see
+https://github.com/haskell/haskell-mode/issues/1594."
+    (if (derived-mode-p 'literate-haskell-mode)
+        (progn
+          (beginning-of-line 1)
+          (when-let ((c (char-after)))
+            (when (= c ? )
+              (forward-char)))
+          (skip-syntax-forward " " (line-end-position))
+          (backward-prefix-chars))
+      (funcall back-to-indentation))))
+
+;; Feature `haskell' from package `haskell-mode' is a meta-feature
+;; which includes many other features from the package, and also for
+;; some reason is where `interactive-haskell-mode' is defined.
+(use-feature haskell
+  :blackout interactive-haskell-mode)
+
+;; Feature `haskell-customize' from package `haskell-mode' defines the
+;; user options for the package.
+(use-feature haskell-customize
+  :config
+
   ;; Disable in-buffer underlining of errors and warnings, since we
   ;; already have them from Flycheck.
   (setq haskell-process-show-overlays nil)
-
-  ;; Enable REPL integration.
-  (add-hook 'haskell-mode-hook #'interactive-haskell-mode)
 
   ;; Work around upstream bug, see
   ;; https://github.com/haskell/haskell-mode/issues/1553.
@@ -2719,27 +2748,7 @@ overwrites the message from *that* command."
   ;; Allow `haskell-mode' to use Stack with the global project instead
   ;; of trying to invoke GHC directly, if not inside any sort of
   ;; project.
-  (setq haskell-process-type 'stack-ghci)
-
-  (radian-defadvice radian--advice-haskell-fix-back-to-indentation
-      (back-to-indentation)
-    :around back-to-indentation
-    "Fix `back-to-indentation' in `literate-haskell-mode'.
-Otherwise, it just moves point to column 0, which is wrong.
-
-This works around an upstream bug; see
-https://github.com/haskell/haskell-mode/issues/1594."
-    (if (derived-mode-p 'literate-haskell-mode)
-        (progn
-          (beginning-of-line 1)
-          (when-let ((c (char-after)))
-            (when (= c ? )
-              (forward-char)))
-          (skip-syntax-forward " " (line-end-position))
-          (backward-prefix-chars))
-      (funcall back-to-indentation)))
-
-  :blackout interactive-haskell-mode)
+  (setq haskell-process-type 'stack-ghci))
 
 ;; Package `hindent' provides a way to invoke the Haskell code
 ;; formatter of the same name as a `fill-paragraph' replacement. You
@@ -4910,12 +4919,8 @@ your local configuration."
 
 ;; Package `zerodark-theme' provides a good-looking color theme that
 ;; works in both windowed and tty Emacs.
-;;
-;; Use my fork until
-;; https://github.com/NicolasPetton/zerodark-theme/pull/54 is merged.
 (straight-register-package
- '(zerodark-theme :host github :repo "NicolasPetton/zerodark-theme"
-                  :fork (:repo "raxod502/zerodark-theme" :branch "fork/2")))
+ '(zerodark-theme :host github :repo "NicolasPetton/zerodark-theme"))
 (when radian-color-theme-enable
   (use-package zerodark-theme))
 
