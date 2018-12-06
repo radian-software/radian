@@ -2164,7 +2164,7 @@ nor requires Flycheck to be loaded."
     (dolist (checker checkers)
       (cl-pushnew checker flycheck-disabled-checkers)))
 
-  :bind-keymap (("C-c !" . flycheck-mode-map))
+  :bind-keymap (("C-c !" . flycheck-command-map))
 
   :config
 
