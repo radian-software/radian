@@ -19,7 +19,6 @@
 	ui = auto
 [core]
 	autocrlf = false
-	editor = emacsclient --alternate-editor="" -nw
 	excludesfile = ~/.gitexclude
 	pager = less -FRSX
 [credential]
