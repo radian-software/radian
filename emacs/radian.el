@@ -998,6 +998,8 @@ split."
       (define-key map (kbd "x t") #'projectile-run-term)
       (define-key map (kbd "x s") #'projectile-run-shell)
       (define-key map (kbd "z") #'projectile-cache-current-file)
+      (define-key map (kbd "<left>") #'projectile-previous-project-buffer)
+      (define-key map (kbd "<right>") #'projectile-next-project-buffer)
       (define-key map (kbd "ESC") #'projectile-project-buffers-other-buffer)
       map)
     "Keymap for Projectile commands after `projectile-keymap-prefix'.")
@@ -1019,7 +1021,10 @@ split."
           ["Switch to buffer" projectile-switch-to-buffer]
           ["Jump between implementation file and test file" projectile-toggle-between-implementation-and-test]
           ["Kill project buffers" projectile-kill-buffers]
+          ["Save project buffers" projectile-save-project-buffers]
           ["Recent files" projectile-recentf]
+          ["Previous buffer" projectile-previous-project-buffer]
+          ["Next buffer" projectile-next-project-buffer]
           "--"
           ["Toggle project wide read-only" projectile-toggle-project-read-only]
           ["Edit .dir-locals.el" projectile-edit-dir-locals]
@@ -1048,6 +1053,7 @@ split."
           ["Compile project" projectile-compile-project]
           ["Test project" projectile-test-project]
           ["Run project" projectile-run-project]
+          ["Repeat last external command" projectile-repeat-last-command]
           "--"
           ["Project info" projectile-project-info]
           ["About" projectile-version]))
@@ -1968,6 +1974,9 @@ the timer when no buffers need to be checked."
     (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
+
+  ;; Work around https://github.com/Fuco1/smartparens/issues/783.
+  (setq sp-escape-quotes-after-insert nil)
 
   :blackout t)
 
