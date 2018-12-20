@@ -1729,6 +1729,21 @@ argument."
     :override bookmark-maybe-message
     "Silence useless messages from bookmark.el."))
 
+;;;;; Definition location
+
+;; Package `dumb-jump' provides a mechanism to jump to the definitions
+;; of functions, variables, etc. in a variety of programming
+;; languages. The advantage of `dumb-jump' is that it doesn't try to
+;; be clever, so it "just works" instantly for dozens of languages
+;; with zero configuration.
+(use-package dumb-jump
+  :init
+
+  (dumb-jump-mode +1)
+
+  :bind (:map dumb-jump-mode-map
+              ("M-Q" . dumb-jump-quick-look)))
+
 ;;;; Find and replace
 
 ;; Package `visual-regexp' provides an alternate version of
