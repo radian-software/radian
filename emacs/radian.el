@@ -934,6 +934,11 @@ split."
 ;; projects, etc. It then provides commands for quickly navigating
 ;; between and within these projects.
 (use-package projectile
+  ;; Why do we do this convoluted lazy-loading instead of just not
+  ;; enabling `projectile-mode'? It's because setting up the
+  ;; `counsel-projectile' keybindings requires for `projectile-mode'
+  ;; to be enabled and for `projectile-command-map' and
+  ;; `projectile-mode-map' to be defined.
   :init/el-patch
 
   (defcustom projectile-keymap-prefix nil
