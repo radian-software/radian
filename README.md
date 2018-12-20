@@ -25,8 +25,8 @@ These dotfiles attempt to achieve the following goals:
       status, buffer name, point position, current project, Git
       branch, and active modes
     * Extremely clean mode lighters thanks to [Blackout]
-    * Aggressive startup optimization: 0.6s or less for a fully
-      configured graphical frame
+    * Aggressive startup optimization: 0.7s or less for a fully
+      configured graphical frame, from cold boot
     * Aggressively consistent coding style and documentation,
       including heavy use of macros to automate and foolproof common
       operations
@@ -150,7 +150,6 @@ Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* should be either obvious or
 commented.
 
-[1.0]: https://github.com/raxod502/radian/milestone/1
 [alembic]: https://github.com/pallet/alembic
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
