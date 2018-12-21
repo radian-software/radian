@@ -3555,6 +3555,17 @@ unhelpful."
 ;; Emacs help facility which provides much more contextual information
 ;; in a better format.
 (use-package helpful
+  :init
+
+  (use-feature counsel
+    :config
+
+    ;; Have the alternate "help" action for `counsel-M-x' use Helpful
+    ;; instead of the default Emacs help.
+    (setf (nth 0 (alist-get "h" (plist-get ivy--actions-list 'counsel-M-x)
+                            nil nil #'equal))
+          (lambda (x) (helpful-function (intern x)))))
+
   :bind (;; Remap standard commands.
          ([remap describe-function] . helpful-callable)
          ([remap describe-variable] . helpful-variable)
