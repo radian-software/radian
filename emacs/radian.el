@@ -722,15 +722,16 @@ Local bindings (`counsel-mode-map'):
     (el-patch-concat
       "rg -S --no-heading --line-number --color never "
       (el-patch-add
-        "-z ")
+        "-z --sort path ")
       "%s .")
     (el-patch-concat
       "Alternative to `counsel-ag-base-command' using ripgrep.
 
 Note: don't use single quotes for the regex."
       (el-patch-add
-        "\n\nSupport for searching compressed files has been added
-by `el-patch'."))
+        "\n\nSupport for searching compressed files and for
+reporting results in a deterministic order has been added by
+`el-patch'."))
     :type 'string
     :group 'ivy)
 
