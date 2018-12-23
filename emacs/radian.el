@@ -2404,7 +2404,8 @@ currently active.")
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
 
 ;; Package `apples-mode' provides a major mode for AppleScript.
-(use-package apples-mode)
+(use-package apples-mode
+  :mode "\\.\\(applescri\\|sc\\)pt\\'")
 
 ;;;; C, C++, Objective-C, Java
 ;; https://en.wikipedia.org/wiki/C_(programming_language)
