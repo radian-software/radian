@@ -273,9 +273,6 @@ binding the variable dynamically over the entire init-file."
     (setq straight-check-for-modifications '(watch-files find-when-checking))
   (setq straight-check-for-modifications '(check-on-save find-when-checking)))
 
-;; Use GNU ELPA mirror so that packages like AUCTeX will work.
-(setq straight-recipes-gnu-elpa-use-mirror t)
-
 (radian--run-hook 'radian-before-straight-hook)
 
 ;; Bootstrap the package manager, straight.el.
