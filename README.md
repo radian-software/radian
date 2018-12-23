@@ -23,7 +23,7 @@ These dotfiles attempt to achieve the following goals:
       [`prescient.el`][prescient.el]
     * Informative but minimal mode-line showing file modification
       status, buffer name, point position, current project, Git
-      branch, and active modes
+      branch, and active modes (with optional right-alignment support)
     * Extremely clean mode lighters thanks to [Blackout]
     * Aggressive startup optimization: 0.7s or less for a fully
       configured graphical frame, from cold boot
@@ -40,11 +40,11 @@ These dotfiles attempt to achieve the following goals:
       partly on [`restart-emacs`][restart-emacs]
     * Configured packages: [Atomic Chrome][atomic-chrome],
       [Autorevert], [buffer-move], [Company], [Counsel],
-      [delete-selection-mode], [Dired], [ElDoc], [ESUP], [Flycheck],
-      [Helpful], [Ivy], [Magit], [no-littering], [Org], [Projectile],
-      [Smartparens], [Sunrise Commander][sunrise-commander], [Swiper],
-      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
-      [webpaste.el], and more
+      [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
+      [Flycheck], [Helpful], [Ivy], [Magit], [no-littering], [Org],
+      [Projectile], [Smartparens], [Swiper], [transpose-frame],
+      [undo-tree], [use-package], [visual-regexp], [webpaste.el], and
+      more
     * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
       [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
       more
@@ -162,6 +162,7 @@ commented.
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [dotman]: https://github.com/raxod502/dotman
+[dumb-jump]: https://github.com/jacktasia/dumb-jump
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html
 [el-patch]: https://github.com/raxod502/el-patch
 [eldoc]: https://www.emacswiki.org/emacs/ElDoc
@@ -197,7 +198,6 @@ commented.
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
-[sunrise-commander]: https://github.com/escherdragon/sunrise-commander
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
 [tools.namespace]: https://github.com/clojure/tools.namespace
