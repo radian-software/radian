@@ -98,7 +98,6 @@
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
  ("ssh-config-mode-el" . "1ec676c021269c7b9cf814cf1d12f6acdcc25588")
  ("straight.el" . "13d019dfc72e69cce58b510766e197b044ea823b")
- ("sunrise-commander" . "a98c5c77e6d49d906919f4a9ab6192ea391a5255")
  ("swift-mode" . "55ce4e53f856626938b50f014c5f82947a628d6a")
  ("swiper" . "71d8acfb92de9c77a23c7d2705b8690053e688b5")
  ("sx.el" . "a214f46b15eb29eaf02abdd4ddc2f90c3925d15f")
