@@ -4712,7 +4712,7 @@ This is passed to `set-frame-font'."
 ;; The following code customizes the mode line to something like:
 ;; [*] radian.el   18% (18,0)     [radian:develop*]  (Emacs-Lisp)
 
-(defun radian--mode-line-buffer-modified-status ()
+(defun radian-mode-line-buffer-modified-status ()
   "Return a mode line construct indicating buffer modification status.
 This is [*] if the buffer has been modified and whitespace
 otherwise. (Non-file-visiting buffers are never considered to be
@@ -4732,7 +4732,7 @@ modified.) It is shown in the same color as the buffer name, i.e.
 (setq-default mode-line-buffer-identification
               (propertized-buffer-identification "%b"))
 
-(defvar-local radian--mode-line-project-and-branch nil
+(defvar-local radian-mode-line-project-and-branch nil
   "Mode line construct showing Projectile project and Git status.
 The format is [project:branch*], where the * is shown if the
 working directory is dirty. Either component can be missing; this
@@ -4748,14 +4748,14 @@ See also `radian-show-git-mode'.")
 
 ;; Don't clear the cache when switching major modes (or using M-x
 ;; normal-mode).
-(put 'radian--mode-line-project-and-branch 'permanent-local t)
+(put 'radian-mode-line-project-and-branch 'permanent-local t)
 
 (defun radian--mode-line-recompute-project-and-branch ()
-  "Recalculate and set `radian--mode-line-project-and-branch'.
+  "Recalculate and set `radian-mode-line-project-and-branch'.
 Force a redisplay of the mode line if necessary. This is
 buffer-local."
   (condition-case-unless-debug err
-      (let ((old radian--mode-line-project-and-branch)
+      (let ((old radian-mode-line-project-and-branch)
             (new
              (let* (;; Don't insist on having Projectile loaded.
                     (project-name (when (featurep 'projectile)
@@ -4826,24 +4826,25 @@ buffer-local."
                 (git
                  (format "  [%s%s]" branch-name dirty))))))
         (unless (equal old new)
-          (setq radian--mode-line-project-and-branch new)
+          (setq radian-mode-line-project-and-branch new)
           (force-mode-line-update)))
     (error
      ;; We should not usually get an error here. In the case that we
      ;; do, however, let's try to avoid displaying garbage data, and
      ;; instead delete the construct entirely from the mode line.
-     (unless (null radian--mode-line-project-and-branch)
-       (setq radian--mode-line-project-and-branch nil)
+     (unless (null radian-mode-line-project-and-branch)
+       (setq radian-mode-line-project-and-branch nil)
        (force-mode-line-update)))))
 
 ;; We will make sure this information is updated after some time of
 ;; inactivity, for the current buffer.
 
-(defvar radian--mode-line-update-delay 1
+(defcustom radian-mode-line-update-delay 1
   "Seconds of inactivity before updating the mode line.
 Specifically, this entails updating the Projectile project, Git
 branch, and dirty status, which are the most computationally
-taxing elements.")
+taxing elements."
+  :type 'number)
 
 ;; We only need one global timer pair for all the buffers, since we
 ;; will only be updating the cached mode line value for the current
@@ -4866,7 +4867,7 @@ taxing elements.")
 
 (defun radian--mode-line-recompute-and-reschedule ()
   "Compute mode line data and re-set timers.
-The delay is `radian--mode-line-update-delay'. The timers are
+The delay is `radian-mode-line-update-delay'. The timers are
 `radian--mode-line-idle-timer' and
 `radian--mode-line-repeat-timer'."
 
@@ -4889,12 +4890,12 @@ The delay is `radian--mode-line-update-delay'. The timers are
   (when (current-idle-time)
     (setq radian--mode-line-repeat-timer
           (run-with-idle-timer
-           (time-add (current-idle-time) radian--mode-line-update-delay)
+           (time-add (current-idle-time) radian-mode-line-update-delay)
            nil #'radian--mode-line-recompute-and-reschedule))))
 
 (defvar radian--mode-line-idle-timer
   (run-with-idle-timer
-   radian--mode-line-update-delay 'repeat
+   radian-mode-line-update-delay 'repeat
    #'radian--mode-line-recompute-and-reschedule)
   "Timer that recomputes information for the mode line, or nil.
 This runs once each time Emacs is idle.
@@ -4934,9 +4935,9 @@ spaces."
   (let ((width (- (window-width) (length left))))
     (format (format "%%s%%%ds" width) left right)))
 
-(defvar radian--mode-line-left
+(defcustom radian-mode-line-left
   '(;; Show [*] if the buffer is modified.
-    (:eval (radian--mode-line-buffer-modified-status))
+    (:eval (radian-mode-line-buffer-modified-status))
     " "
     ;; Show the name of the current buffer.
     mode-line-buffer-identification
@@ -4944,14 +4945,16 @@ spaces."
     ;; Show the row and column of point.
     mode-line-position
     ;; Show the current Projectile project and Git branch.
-    radian--mode-line-project-and-branch
+    radian-mode-line-project-and-branch
     ;; Show the active major and minor modes.
     "  "
     mode-line-modes)
-  "Composite mode line construct to be shown left-aligned.")
+  "Composite mode line construct to be shown left-aligned."
+  :type 'sexp)
 
-(defvar radian--mode-line-right nil
-  "Composite mode line construct to be shown right-aligned.")
+(defcustom radian-mode-line-right nil
+  "Composite mode line construct to be shown right-aligned."
+  :type 'sexp)
 
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
@@ -4959,8 +4962,8 @@ spaces."
               '(:eval (replace-regexp-in-string
                        "%" "%%"
                        (radian--mode-line-align
-                        (format-mode-line radian--mode-line-left)
-                        (format-mode-line radian--mode-line-right))
+                        (format-mode-line radian-mode-line-left)
+                        (format-mode-line radian-mode-line-right))
                        'fixedcase 'literal)))
 
 ;;;; Color theme
