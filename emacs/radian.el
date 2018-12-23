@@ -1977,7 +1977,7 @@ the timer when no buffers need to be checked."
   ;; so it may be controversial upstream. We only enable the
   ;; keybinding in windowed mode.
   (when (display-graphic-p)
-    (map-put sp-paredit-bindings "M-[" #'sp-wrap-square))
+    (setf (map-elt sp-paredit-bindings "M-[") #'sp-wrap-square))
 
   ;; Set up keybindings for s-expression navigation and manipulation
   ;; in the style of Paredit.
@@ -2443,7 +2443,7 @@ currently active.")
   (c-add-style "radian-bsd"
                '("bsd"
                  (c-basic-offset . 2)))
-  (map-put c-default-style 'other "radian-bsd")
+  (setf (map-elt c-default-style 'other) "radian-bsd")
 
   (put 'c-default-style 'safe-local-variable #'stringp)
 
@@ -3322,7 +3322,7 @@ FORCE is not nil.")
       ;; opening PDFs.
       (add-to-list 'TeX-view-program-list
                    '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-      (map-put TeX-view-program-selection 'output-pdf '("TeXShop"))))
+      (setf (map-elt TeX-view-program-selection 'output-pdf) '("TeXShop"))))
 
   (radian-defadvice radian--advice-inhibit-tex-style-loading-message
       (TeX-load-style-file file)
