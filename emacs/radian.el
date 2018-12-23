@@ -4331,6 +4331,15 @@ as argument."
   (magit-define-popup-switch 'magit-merge-popup ?u
     "Allow unrelated" "--allow-unrelated-histories"))
 
+;; Feature `git-commit' from package `magit' provides the commit
+;; message editing capabilities of Magit.
+(use-feature git-commit
+  :config
+
+  ;; Max length for commit message summary is 50 characters as per
+  ;; https://chris.beams.io/posts/git-commit/.
+  (setq git-commit-summary-max-length 50))
+
 ;; Package `gh' provides an Elisp interface to the GitHub API.
 (use-package gh
   ;; Disable autoloads because this package autoloads *way* too much
@@ -4356,46 +4365,6 @@ as argument."
        (magit-gh-pulls-get-api) (car repo) (cdr repo))))
 
   :blackout t)
-
-;; Package `git-commit' allows you to use Emacsclient as a Git commit
-;; message editor, providing syntax highlighting and using
-;; `with-editor' to allow you to conveniently accept or abort the
-;; commit.
-(use-package git-commit
-  :init/el-patch
-
-  (defun git-commit-setup-check-buffer ()
-    (and buffer-file-name
-         (string-match-p git-commit-filename-regexp buffer-file-name)
-         (git-commit-setup)))
-
-  (define-minor-mode global-git-commit-mode
-    "Edit Git commit messages.
-This global mode arranges for `git-commit-setup' to be called
-when a Git commit message file is opened.  That usually happens
-when Git uses the Emacsclient as $GIT_EDITOR to have the user
-provide such a commit message."
-    :group 'git-commit
-    :type 'boolean
-    :global t
-    :init-value t
-    :initialize (lambda (symbol exp)
-                  (custom-initialize-default symbol exp)
-                  (when global-git-commit-mode
-                    (add-hook 'find-file-hook 'git-commit-setup-check-buffer)))
-    (if global-git-commit-mode
-        (add-hook  'find-file-hook 'git-commit-setup-check-buffer)
-      (remove-hook 'find-file-hook 'git-commit-setup-check-buffer)))
-
-  :init
-
-  (global-git-commit-mode +1)
-
-  :config
-
-  ;; Max length for commit message summary is 50 characters as per
-  ;; https://chris.beams.io/posts/git-commit/.
-  (setq git-commit-summary-max-length 50))
 
 ;;;; External commands
 
