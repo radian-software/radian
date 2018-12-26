@@ -4304,6 +4304,14 @@ as argument."
   :bind* (:filter (radian--browse-url-predicate)
                   ("C-c C-o" . browse-url-at-point)))
 
+;; Feature `bug-reference' provides a mechanism for hyperlinking issue
+;; tracker references (like #20), so that you can open them in a web
+;; browser easily.
+(use-feature bug-reference
+  :config
+
+  (bind-key "C-c C-o" #'bug-reference-push-button bug-reference-map))
+
 ;; Package `atomic-chrome' provides a way for you to edit textareas in
 ;; Chrome or Firefox using Emacs. See
 ;; https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc
