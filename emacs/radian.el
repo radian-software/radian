@@ -3338,6 +3338,13 @@ This is an `:around' advice for `TeX-load-style-file'."
                   (raw-load file noerror 'nomessage nosuffix must-suffix))))
       (funcall TeX-load-style-file file)))
 
+  (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
+      (TeX-auto-list-information name)
+    :around TeX-auto-list-information
+    "Inhibit the \"Removing duplicates...\" messages."
+    (let ((inhibit-message t))
+      (funcall TeX-auto-list-information name)))
+
   (radian-defhook radian--flycheck-tex-setup ()
     TeX-mode-hook
     "Disable some Flycheck checkers in TeX buffers.
