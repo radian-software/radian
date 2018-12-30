@@ -1623,11 +1623,7 @@ advice, \\[kill-line] will kill both the whitespace and the
 newline, which is inconsistent with its behavior when the
 whitespace is replaced with non-whitespace. With this advice,
 \\[kill-line] will kill just the whitespace, and another
-invocation will kill the newline.
-
-This is an `:around' advice for `kill-line'. KILL-LINE is the
-original definition of `kill-line' and ARGS are the arguments
-that were passed to it."
+invocation will kill the newline."
   (let ((show-trailing-whitespace t))
     (apply kill-line args)))
 
@@ -1735,11 +1731,7 @@ the reverse direction from \\[universal-argument]
   "Allow \\[pop-global-mark] to step in reverse.
 If a negative prefix argument is given (like
 \\[negative-argument] \\[pop-global-mark]), then it will step in
-the reverse direction from \\[pop-global-mark].
-
-This is an `:around' advice for `pop-global-mark'.
-POP-GLOBAL-MARK is the original function and ARG is its
-argument."
+the reverse direction from \\[pop-global-mark]."
   (interactive "P")
   (if arg
       ;; Tweaked from the implementation of `pop-global-mark'.
@@ -3328,8 +3320,7 @@ FORCE is not nil.")
   (radian-defadvice radian--advice-inhibit-tex-style-loading-message
       (TeX-load-style-file file)
     :around TeX-load-style-file
-    "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
-This is an `:around' advice for `TeX-load-style-file'."
+    "Inhibit the \"Loading **/auto/*.el (source)...\" messages."
     (cl-letf* (((symbol-function #'raw-load) (symbol-function #'load))
                ((symbol-function #'load)
                 (lambda (file &optional
@@ -3347,8 +3338,7 @@ This is an `:around' advice for `TeX-load-style-file'."
 
   (radian-defhook radian--flycheck-tex-setup ()
     TeX-mode-hook
-    "Disable some Flycheck checkers in TeX buffers.
-This function is for use on `TeX-mode-hook'."
+    "Disable some Flycheck checkers in TeX buffers."
     (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck)))
 
 ;; Feature `tex-buf' from package `auctex' provides support for
