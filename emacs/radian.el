@@ -2926,8 +2926,10 @@ ARG is passed to `hindent-mode' toggle function."
          ("\\.mmark\\'" . markdown-mode))
 
   :bind (;; C-c C-s p is a really dumb binding, we prefer C-c C-s C-p.
+         ;; Same for C-c C-s q.
          :map markdown-mode-style-map
-              ("C-p" . markdown-insert-pre))
+              ("C-p" . markdown-insert-pre)
+              ("C-q" . markdown-insert-blockquote))
   :config
 
   (radian-defhook radian--flycheck-markdown-setup ()
