@@ -254,7 +254,10 @@ binding the variable dynamically over the entire init-file."
   radian--finalize-init-hook
   "Finalize the init-file's straight.el transaction."
   (setq straight-treat-as-init nil)
-  (straight-finalize-transaction))
+  ;; Just in case the straight.el bootstrap failed, do not mask the
+  ;; error with a void-function error.
+  (when (fboundp 'straight-finalize-transaction)
+    (straight-finalize-transaction)))
 
 (setq straight-treat-as-init t)
 
