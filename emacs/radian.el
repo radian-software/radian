@@ -78,25 +78,24 @@ function. DOCSTRING and BODY are as in `defun'."
        ,@body)
      (add-hook ',hook ',name)))
 
+(defmacro radian-operating-system-p (os)
+  "Return non-nil if OS matches the system type.
+Allowable values for OS (not quoted) are `macOS', `osx',
+`windows', `linux', `unix'."
+  (pcase os
+    (`unix `(not (memq system-type '(ms-dos windows-nt cygwin))))
+    ((or `macOS `osx) `(eq system-type 'darwin))
+    (`linux `(not (memq system-type
+                        '(darwin ms-dos windows-nt cygwin))))
+    (`windows `(memq system-type '(ms-dos windows-nt cygwin)))))
+
 (defmacro radian-with-operating-system (os &rest body)
   "If OS matches the system type, eval and return BODY. Else return nil.
-Allowable values for OS (not quoted):
-
-- macOS
-- windows
-- unix
-- linux"
+Allowable values for OS (not quoted) are `macOS', `osx',
+`windows', `linux', `unix'."
   (declare (indent 1))
-  (let ((check
-         (pcase os
-           (`unix (not (memq system-type '(ms-dos windows-nt cygwin))))
-           (`macOS (eq system-type 'darwin))
-           (`linux (not (memq system-type
-                              '(darwin ms-dos windows-nt cygwin))))
-           (`windows (memq system-type '(ms-dos windows-nt cygwin))))))
-    (when check
-      `(progn
-         ,@body))))
+  `(when (radian-operating-system-p ,os)
+     ,@body))
 
 (defun radian-managed-p (filename)
   "Return non-nil if FILENAME is managed by Radian.
@@ -4360,11 +4359,20 @@ Also set up filling correctly based on
 
   (radian-defhook radian--atomic-chrome-switch-back ()
     atomic-chrome-edit-done-hook
-    "Switch back to Google Chrome after finishing with `atomic-chrome'.
-This only works on macOS currently."
-    (radian-with-operating-system macOS
-      (when (file-directory-p "/Applications/Google Chrome.app")
-        (call-process "open" nil nil nil "-a" "Google Chrome"))))
+    "Switch back to the browser after finishing with `atomic-chrome'."
+    (when-let* ((conn (websocket-server-conn
+                       (atomic-chrome-get-websocket (current-buffer))))
+                (browser
+                 (cond
+                  ((eq conn atomic-chrome-server-ghost-text)
+                    "Firefox")
+                   ((eq conn atomic-chrome-server-atomic-chrome)
+                    "Google Chrome"))))
+      (cond
+       ((radian-operating-system-p macOS)
+        (call-process "open" nil nil nil "-a" browser))
+       ((radian-operating-system-p linux)
+        (call-process "wmctrl" nil nil nil "-a" browser)))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
