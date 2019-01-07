@@ -4677,87 +4677,88 @@ See also `radian-show-git-mode'.")
   "Recalculate and set `radian-mode-line-project-and-branch'.
 Force a redisplay of the mode line if necessary. This is
 buffer-local."
-  (condition-case-unless-debug err
-      (let ((old radian-mode-line-project-and-branch)
-            (new
-             (let* (;; Don't insist on having Projectile loaded.
-                    (project-name (when (featurep 'projectile)
-                                    (projectile-project-name)))
-                    ;; Projectile returns "-" to mean "no project".
-                    ;; I'm still wondering what happens if someone
-                    ;; makes a project named "-".
-                    (project-name (unless (equal project-name "-")
-                                    project-name))
-                    ;; Check if we are actually in a Git repo, and Git
-                    ;; is available, and we want to show the Git
-                    ;; status.
-                    (git (and
-                          radian-show-git-mode
-                          (executable-find "git")
-                          (locate-dominating-file default-directory ".git")))
-                    (branch-name
-                     (when git
-                       ;; Determine a reasonable string to show for
-                       ;; the current branch. This is actually more or
-                       ;; less the same logic as we use for the Radian
-                       ;; Zsh prompt.
-                       (with-temp-buffer
-                         ;; First attempt uses symbolic-ref, which
-                         ;; returns the branch name if it exists.
-                         (call-process "git" nil '(t nil) nil
-                                       "symbolic-ref" "HEAD")
-                         (if (> (buffer-size) 0)
-                             ;; It actually returns something like
-                             ;; refs/heads/master, though, so let's
-                             ;; try to trim it if possible.
-                             (let ((regex "^\\(refs/heads/\\)?\\(.+\\)$")
-                                   (str (string-trim (buffer-string))))
-                               (if (string-match regex str)
-                                   (match-string 2 str)
-                                 ;; If it's something weird then just
-                                 ;; show it literally.
-                                 str))
-                           ;; If symbolic-ref didn't return anything
-                           ;; on stdout (we discarded stderr), we
-                           ;; probably have a detached head and we
-                           ;; should show the abbreviated commit hash
-                           ;; (e.g. b007692).
-                           (erase-buffer)
+  (unless (file-remote-p default-directory)
+    (condition-case-unless-debug err
+        (let ((old radian-mode-line-project-and-branch)
+              (new
+               (let* (;; Don't insist on having Projectile loaded.
+                      (project-name (when (featurep 'projectile)
+                                      (projectile-project-name)))
+                      ;; Projectile returns "-" to mean "no project".
+                      ;; I'm still wondering what happens if someone
+                      ;; makes a project named "-".
+                      (project-name (unless (equal project-name "-")
+                                      project-name))
+                      ;; Check if we are actually in a Git repo, and Git
+                      ;; is available, and we want to show the Git
+                      ;; status.
+                      (git (and
+                            radian-show-git-mode
+                            (executable-find "git")
+                            (locate-dominating-file default-directory ".git")))
+                      (branch-name
+                       (when git
+                         ;; Determine a reasonable string to show for
+                         ;; the current branch. This is actually more or
+                         ;; less the same logic as we use for the Radian
+                         ;; Zsh prompt.
+                         (with-temp-buffer
+                           ;; First attempt uses symbolic-ref, which
+                           ;; returns the branch name if it exists.
                            (call-process "git" nil '(t nil) nil
-                                         "rev-parse" "--short" "HEAD")
+                                         "symbolic-ref" "HEAD")
                            (if (> (buffer-size) 0)
-                               (string-trim (buffer-string))
-                             ;; We shouldn't get here. Unfortunately,
-                             ;; it turns out that we do every once in
-                             ;; a while. (I have no idea why.)
-                             "???")))))
-                    (dirty (when git
-                             (with-temp-buffer
-                               (call-process "git" nil t nil
-                                             "status" "--porcelain")
-                               (if (> (buffer-size) 0)
-                                   "*" "")))))
-               (cond
-                ((and project-name git)
-                 (format "  [%s:%s%s]" project-name branch-name dirty))
-                (project-name
-                 (format "  [%s]" project-name))
-                ;; This should never happen unless you do something
-                ;; perverse like create a version-controlled
-                ;; Projectile project whose name is a hyphen, but we
-                ;; want to handle it anyway.
-                (git
-                 (format "  [%s%s]" branch-name dirty))))))
-        (unless (equal old new)
-          (setq radian-mode-line-project-and-branch new)
-          (force-mode-line-update)))
-    (error
-     ;; We should not usually get an error here. In the case that we
-     ;; do, however, let's try to avoid displaying garbage data, and
-     ;; instead delete the construct entirely from the mode line.
-     (unless (null radian-mode-line-project-and-branch)
-       (setq radian-mode-line-project-and-branch nil)
-       (force-mode-line-update)))))
+                               ;; It actually returns something like
+                               ;; refs/heads/master, though, so let's
+                               ;; try to trim it if possible.
+                               (let ((regex "^\\(refs/heads/\\)?\\(.+\\)$")
+                                     (str (string-trim (buffer-string))))
+                                 (if (string-match regex str)
+                                     (match-string 2 str)
+                                   ;; If it's something weird then just
+                                   ;; show it literally.
+                                   str))
+                             ;; If symbolic-ref didn't return anything
+                             ;; on stdout (we discarded stderr), we
+                             ;; probably have a detached head and we
+                             ;; should show the abbreviated commit hash
+                             ;; (e.g. b007692).
+                             (erase-buffer)
+                             (call-process "git" nil '(t nil) nil
+                                           "rev-parse" "--short" "HEAD")
+                             (if (> (buffer-size) 0)
+                                 (string-trim (buffer-string))
+                               ;; We shouldn't get here. Unfortunately,
+                               ;; it turns out that we do every once in
+                               ;; a while. (I have no idea why.)
+                               "???")))))
+                      (dirty (when git
+                               (with-temp-buffer
+                                 (call-process "git" nil t nil
+                                               "status" "--porcelain")
+                                 (if (> (buffer-size) 0)
+                                     "*" "")))))
+                 (cond
+                  ((and project-name git)
+                   (format "  [%s:%s%s]" project-name branch-name dirty))
+                  (project-name
+                   (format "  [%s]" project-name))
+                  ;; This should never happen unless you do something
+                  ;; perverse like create a version-controlled
+                  ;; Projectile project whose name is a hyphen, but we
+                  ;; want to handle it anyway.
+                  (git
+                   (format "  [%s%s]" branch-name dirty))))))
+          (unless (equal old new)
+            (setq radian-mode-line-project-and-branch new)
+            (force-mode-line-update)))
+      (error
+       ;; We should not usually get an error here. In the case that we
+       ;; do, however, let's try to avoid displaying garbage data, and
+       ;; instead delete the construct entirely from the mode line.
+       (unless (null radian-mode-line-project-and-branch)
+         (setq radian-mode-line-project-and-branch nil)
+         (force-mode-line-update))))))
 
 ;; We will make sure this information is updated after some time of
 ;; inactivity, for the current buffer.
