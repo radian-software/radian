@@ -2449,8 +2449,8 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
     ;; headers and such. Disable them by default.
     (radian--flycheck-disable-checkers 'c/c++-clang 'c/c++-gcc))
 
-  (add-hook 'c-mode #'radian--flycheck-c/c++-setup)
-  (add-hook 'c++-mode #'radian--flycheck-c/c++-setup))
+  (add-hook 'c-mode-hook #'radian--flycheck-c/c++-setup)
+  (add-hook 'c++-mode-hook #'radian--flycheck-c/c++-setup))
 
 ;; Package `irony-mode' provides a framework to use libclang to get
 ;; semantic information about C, C++, and Objective-C code. Such
