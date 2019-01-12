@@ -79,6 +79,7 @@
  ("peg.el" . "081efeca91d790c7fbc90871ac22c40935f4833b")
  ("pip-requirements.el" . "216cd1690f80cc965d4ae47b8753fc185f778ff6")
  ("pkg-info.el" . "76ba7415480687d05a4353b27fea2ae02b8d9d61")
+ ("pkgbuild-mode" . "e30e37730b5f30bc0dd5b9328fbf4cb3e6f46fdd")
  ("popup-el" . "80829dd46381754639fb764da11c67235fe63282")
  ("pos-tip" . "051e08fec5cf30b7574bdf439f79fef7d42d689d")
  ("prescient.el" . "c395c6dee67cf269be12467b768343fb10f2399f")

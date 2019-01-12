@@ -3533,6 +3533,10 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; The default mode lighter is "pip-require". Ew.
   :blackout "Requirements")
 
+;; Package `pkgbuild-mode' provides a major mode for PKGBUILD files
+;; used by Arch Linux and derivatives.
+(use-package pkgbuild-mode)
+
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
 (use-package ssh-config-mode)
 
