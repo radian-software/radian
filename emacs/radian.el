@@ -4860,7 +4860,7 @@ the former is shown.")
 LEFT and RIGHT are strings, and the return value is a string that
 displays them left- and right-aligned respectively, separated by
 spaces."
-  (let ((width (- (window-width) (length left))))
+  (let ((width (- (window-total-width) (length left))))
     (format (format "%%s%%%ds" width) left right)))
 
 (defcustom radian-mode-line-left
