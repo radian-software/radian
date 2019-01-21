@@ -4327,16 +4327,10 @@ as argument."
   :straight (:host github :repo "alpha22jp/atomic-chrome"
                    :fork (:repo "raxod502/atomic-chrome" :branch "fork/1"))
   :defer 5
-  :bind (:map atomic-chrome-edit-mode-map
-              :filter (not radian-atomic-chrome-allow-filling)
-              ("M-q" . ignore))
   :config
 
   (defvar-local radian-atomic-chrome-url nil
     "The URL of the text area being edited.")
-
-  (defvar-local radian-atomic-chrome-allow-filling nil
-    "Non-nil means that hard line wrapping may be used.")
 
   (defcustom radian-atomic-chrome-setup-hook nil
     "Hook run while setting up an `atomic-chrome' buffer.
@@ -4351,10 +4345,7 @@ Also set up filling correctly based on
 `radian-atomic-chrome-allow-filling', after running
 `radian-atomic-chrome-setup-hook'."
     (setq radian-atomic-chrome-url url)
-    (run-hooks 'radian-atomic-chrome-setup-hook)
-    (unless radian-atomic-chrome-allow-filling
-      (auto-fill-mode -1)
-      (visual-line-mode +1)))
+    (run-hooks 'radian-atomic-chrome-setup-hook))
 
   ;; Edit in Markdown by default, because many sites support it and
   ;; it's not a big deal if the text area doesn't actually support
