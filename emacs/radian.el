@@ -467,7 +467,7 @@ see https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692."))
   "Keymap for Radian commands that should be put under a prefix.
 This keymap is bound under M-P.")
 
-(bind-key "M-P" radian-keymap)
+(bind-key* "M-P" radian-keymap)
 
 (defmacro radian-bind-key (key-name command &optional predicate)
   "Bind a key in `radian-keymap'."
