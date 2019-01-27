@@ -694,6 +694,11 @@ sets `completion-in-region-function' regardless of the value of
 
   :blackout t)
 
+;; Package `ivy-hydra' provides the C-o binding for Ivy menus which
+;; allows you to pick from a set of options for what to do with a
+;; selected candidate.
+(use-package ivy-hydra)
+
 ;; Package `counsel' provides purpose-built replacements for many
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
 ;; to provide extra features.
