@@ -4338,17 +4338,13 @@ as argument."
     "The URL of the text area being edited.")
 
   (defcustom radian-atomic-chrome-setup-hook nil
-    "Hook run while setting up an `atomic-chrome' buffer.
-You can set `radian-atomic-chrome-allow-filling' based on the
-value of `radian-atomic-chrome-url' in this hook."
+    "Hook run while setting up an `atomic-chrome' buffer."
     :type 'hook)
 
   (radian-defadvice radian--advice-atomic-chrome-setup (url)
     :after atomic-chrome-set-major-mode
     "Save the URL in `radian-atomic-chrome-url'.
-Also set up filling correctly based on
-`radian-atomic-chrome-allow-filling', after running
-`radian-atomic-chrome-setup-hook'."
+Also run `radian-atomic-chrome-setup-hook'."
     (setq radian-atomic-chrome-url url)
     (run-hooks 'radian-atomic-chrome-setup-hook))
 
