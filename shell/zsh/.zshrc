@@ -121,6 +121,13 @@ fi
 
 ### Command line
 
+# Force the usage of Emacs keybindings. Otherwise they will be set
+# depending on whether the literal string "vi" appears in the value of
+# EDITOR, which is a terrible idea for many reasons (not least of
+# which being that my EDITOR is Vim while I want to use Emacs
+# keybindings in Zsh).
+bindkey -e
+
 # Allow a very fast way (just typing ".") to reload the shell
 # configuration. Based on [1].
 #

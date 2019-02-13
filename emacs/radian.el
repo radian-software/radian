@@ -78,25 +78,24 @@ function. DOCSTRING and BODY are as in `defun'."
        ,@body)
      (add-hook ',hook ',name)))
 
+(defmacro radian-operating-system-p (os)
+  "Return non-nil if OS matches the system type.
+Allowable values for OS (not quoted) are `macOS', `osx',
+`windows', `linux', `unix'."
+  (pcase os
+    (`unix `(not (memq system-type '(ms-dos windows-nt cygwin))))
+    ((or `macOS `osx) `(eq system-type 'darwin))
+    (`linux `(not (memq system-type
+                        '(darwin ms-dos windows-nt cygwin))))
+    (`windows `(memq system-type '(ms-dos windows-nt cygwin)))))
+
 (defmacro radian-with-operating-system (os &rest body)
   "If OS matches the system type, eval and return BODY. Else return nil.
-Allowable values for OS (not quoted):
-
-- macOS
-- windows
-- unix
-- linux"
+Allowable values for OS (not quoted) are `macOS', `osx',
+`windows', `linux', `unix'."
   (declare (indent 1))
-  (let ((check
-         (pcase os
-           (`unix (not (memq system-type '(ms-dos windows-nt cygwin))))
-           (`macOS (eq system-type 'darwin))
-           (`linux (not (memq system-type
-                              '(darwin ms-dos windows-nt cygwin))))
-           (`windows (memq system-type '(ms-dos windows-nt cygwin))))))
-    (when check
-      `(progn
-         ,@body))))
+  `(when (radian-operating-system-p ,os)
+     ,@body))
 
 (defun radian-managed-p (filename)
   "Return non-nil if FILENAME is managed by Radian.
@@ -254,7 +253,10 @@ binding the variable dynamically over the entire init-file."
   radian--finalize-init-hook
   "Finalize the init-file's straight.el transaction."
   (setq straight-treat-as-init nil)
-  (straight-finalize-transaction))
+  ;; Just in case the straight.el bootstrap failed, do not mask the
+  ;; error with a void-function error.
+  (when (fboundp 'straight-finalize-transaction)
+    (straight-finalize-transaction)))
 
 (setq straight-treat-as-init t)
 
@@ -271,9 +273,6 @@ binding the variable dynamically over the entire init-file."
          (executable-find "python3"))
     (setq straight-check-for-modifications '(watch-files find-when-checking))
   (setq straight-check-for-modifications '(check-on-save find-when-checking)))
-
-;; Use GNU ELPA mirror so that packages like AUCTeX will work.
-(setq straight-recipes-gnu-elpa-use-mirror t)
 
 (radian--run-hook 'radian-before-straight-hook)
 
@@ -407,6 +406,54 @@ binding the variable dynamically over the entire init-file."
                    :repo "raxod502/el-patch"
                    :branch "develop")
   :demand t)
+
+;;; Fixes to internal functions
+
+;; Backported bugfix for `while-no-input' from Emacs 27 which helps to
+;; prevent spurious "Quit" events from being registered in some
+;; situations. See [1].
+;;
+;; [1]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692.
+(el-patch-defmacro while-no-input (&rest body)
+  (el-patch-concat
+    "Execute BODY only as long as there's no pending input.
+If input arrives, that ends the execution of BODY,
+and `while-no-input' returns t.  Quitting makes it return nil.
+If BODY finishes, `while-no-input' returns whatever value BODY produced."
+    (el-patch-add
+      "\n\nThis function includes a backported fix for bug#31692;
+see https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692."))
+  (declare (debug t) (indent 0))
+  (let ((catch-sym (make-symbol "input")))
+    `(with-local-quit
+       (catch ',catch-sym
+	 (let ((throw-on-input ',catch-sym)
+               (el-patch-add val))
+           (el-patch-wrap 2
+             (setq val (or (input-pending-p)
+	                   (progn ,@body))))
+           (el-patch-add
+             (cond
+              ;; When input arrives while throw-on-input is non-nil,
+              ;; kbd_buffer_store_buffered_event sets quit-flag to the
+              ;; value of throw-on-input.  If, when BODY finishes,
+              ;; quit-flag still has the same value as throw-on-input, it
+              ;; means BODY never tested quit-flag, and therefore ran to
+              ;; completion even though input did arrive before it
+              ;; finished.  In that case, we must manually simulate what
+              ;; 'throw' in process_quit_flag would do, and we must
+              ;; reset quit-flag, because leaving it set will cause us
+              ;; quit to top-level, which has undesirable consequences,
+              ;; such as discarding input etc.  We return t in that case
+              ;; because input did arrive during execution of BODY.
+              ((eq quit-flag throw-on-input)
+               (setq quit-flag nil)
+               t)
+              ;; This is for when the user actually QUITs during
+              ;; execution of BODY.
+              (quit-flag
+               nil)
+              (t val))))))))
 
 ;;; Keybindings
 
@@ -723,15 +770,16 @@ Local bindings (`counsel-mode-map'):
     (el-patch-concat
       "rg -S --no-heading --line-number --color never "
       (el-patch-add
-        "-z ")
+        "-z --sort path ")
       "%s .")
     (el-patch-concat
       "Alternative to `counsel-ag-base-command' using ripgrep.
 
 Note: don't use single quotes for the regex."
       (el-patch-add
-        "\n\nSupport for searching compressed files has been added
-by `el-patch'."))
+        "\n\nSupport for searching compressed files and for
+reporting results in a deterministic order has been added by
+`el-patch'."))
     :type 'string
     :group 'ivy)
 
@@ -935,6 +983,11 @@ split."
 ;; projects, etc. It then provides commands for quickly navigating
 ;; between and within these projects.
 (use-package projectile
+  ;; Why do we do this convoluted lazy-loading instead of just not
+  ;; enabling `projectile-mode'? It's because setting up the
+  ;; `counsel-projectile' keybindings requires for `projectile-mode'
+  ;; to be enabled and for `projectile-command-map' and
+  ;; `projectile-mode-map' to be defined.
   :init/el-patch
 
   (defcustom projectile-keymap-prefix nil
@@ -1573,11 +1626,7 @@ advice, \\[kill-line] will kill both the whitespace and the
 newline, which is inconsistent with its behavior when the
 whitespace is replaced with non-whitespace. With this advice,
 \\[kill-line] will kill just the whitespace, and another
-invocation will kill the newline.
-
-This is an `:around' advice for `kill-line'. KILL-LINE is the
-original definition of `kill-line' and ARGS are the arguments
-that were passed to it."
+invocation will kill the newline."
   (let ((show-trailing-whitespace t))
     (apply kill-line args)))
 
@@ -1685,11 +1734,7 @@ the reverse direction from \\[universal-argument]
   "Allow \\[pop-global-mark] to step in reverse.
 If a negative prefix argument is given (like
 \\[negative-argument] \\[pop-global-mark]), then it will step in
-the reverse direction from \\[pop-global-mark].
-
-This is an `:around' advice for `pop-global-mark'.
-POP-GLOBAL-MARK is the original function and ARG is its
-argument."
+the reverse direction from \\[pop-global-mark]."
   (interactive "P")
   (if arg
       ;; Tweaked from the implementation of `pop-global-mark'.
@@ -1724,6 +1769,21 @@ argument."
   (radian-defadvice radian--advice-bookmark-silence (&rest _)
     :override bookmark-maybe-message
     "Silence useless messages from bookmark.el."))
+
+;;;;; Definition location
+
+;; Package `dumb-jump' provides a mechanism to jump to the definitions
+;; of functions, variables, etc. in a variety of programming
+;; languages. The advantage of `dumb-jump' is that it doesn't try to
+;; be clever, so it "just works" instantly for dozens of languages
+;; with zero configuration.
+(use-package dumb-jump
+  :init
+
+  (dumb-jump-mode +1)
+
+  :bind (:map dumb-jump-mode-map
+              ("M-Q" . dumb-jump-quick-look)))
 
 ;;;; Find and replace
 
@@ -1912,7 +1972,7 @@ the timer when no buffers need to be checked."
   ;; so it may be controversial upstream. We only enable the
   ;; keybinding in windowed mode.
   (when (display-graphic-p)
-    (map-put sp-paredit-bindings "M-[" #'sp-wrap-square))
+    (setf (map-elt sp-paredit-bindings "M-[") #'sp-wrap-square))
 
   ;; Set up keybindings for s-expression navigation and manipulation
   ;; in the style of Paredit.
@@ -2339,7 +2399,8 @@ currently active.")
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
 
 ;; Package `apples-mode' provides a major mode for AppleScript.
-(use-package apples-mode)
+(use-package apples-mode
+  :mode "\\.\\(applescri\\|sc\\)pt\\'")
 
 ;;;; C, C++, Objective-C, Java
 ;; https://en.wikipedia.org/wiki/C_(programming_language)
@@ -2378,7 +2439,7 @@ currently active.")
   (c-add-style "radian-bsd"
                '("bsd"
                  (c-basic-offset . 2)))
-  (map-put c-default-style 'other "radian-bsd")
+  (setf (map-elt c-default-style 'other) "radian-bsd")
 
   (put 'c-default-style 'safe-local-variable #'stringp)
 
@@ -2389,8 +2450,8 @@ This function is for use in `c-mode-hook' and `c++-mode-hook'."
     ;; headers and such. Disable them by default.
     (radian--flycheck-disable-checkers 'c/c++-clang 'c/c++-gcc))
 
-  (add-hook 'c-mode #'radian--flycheck-c/c++-setup)
-  (add-hook 'c++-mode #'radian--flycheck-c/c++-setup))
+  (add-hook 'c-mode-hook #'radian--flycheck-c/c++-setup)
+  (add-hook 'c++-mode-hook #'radian--flycheck-c/c++-setup))
 
 ;; Package `irony-mode' provides a framework to use libclang to get
 ;; semantic information about C, C++, and Objective-C code. Such
@@ -2868,8 +2929,10 @@ ARG is passed to `hindent-mode' toggle function."
          ("\\.mmark\\'" . markdown-mode))
 
   :bind (;; C-c C-s p is a really dumb binding, we prefer C-c C-s C-p.
+         ;; Same for C-c C-s q.
          :map markdown-mode-style-map
-              ("C-p" . markdown-insert-pre))
+              ("C-p" . markdown-insert-pre)
+              ("C-q" . markdown-insert-blockquote))
   :config
 
   (radian-defhook radian--flycheck-markdown-setup ()
@@ -3257,13 +3320,12 @@ FORCE is not nil.")
       ;; opening PDFs.
       (add-to-list 'TeX-view-program-list
                    '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-      (map-put TeX-view-program-selection 'output-pdf '("TeXShop"))))
+      (setf (map-elt TeX-view-program-selection 'output-pdf) '("TeXShop"))))
 
   (radian-defadvice radian--advice-inhibit-tex-style-loading-message
       (TeX-load-style-file file)
     :around TeX-load-style-file
-    "Inhibit the \"Loading **/auto/*.el (source)...\" messages.
-This is an `:around' advice for `TeX-load-style-file'."
+    "Inhibit the \"Loading **/auto/*.el (source)...\" messages."
     (cl-letf* (((symbol-function #'raw-load) (symbol-function #'load))
                ((symbol-function #'load)
                 (lambda (file &optional
@@ -3272,10 +3334,16 @@ This is an `:around' advice for `TeX-load-style-file'."
                   (raw-load file noerror 'nomessage nosuffix must-suffix))))
       (funcall TeX-load-style-file file)))
 
+  (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
+      (TeX-auto-list-information name)
+    :around TeX-auto-list-information
+    "Inhibit the \"Removing duplicates...\" messages."
+    (let ((inhibit-message t))
+      (funcall TeX-auto-list-information name)))
+
   (radian-defhook radian--flycheck-tex-setup ()
     TeX-mode-hook
-    "Disable some Flycheck checkers in TeX buffers.
-This function is for use on `TeX-mode-hook'."
+    "Disable some Flycheck checkers in TeX buffers."
     (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck)))
 
 ;; Feature `tex-buf' from package `auctex' provides support for
@@ -3466,6 +3534,10 @@ This function calls `json-mode--update-auto-mode' to change the
   ;; The default mode lighter is "pip-require". Ew.
   :blackout "Requirements")
 
+;; Package `pkgbuild-mode' provides a major mode for PKGBUILD files
+;; used by Arch Linux and derivatives.
+(use-package pkgbuild-mode)
+
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
 (use-package ssh-config-mode)
 
@@ -3536,6 +3608,17 @@ unhelpful."
 ;; Emacs help facility which provides much more contextual information
 ;; in a better format.
 (use-package helpful
+  :init
+
+  (use-feature counsel
+    :config
+
+    ;; Have the alternate "help" action for `counsel-M-x' use Helpful
+    ;; instead of the default Emacs help.
+    (setf (nth 0 (alist-get "h" (plist-get ivy--actions-list 'counsel-M-x)
+                            nil nil #'equal))
+          (lambda (x) (helpful-function (intern x)))))
+
   :bind (;; Remap standard commands.
          ([remap describe-function] . helpful-callable)
          ([remap describe-variable] . helpful-variable)
@@ -4003,102 +4086,6 @@ most of the Linux utilities in `dired-guess-shell-alist-default'
 are probably not going to be installed."
       "open")))
 
-;;;;; Sunrise Commander
-
-;; Package `sunrise-commander' offers an improved two-pane version of
-;; Dired for efficient filesystem management. Unfortunately, the UX is
-;; sometimes a bit clunky, so some things will have to be fixed in
-;; future (or the package will need to be replaced).
-(use-package sunrise-commander
-  :preface
-
-  ;; Prevent extensions from being loaded. We have to do this in
-  ;; `:preface' because for some stupid reason the extensions are
-  ;; loaded in the autoloads(!!!).
-  (setq sr-autoload-extensions nil)
-
-  ;; Use my fork until
-  ;; https://github.com/escherdragon/sunrise-commander/pull/58 and
-  ;; https://github.com/escherdragon/sunrise-commander/pull/59 are
-  ;; merged.
-  :straight (:host github :repo "escherdragon/sunrise-commander"
-                   :fork (:repo "raxod502/sunrise-commander" :branch "fork/1"))
-  :init
-
-  ;; Add integration with wdx, see https://github.com/raxod502/wdx.
-
-  (defun radian--wdx-location ()
-    "Return the path to the wdx binary.
-Signal an error if it doesn't exist."
-    (let ((path "~/.zplugin/plugins/raxod502---wdx/bin/wdx"))
-      (if (file-executable-p path)
-          path
-        (user-error "wdx is not installed"))))
-
-  (defun radian-sunrise-wdx ()
-    "Prompt for wdx warp point and go there."
-    (interactive)
-    (let ((wdx (radian--wdx-location)))
-      (with-temp-buffer
-        (unless (= 0 (call-process wdx nil t nil "ls"))
-          (error "Unexpected error from wdx"))
-        (let ((point (completing-read
-                      "Go to warp point: " (split-string (buffer-string) "\n")
-                      nil 'require-match)))
-          (erase-buffer)
-          (unless (= 0 (call-process wdx nil t nil "show" "--" point))
-            (error "Unexpected error from wdx"))
-          (let ((path (string-remove-suffix "\n" (buffer-string))))
-            (sr-goto-dir path))))))
-
-  (defun radian-sunrise-wdx-set-or-remove (&optional remove)
-    "Prompt for wdx warp point name and set it at the current directory.
-With prefix argument, prompt for warp point to remove."
-    (interactive "P")
-    (let ((wdx (radian--wdx-location)))
-      (if remove
-          (with-temp-buffer
-            (unless (= 0 (call-process wdx nil t nil "ls"))
-              (error "Unexpected error from wdx"))
-            (let ((point (completing-read
-                          "Delete warp point: "
-                          (split-string (buffer-string) "\n"))))
-              (unless (= 0 (call-process wdx nil t nil "rm" "--" point))
-                (error "Unexpected error from wdx"))
-              (message "Deleted warp point %S" point)))
-        (let ((point (read-from-minibuffer "Set warp point: ")))
-          (unless (= 0 (call-process wdx nil t nil "set" "--" point))
-            (error "Unexpected error from wdx"))
-          (message "Set warp point %S" point)))))
-
-  (cl-defun radian-sunrise-cd ()
-    "Like `sunrise-cd' but after you've already run `sunrise'."
-    (interactive)
-    (dolist (buf (buffer-list))
-      (let ((path nil))
-        (with-current-buffer buf
-          (unless (derived-mode-p 'sr-mode)
-            (setq path (or buffer-file-name default-directory))))
-        (when path
-          (sr-dired path)
-          (cl-return-from radian-sunrise-cd))))
-    (user-error "No buffers to show in Sunrise Commander"))
-
-  :bind (:map sr-mode-map
-              ("j" . radian-sunrise-wdx)
-              ("k" . radian-sunrise-wdx-set-or-remove)
-              ("o" . radian-sunrise-cd)
-              ;; See
-              ;; https://github.com/escherdragon/sunrise-commander/issues/61.
-              ("C-e" . move-end-of-line))
-  :bind* (("C-c s" . sunrise))
-  :config
-
-  ;; Prevent Sunrise Commander from doing anything when you move the
-  ;; mouse. Otherwise it becomes rather annoying when you have to move
-  ;; the mouse across the Emacs frame.
-  (setq sr-cursor-follows-mouse nil))
-
 ;;;; Terminal emulator
 
 ;; Feature `term' provides a workable, though slow, terminal emulator
@@ -4252,6 +4239,15 @@ as argument."
   (magit-define-popup-switch 'magit-merge-popup ?u
     "Allow unrelated" "--allow-unrelated-histories"))
 
+;; Feature `git-commit' from package `magit' provides the commit
+;; message editing capabilities of Magit.
+(use-feature git-commit
+  :config
+
+  ;; Max length for commit message summary is 50 characters as per
+  ;; https://chris.beams.io/posts/git-commit/.
+  (setq git-commit-summary-max-length 50))
+
 ;; Package `gh' provides an Elisp interface to the GitHub API.
 (use-package gh
   ;; Disable autoloads because this package autoloads *way* too much
@@ -4277,46 +4273,6 @@ as argument."
        (magit-gh-pulls-get-api) (car repo) (cdr repo))))
 
   :blackout t)
-
-;; Package `git-commit' allows you to use Emacsclient as a Git commit
-;; message editor, providing syntax highlighting and using
-;; `with-editor' to allow you to conveniently accept or abort the
-;; commit.
-(use-package git-commit
-  :init/el-patch
-
-  (defun git-commit-setup-check-buffer ()
-    (and buffer-file-name
-         (string-match-p git-commit-filename-regexp buffer-file-name)
-         (git-commit-setup)))
-
-  (define-minor-mode global-git-commit-mode
-    "Edit Git commit messages.
-This global mode arranges for `git-commit-setup' to be called
-when a Git commit message file is opened.  That usually happens
-when Git uses the Emacsclient as $GIT_EDITOR to have the user
-provide such a commit message."
-    :group 'git-commit
-    :type 'boolean
-    :global t
-    :init-value t
-    :initialize (lambda (symbol exp)
-                  (custom-initialize-default symbol exp)
-                  (when global-git-commit-mode
-                    (add-hook 'find-file-hook 'git-commit-setup-check-buffer)))
-    (if global-git-commit-mode
-        (add-hook  'find-file-hook 'git-commit-setup-check-buffer)
-      (remove-hook 'find-file-hook 'git-commit-setup-check-buffer)))
-
-  :init
-
-  (global-git-commit-mode +1)
-
-  :config
-
-  ;; Max length for commit message summary is 50 characters as per
-  ;; https://chris.beams.io/posts/git-commit/.
-  (setq git-commit-summary-max-length 50))
 
 ;;;; External commands
 
@@ -4353,6 +4309,14 @@ provide such a commit message."
 
   :bind* (:filter (radian--browse-url-predicate)
                   ("C-c C-o" . browse-url-at-point)))
+
+;; Feature `bug-reference' provides a mechanism for hyperlinking issue
+;; tracker references (like #20), so that you can open them in a web
+;; browser easily.
+(use-feature bug-reference
+  :config
+
+  (bind-key "C-c C-o" #'bug-reference-push-button bug-reference-map))
 
 ;; Package `atomic-chrome' provides a way for you to edit textareas in
 ;; Chrome or Firefox using Emacs. See
@@ -4400,11 +4364,20 @@ Also set up filling correctly based on
 
   (radian-defhook radian--atomic-chrome-switch-back ()
     atomic-chrome-edit-done-hook
-    "Switch back to Google Chrome after finishing with `atomic-chrome'.
-This only works on macOS currently."
-    (radian-with-operating-system macOS
-      (when (file-directory-p "/Applications/Google Chrome.app")
-        (call-process "open" nil nil nil "-a" "Google Chrome"))))
+    "Switch back to the browser after finishing with `atomic-chrome'."
+    (when-let* ((conn (websocket-server-conn
+                       (atomic-chrome-get-websocket (current-buffer))))
+                (browser
+                 (cond
+                  ((eq conn atomic-chrome-server-ghost-text)
+                    "Firefox")
+                   ((eq conn atomic-chrome-server-atomic-chrome)
+                    "Google Chrome"))))
+      (cond
+       ((radian-operating-system-p macOS)
+        (call-process "open" nil nil nil "-a" browser))
+       ((radian-operating-system-p linux)
+        (call-process "wmctrl" nil nil nil "-a" browser)))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
@@ -4667,7 +4640,7 @@ This is passed to `set-frame-font'."
 ;; The following code customizes the mode line to something like:
 ;; [*] radian.el   18% (18,0)     [radian:develop*]  (Emacs-Lisp)
 
-(defun radian--mode-line-buffer-modified-status ()
+(defun radian-mode-line-buffer-modified-status ()
   "Return a mode line construct indicating buffer modification status.
 This is [*] if the buffer has been modified and whitespace
 otherwise. (Non-file-visiting buffers are never considered to be
@@ -4687,7 +4660,7 @@ modified.) It is shown in the same color as the buffer name, i.e.
 (setq-default mode-line-buffer-identification
               (propertized-buffer-identification "%b"))
 
-(defvar-local radian--mode-line-project-and-branch nil
+(defvar-local radian-mode-line-project-and-branch nil
   "Mode line construct showing Projectile project and Git status.
 The format is [project:branch*], where the * is shown if the
 working directory is dirty. Either component can be missing; this
@@ -4703,102 +4676,104 @@ See also `radian-show-git-mode'.")
 
 ;; Don't clear the cache when switching major modes (or using M-x
 ;; normal-mode).
-(put 'radian--mode-line-project-and-branch 'permanent-local t)
+(put 'radian-mode-line-project-and-branch 'permanent-local t)
 
 (defun radian--mode-line-recompute-project-and-branch ()
-  "Recalculate and set `radian--mode-line-project-and-branch'.
+  "Recalculate and set `radian-mode-line-project-and-branch'.
 Force a redisplay of the mode line if necessary. This is
 buffer-local."
-  (condition-case-unless-debug err
-      (let ((old radian--mode-line-project-and-branch)
-            (new
-             (let* (;; Don't insist on having Projectile loaded.
-                    (project-name (when (featurep 'projectile)
-                                    (projectile-project-name)))
-                    ;; Projectile returns "-" to mean "no project".
-                    ;; I'm still wondering what happens if someone
-                    ;; makes a project named "-".
-                    (project-name (unless (equal project-name "-")
-                                    project-name))
-                    ;; Check if we are actually in a Git repo, and Git
-                    ;; is available, and we want to show the Git
-                    ;; status.
-                    (git (and
-                          radian-show-git-mode
-                          (executable-find "git")
-                          (locate-dominating-file default-directory ".git")))
-                    (branch-name
-                     (when git
-                       ;; Determine a reasonable string to show for
-                       ;; the current branch. This is actually more or
-                       ;; less the same logic as we use for the Radian
-                       ;; Zsh prompt.
-                       (with-temp-buffer
-                         ;; First attempt uses symbolic-ref, which
-                         ;; returns the branch name if it exists.
-                         (call-process "git" nil '(t nil) nil
-                                       "symbolic-ref" "HEAD")
-                         (if (> (buffer-size) 0)
-                             ;; It actually returns something like
-                             ;; refs/heads/master, though, so let's
-                             ;; try to trim it if possible.
-                             (let ((regex "^\\(refs/heads/\\)?\\(.+\\)$")
-                                   (str (string-trim (buffer-string))))
-                               (if (string-match regex str)
-                                   (match-string 2 str)
-                                 ;; If it's something weird then just
-                                 ;; show it literally.
-                                 str))
-                           ;; If symbolic-ref didn't return anything
-                           ;; on stdout (we discarded stderr), we
-                           ;; probably have a detached head and we
-                           ;; should show the abbreviated commit hash
-                           ;; (e.g. b007692).
-                           (erase-buffer)
+  (unless (file-remote-p default-directory)
+    (condition-case-unless-debug err
+        (let ((old radian-mode-line-project-and-branch)
+              (new
+               (let* (;; Don't insist on having Projectile loaded.
+                      (project-name (when (featurep 'projectile)
+                                      (projectile-project-name)))
+                      ;; Projectile returns "-" to mean "no project".
+                      ;; I'm still wondering what happens if someone
+                      ;; makes a project named "-".
+                      (project-name (unless (equal project-name "-")
+                                      project-name))
+                      ;; Check if we are actually in a Git repo, and Git
+                      ;; is available, and we want to show the Git
+                      ;; status.
+                      (git (and
+                            radian-show-git-mode
+                            (executable-find "git")
+                            (locate-dominating-file default-directory ".git")))
+                      (branch-name
+                       (when git
+                         ;; Determine a reasonable string to show for
+                         ;; the current branch. This is actually more or
+                         ;; less the same logic as we use for the Radian
+                         ;; Zsh prompt.
+                         (with-temp-buffer
+                           ;; First attempt uses symbolic-ref, which
+                           ;; returns the branch name if it exists.
                            (call-process "git" nil '(t nil) nil
-                                         "rev-parse" "--short" "HEAD")
+                                         "symbolic-ref" "HEAD")
                            (if (> (buffer-size) 0)
-                               (string-trim (buffer-string))
-                             ;; We shouldn't get here. Unfortunately,
-                             ;; it turns out that we do every once in
-                             ;; a while. (I have no idea why.)
-                             "???")))))
-                    (dirty (when git
-                             (with-temp-buffer
-                               (call-process "git" nil t nil
-                                             "status" "--porcelain")
-                               (if (> (buffer-size) 0)
-                                   "*" "")))))
-               (cond
-                ((and project-name git)
-                 (format "  [%s:%s%s]" project-name branch-name dirty))
-                (project-name
-                 (format "  [%s]" project-name))
-                ;; This should never happen unless you do something
-                ;; perverse like create a version-controlled
-                ;; Projectile project whose name is a hyphen, but we
-                ;; want to handle it anyway.
-                (git
-                 (format "  [%s%s]" branch-name dirty))))))
-        (unless (equal old new)
-          (setq radian--mode-line-project-and-branch new)
-          (force-mode-line-update)))
-    (error
-     ;; We should not usually get an error here. In the case that we
-     ;; do, however, let's try to avoid displaying garbage data, and
-     ;; instead delete the construct entirely from the mode line.
-     (unless (null radian--mode-line-project-and-branch)
-       (setq radian--mode-line-project-and-branch nil)
-       (force-mode-line-update)))))
+                               ;; It actually returns something like
+                               ;; refs/heads/master, though, so let's
+                               ;; try to trim it if possible.
+                               (let ((regex "^\\(refs/heads/\\)?\\(.+\\)$")
+                                     (str (string-trim (buffer-string))))
+                                 (if (string-match regex str)
+                                     (match-string 2 str)
+                                   ;; If it's something weird then just
+                                   ;; show it literally.
+                                   str))
+                             ;; If symbolic-ref didn't return anything
+                             ;; on stdout (we discarded stderr), we
+                             ;; probably have a detached head and we
+                             ;; should show the abbreviated commit hash
+                             ;; (e.g. b007692).
+                             (erase-buffer)
+                             (call-process "git" nil '(t nil) nil
+                                           "rev-parse" "--short" "HEAD")
+                             (if (> (buffer-size) 0)
+                                 (string-trim (buffer-string))
+                               ;; We shouldn't get here. Unfortunately,
+                               ;; it turns out that we do every once in
+                               ;; a while. (I have no idea why.)
+                               "???")))))
+                      (dirty (when git
+                               (with-temp-buffer
+                                 (call-process "git" nil t nil
+                                               "status" "--porcelain")
+                                 (if (> (buffer-size) 0)
+                                     "*" "")))))
+                 (cond
+                  ((and project-name git)
+                   (format "  [%s:%s%s]" project-name branch-name dirty))
+                  (project-name
+                   (format "  [%s]" project-name))
+                  ;; This should never happen unless you do something
+                  ;; perverse like create a version-controlled
+                  ;; Projectile project whose name is a hyphen, but we
+                  ;; want to handle it anyway.
+                  (git
+                   (format "  [%s%s]" branch-name dirty))))))
+          (unless (equal old new)
+            (setq radian-mode-line-project-and-branch new)
+            (force-mode-line-update)))
+      (error
+       ;; We should not usually get an error here. In the case that we
+       ;; do, however, let's try to avoid displaying garbage data, and
+       ;; instead delete the construct entirely from the mode line.
+       (unless (null radian-mode-line-project-and-branch)
+         (setq radian-mode-line-project-and-branch nil)
+         (force-mode-line-update))))))
 
 ;; We will make sure this information is updated after some time of
 ;; inactivity, for the current buffer.
 
-(defvar radian--mode-line-update-delay 1
+(defcustom radian-mode-line-update-delay 1
   "Seconds of inactivity before updating the mode line.
 Specifically, this entails updating the Projectile project, Git
 branch, and dirty status, which are the most computationally
-taxing elements.")
+taxing elements."
+  :type 'number)
 
 ;; We only need one global timer pair for all the buffers, since we
 ;; will only be updating the cached mode line value for the current
@@ -4821,7 +4796,7 @@ taxing elements.")
 
 (defun radian--mode-line-recompute-and-reschedule ()
   "Compute mode line data and re-set timers.
-The delay is `radian--mode-line-update-delay'. The timers are
+The delay is `radian-mode-line-update-delay'. The timers are
 `radian--mode-line-idle-timer' and
 `radian--mode-line-repeat-timer'."
 
@@ -4844,12 +4819,12 @@ The delay is `radian--mode-line-update-delay'. The timers are
   (when (current-idle-time)
     (setq radian--mode-line-repeat-timer
           (run-with-idle-timer
-           (time-add (current-idle-time) radian--mode-line-update-delay)
+           (time-add (current-idle-time) radian-mode-line-update-delay)
            nil #'radian--mode-line-recompute-and-reschedule))))
 
 (defvar radian--mode-line-idle-timer
   (run-with-idle-timer
-   radian--mode-line-update-delay 'repeat
+   radian-mode-line-update-delay 'repeat
    #'radian--mode-line-recompute-and-reschedule)
   "Timer that recomputes information for the mode line, or nil.
 This runs once each time Emacs is idle.
@@ -4886,12 +4861,12 @@ the former is shown.")
 LEFT and RIGHT are strings, and the return value is a string that
 displays them left- and right-aligned respectively, separated by
 spaces."
-  (let ((width (- (window-width) (length left))))
+  (let ((width (- (window-total-width) (length left))))
     (format (format "%%s%%%ds" width) left right)))
 
-(defvar radian--mode-line-left
+(defcustom radian-mode-line-left
   '(;; Show [*] if the buffer is modified.
-    (:eval (radian--mode-line-buffer-modified-status))
+    (:eval (radian-mode-line-buffer-modified-status))
     " "
     ;; Show the name of the current buffer.
     mode-line-buffer-identification
@@ -4899,14 +4874,16 @@ spaces."
     ;; Show the row and column of point.
     mode-line-position
     ;; Show the current Projectile project and Git branch.
-    radian--mode-line-project-and-branch
+    radian-mode-line-project-and-branch
     ;; Show the active major and minor modes.
     "  "
     mode-line-modes)
-  "Composite mode line construct to be shown left-aligned.")
+  "Composite mode line construct to be shown left-aligned."
+  :type 'sexp)
 
-(defvar radian--mode-line-right nil
-  "Composite mode line construct to be shown right-aligned.")
+(defcustom radian-mode-line-right nil
+  "Composite mode line construct to be shown right-aligned."
+  :type 'sexp)
 
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
@@ -4914,8 +4891,8 @@ spaces."
               '(:eval (replace-regexp-in-string
                        "%" "%%"
                        (radian--mode-line-align
-                        (format-mode-line radian--mode-line-left)
-                        (format-mode-line radian--mode-line-right))
+                        (format-mode-line radian-mode-line-left)
+                        (format-mode-line radian-mode-line-right))
                        'fixedcase 'literal)))
 
 ;;;; Color theme
