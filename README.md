@@ -38,13 +38,13 @@ These dotfiles attempt to achieve the following goals:
       dotfiles
     * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
       partly on [`restart-emacs`][restart-emacs]
-    * Configured packages: [Atomic Chrome][atomic-chrome],
-      [Autorevert], [buffer-move], [Company], [Counsel],
-      [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
-      [Flycheck], [Helpful], [Ivy], [Magit], [no-littering], [Org],
-      [Projectile], [Smartparens], [Swiper], [transpose-frame],
-      [undo-tree], [use-package], [visual-regexp], [webpaste.el], and
-      more
+    * Configured packages: [Atomic Chrome][atomic-chrome] (with
+      [Firefox] support), [Autorevert], [buffer-move], [Company],
+      [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
+      [ElDoc], [ESUP], [Flycheck], [Helpful], [Ivy], [Magit],
+      [no-littering], [Org], [Projectile], [Smartparens], [Swiper],
+      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
+      [webpaste.el], and more
     * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
       [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
       more
@@ -169,6 +169,7 @@ commented.
 [emacs]: https://www.gnu.org/software/emacs/
 [esup]: https://github.com/jschaf/esup
 [exa]: https://the.exa.website/
+[firefox]: https://www.mozilla.org/en-US/firefox/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [git]: https://git-scm.com/
