@@ -14,12 +14,6 @@ if [[ -f ~/.zshrc.local ]]; then
     . ~/.zshrc.local
 fi
 
-### ~/.profile
-
-if [[ -f ~/.profile ]]; then
-    . ~/.profile
-fi
-
 ## zplugin
 
 if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
