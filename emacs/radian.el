@@ -4333,6 +4333,16 @@ as argument."
 
   (bind-key "C-c C-o" #'bug-reference-push-button bug-reference-map))
 
+;; Package `git-link' provides a simple function M-x git-link which
+;; copies to the kill ring a link to the current line of code or
+;; selection on GitHub, GitLab, etc.
+(use-package git-link
+  :config
+
+  ;; Link to a particular revision of a file rather than using the
+  ;; branch name in the URL.
+  (setq git-link-use-commit t))
+
 ;; Package `atomic-chrome' provides a way for you to edit textareas in
 ;; Chrome or Firefox using Emacs. See
 ;; https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc

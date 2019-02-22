@@ -42,6 +42,7 @@
  ("geiser" . "a6a2f2c2194cdef97d67945aa1e7df81763ec34e")
  ("gh.el" . "f029fc11f345ef04ab62ee91c38657e29c462fea")
  ("ghub" . "f389fce41cd1bd1805bad18d12e237362af05283")
+ ("git-link" . "472af75eca7aba42a1934f408c4bda55e34c9dcf")
  ("git-modes" . "55468314a5f6b77d2c96be62c7005ac94545e217")
  ("git.el" . "a3396a7027a7d986598c6a2d6d5599bac918f3da")
  ("gnu-elpa-mirror" . "4456d0bcf01a229312112c65428f8cc48bd9a7e9")
