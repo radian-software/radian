@@ -2991,25 +2991,23 @@ See https://emacs.stackexchange.com/a/3338/12534."
    (t
     (setq python-shell-interpreter "python")))
 
-  (radian-defhook radian--python-use-correct-flycheck-executable ()
+  (radian-defhook radian--python-use-correct-flycheck-executables ()
     python-mode-hook
-    "Use the correct Python executable for Flycheck."
+    "Use the correct Python executables for Flycheck."
     (let ((executable python-shell-interpreter))
       (save-excursion
         (save-match-data
           (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
                     (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
             (setq executable (substring-no-properties (match-string 1))))))
-      ;; We actually want to run Python here.
-      (dolist (var '(flycheck-python-pycompile-executable))
-        (make-local-variable var)
-        (set var executable))
-      ;; In this case we want to run the modules, which can only be
-      ;; done using Python 3.
-      (dolist (var '(flycheck-python-pylint-executable
-                     flycheck-python-flake8-executable))
-        (make-local-variable var)
-        (set var python-shell-interpreter)))))
+      ;; Try to compile using the appropriate version of Python for
+      ;; the file.
+      (setq-local flycheck-python-pycompile-executable executable)
+      ;; We might be running inside a virtualenv, in which case the
+      ;; modules won't be available. But calling the executables
+      ;; directly will work.
+      (setq-local flycheck-python-pylint-executable "pylint")
+      (setq-local flycheck-python-flake8-executable "flake8"))))
 
 ;; Package `elpy' provides a language server for Python, including
 ;; integration with most other packages that need to draw information
