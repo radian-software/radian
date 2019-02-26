@@ -29,10 +29,22 @@
 
 (defmacro radian-protect-macros (&rest body)
   "Eval BODY, protecting macros from incorrect expansion.
-Any code in a `with-eval-after-load' form that uses macros
-defined in the form being `with-eval-after-load'ed should be
-wrapped in this macro; otherwise, its correct evaluation is not
-guaranteed by Elisp."
+This macro should be used in the following situation:
+
+Some form is being evaluated, and this form contains as a
+sub-form some code that will not be evaluated immediately, but
+will be evaluated later. The code uses a macro that is not
+defined at the time the top-level form is evaluated, but will be
+defined by time the sub-form's code is evaluated. This macro
+handles its arguments in some way other than evaluating them
+directly. And finally, one of the arguments of this macro could
+be interpreted itself as a macro invocation, and expanding the
+invocation would break the evaluation of the outer macro.
+
+You might think this situation is such an edge case that it would
+never happen, but you'd be wrong, unfortunately. In such a
+situation, you must wrap at least the outer macro in this form,
+but can wrap at any higher level up to the top-level form."
   (declare (indent 0))
   `(eval '(progn ,@body)))
 
