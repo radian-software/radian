@@ -4327,7 +4327,13 @@ as argument."
   ;; Actually, don't bother saving buffers at all. That's dumb. We
   ;; know to save our buffers if we want them to be updated on disk.
   (setq compilation-save-buffers-predicate
-        (lambda ())))
+        (lambda ()))
+
+  (radian-defadvice radian--advice-compile-pop-to-buffer (buf)
+    :filter-return compilation-start
+    "Pop to compilation buffer on \\[compile]."
+    (prog1 buf
+      (select-window (get-buffer-window buf)))))
 
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
