@@ -4255,6 +4255,11 @@ as argument."
            (socket (expand-file-name "git/credential/socket" xdg-config-home)))
       (setq magit-credential-cache-daemon-socket socket)))
 
+  ;; Don't try to save unsaved buffers when using Magit. We know
+  ;; perfectly well that we need to save our buffers if we want Magit
+  ;; to see them.
+  (setq magit-save-repository-buffers nil)
+
   ;; Allow pulling with --rebase just once, without needing to
   ;; configure pull.rebase permanently. See
   ;; https://github.com/magit/magit/issues/2597#issuecomment-201392835.
@@ -4313,7 +4318,16 @@ as argument."
 
   ;; Automatically scroll the Compilation buffer as output appears,
   ;; but stop at the first error.
-  (setq compilation-scroll-output 'first-error))
+  (setq compilation-scroll-output 'first-error)
+
+  ;; Don't ask about saving buffers when invoking `compile'. Try to
+  ;; save them all immediately using `save-some-buffers'.
+  (setq compilation-ask-about-save nil)
+
+  ;; Actually, don't bother saving buffers at all. That's dumb. We
+  ;; know to save our buffers if we want them to be updated on disk.
+  (setq compilation-save-buffers-predicate
+        (lambda ())))
 
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
