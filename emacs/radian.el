@@ -1265,7 +1265,13 @@ counterparts."
 
   :init
 
-  (counsel-projectile-mode +1))
+  (counsel-projectile-mode +1)
+
+  :config
+
+  ;; Sort files using `prescient', instead of just showing them in
+  ;; lexicographic order.
+  (setq counsel-projectile-sort-files t))
 
 (defun radian--advice-find-file-create-directories
     (find-file filename &rest args)
