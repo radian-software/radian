@@ -2228,12 +2228,6 @@ area."
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
-  ;; Use my fork which has support for running a syntax check on
-  ;; switching buffers until [1] is merged.
-  ;;
-  ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :straight (:host github :repo "flycheck/flycheck"
-                   :fork (:repo "raxod502/flycheck" :branch "fork/4"))
   :defer 4
   :init
 
@@ -4266,14 +4260,8 @@ as argument."
   ;; to see them.
   (setq magit-save-repository-buffers nil)
 
-  ;; Allow pulling with --rebase just once, without needing to
-  ;; configure pull.rebase permanently. See
-  ;; https://github.com/magit/magit/issues/2597#issuecomment-201392835.
-  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase")
-
-  ;; Allow merging unrelated histories.
-  (magit-define-popup-switch 'magit-merge-popup ?u
-    "Allow unrelated" "--allow-unrelated-histories"))
+  (transient-append-suffix 'magit-merge "-s"
+    '("-u" "Allow unrelated" "--allow-unrelated-histories")))
 
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
@@ -4290,6 +4278,14 @@ as argument."
   ;; code. See https://github.com/sigma/gh.el/issues/95.
   :straight (:host github :repo "sigma/gh.el"
                    :no-autoloads t))
+
+;; Package `magit-popup' is a dependency of `magit-gh-pulls' that is
+;; not declared properly, see
+;; <https://github.com/sigma/magit-gh-pulls/issues/126>. The reason
+;; for this issue is that `magit-gh-pulls' was previously a dependency
+;; of `magit', so that hid the error.
+(use-package magit-popup
+  :after magit-gh-pulls)
 
 ;; Package `magit-gh-pulls' adds a section to Magit which displays
 ;; open pull requests on a corresponding GitHub repository, if any,
