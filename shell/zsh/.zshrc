@@ -470,7 +470,7 @@ if (( $+commands[git] )); then
     alias ghre='git help remote'
     alias ghf='git help fetch'
     alias ghu='git help pull'
-    alias ghp='git help pull'
+    alias ghp='git help push'
 
     alias gi='git init'
 
