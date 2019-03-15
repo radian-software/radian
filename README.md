@@ -87,12 +87,31 @@ configuration, and optionally installing local configuration.
 
 ### Installing software
 #### macOS
+##### Emacs
 
-* Emacs: `brew install emacs --with-cocoa`, version 26.1 minimum;
-  `brew install python`; (optional for improved startup time) `brew
-  install watchexec`
-* Zsh: `brew install zsh`; `mkdir ~/.zplugin`; `git clone
-  git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
+Emacs 26.1 is broken on macOS 10.14, so install from HEAD. Revert to
+previous Homebrew commit because the maintainers of Homebrew thought
+it would be a good idea to remove the ability to install a graphical
+Emacs from HEAD. Hope in vain that somebody writes a good package
+manager for macOS. Switch to Linux.
+
+    $ cd "$(brew --repo homebrew/core)"
+    $ git checkout 57d0340a0cb08fa053a1f7320e2f8d331f793b2e -- Formula/emacs.rb
+    $ brew install emacs --HEAD --with-cocoa
+
+Install support tools. Python is required for environment variable
+setting; watchexec is optional for improved startup time.
+
+    $ brew install python watchexec
+
+##### Zsh
+
+    $ brew install zsh
+    $ mkdir ~/.zplugin
+    $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+
+##### Remaining tools
+
 * Tmux: `brew install tmux`
 * Git: `brew install git`
 * Leiningen: `brew cask install java`; `brew install leiningen`
