@@ -1512,18 +1512,19 @@ unquote it using a comma."
 (radian-register-dotfile ,radian-directory "r a" "radian-repo")
 
 ;; Emacs
-(radian-register-dotfile ".emacs.d/init.el" "e i")
 (radian-register-dotfile
- ,(expand-file-name
-   "emacs/radian.el"
-   radian-directory)
+ ,(expand-file-name "init.el" user-emacs-directory)
+ "e i")
+(radian-register-dotfile
+ ,(expand-file-name "emacs/radian.el" radian-directory)
  "e r")
 (radian-register-dotfile
- ".emacs.d/straight/versions/radian.el"
+ (expand-file-name "straight/versions/radian.el" user-emacs-directory)
  "e v" "radian-versions-el")
-(radian-register-dotfile ".emacs.d/init.local.el" "e l")
 (radian-register-dotfile
- ".emacs.d/straight/versions/radian-local.el"
+ (expand-file-name "init.local.el" user-emacs-directory) "e l")
+(radian-register-dotfile
+ (expand-file-name "straight/versions/radian-local.el" user-emacs-directory)
  "e V" "radian-local-versions-el")
 
 ;; Git
@@ -4478,7 +4479,8 @@ Also run `radian-atomic-chrome-setup-hook'."
 
               ;; Abbreviated (and flattened) version of init.el.
               (defvar radian-minimum-emacs-version "26.1")
-              (defvar radian-local-init-file "~/.emacs.d/init.local.el")
+              (defvar radian-local-init-file
+                (expand-file-name "init.local.el" user-emacs-directory))
               (setq package-enable-at-startup nil)
               (setq custom-file (expand-file-name
                                  (format "custom-%d-%d.el" (emacs-pid) (random))
