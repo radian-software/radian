@@ -1519,12 +1519,12 @@ unquote it using a comma."
  ,(expand-file-name "emacs/radian.el" radian-directory)
  "e r")
 (radian-register-dotfile
- (expand-file-name "straight/versions/radian.el" user-emacs-directory)
+ ,(expand-file-name "straight/versions/radian.el" user-emacs-directory)
  "e v" "radian-versions-el")
 (radian-register-dotfile
- (expand-file-name "init.local.el" user-emacs-directory) "e l")
+ ,(expand-file-name "init.local.el" user-emacs-directory) "e l")
 (radian-register-dotfile
- (expand-file-name "straight/versions/radian-local.el" user-emacs-directory)
+ ,(expand-file-name "straight/versions/radian-local.el" user-emacs-directory)
  "e V" "radian-local-versions-el")
 
 ;; Git
