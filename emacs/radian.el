@@ -4218,7 +4218,10 @@ as argument."
   (setq magit-save-repository-buffers nil)
 
   (transient-append-suffix 'magit-merge "-s"
-    '("-u" "Allow unrelated" "--allow-unrelated-histories")))
+    '("-u" "Allow unrelated" "--allow-unrelated-histories"))
+
+  (transient-append-suffix 'magit-pull "-r"
+    '("-a" "Autostash" "--autostash")))
 
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
