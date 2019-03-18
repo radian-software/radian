@@ -1799,10 +1799,8 @@ the reverse direction from \\[pop-global-mark]."
 ;; Package `swiper' provides an alternative to `isearch' which instead
 ;; uses `ivy' to display and select from the results.
 (use-package swiper
-  :init
-
-  (radian-bind-key "g" #'swiper)
-
+  :bind (("C-s" . swiper)
+         ("C-r" . swiper))
   :config
 
   ;; Use only one color for subgroups in Swiper highlighting.
