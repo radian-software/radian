@@ -357,48 +357,6 @@ binding the variable dynamically over the entire init-file."
 
 ;;; Prevent Emacs-provided Org from being loaded
 
-;; The following is a temporary hack until straight.el supports
-;; building Org, see:
-;;
-;; * https://github.com/raxod502/straight.el/issues/211
-;; * https://github.com/raxod502/radian/issues/410
-;;
-;; There are three things missing from our version of Org: the
-;; functions `org-git-version' and `org-release', and the feature
-;; `org-version'. We provide all three of those ourself, therefore.
-
-;; Package `git' is a library providing convenience functions for
-;; running Git.
-(use-package git)
-
-(defun org-git-version ()
-  "The Git version of org-mode.
-  Inserted by installing org-mode or when a release is made."
-  (require 'git)
-  (let ((git-repo (expand-file-name
-                   "straight/repos/org/" user-emacs-directory)))
-    (string-trim
-     (git-run "describe"
-              "--match=release\*"
-              "--abbrev=6"
-              "HEAD"))))
-
-(defun org-release ()
-  "The release version of org-mode.
-  Inserted by installing org-mode or when a release is made."
-  (require 'git)
-  (let ((git-repo (expand-file-name
-                   "straight/repos/org/" user-emacs-directory)))
-    (string-trim
-     (string-remove-prefix
-      "release_"
-      (git-run "describe"
-               "--match=release\*"
-               "--abbrev=0"
-               "HEAD")))))
-
-(provide 'org-version)
-
 ;; Our real configuration for Org comes much later. Doing this now
 ;; means that if any packages that are installed in the meantime
 ;; depend on Org, they will not accidentally cause the Emacs-provided
