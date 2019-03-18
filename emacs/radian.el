@@ -4239,33 +4239,6 @@ as argument."
   :straight (:host github :repo "sigma/gh.el"
                    :no-autoloads t))
 
-;; Package `magit-popup' is a dependency of `magit-gh-pulls' that is
-;; not declared properly, see
-;; <https://github.com/sigma/magit-gh-pulls/issues/126>. The reason
-;; for this issue is that `magit-gh-pulls' was previously a dependency
-;; of `magit', so that hid the error.
-(use-package magit-popup
-  :after magit-gh-pulls)
-
-;; Package `magit-gh-pulls' adds a section to Magit which displays
-;; open pull requests on a corresponding GitHub repository, if any,
-;; and allows you to check them out locally.
-(use-package magit-gh-pulls
-  :demand t
-  :after magit
-  :config
-
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
-
-  (radian-defadvice radian--advice-hide-magit-gh-pulls-when-not-cached ()
-    :before-while magit-gh-pulls-insert-gh-pulls
-    "Hide the \"Pull Requests\" section when the list is not cached."
-    (when-let ((repo (magit-gh-pulls-guess-repo)))
-      (magit-gh-pulls-requests-cached-p
-       (magit-gh-pulls-get-api) (car repo) (cdr repo))))
-
-  :blackout t)
-
 ;;;; External commands
 
 ;; Feature `compile' provides a way to run a shell command from Emacs

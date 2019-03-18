@@ -63,8 +63,6 @@
  ("logito" . "824acb89d2cc18cb47281a4fbddd81ad244a2052")
  ("loop.el" . "e22807f83a0890dc8a904c51ee0742c34efccc6c")
  ("magit" . "c8c3326f01bd242ec9d1739bd634f3f96de7232c")
- ("magit-gh-pulls" . "6949e973f3e951cb0bfe75d889e0fcccc33ba733")
- ("magit-popup" . "4250c3a606011e3ff2477e3b5bbde2b493f3c85c")
  ("markdown-mode" . "53db08184b84ac2bb0709d3ef4dfbaf97965e0d9")
  ("marshal.el" . "f038689cbd5b3680b80b44edd0c7a63ca3038e26")
  ("melpa" . "67942b34975015dd6f2b5f6b43829cc13b1832c6")
