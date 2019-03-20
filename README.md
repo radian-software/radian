@@ -138,7 +138,7 @@ Use symbolic links:
     ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
-    ./shell/zsh/.zprofile => ~/.zprofile
+    ./shell/zsh/.zshenv => ~/.zshenv
     ./tmux/.tmux.conf => ~/.tmux.conf
 
 ### Installing local configuration
