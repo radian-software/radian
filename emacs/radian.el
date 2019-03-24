@@ -4138,6 +4138,16 @@ are probably not going to be installed."
       (push (concat "ALTERNATE_EDITOR=" with-editor-sleeping-editor)
             process-environment))))
 
+;; Package `transient' is the interface used by Magit to display
+;; popups.
+(use-package transient
+  :config
+
+  ;; Allow using `q' to quit out of popups, in addition to `C-g'. See
+  ;; <https://magit.vc/manual/transient.html#Why-does-q-not-quit-popups-anymore_003f>
+  ;; for discussion.
+  (transient-bind-q-to-quit))
+
 ;; Package `magit' provides a full graphical interface for Git within
 ;; Emacs.
 (use-package magit
