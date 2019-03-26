@@ -3605,7 +3605,35 @@ unhelpful."
          ("C" . helpful-command)
 
          :map global-map
-         ("C-c C-d" . helpful-at-point)))
+         ("C-c C-d" . helpful-at-point))
+
+  :config
+
+  ;; Make it so you can quit out of `helpful-key' with C-g, like for
+  ;; every other command. Put this in a minor mode so it can be
+  ;; disabled.
+  (define-minor-mode radian-universal-keyboard-quit-mode
+    "Minor mode for making C-g work in `helpful-key'."
+    :global t
+    (if radian-universal-keyboard-quit-mode
+        (radian-defadvice radian--advice-helpful-key-allow-keyboard-quit
+            (func &rest args)
+          :before helpful-key
+          "Make C-g work in `helpful-key'."
+          ;; The docstring of `add-function' says that if we make our
+          ;; advice interactive and the interactive spec is *not* a
+          ;; function, then it overrides the original function's
+          ;; interactive spec.
+          (interactive
+           (list
+            (let ((ret (read-key-sequence "Press key: ")))
+              (when (equal ret "\^G")
+                (signal 'quit nil))
+              ret))))
+      (advice-remove
+       #'helpful-key #'radian--advice-helpful-key-allow-keyboard-quit)))
+
+  (radian-universal-keyboard-quit-mode +1))
 
 ;;;; Custom
 
