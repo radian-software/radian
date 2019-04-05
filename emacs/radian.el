@@ -1519,6 +1519,12 @@ unquote it using a comma."
 ;;; Editing
 ;;;; Text formatting
 
+;; When region is active, make `capitalize-word' and friends act on
+;; it.
+(bind-key "M-c" #'capitalize-dwim)
+(bind-key "M-l" #'downcase-dwim)
+(bind-key "M-u" #'upcase-dwim)
+
 (defun radian-reverse-region-characters (beg end)
   "Reverse the characters in the region from BEG to END.
 Interactively, reverse the characters in the current region."
