@@ -450,6 +450,7 @@ if (( $+commands[git] )); then
     alias gha='git help add'
     alias ghrm='git help rm'
     alias ghmv='git help mv'
+    alias ghr='git help reset'
     alias ghcm='git help commit'
     alias ghcp='git help cherry-pick'
     alias ghrv='git help revert'
@@ -576,6 +577,7 @@ if (( $+commands[git] )); then
     alias gbdd='git branch --delete --force'
 
     alias gco='git checkout'
+    alias gcot='git checkout --track'
     alias gcop='git checkout --patch'
     alias gcob='git checkout -B'
 
