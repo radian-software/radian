@@ -2109,6 +2109,13 @@ currently active.")
   :blackout yas-minor-mode)
 
 ;;; IDE features
+;;;; Virtual environments
+;;;;; Python
+
+;; Package `pyvenv' provides functions for activating and deactivating
+;; Python virtualenvs within Emacs.
+(use-package pyvenv)
+
 ;;;; Indentation
 
 ;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
