@@ -452,50 +452,59 @@ This keymap is bound under M-P.")
 ;;; Environment
 ;;;; Environment variables
 
-(defun radian-source-profile ()
-  "Load ~/.profile and set environment variables exported therein."
-  (interactive)
-  (let ((profile-file "~/.profile")
-        (buf-name " *radian-env-output*"))
-    (when (and profile-file
-               (file-exists-p profile-file)
-               (executable-find "python"))
-      (ignore-errors (kill-buffer buf-name))
-      (with-current-buffer (get-buffer-create buf-name)
-        (let* ((python-script
-                (expand-file-name "scripts/print_env.py" radian-directory))
-               (delimiter (radian--random-string))
-               (sh-script (format ". %s && %s %s"
-                                  (shell-quote-argument
-                                   (expand-file-name profile-file))
-                                  (shell-quote-argument python-script)
-                                  (shell-quote-argument delimiter)))
-               (return (call-process "sh" nil t nil "-c" sh-script))
-               (found-delimiter
-                (progn
-                  (goto-char (point-min))
-                  (search-forward delimiter nil 'noerror))))
-          (if (and (= 0 return) found-delimiter)
-              (let* ((results (split-string
-                               (buffer-string) (regexp-quote delimiter)))
-                     (results (cl-subseq results 1 (1- (length results)))))
-                (if (cl-evenp (length results))
-                    (cl-loop for (var value) on results by #'cddr do
-                             (setenv var value)
-                             (when (string= var "PATH")
-                               (setq exec-path (parse-colon-path value))))
-                  (message
-                   "Loading %s produced malformed result; see buffer %S"
-                   profile-file
-                   buf-name)))
-            (message "Failed to load %s; see buffer %S"
-                     profile-file
-                     buf-name)))))))
+(defvar radian--env-setup-p nil
+  "Non-nil if `radian-env-setup' has completed at least once.")
 
-(defvar radian--source-profile-timer
-  (run-at-time 1 nil #'radian-source-profile)
-  "Timer used to run `radian-source-profile'.
-We shouldn't need environment variables to be set correctly
+(defun radian-env-setup (&optional again)
+  "Load ~/.profile and set environment variables exported therein.
+Only do this once, unless AGAIN is non-nil."
+  (interactive)
+  ;; No need to worry about race conditions because Elisp isn't
+  ;; concurrent (yet).
+  (unless (and radian--env-setup-p (not again))
+    (let ((profile-file "~/.profile")
+          (buf-name " *radian-env-output*"))
+      (when (and profile-file
+                 (file-exists-p profile-file)
+                 (executable-find "python"))
+        (ignore-errors (kill-buffer buf-name))
+        (with-current-buffer (get-buffer-create buf-name)
+          (let* ((python-script
+                  (expand-file-name "scripts/print_env.py" radian-directory))
+                 (delimiter (radian--random-string))
+                 (sh-script (format ". %s && %s %s"
+                                    (shell-quote-argument
+                                     (expand-file-name profile-file))
+                                    (shell-quote-argument python-script)
+                                    (shell-quote-argument delimiter)))
+                 (return (call-process "sh" nil t nil "-c" sh-script))
+                 (found-delimiter
+                  (progn
+                    (goto-char (point-min))
+                    (search-forward delimiter nil 'noerror))))
+            (if (and (= 0 return) found-delimiter)
+                (let* ((results (split-string
+                                 (buffer-string) (regexp-quote delimiter)))
+                       (results (cl-subseq results 1 (1- (length results)))))
+                  (if (cl-evenp (length results))
+                      (progn
+                        (cl-loop for (var value) on results by #'cddr do
+                                 (setenv var value)
+                                 (when (string= var "PATH")
+                                   (setq exec-path (parse-colon-path value))))
+                        (setq radian--env-setup-p t))
+                    (message
+                     "Loading %s produced malformed result; see buffer %S"
+                     profile-file
+                     buf-name)))
+              (message "Failed to load %s; see buffer %S"
+                       profile-file
+                       buf-name))))))))
+
+(defvar radian--env-setup-timer
+  (run-at-time 1 nil #'radian-env-setup)
+  "Timer used to run `radian-env-setup'.
+We (mostly) don't need environment variables to be set correctly
 during init, so deferring their processing saves some time at
 startup.")
 
