@@ -1757,21 +1757,6 @@ the reverse direction from \\[pop-global-mark]."
     :override bookmark-maybe-message
     "Silence useless messages from bookmark.el."))
 
-;;;;; Definition location
-
-;; Package `dumb-jump' provides a mechanism to jump to the definitions
-;; of functions, variables, etc. in a variety of programming
-;; languages. The advantage of `dumb-jump' is that it doesn't try to
-;; be clever, so it "just works" instantly for dozens of languages
-;; with zero configuration.
-(use-package dumb-jump
-  :init
-
-  (dumb-jump-mode +1)
-
-  :bind (:map dumb-jump-mode-map
-              ("M-Q" . dumb-jump-quick-look)))
-
 ;;;; Find and replace
 
 ;; Package `visual-regexp' provides an alternate version of
@@ -2030,6 +2015,122 @@ the timer when no buffers need to be checked."
 
   :blackout t)
 
+;;;; Snippet expansion
+
+;; Feature `abbrev' provides functionality for expanding user-defined
+;; abbreviations. We prefer to use `yasnippet' instead, though.
+(use-feature abbrev
+  :blackout t)
+
+;; Package `yasnippet' allows the expansion of user-defined
+;; abbreviations into fillable templates. It is also used by
+;; `clj-refactor' for some of its refactorings.
+(use-package yasnippet
+  :bind (:map yas-minor-mode-map
+
+              ;; Disable TAB from expanding snippets, as I don't use it and
+              ;; it's annoying.
+              ("TAB" . nil)
+              ("<tab>" . nil))
+  :config
+
+  ;; Reduce verbosity. The default value is 3. Bumping it down to 2
+  ;; eliminates a message about successful snippet lazy-loading setup
+  ;; on every(!) Emacs init. Errors should still be shown.
+  (setq yas-verbosity 2)
+
+  ;; Make it so that Company's keymap overrides Yasnippet's keymap
+  ;; when a snippet is active. This way, you can TAB to complete a
+  ;; suggestion for the current field in a snippet, and then TAB to
+  ;; move to the next field. Plus, C-g will dismiss the Company
+  ;; completions menu rather than cancelling the snippet and moving
+  ;; the cursor while leaving the completions menu on-screen in the
+  ;; same location.
+  (use-feature company
+    :config
+
+    ;; This function translates the "event types" I get from
+    ;; `map-keymap' into things that I can pass to `lookup-key' and
+    ;; `define-key'. It's a hack, and I'd like to find a built-in
+    ;; function that accomplishes the same thing while taking care of
+    ;; any edge cases I might have missed in this ad-hoc solution.
+    (defun radian--yasnippet-normalize-event (event)
+      "This function is a complete hack, do not use.
+But in principle, it translates what we get from `map-keymap'
+into what `lookup-key' and `define-key' want."
+      (if (vectorp event)
+          event
+        (vector event)))
+
+    ;; Here we define a hybrid keymap that delegates first to
+    ;; `company-active-map' and then to `yas-keymap'.
+    (defvar radian--yasnippet-then-company-keymap
+      ;; It starts out as a copy of `yas-keymap', and then we
+      ;; merge in all of the bindings from `company-active-map'.
+      (let ((keymap (copy-keymap yas-keymap)))
+        (map-keymap
+         (lambda (event company-cmd)
+           (let* ((event (radian--yasnippet-normalize-event event))
+                  (yas-cmd (lookup-key yas-keymap event)))
+             ;; Here we use an extended menu item with the
+             ;; `:filter' option, which allows us to dynamically
+             ;; decide which command we want to run when a key is
+             ;; pressed.
+             (define-key keymap event
+               `(menu-item
+                 nil ,company-cmd :filter
+                 (lambda (cmd)
+                   ;; There doesn't seem to be any obvious
+                   ;; function from Company to tell whether or not
+                   ;; a completion is in progress (à la
+                   ;; `company-explicit-action-p'), so I just
+                   ;; check whether or not `company-my-keymap' is
+                   ;; defined, which seems to be good enough.
+                   (if company-my-keymap
+                       ',company-cmd
+                     ',yas-cmd))))))
+         company-active-map)
+        keymap)
+      "Keymap which delegates to both `company-active-map' and `yas-keymap'.
+The bindings in `company-active-map' only apply if Company is
+currently active.")
+
+    (radian-defadvice radian--advice-company-overrides-yasnippet
+        (yas--make-control-overlay &rest args)
+      :around yas--make-control-overlay
+      "Allow `company' keybindings to override those of `yasnippet'."
+      ;; The function `yas--make-control-overlay' uses the current
+      ;; value of `yas-keymap' to build the Yasnippet overlay, so to
+      ;; override the Yasnippet keymap we only need to dynamically
+      ;; rebind `yas-keymap' for the duration of that function.
+      (let ((yas-keymap radian--yasnippet-then-company-keymap))
+        (apply yas--make-control-overlay args))))
+
+  :blackout yas-minor-mode)
+
+;;; IDE features
+;;;; Indentation
+
+;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
+;; that `indent-tabs-mode' is even *available* as an *option* disgusts
+;; me, much less the fact that it's *enabled* by default (meaning that
+;; *both* tabs and spaces are used at the same time).
+(setq-default indent-tabs-mode nil)
+
+(defun radian-indent-defun ()
+  "Indent the surrounding defun."
+  (interactive)
+  (save-excursion
+    (when (beginning-of-defun)
+      (let ((beginning (point)))
+        (end-of-defun)
+        (let ((end (point)))
+          (let ((inhibit-message t)
+                (message-log-max nil))
+            (indent-region beginning end)))))))
+
+(bind-key* "C-M-q" #'radian-indent-defun)
+
 ;;;; Autocompletion
 
 ;; Package `company' provides an in-buffer autocompletion framework.
@@ -2161,7 +2262,22 @@ backends will still be included.")
   ;; Use `prescient' for Company menus.
   (company-prescient-mode +1))
 
-;;;; Automatic display of documentation in the minibuffer
+;;;;; Definition location
+
+;; Package `dumb-jump' provides a mechanism to jump to the definitions
+;; of functions, variables, etc. in a variety of programming
+;; languages. The advantage of `dumb-jump' is that it doesn't try to
+;; be clever, so it "just works" instantly for dozens of languages
+;; with zero configuration.
+(use-package dumb-jump
+  :init
+
+  (dumb-jump-mode +1)
+
+  :bind (:map dumb-jump-mode-map
+              ("M-Q" . dumb-jump-quick-look)))
+
+;;;; Display contextual metadata
 
 ;; Feature `eldoc' provides a minor mode (enabled by default in Emacs
 ;; 25) which allows function signatures or other metadata to be
@@ -2189,7 +2305,7 @@ area."
 
   :blackout t)
 
-;;;; Automatic syntax checking
+;;;; Syntax checking and code linting
 
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting, or more generally syntax checking. It comes
@@ -2239,121 +2355,6 @@ nor requires Flycheck to be loaded."
   (radian-bind-key "n" #'flycheck-next-error)
 
   :blackout t)
-
-;;;; Indentation
-
-;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
-;; that `indent-tabs-mode' is even *available* as an *option* disgusts
-;; me, much less the fact that it's *enabled* by default (meaning that
-;; *both* tabs and spaces are used at the same time).
-(setq-default indent-tabs-mode nil)
-
-(defun radian-indent-defun ()
-  "Indent the surrounding defun."
-  (interactive)
-  (save-excursion
-    (when (beginning-of-defun)
-      (let ((beginning (point)))
-        (end-of-defun)
-        (let ((end (point)))
-          (let ((inhibit-message t)
-                (message-log-max nil))
-            (indent-region beginning end)))))))
-
-(bind-key* "C-M-q" #'radian-indent-defun)
-
-;;;; Snippet expansion
-
-;; Feature `abbrev' provides functionality for expanding user-defined
-;; abbreviations. We prefer to use `yasnippet' instead, though.
-(use-feature abbrev
-  :blackout t)
-
-;; Package `yasnippet' allows the expansion of user-defined
-;; abbreviations into fillable templates. It is also used by
-;; `clj-refactor' for some of its refactorings.
-(use-package yasnippet
-  :bind (:map yas-minor-mode-map
-
-              ;; Disable TAB from expanding snippets, as I don't use it and
-              ;; it's annoying.
-              ("TAB" . nil)
-              ("<tab>" . nil))
-  :config
-
-  ;; Reduce verbosity. The default value is 3. Bumping it down to 2
-  ;; eliminates a message about successful snippet lazy-loading setup
-  ;; on every(!) Emacs init. Errors should still be shown.
-  (setq yas-verbosity 2)
-
-  ;; Make it so that Company's keymap overrides Yasnippet's keymap
-  ;; when a snippet is active. This way, you can TAB to complete a
-  ;; suggestion for the current field in a snippet, and then TAB to
-  ;; move to the next field. Plus, C-g will dismiss the Company
-  ;; completions menu rather than cancelling the snippet and moving
-  ;; the cursor while leaving the completions menu on-screen in the
-  ;; same location.
-  (use-feature company
-    :config
-
-    ;; This function translates the "event types" I get from
-    ;; `map-keymap' into things that I can pass to `lookup-key' and
-    ;; `define-key'. It's a hack, and I'd like to find a built-in
-    ;; function that accomplishes the same thing while taking care of
-    ;; any edge cases I might have missed in this ad-hoc solution.
-    (defun radian--yasnippet-normalize-event (event)
-      "This function is a complete hack, do not use.
-But in principle, it translates what we get from `map-keymap'
-into what `lookup-key' and `define-key' want."
-      (if (vectorp event)
-          event
-        (vector event)))
-
-    ;; Here we define a hybrid keymap that delegates first to
-    ;; `company-active-map' and then to `yas-keymap'.
-    (defvar radian--yasnippet-then-company-keymap
-      ;; It starts out as a copy of `yas-keymap', and then we
-      ;; merge in all of the bindings from `company-active-map'.
-      (let ((keymap (copy-keymap yas-keymap)))
-        (map-keymap
-         (lambda (event company-cmd)
-           (let* ((event (radian--yasnippet-normalize-event event))
-                  (yas-cmd (lookup-key yas-keymap event)))
-             ;; Here we use an extended menu item with the
-             ;; `:filter' option, which allows us to dynamically
-             ;; decide which command we want to run when a key is
-             ;; pressed.
-             (define-key keymap event
-               `(menu-item
-                 nil ,company-cmd :filter
-                 (lambda (cmd)
-                   ;; There doesn't seem to be any obvious
-                   ;; function from Company to tell whether or not
-                   ;; a completion is in progress (à la
-                   ;; `company-explicit-action-p'), so I just
-                   ;; check whether or not `company-my-keymap' is
-                   ;; defined, which seems to be good enough.
-                   (if company-my-keymap
-                       ',company-cmd
-                     ',yas-cmd))))))
-         company-active-map)
-        keymap)
-      "Keymap which delegates to both `company-active-map' and `yas-keymap'.
-The bindings in `company-active-map' only apply if Company is
-currently active.")
-
-    (radian-defadvice radian--advice-company-overrides-yasnippet
-        (yas--make-control-overlay &rest args)
-      :around yas--make-control-overlay
-      "Allow `company' keybindings to override those of `yasnippet'."
-      ;; The function `yas--make-control-overlay' uses the current
-      ;; value of `yas-keymap' to build the Yasnippet overlay, so to
-      ;; override the Yasnippet keymap we only need to dynamically
-      ;; rebind `yas-keymap' for the duration of that function.
-      (let ((yas-keymap radian--yasnippet-then-company-keymap))
-        (apply yas--make-control-overlay args))))
-
-  :blackout yas-minor-mode)
 
 ;;; Language support
 ;;;; Text-based languages
