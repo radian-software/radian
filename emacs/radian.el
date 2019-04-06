@@ -2282,7 +2282,17 @@ backends will still be included.")
   (dumb-jump-mode +1)
 
   :bind (:map dumb-jump-mode-map
-              ("M-Q" . dumb-jump-quick-look)))
+              ("M-Q" . dumb-jump-quick-look))
+  :bind* (("C-M-d" . dumb-jump-go-prompt)
+          ("C-x 4 g" . dumb-jump-go-other-window)
+          ("C-x 4 d" . radian-dumb-jump-go-prompt-other-window))
+  :config
+
+  (defun radian-dumb-jump-go-prompt-other-window ()
+    "Like `dumb-jump-go-prompt' but use a different window."
+    (interactive)
+    (let ((dumb-jump-window 'other))
+      (dumb-jump-go-prompt))))
 
 ;;;; Display contextual metadata
 
