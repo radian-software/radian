@@ -2116,6 +2116,51 @@ currently active.")
 ;; Python virtualenvs within Emacs.
 (use-package pyvenv)
 
+;;;; Language servers
+
+;; Package `lsp-mode' is an Emacs client for the Language Server
+;; Protocol <https://langserver.org/>. It is where we get all of our
+;; information for completions, definition location, documentation,
+;; and so on.
+(use-package lsp-mode
+  :init
+
+  (radian-defhook radian--lsp-enable ()
+    prog-mode-hook
+    "Enable `lsp-mode' for most programming modes."
+    (unless (derived-mode-p
+             ;; `lsp-mode' doesn't support Elisp, so let's avoid
+             ;; triggering the autoload just for checking that, yes,
+             ;; there's nothing to do for the *scratch* buffer.
+             #'emacs-lisp-mode
+             ;; Disable for modes that we currently use a specialized
+             ;; framework for, until they are phased out in favor of
+             ;; LSP.
+             #'c-mode
+             #'c++-mode
+             #'objc-mode
+             #'js2-mode
+             #'python-mode
+             #'ruby-mode
+             #'rust-mode
+             #'typescript-mode)
+      (lsp)))
+
+  :config
+
+  ;; We use Flycheck, not Flymake.
+  (setq lsp-prefer-flymake nil)
+
+  (defun radian--advice-lsp-mode-silence (format &rest _)
+    "Silence needless diagnostic messages from `lsp-mode'.
+
+This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
+    (member format '("No LSP server for %s."
+                     "Connected to %s.")))
+
+  (dolist (fun '(lsp--warn lsp--info))
+    (advice-add fun :before-until #'radian--advice-lsp-mode-silence)))
+
 ;;;; Indentation
 
 ;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
@@ -2269,7 +2314,11 @@ backends will still be included.")
   ;; Use `prescient' for Company menus.
   (company-prescient-mode +1))
 
-;;;;; Definition location
+;; Package `company-lsp' provides a Company backend for `lsp-mode'.
+;; It's configured automatically by `lsp-mode'.
+(use-package company-lsp)
+
+;;;; Definition location
 
 ;; Package `dumb-jump' provides a mechanism to jump to the definitions
 ;; of functions, variables, etc. in a variety of programming
@@ -2372,6 +2421,30 @@ nor requires Flycheck to be loaded."
   (radian-bind-key "n" #'flycheck-next-error)
 
   :blackout t)
+
+;; Package `lsp-ui' provides Flycheck integration for `lsp-mode', as
+;; well as various other UI elements that integrate with `lsp-mode'.
+;; It's configured automatically by `lsp-mode'.
+(use-package lsp-ui
+  :bind (("C-c f" . lsp-ui-sideline-apply-code-actions))
+  :config
+
+  (radian-defadvice radian--advice-lsp-ui-apply-single-fix (orig-fun &rest args)
+    :around lsp-ui-sideline-apply-code-actions
+    "Apply code fix immediately if only one is possible."
+    (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
+               ((symbol-function #'completing-read)
+                (lambda (prompt collection &rest args)
+                  (if (= (safe-length collection) 1)
+                      (car collection)
+                    (apply orig-completing-read prompt collection args)))))
+      (apply orig-fun args)))
+
+  ;; Don't show symbol definitions in the sideline. They are pretty
+  ;; noisy, and there appears to currently be a bug where they prevent
+  ;; Flycheck errors from being shown (the errors flash briefly and
+  ;; then disappear).
+  (setq lsp-ui-sideline-show-hover nil))
 
 ;;; Language support
 ;;;; Text-based languages
