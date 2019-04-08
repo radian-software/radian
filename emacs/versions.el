@@ -12,7 +12,7 @@
  ("clj-refactor.el" . "1a1bb0f7509e45d504170ed59914b5db4f245909")
  ("clojure-mode" . "a1d6a0f1b53dc454333be99eae1517315267aa6b")
  ("company-auctex" . "48c42c58ce2f0e693301b0cb2d085055410c1b25")
- ("company-lsp" . "2b99795ce52d49a42b8a45821e39ba574f4fa5fc")
+ ("company-lsp" . "4218f180688eb3ecba454d00b0e68931a0aef5c9")
  ("company-mode" . "20fe01542bf7665ba90f9fe1a86cbe0eea4d9f8a")
  ("company-tern" . "10ac058b065ae73c1f30e9fb7d969dd1a79387be")
  ("counsel-projectile" . "d64e5275c578a494102852c466a3696bde466739")
@@ -57,7 +57,7 @@
  ("let-alist" . "33e71829e8814cf5f28b6e4291192aafef61b69e")
  ("logito" . "824acb89d2cc18cb47281a4fbddd81ad244a2052")
  ("loop.el" . "e22807f83a0890dc8a904c51ee0742c34efccc6c")
- ("lsp-mode" . "0dd656f94b198a75e0cbbce6112d77937c30db34")
+ ("lsp-mode" . "0047b780c299584923adf22298fa28d29c2cbbc1")
  ("lsp-ui" . "cf945e643374d80f6ce9aa5a70165693de0bb2e8")
  ("magit" . "c8c3326f01bd242ec9d1739bd634f3f96de7232c")
  ("markdown-mode" . "53db08184b84ac2bb0709d3ef4dfbaf97965e0d9")
@@ -92,7 +92,7 @@
  ("smartparens" . "4d1571019080fec63b11474db32380b5fa4eb418")
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
  ("ssh-config-mode-el" . "398eb8a882a1ae4dc9445d24dc62eb22b8ef51b9")
- ("straight.el" . "86476a194cbd2bf47e6e37c31621c2e2b0218109")
+ ("straight.el" . "aa2f612546815167f87dda835f8efaabf1264c7f")
  ("swift-mode" . "13628495bdb2dcf30eea04412e1d3e3c80b8e999")
  ("swiper" . "e81e479ddb86eab955ec8ac71542b89c9eb15203")
  ("sx.el" . "49358eae36dd4bb5b9207313b30df085e7f25cef")
@@ -113,4 +113,4 @@
  ("yaml-mode" . "40067a10ac1360f0b9533f0bbbb2eea128e2574d")
  ("yasnippet" . "1d96da2e08664c31ff7f6f7441da1f4fa5680b1f")
  ("zerodark-theme" . "a697570aeb5b8c008961e0869f5e05740f43113d"))
-:saturn
+:uranus
