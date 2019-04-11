@@ -10,7 +10,8 @@ These dotfiles attempt to achieve the following goals:
 * remaining as simple as possible while maximizing usability (in
   particular, not rebinding keys unnecessarily)
 * supporting local configuration without the need to fork this
-  repository (my local Emacs configuration is almost 500 lines)
+  repository (my local Emacs configuration is almost 750 lines of
+  code)
 
 ## Software configured, features
 
@@ -21,6 +22,8 @@ These dotfiles attempt to achieve the following goals:
     * Future-proof customizations using [`el-patch`][el-patch]
     * Sorting by frecency and usage on all commands using
       [`prescient.el`][prescient.el]
+    * IDE features for expanding library of programming languages with
+      [LSP] via [`lsp-mode`][lsp-mode]
     * Informative but minimal mode-line showing file modification
       status, buffer name, point position, current project, Git
       branch, and active modes (with optional right-alignment support)
@@ -41,10 +44,10 @@ These dotfiles attempt to achieve the following goals:
     * Configured packages: [Atomic Chrome][atomic-chrome] (with
       [Firefox] support), [Autorevert], [buffer-move], [Company],
       [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-      [ElDoc], [ESUP], [Flycheck], [Helpful], [Ivy], [Magit],
-      [no-littering], [Org], [Projectile], [Smartparens], [Swiper],
-      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
-      [webpaste.el], and more
+      [ElDoc], [ESUP], [Flycheck], [git-link], [Helpful], [Ivy],
+      [Magit], [no-littering], [Org], [Projectile], [pyvenv],
+      [Smartparens], [Swiper], [transpose-frame], [undo-tree],
+      [use-package], [visual-regexp], [webpaste.el], and more
     * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
       [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
       more
@@ -95,8 +98,8 @@ it would be a good idea to remove the ability to install a graphical
 Emacs from HEAD. Hope in vain that somebody writes a good package
 manager for macOS. Switch to Linux.
 
-    $ cd "$(brew --repo homebrew/core)"
-    $ git checkout 57d0340a0cb08fa053a1f7320e2f8d331f793b2e -- Formula/emacs.rb
+    $ git -C "$(brew --repo homebrew/core)" \
+        checkout 57d0340a0cb08fa053a1f7320e2f8d331f793b2e -- Formula/emacs.rb
     $ brew install emacs --HEAD --with-cocoa
 
 Install support tools. Python is required for environment variable
@@ -141,6 +144,9 @@ Use symbolic links:
     ./shell/zsh/.zshenv => ~/.zshenv
     ./tmux/.tmux.conf => ~/.tmux.conf
 
+Do not attempt to use the `emacs` subdirectory of this repository as
+`user-emacs-directory`; it won't work.
+
 ### Installing local configuration
 
 * Emacs: `~/.emacs.d/init.local.el`,
@@ -149,6 +155,9 @@ Use symbolic links:
 * Zsh: `~/.zshrc.local`
 * Tmux: `~/.tmux.local.conf`
 * Git: `~/.gitconfig.local`
+
+I suggest versioning your local dotfiles in a separate repository, and
+symlinking them to the appropriate locations. This is what I do.
 
 ### Tips and tricks
 
@@ -193,6 +202,7 @@ commented.
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [git]: https://git-scm.com/
+[git-link]: https://github.com/sshaw/git-link
 [haskell]: https://www.haskell.org/
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
@@ -201,6 +211,8 @@ commented.
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [latex]: https://www.latex-project.org/
 [leiningen]: http://leiningen.org/
+[lsp]: https://langserver.org/
+[lsp-mode]: https://github.com/emacs-lsp/lsp-mode
 [magit]: https://magit.vc/
 [markdown-mode]: http://jblevins.org/projects/markdown-mode/
 [markdown]: https://daringfireball.net/projects/markdown/syntax
@@ -211,6 +223,7 @@ commented.
 [projectile]: http://batsov.com/projectile/
 [prs]: https://github.com/raxod502/radian/pulls
 [python]: https://www.python.org/
+[pyvenv]: https://github.com/jorgenschaefer/pyvenv
 [racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
