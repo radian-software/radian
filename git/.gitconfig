@@ -6,6 +6,9 @@
 	alias = "!_() { git config --global alias.$1 \"$2\"; }; _"
 	aliases = config --get-regexp ^alias\\.
 	checkup = !git log -1 && (git fetch --all 2>/dev/null || true) && git status
+# Run a command with the repository root as cwd. See
+# https://stackoverflow.com/questions/957928#comment9747528_957978.
+	exec = "!exec "
 	msg = log --format=%B -1
 	reword = "!_() { uuid=$(uuidgen) && (saved=\"$(git stash save $uuid | grep $uuid)\"; git commit --amend; (if [[ -n \"$saved\" ]]; then git stash pop > /dev/null; fi);) }; _"
 	rework = "!_() { if [[ -n \"$1\" ]]; then git rebase -i HEAD~$1; else git rebase -i \"origin/$(git rev-parse --abbrev-ref HEAD)\"; fi; }; _"

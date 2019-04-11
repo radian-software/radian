@@ -29,10 +29,22 @@
 
 (defmacro radian-protect-macros (&rest body)
   "Eval BODY, protecting macros from incorrect expansion.
-Any code in a `with-eval-after-load' form that uses macros
-defined in the form being `with-eval-after-load'ed should be
-wrapped in this macro; otherwise, its correct evaluation is not
-guaranteed by Elisp."
+This macro should be used in the following situation:
+
+Some form is being evaluated, and this form contains as a
+sub-form some code that will not be evaluated immediately, but
+will be evaluated later. The code uses a macro that is not
+defined at the time the top-level form is evaluated, but will be
+defined by time the sub-form's code is evaluated. This macro
+handles its arguments in some way other than evaluating them
+directly. And finally, one of the arguments of this macro could
+be interpreted itself as a macro invocation, and expanding the
+invocation would break the evaluation of the outer macro.
+
+You might think this situation is such an edge case that it would
+never happen, but you'd be wrong, unfortunately. In such a
+situation, you must wrap at least the outer macro in this form,
+but can wrap at any higher level up to the top-level form."
   (declare (indent 0))
   `(eval '(progn ,@body)))
 
@@ -468,7 +480,7 @@ see https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692."))
   "Keymap for Radian commands that should be put under a prefix.
 This keymap is bound under M-P.")
 
-(bind-key "M-P" radian-keymap)
+(bind-key* "M-P" radian-keymap)
 
 (defmacro radian-bind-key (key-name command &optional predicate)
   "Bind a key in `radian-keymap'."
@@ -694,6 +706,11 @@ sets `completion-in-region-function' regardless of the value of
   (setq ivy-sort-max-size 50000)
 
   :blackout t)
+
+;; Package `ivy-hydra' provides the C-o binding for Ivy menus which
+;; allows you to pick from a set of options for what to do with a
+;; selected candidate.
+(use-package ivy-hydra)
 
 ;; Package `counsel' provides purpose-built replacements for many
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
@@ -1249,7 +1266,13 @@ counterparts."
 
   :init
 
-  (counsel-projectile-mode +1))
+  (counsel-projectile-mode +1)
+
+  :config
+
+  ;; Sort files using `prescient', instead of just showing them in
+  ;; lexicographic order.
+  (setq counsel-projectile-sort-files t))
 
 (defun radian--advice-find-file-create-directories
     (find-file filename &rest args)
@@ -1490,18 +1513,19 @@ unquote it using a comma."
 (radian-register-dotfile ,radian-directory "r a" "radian-repo")
 
 ;; Emacs
-(radian-register-dotfile ".emacs.d/init.el" "e i")
 (radian-register-dotfile
- ,(expand-file-name
-   "emacs/radian.el"
-   radian-directory)
+ ,(expand-file-name "init.el" user-emacs-directory)
+ "e i")
+(radian-register-dotfile
+ ,(expand-file-name "emacs/radian.el" radian-directory)
  "e r")
 (radian-register-dotfile
- ".emacs.d/straight/versions/radian.el"
+ ,(expand-file-name "straight/versions/radian.el" user-emacs-directory)
  "e v" "radian-versions-el")
-(radian-register-dotfile ".emacs.d/init.local.el" "e l")
 (radian-register-dotfile
- ".emacs.d/straight/versions/radian-local.el"
+ ,(expand-file-name "init.local.el" user-emacs-directory) "e l")
+(radian-register-dotfile
+ ,(expand-file-name "straight/versions/radian-local.el" user-emacs-directory)
  "e V" "radian-local-versions-el")
 
 ;; Git
@@ -2206,12 +2230,6 @@ area."
 ;; with a large number of checkers pre-defined, and other packages
 ;; define more.
 (use-package flycheck
-  ;; Use my fork which has support for running a syntax check on
-  ;; switching buffers until [1] is merged.
-  ;;
-  ;; [1]: https://github.com/flycheck/flycheck/pull/1308
-  :straight (:host github :repo "flycheck/flycheck"
-                   :fork (:repo "raxod502/flycheck" :branch "fork/4"))
   :defer 4
   :init
 
@@ -2987,25 +3005,23 @@ See https://emacs.stackexchange.com/a/3338/12534."
    (t
     (setq python-shell-interpreter "python")))
 
-  (radian-defhook radian--python-use-correct-flycheck-executable ()
+  (radian-defhook radian--python-use-correct-flycheck-executables ()
     python-mode-hook
-    "Use the correct Python executable for Flycheck."
+    "Use the correct Python executables for Flycheck."
     (let ((executable python-shell-interpreter))
       (save-excursion
         (save-match-data
           (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
                     (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
             (setq executable (substring-no-properties (match-string 1))))))
-      ;; We actually want to run Python here.
-      (dolist (var '(flycheck-python-pycompile-executable))
-        (make-local-variable var)
-        (set var executable))
-      ;; In this case we want to run the modules, which can only be
-      ;; done using Python 3.
-      (dolist (var '(flycheck-python-pylint-executable
-                     flycheck-python-flake8-executable))
-        (make-local-variable var)
-        (set var python-shell-interpreter)))))
+      ;; Try to compile using the appropriate version of Python for
+      ;; the file.
+      (setq-local flycheck-python-pycompile-executable executable)
+      ;; We might be running inside a virtualenv, in which case the
+      ;; modules won't be available. But calling the executables
+      ;; directly will work.
+      (setq-local flycheck-python-pylint-executable "pylint")
+      (setq-local flycheck-python-flake8-executable "flake8"))))
 
 ;; Package `elpy' provides a language server for Python, including
 ;; integration with most other packages that need to draw information
@@ -3662,6 +3678,17 @@ unhelpful."
     ;; actually quite distracting to work with.
     (radian--flycheck-disable-checkers 'emacs-lisp 'emacs-lisp-checkdoc))
 
+  ;; Note that this function is actually defined in `elisp-mode'
+  ;; because screw modularity.
+  (radian-defadvice radian--advice-company-elisp-use-helpful
+      (func &rest args)
+    :around elisp--company-doc-buffer
+    "Cause `company' to use Helpful to show Elisp documentation."
+    (cl-letf (((symbol-function #'describe-function) #'helpful-function)
+              ((symbol-function #'describe-variable) #'helpful-variable)
+              ((symbol-function #'help-buffer) #'current-buffer))
+      (apply func args)))
+
   ;; The default mode lighter has a space instead of a hyphen.
   ;; Disgusting!
   :blackout (lisp-interaction-mode . "Lisp-Interaction"))
@@ -4230,14 +4257,13 @@ as argument."
            (socket (expand-file-name "git/credential/socket" xdg-config-home)))
       (setq magit-credential-cache-daemon-socket socket)))
 
-  ;; Allow pulling with --rebase just once, without needing to
-  ;; configure pull.rebase permanently. See
-  ;; https://github.com/magit/magit/issues/2597#issuecomment-201392835.
-  (magit-define-popup-switch 'magit-pull-popup ?r "Rebase" "--rebase")
+  ;; Don't try to save unsaved buffers when using Magit. We know
+  ;; perfectly well that we need to save our buffers if we want Magit
+  ;; to see them.
+  (setq magit-save-repository-buffers nil)
 
-  ;; Allow merging unrelated histories.
-  (magit-define-popup-switch 'magit-merge-popup ?u
-    "Allow unrelated" "--allow-unrelated-histories"))
+  (transient-append-suffix 'magit-merge "-s"
+    '("-u" "Allow unrelated" "--allow-unrelated-histories")))
 
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
@@ -4254,6 +4280,14 @@ as argument."
   ;; code. See https://github.com/sigma/gh.el/issues/95.
   :straight (:host github :repo "sigma/gh.el"
                    :no-autoloads t))
+
+;; Package `magit-popup' is a dependency of `magit-gh-pulls' that is
+;; not declared properly, see
+;; <https://github.com/sigma/magit-gh-pulls/issues/126>. The reason
+;; for this issue is that `magit-gh-pulls' was previously a dependency
+;; of `magit', so that hid the error.
+(use-package magit-popup
+  :after magit-gh-pulls)
 
 ;; Package `magit-gh-pulls' adds a section to Magit which displays
 ;; open pull requests on a corresponding GitHub repository, if any,
@@ -4288,7 +4322,22 @@ as argument."
 
   ;; Automatically scroll the Compilation buffer as output appears,
   ;; but stop at the first error.
-  (setq compilation-scroll-output 'first-error))
+  (setq compilation-scroll-output 'first-error)
+
+  ;; Don't ask about saving buffers when invoking `compile'. Try to
+  ;; save them all immediately using `save-some-buffers'.
+  (setq compilation-ask-about-save nil)
+
+  ;; Actually, don't bother saving buffers at all. That's dumb. We
+  ;; know to save our buffers if we want them to be updated on disk.
+  (setq compilation-save-buffers-predicate
+        (lambda ()))
+
+  (radian-defadvice radian--advice-compile-pop-to-buffer (buf)
+    :filter-return compilation-start
+    "Pop to compilation buffer on \\[compile]."
+    (prog1 buf
+      (select-window (get-buffer-window buf)))))
 
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
@@ -4318,6 +4367,16 @@ as argument."
 
   (bind-key "C-c C-o" #'bug-reference-push-button bug-reference-map))
 
+;; Package `git-link' provides a simple function M-x git-link which
+;; copies to the kill ring a link to the current line of code or
+;; selection on GitHub, GitLab, etc.
+(use-package git-link
+  :config
+
+  ;; Link to a particular revision of a file rather than using the
+  ;; branch name in the URL.
+  (setq git-link-use-commit t))
+
 ;; Package `atomic-chrome' provides a way for you to edit textareas in
 ;; Chrome or Firefox using Emacs. See
 ;; https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc
@@ -4328,34 +4387,21 @@ as argument."
   :straight (:host github :repo "alpha22jp/atomic-chrome"
                    :fork (:repo "raxod502/atomic-chrome" :branch "fork/1"))
   :defer 5
-  :bind (:map atomic-chrome-edit-mode-map
-              :filter (not radian-atomic-chrome-allow-filling)
-              ("M-q" . ignore))
   :config
 
   (defvar-local radian-atomic-chrome-url nil
     "The URL of the text area being edited.")
 
-  (defvar-local radian-atomic-chrome-allow-filling nil
-    "Non-nil means that hard line wrapping may be used.")
-
   (defcustom radian-atomic-chrome-setup-hook nil
-    "Hook run while setting up an `atomic-chrome' buffer.
-You can set `radian-atomic-chrome-allow-filling' based on the
-value of `radian-atomic-chrome-url' in this hook."
+    "Hook run while setting up an `atomic-chrome' buffer."
     :type 'hook)
 
   (radian-defadvice radian--advice-atomic-chrome-setup (url)
     :after atomic-chrome-set-major-mode
     "Save the URL in `radian-atomic-chrome-url'.
-Also set up filling correctly based on
-`radian-atomic-chrome-allow-filling', after running
-`radian-atomic-chrome-setup-hook'."
+Also run `radian-atomic-chrome-setup-hook'."
     (setq radian-atomic-chrome-url url)
-    (run-hooks 'radian-atomic-chrome-setup-hook)
-    (unless radian-atomic-chrome-allow-filling
-      (auto-fill-mode -1)
-      (visual-line-mode +1)))
+    (run-hooks 'radian-atomic-chrome-setup-hook))
 
   ;; Edit in Markdown by default, because many sites support it and
   ;; it's not a big deal if the text area doesn't actually support
@@ -4434,7 +4480,8 @@ Also set up filling correctly based on
 
               ;; Abbreviated (and flattened) version of init.el.
               (defvar radian-minimum-emacs-version "26.1")
-              (defvar radian-local-init-file "~/.emacs.d/init.local.el")
+              (defvar radian-local-init-file
+                (expand-file-name "init.local.el" user-emacs-directory))
               (setq package-enable-at-startup nil)
               (setq custom-file (expand-file-name
                                  (format "custom-%d-%d.el" (emacs-pid) (random))

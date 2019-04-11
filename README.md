@@ -38,13 +38,13 @@ These dotfiles attempt to achieve the following goals:
       dotfiles
     * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
       partly on [`restart-emacs`][restart-emacs]
-    * Configured packages: [Atomic Chrome][atomic-chrome],
-      [Autorevert], [buffer-move], [Company], [Counsel],
-      [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
-      [Flycheck], [Helpful], [Ivy], [Magit], [no-littering], [Org],
-      [Projectile], [Smartparens], [Swiper], [transpose-frame],
-      [undo-tree], [use-package], [visual-regexp], [webpaste.el], and
-      more
+    * Configured packages: [Atomic Chrome][atomic-chrome] (with
+      [Firefox] support), [Autorevert], [buffer-move], [Company],
+      [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
+      [ElDoc], [ESUP], [Flycheck], [Helpful], [Ivy], [Magit],
+      [no-littering], [Org], [Projectile], [Smartparens], [Swiper],
+      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
+      [webpaste.el], and more
     * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
       [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
       more
@@ -87,12 +87,31 @@ configuration, and optionally installing local configuration.
 
 ### Installing software
 #### macOS
+##### Emacs
 
-* Emacs: `brew install emacs --with-cocoa`, version 26.1 minimum;
-  `brew install python`; (optional for improved startup time) `brew
-  install watchexec`
-* Zsh: `brew install zsh`; `mkdir ~/.zplugin`; `git clone
-  git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
+Emacs 26.1 is broken on macOS 10.14, so install from HEAD. Revert to
+previous Homebrew commit because the maintainers of Homebrew thought
+it would be a good idea to remove the ability to install a graphical
+Emacs from HEAD. Hope in vain that somebody writes a good package
+manager for macOS. Switch to Linux.
+
+    $ cd "$(brew --repo homebrew/core)"
+    $ git checkout 57d0340a0cb08fa053a1f7320e2f8d331f793b2e -- Formula/emacs.rb
+    $ brew install emacs --HEAD --with-cocoa
+
+Install support tools. Python is required for environment variable
+setting; watchexec is optional for improved startup time.
+
+    $ brew install python watchexec
+
+##### Zsh
+
+    $ brew install zsh
+    $ mkdir ~/.zplugin
+    $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+
+##### Remaining tools
+
 * Tmux: `brew install tmux`
 * Git: `brew install git`
 * Leiningen: `brew cask install java`; `brew install leiningen`
@@ -119,6 +138,7 @@ Use symbolic links:
     ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
+    ./shell/zsh/.zprofile => ~/.zprofile
     ./tmux/.tmux.conf => ~/.tmux.conf
 
 ### Installing local configuration
@@ -169,6 +189,7 @@ commented.
 [emacs]: https://www.gnu.org/software/emacs/
 [esup]: https://github.com/jschaf/esup
 [exa]: https://the.exa.website/
+[firefox]: https://www.mozilla.org/en-US/firefox/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [git]: https://git-scm.com/

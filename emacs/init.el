@@ -19,7 +19,8 @@
     (defvar radian-minimum-emacs-version "26.1"
       "Radian Emacs does not support any Emacs version below this.")
 
-    (defvar radian-local-init-file "~/.emacs.d/init.local.el"
+    (defvar radian-local-init-file
+      (expand-file-name "init.local.el" user-emacs-directory)
       "File for local customizations of Radian.")
 
     ;; Prevent package.el from modifying this file.

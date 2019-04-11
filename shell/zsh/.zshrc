@@ -14,12 +14,6 @@ if [[ -f ~/.zshrc.local ]]; then
     . ~/.zshrc.local
 fi
 
-### ~/.profile
-
-if [[ -f ~/.profile ]]; then
-    . ~/.profile
-fi
-
 ## zplugin
 
 if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
@@ -449,6 +443,34 @@ if (( $+commands[git] )); then
     alias g=git
 
     alias gh='git help'
+    alias ghi='git help init'
+    alias ghst='git help status'
+    alias ghsh='git help show'
+    alias ghl='git help log'
+    alias gha='git help add'
+    alias ghrm='git help rm'
+    alias ghmv='git help mv'
+    alias ghcm='git help commit'
+    alias ghcp='git help cherry-pick'
+    alias ghrv='git help revert'
+    alias ght='git help tag'
+    alias ghn='git help notes'
+    alias ghsta='git help stash'
+    alias ghd='git help diff'
+    alias ghbl='git help blame'
+    alias ghb='git help branch'
+    alias ghco='git help checkout'
+    alias ghlsf='git help ls-files'
+    alias ghx='git help clean'
+    alias ghbs='git help bisect'
+    alias ghm='git help merge'
+    alias ghrb='git help rebase'
+    alias ghsm='git help submodule'
+    alias ghcl='git help clone'
+    alias ghre='git help remote'
+    alias ghf='git help fetch'
+    alias ghu='git help pull'
+    alias ghp='git help push'
 
     alias gi='git init'
 
@@ -560,7 +582,9 @@ if (( $+commands[git] )); then
     alias glsf='git ls-files'
 
     alias gx='git clean'
-    alias gxf='git clean -fd'
+    alias gxu='git clean -ffd'
+    alias gxi='git clean -ffdX'
+    alias gxa='git clean -ffdx'
 
     alias gbs='git bisect'
     alias gbss='git bisect start'
@@ -625,7 +649,9 @@ fi
 
 if (( $+commands[tmux] )); then
     alias ta='tmux attach'
-    alias ts='tmux new-session -s'
+    function ts {
+        tmux new-session -s ${1:-tmux}
+    }
     alias tl='tmux list-sessions'
 fi
 
