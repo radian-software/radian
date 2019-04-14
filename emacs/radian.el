@@ -4302,12 +4302,11 @@ as argument."
   ;; https://chris.beams.io/posts/git-commit/.
   (setq git-commit-summary-max-length 50))
 
-;; Package `gh' provides an Elisp interface to the GitHub API.
-(use-package gh
-  ;; Disable autoloads because this package autoloads *way* too much
-  ;; code. See https://github.com/sigma/gh.el/issues/95.
-  :straight (:host github :repo "sigma/gh.el"
-                   :no-autoloads t))
+;; Package `forge' provides a GitHub/GitLab/etc. interface directly
+;; within Magit.
+(use-package forge
+  :demand t
+  :after magit)
 
 ;;;; External commands
 
