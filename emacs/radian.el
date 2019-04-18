@@ -1438,7 +1438,8 @@ unquote it using a comma."
                         (or pretty-filename
                             (replace-regexp-in-string
                              "[^a-z0-9]" "-"
-                             bare-filename))))))
+                             (downcase
+                              bare-filename)))))))
          (defun-other-window-name
            (intern
             (concat (symbol-name defun-name)
