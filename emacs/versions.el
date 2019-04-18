@@ -62,6 +62,7 @@
  ("loop.el" . "e22807f83a0890dc8a904c51ee0742c34efccc6c")
  ("lsp-mode" . "0047b780c299584923adf22298fa28d29c2cbbc1")
  ("lsp-ui" . "cf945e643374d80f6ce9aa5a70165693de0bb2e8")
+ ("macrostep" . "424e3734a1ee526a1bd7b5c3cd1d3ef19d184267")
  ("magit" . "5a9e114bfc654186b89867ffdd95a3088cdd6446")
  ("markdown-mode" . "53db08184b84ac2bb0709d3ef4dfbaf97965e0d9")
  ("melpa" . "36ecda0341ec95f012a92fca46cd17802c43ca60")

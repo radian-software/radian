@@ -3772,6 +3772,11 @@ to `radian-reload-init'."
  ("C-h C-o" . radian-find-symbol)
  ("C-h C-l" . find-library))
 
+;; Package `macrostep' provides a facility for interactively expanding
+;; Elisp macros.
+(use-package macrostep
+  :bind (("C-c e" . macrostep-expand)))
+
 ;;;;; Emacs Lisp linting
 
 ;; Feature `checkdoc' provides some tools for validating Elisp
