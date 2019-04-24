@@ -51,7 +51,7 @@
  ("helpful" . "28bae3e2bd64c6b89c1607c7b1235b306fa7220b")
  ("hindent" . "ad0c2a9f8755d37f09b356ab7e45a4e49bcda0b3")
  ("ht.el" . "8ec3eb96ee63430fb24257e4aa8169b50cb7be12")
- ("hydra" . "9c4a4711bc78364e114acbbcf484a60669d02d78")
+ ("hydra" . "acb69859f3dde8d6924587f39997320256bdd85d")
  ("inf-ruby" . "49d59a7897f594e3be74ecbddae83719f9a6c0f0")
  ("js2-mode" . "ed955e7f1608cfd2d2713129d65f5fd734842ae4")
  ("json-mode" . "0e819e519ae17a2686e0881c4ca51fa873fa9b83")
