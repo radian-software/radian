@@ -4658,8 +4658,11 @@ This is passed to `set-frame-font'."
   ;; Disable the scroll bars.
   (scroll-bar-mode -1)
 
-  ;; Disable the tool bar.
-  (tool-bar-mode -1)
+  ;; Disable the tool bar and menu bar. See
+  ;; <https://github.com/raxod502/radian/issues/180> for why we do it
+  ;; this way instead of via `tool-bar-mode' and `menu-bar-mode'.
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(menu-bar-lines . 0) default-frame-alist)
 
   ;; Prevent the cursor from blinking.
   (blink-cursor-mode -1)
@@ -4681,11 +4684,12 @@ This is passed to `set-frame-font'."
     (add-to-list 'default-frame-alist '(ns-appearance . dark))
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))))
 
-;; Feature `menu-bar' provides the annoying menu bar which we will
-;; disable immediately.
-(use-feature menu-bar
-  :config
-
+;; For terminal Emacs only, disable the menu bar the proper way (using
+;; `menu-bar-mode'). Unlike in windowed Emacs, this doesn't have a big
+;; performance impact. Furthermore, if we don't do it this way in the
+;; terminal, then you can see the menu bar during startup
+;; unfortunately.
+(unless (display-graphic-p)
   (menu-bar-mode -1))
 
 ;;;; Mode line
