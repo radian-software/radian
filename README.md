@@ -92,15 +92,7 @@ configuration, and optionally installing local configuration.
 #### macOS
 ##### Emacs
 
-Emacs 26.1 is broken on macOS 10.14, so install from HEAD. Revert to
-previous Homebrew commit because the maintainers of Homebrew thought
-it would be a good idea to remove the ability to install a graphical
-Emacs from HEAD. Hope in vain that somebody writes a good package
-manager for macOS. Switch to Linux.
-
-    $ git -C "$(brew --repo homebrew/core)" \
-        checkout 57d0340a0cb08fa053a1f7320e2f8d331f793b2e -- Formula/emacs.rb
-    $ brew install emacs --HEAD --with-cocoa
+    $ brew cask install emacs
 
 Install support tools. Python is required for environment variable
 setting; watchexec is optional for improved startup time.
