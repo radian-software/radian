@@ -2013,10 +2013,12 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode))
+  (dolist (mode '(python-mode sh-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
-                     (radian--smartparens-indent-new-pair "<return>")))
+                     (radian--smartparens-indent-new-pair "<return>"))))
+
+  (dolist (mode '(python-mode))
     (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
