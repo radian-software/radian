@@ -4429,7 +4429,7 @@ Also run `radian-atomic-chrome-setup-hook'."
       (cond
        ((radian-operating-system-p macOS)
         (call-process "open" nil nil nil "-a" browser))
-       ((radian-operating-system-p linux)
+       ((executable-find "wmctrl")
         (call-process "wmctrl" nil nil nil "-a" browser)))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
