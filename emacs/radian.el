@@ -1997,7 +1997,7 @@ the timer when no buffers need to be checked."
 
   ;; Smartparens is broken in `cc-mode' as of Emacs 27. See
   ;; <https://github.com/Fuco1/smartparens/issues/963>.
-  (when (version< emacs-version "27")
+  (when (version<= "27" emacs-version)
     (dolist (fun '(c-electric-paren c-electric-brace))
       (add-to-list 'sp--special-self-insert-commands fun)))
 
