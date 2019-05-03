@@ -4630,6 +4630,10 @@ with which Emacs should be "
 
 ;;; Appearance
 
+;; Allow you to resize frames however you want, not just in whole
+;; columns. "The 80s called, they want their user interface back"
+(setq frame-resize-pixelwise t)
+
 (defcustom radian-font nil
   "Default font, as a string. Nil means use the default.
 This is passed to `set-frame-font'."
