@@ -1654,6 +1654,14 @@ invocation will kill the newline."
 
 ;;;; Undo/redo
 
+;; Feature `warnings' allows us to enable and disable warnings.
+(use-feature warnings
+  :config
+
+  ;; Ignore the warning we get when a huge buffer is reverted and the
+  ;; undo information is too large to be recorded.
+  (add-to-list 'warning-suppress-log-types '(undo discard-info)))
+
 ;; Package `undo-tree' replaces the default Emacs undo system, which
 ;; is poorly designed and hard to use, with a much more powerful
 ;; tree-based system. In basic usage, you don't even have to think
