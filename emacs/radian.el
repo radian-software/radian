@@ -2016,7 +2016,7 @@ the timer when no buffers need to be checked."
       (add-to-list 'sp--special-self-insert-commands fun)))
 
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
-                         js2-mode json-mode
+                         js2-mode json-mode lua-mode
                          python-mode sh-mode web-mode))
     (sp-local-pair mode "{" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
@@ -2027,7 +2027,7 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode sh-mode js2-mode))
+  (dolist (mode '(python-mode sh-mode js2-mode lua-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2941,6 +2941,12 @@ ARG is passed to `hindent-mode' toggle function."
     "Enable `company-tern' in the current buffer."
     (setq-local company-backends
                 (cons 'company-tern radian--company-backends-global))))
+
+;;;; Lua
+;; <http://www.lua.org/>
+
+;; Package `lua-mode' provides a major mode for Lua code.
+(use-package lua-mode)
 
 ;;;; Markdown
 ;; https://daringfireball.net/projects/markdown/
