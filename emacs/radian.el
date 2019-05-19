@@ -285,7 +285,7 @@ binding the variable dynamically over the entire init-file."
 (if (and (executable-find "watchexec")
          (executable-find "python3"))
     (setq straight-check-for-modifications '(watch-files find-when-checking))
-  (setq straight-check-for-modifications '(check-on-save find-when-checking)))
+  (setq straight-check-for-modifications '(find-at-startup find-when-checking)))
 
 (radian--run-hook 'radian-before-straight-hook)
 
