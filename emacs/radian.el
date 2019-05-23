@@ -287,6 +287,10 @@ binding the variable dynamically over the entire init-file."
     (setq straight-check-for-modifications '(watch-files find-when-checking))
   (setq straight-check-for-modifications '(find-at-startup find-when-checking)))
 
+;; Use my Emacsmirror mirror, which improves initial clone time by
+;; several orders of magnitude.
+(setq straight-recipes-emacsmirror-use-mirror t)
+
 (radian--run-hook 'radian-before-straight-hook)
 
 ;; Bootstrap the package manager, straight.el.
