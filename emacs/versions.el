@@ -65,7 +65,7 @@
  ("lua-mode" . "95c64bb5634035630e8c59d10d4a1d1003265743")
  ("macrostep" . "424e3734a1ee526a1bd7b5c3cd1d3ef19d184267")
  ("magit" . "04f7eaa26c7595552d8eca57832896cc842c6fe5")
- ("markdown-mode" . "53db08184b84ac2bb0709d3ef4dfbaf97965e0d9")
+ ("markdown-mode" . "115f77df9755c6a453f3e5d9623ff885d207ea82")
  ("melpa" . "36ecda0341ec95f012a92fca46cd17802c43ca60")
  ("multiple-cursors.el" . "5ff2071face6d618bbe49bb9e1749da9daf4ac85")
  ("no-littering" . "974f105ea17729aa77a5bf1b4d70cb6e09b4cd6a")
@@ -95,7 +95,7 @@
  ("smartparens" . "4d1571019080fec63b11474db32380b5fa4eb418")
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
  ("ssh-config-mode-el" . "398eb8a882a1ae4dc9445d24dc62eb22b8ef51b9")
- ("straight.el" . "4c5839618815f6b0876f403e5e838ed82c6c3063")
+ ("straight.el" . "479632d3f8127ae4fe5637b08ad517c77d5c86ea")
  ("swift-mode" . "13628495bdb2dcf30eea04412e1d3e3c80b8e999")
  ("swiper" . "e81e479ddb86eab955ec8ac71542b89c9eb15203")
  ("sx.el" . "49358eae36dd4bb5b9207313b30df085e7f25cef")
@@ -117,4 +117,4 @@
  ("yaml-mode" . "40067a10ac1360f0b9533f0bbbb2eea128e2574d")
  ("yasnippet" . "1d96da2e08664c31ff7f6f7441da1f4fa5680b1f")
  ("zerodark-theme" . "a697570aeb5b8c008961e0869f5e05740f43113d"))
-:neptune
+:pluto
