@@ -356,48 +356,6 @@ binding the variable dynamically over the entire init-file."
 
 ;;; Prevent Emacs-provided Org from being loaded
 
-;; The following is a temporary hack until straight.el supports
-;; building Org, see:
-;;
-;; * https://github.com/raxod502/straight.el/issues/211
-;; * https://github.com/raxod502/radian/issues/410
-;;
-;; There are three things missing from our version of Org: the
-;; functions `org-git-version' and `org-release', and the feature
-;; `org-version'. We provide all three of those ourself, therefore.
-
-;; Package `git' is a library providing convenience functions for
-;; running Git.
-(use-package git)
-
-(defun org-git-version ()
-  "The Git version of org-mode.
-  Inserted by installing org-mode or when a release is made."
-  (require 'git)
-  (let ((git-repo (expand-file-name
-                   "straight/repos/org/" user-emacs-directory)))
-    (string-trim
-     (git-run "describe"
-              "--match=release\*"
-              "--abbrev=6"
-              "HEAD"))))
-
-(defun org-release ()
-  "The release version of org-mode.
-  Inserted by installing org-mode or when a release is made."
-  (require 'git)
-  (let ((git-repo (expand-file-name
-                   "straight/repos/org/" user-emacs-directory)))
-    (string-trim
-     (string-remove-prefix
-      "release_"
-      (git-run "describe"
-               "--match=release\*"
-               "--abbrev=0"
-               "HEAD")))))
-
-(provide 'org-version)
-
 ;; Our real configuration for Org comes much later. Doing this now
 ;; means that if any packages that are installed in the meantime
 ;; depend on Org, they will not accidentally cause the Emacs-provided
@@ -495,50 +453,59 @@ This keymap is bound under M-P.")
 ;;; Environment
 ;;;; Environment variables
 
-(defun radian-source-profile ()
-  "Load ~/.profile and set environment variables exported therein."
-  (interactive)
-  (let ((profile-file "~/.profile")
-        (buf-name " *radian-env-output*"))
-    (when (and profile-file
-               (file-exists-p profile-file)
-               (executable-find "python"))
-      (ignore-errors (kill-buffer buf-name))
-      (with-current-buffer (get-buffer-create buf-name)
-        (let* ((python-script
-                (expand-file-name "scripts/print_env.py" radian-directory))
-               (delimiter (radian--random-string))
-               (sh-script (format ". %s && %s %s"
-                                  (shell-quote-argument
-                                   (expand-file-name profile-file))
-                                  (shell-quote-argument python-script)
-                                  (shell-quote-argument delimiter)))
-               (return (call-process "sh" nil t nil "-c" sh-script))
-               (found-delimiter
-                (progn
-                  (goto-char (point-min))
-                  (search-forward delimiter nil 'noerror))))
-          (if (and (= 0 return) found-delimiter)
-              (let* ((results (split-string
-                               (buffer-string) (regexp-quote delimiter)))
-                     (results (cl-subseq results 1 (1- (length results)))))
-                (if (cl-evenp (length results))
-                    (cl-loop for (var value) on results by #'cddr do
-                             (setenv var value)
-                             (when (string= var "PATH")
-                               (setq exec-path (parse-colon-path value))))
-                  (message
-                   "Loading %s produced malformed result; see buffer %S"
-                   profile-file
-                   buf-name)))
-            (message "Failed to load %s; see buffer %S"
-                     profile-file
-                     buf-name)))))))
+(defvar radian--env-setup-p nil
+  "Non-nil if `radian-env-setup' has completed at least once.")
 
-(defvar radian--source-profile-timer
-  (run-at-time 1 nil #'radian-source-profile)
-  "Timer used to run `radian-source-profile'.
-We shouldn't need environment variables to be set correctly
+(defun radian-env-setup (&optional again)
+  "Load ~/.profile and set environment variables exported therein.
+Only do this once, unless AGAIN is non-nil."
+  (interactive)
+  ;; No need to worry about race conditions because Elisp isn't
+  ;; concurrent (yet).
+  (unless (and radian--env-setup-p (not again))
+    (let ((profile-file "~/.profile")
+          (buf-name " *radian-env-output*"))
+      (when (and profile-file
+                 (file-exists-p profile-file)
+                 (executable-find "python"))
+        (ignore-errors (kill-buffer buf-name))
+        (with-current-buffer (get-buffer-create buf-name)
+          (let* ((python-script
+                  (expand-file-name "scripts/print_env.py" radian-directory))
+                 (delimiter (radian--random-string))
+                 (sh-script (format ". %s && %s %s"
+                                    (shell-quote-argument
+                                     (expand-file-name profile-file))
+                                    (shell-quote-argument python-script)
+                                    (shell-quote-argument delimiter)))
+                 (return (call-process "sh" nil t nil "-c" sh-script))
+                 (found-delimiter
+                  (progn
+                    (goto-char (point-min))
+                    (search-forward delimiter nil 'noerror))))
+            (if (and (= 0 return) found-delimiter)
+                (let* ((results (split-string
+                                 (buffer-string) (regexp-quote delimiter)))
+                       (results (cl-subseq results 1 (1- (length results)))))
+                  (if (cl-evenp (length results))
+                      (progn
+                        (cl-loop for (var value) on results by #'cddr do
+                                 (setenv var value)
+                                 (when (string= var "PATH")
+                                   (setq exec-path (parse-colon-path value))))
+                        (setq radian--env-setup-p t))
+                    (message
+                     "Loading %s produced malformed result; see buffer %S"
+                     profile-file
+                     buf-name)))
+              (message "Failed to load %s; see buffer %S"
+                       profile-file
+                       buf-name))))))))
+
+(defvar radian--env-setup-timer
+  (run-at-time 1 nil #'radian-env-setup)
+  "Timer used to run `radian-env-setup'.
+We (mostly) don't need environment variables to be set correctly
 during init, so deferring their processing saves some time at
 startup.")
 
@@ -1472,7 +1439,8 @@ unquote it using a comma."
                         (or pretty-filename
                             (replace-regexp-in-string
                              "[^a-z0-9]" "-"
-                             bare-filename))))))
+                             (downcase
+                              bare-filename)))))))
          (defun-other-window-name
            (intern
             (concat (symbol-name defun-name)
@@ -1561,6 +1529,12 @@ unquote it using a comma."
 
 ;;; Editing
 ;;;; Text formatting
+
+;; When region is active, make `capitalize-word' and friends act on
+;; it.
+(bind-key "M-c" #'capitalize-dwim)
+(bind-key "M-l" #'downcase-dwim)
+(bind-key "M-u" #'upcase-dwim)
 
 (defun radian-reverse-region-characters (beg end)
   "Reverse the characters in the region from BEG to END.
@@ -1794,21 +1768,6 @@ the reverse direction from \\[pop-global-mark]."
     :override bookmark-maybe-message
     "Silence useless messages from bookmark.el."))
 
-;;;;; Definition location
-
-;; Package `dumb-jump' provides a mechanism to jump to the definitions
-;; of functions, variables, etc. in a variety of programming
-;; languages. The advantage of `dumb-jump' is that it doesn't try to
-;; be clever, so it "just works" instantly for dozens of languages
-;; with zero configuration.
-(use-package dumb-jump
-  :init
-
-  (dumb-jump-mode +1)
-
-  :bind (:map dumb-jump-mode-map
-              ("M-Q" . dumb-jump-quick-look)))
-
 ;;;; Find and replace
 
 ;; Package `visual-regexp' provides an alternate version of
@@ -1842,10 +1801,8 @@ the reverse direction from \\[pop-global-mark]."
 ;; Package `swiper' provides an alternative to `isearch' which instead
 ;; uses `ivy' to display and select from the results.
 (use-package swiper
-  :init
-
-  (radian-bind-key "g" #'swiper)
-
+  :bind (("C-s" . swiper)
+         ("C-r" . swiper))
   :config
 
   ;; Use only one color for subgroups in Swiper highlighting.
@@ -2039,6 +1996,12 @@ the timer when no buffers need to be checked."
     (forward-line -1)
     (indent-according-to-mode))
 
+  ;; Smartparens is broken in `cc-mode' as of Emacs 27. See
+  ;; <https://github.com/Fuco1/smartparens/issues/963>.
+  (when (version<= "27" emacs-version)
+    (dolist (fun '(c-electric-paren c-electric-brace))
+      (add-to-list 'sp--special-self-insert-commands fun)))
+
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
                          js2-mode json-mode
                          python-mode sh-mode web-mode))
@@ -2051,10 +2014,12 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode))
+  (dolist (mode '(python-mode sh-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
-                     (radian--smartparens-indent-new-pair "<return>")))
+                     (radian--smartparens-indent-new-pair "<return>"))))
+
+  (dolist (mode '(python-mode))
     (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2063,6 +2028,171 @@ the timer when no buffers need to be checked."
   (setq sp-escape-quotes-after-insert nil)
 
   :blackout t)
+
+;;;; Snippet expansion
+
+;; Feature `abbrev' provides functionality for expanding user-defined
+;; abbreviations. We prefer to use `yasnippet' instead, though.
+(use-feature abbrev
+  :blackout t)
+
+;; Package `yasnippet' allows the expansion of user-defined
+;; abbreviations into fillable templates. It is also used by
+;; `clj-refactor' for some of its refactorings.
+(use-package yasnippet
+  :bind (:map yas-minor-mode-map
+
+              ;; Disable TAB from expanding snippets, as I don't use it and
+              ;; it's annoying.
+              ("TAB" . nil)
+              ("<tab>" . nil))
+  :config
+
+  ;; Reduce verbosity. The default value is 3. Bumping it down to 2
+  ;; eliminates a message about successful snippet lazy-loading setup
+  ;; on every(!) Emacs init. Errors should still be shown.
+  (setq yas-verbosity 2)
+
+  ;; Make it so that Company's keymap overrides Yasnippet's keymap
+  ;; when a snippet is active. This way, you can TAB to complete a
+  ;; suggestion for the current field in a snippet, and then TAB to
+  ;; move to the next field. Plus, C-g will dismiss the Company
+  ;; completions menu rather than cancelling the snippet and moving
+  ;; the cursor while leaving the completions menu on-screen in the
+  ;; same location.
+  (use-feature company
+    :config
+
+    ;; This function translates the "event types" I get from
+    ;; `map-keymap' into things that I can pass to `lookup-key' and
+    ;; `define-key'. It's a hack, and I'd like to find a built-in
+    ;; function that accomplishes the same thing while taking care of
+    ;; any edge cases I might have missed in this ad-hoc solution.
+    (defun radian--yasnippet-normalize-event (event)
+      "This function is a complete hack, do not use.
+But in principle, it translates what we get from `map-keymap'
+into what `lookup-key' and `define-key' want."
+      (if (vectorp event)
+          event
+        (vector event)))
+
+    ;; Here we define a hybrid keymap that delegates first to
+    ;; `company-active-map' and then to `yas-keymap'.
+    (defvar radian--yasnippet-then-company-keymap
+      ;; It starts out as a copy of `yas-keymap', and then we
+      ;; merge in all of the bindings from `company-active-map'.
+      (let ((keymap (copy-keymap yas-keymap)))
+        (map-keymap
+         (lambda (event company-cmd)
+           (let* ((event (radian--yasnippet-normalize-event event))
+                  (yas-cmd (lookup-key yas-keymap event)))
+             ;; Here we use an extended menu item with the
+             ;; `:filter' option, which allows us to dynamically
+             ;; decide which command we want to run when a key is
+             ;; pressed.
+             (define-key keymap event
+               `(menu-item
+                 nil ,company-cmd :filter
+                 (lambda (cmd)
+                   ;; There doesn't seem to be any obvious
+                   ;; function from Company to tell whether or not
+                   ;; a completion is in progress (à la
+                   ;; `company-explicit-action-p'), so I just
+                   ;; check whether or not `company-my-keymap' is
+                   ;; defined, which seems to be good enough.
+                   (if company-my-keymap
+                       ',company-cmd
+                     ',yas-cmd))))))
+         company-active-map)
+        keymap)
+      "Keymap which delegates to both `company-active-map' and `yas-keymap'.
+The bindings in `company-active-map' only apply if Company is
+currently active.")
+
+    (radian-defadvice radian--advice-company-overrides-yasnippet
+        (yas--make-control-overlay &rest args)
+      :around yas--make-control-overlay
+      "Allow `company' keybindings to override those of `yasnippet'."
+      ;; The function `yas--make-control-overlay' uses the current
+      ;; value of `yas-keymap' to build the Yasnippet overlay, so to
+      ;; override the Yasnippet keymap we only need to dynamically
+      ;; rebind `yas-keymap' for the duration of that function.
+      (let ((yas-keymap radian--yasnippet-then-company-keymap))
+        (apply yas--make-control-overlay args))))
+
+  :blackout yas-minor-mode)
+
+;;; IDE features
+;;;; Virtual environments
+;;;;; Python
+
+;; Package `pyvenv' provides functions for activating and deactivating
+;; Python virtualenvs within Emacs.
+(use-package pyvenv)
+
+;;;; Language servers
+
+;; Package `lsp-mode' is an Emacs client for the Language Server
+;; Protocol <https://langserver.org/>. It is where we get all of our
+;; information for completions, definition location, documentation,
+;; and so on.
+(use-package lsp-mode
+  :init
+
+  (radian-defhook radian--lsp-enable ()
+    prog-mode-hook
+    "Enable `lsp-mode' for most programming modes."
+    (unless (derived-mode-p
+             ;; `lsp-mode' doesn't support Elisp, so let's avoid
+             ;; triggering the autoload just for checking that, yes,
+             ;; there's nothing to do for the *scratch* buffer.
+             #'emacs-lisp-mode
+             ;; Disable for modes that we currently use a specialized
+             ;; framework for, until they are phased out in favor of
+             ;; LSP.
+             #'js2-mode
+             #'python-mode
+             #'ruby-mode
+             #'rust-mode
+             #'typescript-mode)
+      (lsp)))
+
+  :config
+
+  ;; We use Flycheck, not Flymake.
+  (setq lsp-prefer-flymake nil)
+
+  (defun radian--advice-lsp-mode-silence (format &rest _)
+    "Silence needless diagnostic messages from `lsp-mode'.
+
+This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
+    (member format '("No LSP server for %s."
+                     "Connected to %s.")))
+
+  (dolist (fun '(lsp--warn lsp--info))
+    (advice-add fun :before-until #'radian--advice-lsp-mode-silence)))
+
+;;;; Indentation
+
+;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
+;; that `indent-tabs-mode' is even *available* as an *option* disgusts
+;; me, much less the fact that it's *enabled* by default (meaning that
+;; *both* tabs and spaces are used at the same time).
+(setq-default indent-tabs-mode nil)
+
+(defun radian-indent-defun ()
+  "Indent the surrounding defun."
+  (interactive)
+  (save-excursion
+    (when (beginning-of-defun)
+      (let ((beginning (point)))
+        (end-of-defun)
+        (let ((end (point)))
+          (let ((inhibit-message t)
+                (message-log-max nil))
+            (indent-region beginning end)))))))
+
+(bind-key* "C-M-q" #'radian-indent-defun)
 
 ;;;; Autocompletion
 
@@ -2195,7 +2325,36 @@ backends will still be included.")
   ;; Use `prescient' for Company menus.
   (company-prescient-mode +1))
 
-;;;; Automatic display of documentation in the minibuffer
+;; Package `company-lsp' provides a Company backend for `lsp-mode'.
+;; It's configured automatically by `lsp-mode'.
+(use-package company-lsp)
+
+;;;; Definition location
+
+;; Package `dumb-jump' provides a mechanism to jump to the definitions
+;; of functions, variables, etc. in a variety of programming
+;; languages. The advantage of `dumb-jump' is that it doesn't try to
+;; be clever, so it "just works" instantly for dozens of languages
+;; with zero configuration.
+(use-package dumb-jump
+  :init
+
+  (dumb-jump-mode +1)
+
+  :bind (:map dumb-jump-mode-map
+              ("M-Q" . dumb-jump-quick-look))
+  :bind* (("C-M-d" . dumb-jump-go-prompt)
+          ("C-x 4 g" . dumb-jump-go-other-window)
+          ("C-x 4 d" . radian-dumb-jump-go-prompt-other-window))
+  :config
+
+  (defun radian-dumb-jump-go-prompt-other-window ()
+    "Like `dumb-jump-go-prompt' but use a different window."
+    (interactive)
+    (let ((dumb-jump-window 'other))
+      (dumb-jump-go-prompt))))
+
+;;;; Display contextual metadata
 
 ;; Feature `eldoc' provides a minor mode (enabled by default in Emacs
 ;; 25) which allows function signatures or other metadata to be
@@ -2223,7 +2382,7 @@ area."
 
   :blackout t)
 
-;;;; Automatic syntax checking
+;;;; Syntax checking and code linting
 
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting, or more generally syntax checking. It comes
@@ -2274,120 +2433,29 @@ nor requires Flycheck to be loaded."
 
   :blackout t)
 
-;;;; Indentation
-
-;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
-;; that `indent-tabs-mode' is even *available* as an *option* disgusts
-;; me, much less the fact that it's *enabled* by default (meaning that
-;; *both* tabs and spaces are used at the same time).
-(setq-default indent-tabs-mode nil)
-
-(defun radian-indent-defun ()
-  "Indent the surrounding defun."
-  (interactive)
-  (save-excursion
-    (when (beginning-of-defun)
-      (let ((beginning (point)))
-        (end-of-defun)
-        (let ((end (point)))
-          (let ((inhibit-message t)
-                (message-log-max nil))
-            (indent-region beginning end)))))))
-
-(bind-key* "C-M-q" #'radian-indent-defun)
-
-;;;; Snippet expansion
-
-;; Feature `abbrev' provides functionality for expanding user-defined
-;; abbreviations. We prefer to use `yasnippet' instead, though.
-(use-feature abbrev
-  :blackout t)
-
-;; Package `yasnippet' allows the expansion of user-defined
-;; abbreviations into fillable templates. It is also used by
-;; `clj-refactor' for some of its refactorings.
-(use-package yasnippet
-  :bind (:map yas-minor-mode-map
-
-              ;; Disable TAB from expanding snippets, as I don't use it and
-              ;; it's annoying.
-              ("TAB" . nil)
-              ("<tab>" . nil))
+;; Package `lsp-ui' provides Flycheck integration for `lsp-mode', as
+;; well as various other UI elements that integrate with `lsp-mode'.
+;; It's configured automatically by `lsp-mode'.
+(use-package lsp-ui
+  :bind (("C-c f" . lsp-ui-sideline-apply-code-actions))
   :config
 
-  ;; Reduce verbosity. The default value is 3. Bumping it down to 2
-  ;; eliminates a message about successful snippet lazy-loading setup
-  ;; on every(!) Emacs init. Errors should still be shown.
-  (setq yas-verbosity 2)
+  (radian-defadvice radian--advice-lsp-ui-apply-single-fix (orig-fun &rest args)
+    :around lsp-ui-sideline-apply-code-actions
+    "Apply code fix immediately if only one is possible."
+    (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
+               ((symbol-function #'completing-read)
+                (lambda (prompt collection &rest args)
+                  (if (= (safe-length collection) 1)
+                      (car collection)
+                    (apply orig-completing-read prompt collection args)))))
+      (apply orig-fun args)))
 
-  ;; Make it so that Company's keymap overrides Yasnippet's keymap
-  ;; when a snippet is active. This way, you can TAB to complete a
-  ;; suggestion for the current field in a snippet, and then TAB to
-  ;; move to the next field. Plus, C-g will dismiss the Company
-  ;; completions menu rather than cancelling the snippet and moving
-  ;; the cursor while leaving the completions menu on-screen in the
-  ;; same location.
-  (use-feature company
-    :config
-
-    ;; This function translates the "event types" I get from
-    ;; `map-keymap' into things that I can pass to `lookup-key' and
-    ;; `define-key'. It's a hack, and I'd like to find a built-in
-    ;; function that accomplishes the same thing while taking care of
-    ;; any edge cases I might have missed in this ad-hoc solution.
-    (defun radian--yasnippet-normalize-event (event)
-      "This function is a complete hack, do not use.
-But in principle, it translates what we get from `map-keymap'
-into what `lookup-key' and `define-key' want."
-      (if (vectorp event)
-          event
-        (vector event)))
-
-    ;; Here we define a hybrid keymap that delegates first to
-    ;; `company-active-map' and then to `yas-keymap'.
-    (defvar radian--yasnippet-then-company-keymap
-      ;; It starts out as a copy of `yas-keymap', and then we
-      ;; merge in all of the bindings from `company-active-map'.
-      (let ((keymap (copy-keymap yas-keymap)))
-        (map-keymap
-         (lambda (event company-cmd)
-           (let* ((event (radian--yasnippet-normalize-event event))
-                  (yas-cmd (lookup-key yas-keymap event)))
-             ;; Here we use an extended menu item with the
-             ;; `:filter' option, which allows us to dynamically
-             ;; decide which command we want to run when a key is
-             ;; pressed.
-             (define-key keymap event
-               `(menu-item
-                 nil ,company-cmd :filter
-                 (lambda (cmd)
-                   ;; There doesn't seem to be any obvious
-                   ;; function from Company to tell whether or not
-                   ;; a completion is in progress (à la
-                   ;; `company-explicit-action-p'), so I just
-                   ;; check whether or not `company-my-keymap' is
-                   ;; defined, which seems to be good enough.
-                   (if company-my-keymap
-                       ',company-cmd
-                     ',yas-cmd))))))
-         company-active-map)
-        keymap)
-      "Keymap which delegates to both `company-active-map' and `yas-keymap'.
-The bindings in `company-active-map' only apply if Company is
-currently active.")
-
-    (radian-defadvice radian--advice-company-overrides-yasnippet
-        (yas--make-control-overlay &rest args)
-      :around yas--make-control-overlay
-      "Allow `company' keybindings to override those of `yasnippet'."
-      ;; The function `yas--make-control-overlay' uses the current
-      ;; value of `yas-keymap' to build the Yasnippet overlay, so to
-      ;; override the Yasnippet keymap we only need to dynamically
-      ;; rebind `yas-keymap' for the duration of that function.
-      (let ((yas-keymap radian--yasnippet-then-company-keymap))
-        (apply yas--make-control-overlay args))))
-
-  :blackout yas-minor-mode)
+  ;; Don't show symbol definitions in the sideline. They are pretty
+  ;; noisy, and there appears to currently be a bug where they prevent
+  ;; Flycheck errors from being shown (the errors flash briefly and
+  ;; then disappear).
+  (setq lsp-ui-sideline-show-hover nil))
 
 ;;; Language support
 ;;;; Text-based languages
@@ -2459,83 +2527,7 @@ currently active.")
                  (c-basic-offset . 2)))
   (setf (map-elt c-default-style 'other) "radian-bsd")
 
-  (put 'c-default-style 'safe-local-variable #'stringp)
-
-  (defun radian--flycheck-c/c++-setup ()
-    "Disable some Flycheck checkers for CC modes.
-This function is for use in `c-mode-hook' and `c++-mode-hook'."
-    ;; These checkers are usually not accurate enough to find proper
-    ;; headers and such. Disable them by default.
-    (radian--flycheck-disable-checkers 'c/c++-clang 'c/c++-gcc))
-
-  (add-hook 'c-mode-hook #'radian--flycheck-c/c++-setup)
-  (add-hook 'c++-mode-hook #'radian--flycheck-c/c++-setup))
-
-;; Package `irony-mode' provides a framework to use libclang to get
-;; semantic information about C, C++, and Objective-C code. Such
-;; information can be used by Company, ElDoc, or other packages.
-(use-package irony
-  :init
-
-  (add-hook 'c-mode-hook #'irony-mode)
-  (add-hook 'c++-mode-hook #'irony-mode)
-  (add-hook 'objc-mode-hook #'irony-mode)
-
-  :config
-
-  ;; This tells `irony-mode' to discover compile options in a
-  ;; .clang_complete file or another similar format automatically. See
-  ;; [1] for further discussion.
-  ;;
-  ;; [1]: https://github.com/Sarcasm/irony-mode#configuration
-  (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
-
-  :blackout t)
-
-;; Package `company-irony' provides a Company backend that uses Irony
-;; to complete symbols. See also `company-irony-c-headers'.
-(use-package company-irony
-  :demand t
-  :after (:all company irony))
-
-;; Package `company-irony-c-headers' provides a Company backend that
-;; uses Irony to complete header file #includes. See also
-;; `company-irony'.
-(use-package company-irony-c-headers
-  :demand t
-  :after company-irony
-  :config
-
-  (radian-defhook radian--company-irony-setup ()
-    irony-mode-hook
-    "Configure Company to use Irony as a backend."
-    (setq-local company-backends
-                (cons (list #'company-irony #'company-irony-c-headers)
-                      radian--company-backends-global))))
-
-;; Package `irony-eldoc' provides an ElDoc backend that uses Irony to
-;; display function signatures.
-(use-package irony-eldoc
-  :demand t
-  :after irony
-  :config
-
-  (add-hook 'irony-mode-hook #'irony-eldoc))
-
-;; Package `flycheck-irony' provides a Flycheck syntax checker that
-;; uses Irony to display compilation errors and warnings.
-(use-package flycheck-irony
-  :demand t
-  :after (:all flycheck irony)
-  :config
-
-  ;; This setup is global, so no need to run it on a mode hook.
-  (flycheck-irony-setup)
-
-  ;; Also use cppcheck. See [1] for discussion.
-  ;;
-  ;; [1]: https://github.com/Sarcasm/flycheck-irony/issues/9
-  (flycheck-add-next-checker 'irony '(warning . c/c++-cppcheck)))
+  (put 'c-default-style 'safe-local-variable #'stringp))
 
 ;;;; Clojure
 ;; https://clojure.org/
@@ -3650,7 +3642,35 @@ unhelpful."
          ("C" . helpful-command)
 
          :map global-map
-         ("C-c C-d" . helpful-at-point)))
+         ("C-c C-d" . helpful-at-point))
+
+  :config
+
+  ;; Make it so you can quit out of `helpful-key' with C-g, like for
+  ;; every other command. Put this in a minor mode so it can be
+  ;; disabled.
+  (define-minor-mode radian-universal-keyboard-quit-mode
+    "Minor mode for making C-g work in `helpful-key'."
+    :global t
+    (if radian-universal-keyboard-quit-mode
+        (radian-defadvice radian--advice-helpful-key-allow-keyboard-quit
+            (func &rest args)
+          :before helpful-key
+          "Make C-g work in `helpful-key'."
+          ;; The docstring of `add-function' says that if we make our
+          ;; advice interactive and the interactive spec is *not* a
+          ;; function, then it overrides the original function's
+          ;; interactive spec.
+          (interactive
+           (list
+            (let ((ret (read-key-sequence "Press key: ")))
+              (when (equal ret "\^G")
+                (signal 'quit nil))
+              ret))))
+      (advice-remove
+       #'helpful-key #'radian--advice-helpful-key-allow-keyboard-quit)))
+
+  (radian-universal-keyboard-quit-mode +1))
 
 ;;;; Custom
 
@@ -3755,6 +3775,11 @@ to `radian-reload-init'."
  ("C-h C-v" . find-variable)
  ("C-h C-o" . radian-find-symbol)
  ("C-h C-l" . find-library))
+
+;; Package `macrostep' provides a facility for interactively expanding
+;; Elisp macros.
+(use-package macrostep
+  :bind (("C-c e" . macrostep-expand)))
 
 ;;;;; Emacs Lisp linting
 
@@ -4183,6 +4208,16 @@ are probably not going to be installed."
       (push (concat "ALTERNATE_EDITOR=" with-editor-sleeping-editor)
             process-environment))))
 
+;; Package `transient' is the interface used by Magit to display
+;; popups.
+(use-package transient
+  :config
+
+  ;; Allow using `q' to quit out of popups, in addition to `C-g'. See
+  ;; <https://magit.vc/manual/transient.html#Why-does-q-not-quit-popups-anymore_003f>
+  ;; for discussion.
+  (transient-bind-q-to-quit))
+
 ;; Package `magit' provides a full graphical interface for Git within
 ;; Emacs.
 (use-package magit
@@ -4263,7 +4298,10 @@ as argument."
   (setq magit-save-repository-buffers nil)
 
   (transient-append-suffix 'magit-merge "-s"
-    '("-u" "Allow unrelated" "--allow-unrelated-histories")))
+    '("-u" "Allow unrelated" "--allow-unrelated-histories"))
+
+  (transient-append-suffix 'magit-pull "-r"
+    '("-a" "Autostash" "--autostash")))
 
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
@@ -4274,39 +4312,11 @@ as argument."
   ;; https://chris.beams.io/posts/git-commit/.
   (setq git-commit-summary-max-length 50))
 
-;; Package `gh' provides an Elisp interface to the GitHub API.
-(use-package gh
-  ;; Disable autoloads because this package autoloads *way* too much
-  ;; code. See https://github.com/sigma/gh.el/issues/95.
-  :straight (:host github :repo "sigma/gh.el"
-                   :no-autoloads t))
-
-;; Package `magit-popup' is a dependency of `magit-gh-pulls' that is
-;; not declared properly, see
-;; <https://github.com/sigma/magit-gh-pulls/issues/126>. The reason
-;; for this issue is that `magit-gh-pulls' was previously a dependency
-;; of `magit', so that hid the error.
-(use-package magit-popup
-  :after magit-gh-pulls)
-
-;; Package `magit-gh-pulls' adds a section to Magit which displays
-;; open pull requests on a corresponding GitHub repository, if any,
-;; and allows you to check them out locally.
-(use-package magit-gh-pulls
+;; Package `forge' provides a GitHub/GitLab/etc. interface directly
+;; within Magit.
+(use-package forge
   :demand t
-  :after magit
-  :config
-
-  (add-hook 'magit-mode-hook 'turn-on-magit-gh-pulls)
-
-  (radian-defadvice radian--advice-hide-magit-gh-pulls-when-not-cached ()
-    :before-while magit-gh-pulls-insert-gh-pulls
-    "Hide the \"Pull Requests\" section when the list is not cached."
-    (when-let ((repo (magit-gh-pulls-guess-repo)))
-      (magit-gh-pulls-requests-cached-p
-       (magit-gh-pulls-get-api) (car repo) (cdr repo))))
-
-  :blackout t)
+  :after magit)
 
 ;;;; External commands
 
@@ -4422,7 +4432,7 @@ Also run `radian-atomic-chrome-setup-hook'."
       (cond
        ((radian-operating-system-p macOS)
         (call-process "open" nil nil nil "-a" browser))
-       ((radian-operating-system-p linux)
+       ((executable-find "wmctrl")
         (call-process "wmctrl" nil nil nil "-a" browser)))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
@@ -4621,6 +4631,10 @@ with which Emacs should be "
 
 ;;; Appearance
 
+;; Allow you to resize frames however you want, not just in whole
+;; columns. "The 80s called, they want their user interface back"
+(setq frame-resize-pixelwise t)
+
 (defcustom radian-font nil
   "Default font, as a string. Nil means use the default.
 This is passed to `set-frame-font'."
@@ -4652,8 +4666,11 @@ This is passed to `set-frame-font'."
   ;; Disable the scroll bars.
   (scroll-bar-mode -1)
 
-  ;; Disable the tool bar.
-  (tool-bar-mode -1)
+  ;; Disable the tool bar and menu bar. See
+  ;; <https://github.com/raxod502/radian/issues/180> for why we do it
+  ;; this way instead of via `tool-bar-mode' and `menu-bar-mode'.
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(menu-bar-lines . 0) default-frame-alist)
 
   ;; Prevent the cursor from blinking.
   (blink-cursor-mode -1)
@@ -4675,11 +4692,12 @@ This is passed to `set-frame-font'."
     (add-to-list 'default-frame-alist '(ns-appearance . dark))
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))))
 
-;; Feature `menu-bar' provides the annoying menu bar which we will
-;; disable immediately.
-(use-feature menu-bar
-  :config
-
+;; For terminal Emacs only, disable the menu bar the proper way (using
+;; `menu-bar-mode'). Unlike in windowed Emacs, this doesn't have a big
+;; performance impact. Furthermore, if we don't do it this way in the
+;; terminal, then you can see the menu bar during startup
+;; unfortunately.
+(unless (display-graphic-p)
   (menu-bar-mode -1))
 
 ;;;; Mode line
