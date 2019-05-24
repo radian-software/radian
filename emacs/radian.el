@@ -279,9 +279,7 @@ binding the variable dynamically over the entire init-file."
 
 ;; If watchexec and Python are installed, use file watchers to detect
 ;; package modifications. This saves time at startup. Otherwise, use
-;; the less robust but equally fast `before-save-hook' modification
-;; checker. In both cases, allow using find(1) when explicitly
-;; requested.
+;; the ever-reliable find(1).
 (if (and (executable-find "watchexec")
          (executable-find "python3"))
     (setq straight-check-for-modifications '(watch-files find-when-checking))
