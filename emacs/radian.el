@@ -3554,7 +3554,26 @@ This function calls `json-mode--update-auto-mode' to change the
 
   (defvar json-mode--auto-mode-entry
     (json-mode--update-auto-mode json-mode-auto-mode-list)
-    "Regexp generated from the `json-mode-auto-mode-list'."))
+    "Regexp generated from the `json-mode-auto-mode-list'.")
+
+  (use-feature flycheck
+    :config
+
+    ;; Handle an error message that occurs when the buffer has only
+    ;; whitespace, and in some other circumstances, which for some
+    ;; bizarre reason still isn't handled correctly by Flycheck.
+    (radian-protect-macros
+      (cl-pushnew
+       (cons
+        (flycheck-rx-to-string
+         `(and
+           line-start
+           (message "No JSON object could be decoded")
+           line-end)
+         'no-group)
+        'error)
+       (flycheck-checker-get 'json-python-json 'error-patterns)
+       :test #'equal))))
 
 ;; Package `pip-requirements' provides a major mode for
 ;; requirements.txt files used by Pip.
