@@ -1460,12 +1460,24 @@ unquote it using a comma."
          (defun-form `(defun ,defun-name ()
                         ,docstring
                         (interactive)
-                        (find-file ,full-filename)))
+                        (when (or (file-exists-p ,full-filename)
+                                  (yes-or-no-p
+                                   ,(format
+                                     "Does not exist, really visit %s? "
+                                     (file-name-nondirectory
+                                      full-filename))))
+                          (find-file ,full-filename))))
          (defun-other-window-form
            `(defun ,defun-other-window-name ()
               ,docstring-other-window
               (interactive)
-              (find-file-other-window ,full-filename)))
+              (when (or (file-exists-p ,full-filename)
+                        (yes-or-no-p
+                         ,(format
+                           "Does not exist, really visit %s? "
+                           (file-name-nondirectory
+                            full-filename))))
+                (find-file-other-window ,full-filename))))
          (full-keybinding
           (when keybinding
             (radian-join-keys "e" keybinding)))
