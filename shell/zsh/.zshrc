@@ -623,7 +623,7 @@ if (( $+commands[git] )); then
     alias gfa='git fetch --all --prune'
 
     alias gu='git pull'
-    alias gur='git pull --rebase'
+    alias gur='git pull --rebase --autostash'
     alias gum='git pull --no-rebase'
 
     alias gp='git push'
