@@ -3456,7 +3456,7 @@ This prevents them from getting in the way of buffer selection."
     "If inside node_modules, disable the `typescript-tslint' Flycheck checker.
 If we don't disable it, then it will generally just generate
 several thousand errors, disable itself, and print a warning."
-    (when (locate-dominating-file "node_modules")
+    (when (locate-dominating-file buffer-file-name "node_modules")
       (radian--flycheck-disable-checkers 'typescript-tslint)))
 
   ;; Fix capitalization. It's TypeScript, not typescript.
