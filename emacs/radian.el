@@ -3570,6 +3570,11 @@ This function calls `json-mode--update-auto-mode' to change the
 
   :config
 
+  (radian-defhook radian--fix-json-indentation ()
+    json-mode-hook
+    "Set the tab width to 2 for JSON."
+    (setq-local tab-width 2))
+
   (use-feature flycheck
     :config
 
