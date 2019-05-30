@@ -2031,7 +2031,7 @@ the timer when no buffers need to be checked."
 
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
                          js2-mode json-mode lua-mode
-                         python-mode sh-mode web-mode))
+                         python-mode sh-mode web-mode go-mode))
     (sp-local-pair mode "{" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2041,7 +2041,7 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode sh-mode js2-mode lua-mode))
+  (dolist (mode '(python-mode sh-mode js2-mode lua-mode go-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
