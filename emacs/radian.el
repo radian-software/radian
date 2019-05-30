@@ -3568,6 +3568,8 @@ This function calls `json-mode--update-auto-mode' to change the
     (json-mode--update-auto-mode json-mode-auto-mode-list)
     "Regexp generated from the `json-mode-auto-mode-list'.")
 
+  :config
+
   (use-feature flycheck
     :config
 
