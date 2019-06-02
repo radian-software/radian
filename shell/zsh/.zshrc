@@ -16,10 +16,17 @@ fi
 
 ## zplugin
 
-if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
+radian_zplugin=
 
+if [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
+    radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
+elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
+    radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
+fi
+
+if [[ -n $radian_zplugin ]]; then
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . ~/.zplugin/bin/zplugin.zsh
+    . $radian_zplugin
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
