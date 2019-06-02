@@ -95,6 +95,8 @@ configuration, and optionally installing local configuration.
 #### macOS
 ##### Emacs
 
+**Minimum version supported: Emacs 26.1**
+
     $ brew cask install emacs
 
 Install support tools. Python is required for environment variable
