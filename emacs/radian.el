@@ -608,13 +608,6 @@ This is used to prevent duplicate entries in the kill ring.")
 ;; improvement over the default Emacs interface for candidate
 ;; selection.
 (use-package ivy
-  ;; Use my fork until https://github.com/abo-abo/swiper/issues/1632
-  ;; is fixed.
-  :straight (:host github :repo "abo-abo/swiper"
-                   :files (:defaults
-                           (:exclude "swiper.el" "counsel.el" "ivy-hydra.el")
-                           "doc/ivy-help.org")
-                   :fork (:repo "raxod502/swiper" :branch "fork/1"))
   :init/el-patch
 
   (defvar ivy-mode-map
@@ -2735,11 +2728,6 @@ docstrings."
 ;; Package `clj-refactor' provides automated refactoring commands for
 ;; Clojure code.
 (use-package clj-refactor
-  ;; Use my fork which has support for automatically sorting project
-  ;; dependencies after adding them to the project.clj.
-  :straight (:host github :repo "clojure-emacs/clj-refactor.el"
-                   :fork (:repo "raxod502/clj-refactor.el" :branch "fork/3")
-                   :files (:defaults "CHANGELOG.md"))
   :init
 
   (radian-defhook radian--clj-refactor-enable ()
