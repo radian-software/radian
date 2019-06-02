@@ -258,20 +258,6 @@ binding the variable dynamically over the entire init-file."
 
 (setq straight-current-profile 'radian)
 
-;; Treat loading the init-file as a transaction. See the straight.el
-;; documentation for more information about this.
-
-(radian-defhook radian--finalize-straight-transaction ()
-  radian--finalize-init-hook
-  "Finalize the init-file's straight.el transaction."
-  (setq straight-treat-as-init nil)
-  ;; Just in case the straight.el bootstrap failed, do not mask the
-  ;; error with a void-function error.
-  (when (fboundp 'straight-finalize-transaction)
-    (straight-finalize-transaction)))
-
-(setq straight-treat-as-init t)
-
 ;; Use the develop branch of straight.el on Radian's develop branch.
 ;; (On Radian's master branch, we use the master branch of
 ;; straight.el.)
@@ -3802,8 +3788,7 @@ to `radian-reload-init'."
         (setq name (buffer-name)))
       (let ((load-file-name (buffer-file-name)))
         (message "Evaluating %s..." name)
-        (straight-transaction
-          (eval-region start end))
+        (eval-region start end)
         (message "Evaluating %s...done" name)))))
 
 ;; This keybinding is used for evaluating a buffer of Clojure code in
