@@ -16,7 +16,7 @@
         (setq user-init-file (expand-file-name "init.el" user-emacs-directory))
         (load user-init-file 'noerror 'nomessage))
 
-    (defvar radian-minimum-emacs-version "26.1"
+    (defvar radian-minimum-emacs-version "25.2"
       "Radian Emacs does not support any Emacs version below this.")
 
     (defvar radian-local-init-file

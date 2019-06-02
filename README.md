@@ -95,7 +95,7 @@ configuration, and optionally installing local configuration.
 #### macOS
 ##### Emacs
 
-**Minimum version supported: Emacs 26.1**
+**Minimum version supported: Emacs 25.2**
 
     $ brew cask install emacs
 

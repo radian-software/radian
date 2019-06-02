@@ -3663,8 +3663,7 @@ unhelpful."
 
     ;; Have the alternate "help" action for `counsel-M-x' use Helpful
     ;; instead of the default Emacs help.
-    (setf (nth 0 (alist-get "h" (plist-get ivy--actions-list 'counsel-M-x)
-                            nil nil #'equal))
+    (setf (nth 0 (cdr (assoc "h" (plist-get ivy--actions-list 'counsel-M-x))))
           (lambda (x) (helpful-function (intern x)))))
 
   :bind (;; Remap standard commands.
@@ -4102,10 +4101,6 @@ non-nil value to enable trashing for file operations."
   (osx-trash-setup))
 
 ;;;;; Dired
-
-;; For some reason, the autoloads from `dired-aux' and `dired-x' are
-;; not loaded automatically. Do it.
-(require 'dired-loaddefs)
 
 ;; Dired has some trouble parsing out filenames that have e.g. leading
 ;; spaces, unless the ls program used has support for Dired. GNU ls
