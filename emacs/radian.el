@@ -4690,6 +4690,14 @@ This is passed to `set-frame-font'."
 ;; Smartparens.
 (setq blink-matching-paren nil)
 
+(radian-defadvice radian--advice-read-passwd-hide-char (func &rest args)
+  :around read-passwd
+  "Display passwords as **** rather than .... in the minibuffer.
+This is the default behavior is Emacs 27, so this advice only has
+an effect for Emacs 26 or below."
+  (let ((read-hide-char (or read-hide-char ?*)))
+    (apply func args)))
+
 ;; Disable the contextual menu that pops up when you right-click.
 (unbind-key "<C-down-mouse-1>")
 
