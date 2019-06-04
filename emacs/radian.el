@@ -4817,8 +4817,9 @@ buffer-local."
                          (with-temp-buffer
                            ;; First attempt uses symbolic-ref, which
                            ;; returns the branch name if it exists.
-                           (call-process "git" nil '(t nil) nil
-                                         "symbolic-ref" "HEAD")
+                           (ignore-errors
+                             (call-process "git" nil '(t nil) nil
+                                           "symbolic-ref" "HEAD"))
                            (if (> (buffer-size) 0)
                                ;; It actually returns something like
                                ;; refs/heads/master, though, so let's
@@ -4836,8 +4837,9 @@ buffer-local."
                              ;; should show the abbreviated commit hash
                              ;; (e.g. b007692).
                              (erase-buffer)
-                             (call-process "git" nil '(t nil) nil
-                                           "rev-parse" "--short" "HEAD")
+                             (ignore-errors
+                               (call-process "git" nil '(t nil) nil
+                                             "rev-parse" "--short" "HEAD"))
                              (if (> (buffer-size) 0)
                                  (string-trim (buffer-string))
                                ;; We shouldn't get here. Unfortunately,
@@ -4846,8 +4848,9 @@ buffer-local."
                                "???")))))
                       (dirty (when git
                                (with-temp-buffer
-                                 (call-process "git" nil t nil
-                                               "status" "--porcelain")
+                                 (ignore-errors
+                                   (call-process "git" nil t nil
+                                                 "status" "--porcelain"))
                                  (if (> (buffer-size) 0)
                                      "*" "")))))
                  (cond
