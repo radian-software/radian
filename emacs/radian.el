@@ -2868,7 +2868,9 @@ ARG is passed to `hindent-mode' toggle function."
          ("\\.erb\\'" . web-mode)
          ("\\.mustache\\'" . web-mode)
          ("\\.djhtml\\'" . web-mode)
-         ("\\.html?\\'" . web-mode))
+         ("\\.html?\\'" . web-mode)
+         ;; My additions.
+         ("\\.ejs\\'" . web-mode))
   :config
 
   ;; Indent by two spaces by default.
