@@ -2176,7 +2176,12 @@ This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
                      "Connected to %s.")))
 
   (dolist (fun '(lsp--warn lsp--info))
-    (advice-add fun :before-until #'radian--advice-lsp-mode-silence)))
+    (advice-add fun :before-until #'radian--advice-lsp-mode-silence))
+
+  ;; If we don't disable this, we get a warning about YASnippet not
+  ;; being available, even though it is. I don't use YASnippet anyway,
+  ;; so don't bother with it.
+  (setq lsp-enable-snippet nil))
 
 ;;;; Indentation
 
