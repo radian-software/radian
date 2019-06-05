@@ -446,7 +446,7 @@ This keymap is bound under M-P.")
 (defun radian-env-setup (&optional again)
   "Load ~/.profile and set environment variables exported therein.
 Only do this once, unless AGAIN is non-nil."
-  (interactive)
+  (interactive (list 'again))
   ;; No need to worry about race conditions because Elisp isn't
   ;; concurrent (yet).
   (unless (and radian--env-setup-p (not again))
@@ -454,7 +454,7 @@ Only do this once, unless AGAIN is non-nil."
           (buf-name " *radian-env-output*"))
       (when (and profile-file
                  (file-exists-p profile-file)
-                 (executable-find "python"))
+                 (executable-find "python2"))
         (ignore-errors (kill-buffer buf-name))
         (with-current-buffer (get-buffer-create buf-name)
           (let* ((python-script

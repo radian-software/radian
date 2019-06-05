@@ -1,3 +1,11 @@
+## Load ~/.profile when re-exec'ing Zsh
+
+if [[ -n $RADIAN_FINISHED ]]; then
+    emulate sh -c '. ~/.profile'
+fi
+
+export RADIAN_FINISHED=1
+
 ## Locate Radian repository
 
 # Set $RADIAN to the location of the Radian repository, if found.

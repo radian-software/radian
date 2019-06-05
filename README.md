@@ -138,7 +138,7 @@ Use symbolic links:
     ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
-    ./shell/zsh/.zshenv => ~/.zshenv
+    ./shell/zsh/.zprofile => ~/.zprofile
     ./tmux/.tmux.conf => ~/.tmux.conf
 
 Do not attempt to use the `emacs` subdirectory of this repository as
