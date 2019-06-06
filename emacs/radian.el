@@ -454,7 +454,7 @@ Only do this once, unless AGAIN is non-nil."
           (buf-name " *radian-env-output*"))
       (when (and profile-file
                  (file-exists-p profile-file)
-                 (executable-find "python2"))
+                 (executable-find "python"))
         (ignore-errors (kill-buffer buf-name))
         (with-current-buffer (get-buffer-create buf-name)
           (let* ((python-script
