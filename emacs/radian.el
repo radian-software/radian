@@ -2153,6 +2153,8 @@ currently active.")
              ;; triggering the autoload just for checking that, yes,
              ;; there's nothing to do for the *scratch* buffer.
              #'emacs-lisp-mode
+             ;; `go-mode' and LSP are a dumpster fire right now.
+             #'go-mode
              ;; Disable for modes that we currently use a specialized
              ;; framework for, until they are phased out in favor of
              ;; LSP.
