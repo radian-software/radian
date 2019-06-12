@@ -275,6 +275,9 @@ binding the variable dynamically over the entire init-file."
 ;; several orders of magnitude.
 (setq straight-recipes-emacsmirror-use-mirror t)
 
+;; Clear out recipe overrides (in case of re-init).
+(setq straight-recipe-overrides nil)
+
 (radian--run-hook 'radian-before-straight-hook)
 
 ;; Bootstrap the package manager, straight.el.
