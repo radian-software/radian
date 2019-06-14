@@ -1823,6 +1823,10 @@ the reverse direction from \\[pop-global-mark]."
 ;;; Electricity: automatic things
 ;;;; Autorevert
 
+;; On macOS, Emacs has a nice keybinding to revert the current buffer.
+;; On other platforms such a binding is missing; we re-add it here.
+(bind-key "s-u" #'revert-buffer)
+
 ;; Feature `autorevert' allows the use of file-watchers or polling in
 ;; order to detect when the file visited by a buffer has changed, and
 ;; optionally reverting the buffer to match the file (unless it has
