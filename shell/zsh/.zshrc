@@ -25,6 +25,11 @@ elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
 fi
 
 if [[ -n $radian_zplugin ]]; then
+    # zplugin will happily keep adding the same entry to PATH every
+    # time you run it. Get rid of stale PATH entries. Thanks to
+    # <https://stackoverflow.com/a/41876600/3538165>.
+    path=(${path:#*/.zplugin/*})
+
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
     . $radian_zplugin
     autoload -Uz _zplugin
