@@ -30,7 +30,7 @@ if command -v ssh-agent >/dev/null 2>&1; then
     }
 
     ssh_connected() {
-        ps -p "$SSH_AGENT_PID" >/dev/null 2>&1
+        ps -p "$SSH_AGENT_PID" 2>&1 | grep -qF ssh-agent
     }
 
     ssh_forget() {
