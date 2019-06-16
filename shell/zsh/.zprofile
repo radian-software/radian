@@ -11,5 +11,5 @@
 # (unexported) environment variable RADIAN_SKIP_PROFILE to make sure
 # that we only source ~/.profile once in any given shell session.
 
-emulate sh -c '. "$HOME/.profile'
+emulate sh -c '. "$HOME/.profile"'
 RADIAN_SKIP_PROFILE=1
