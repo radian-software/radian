@@ -2017,7 +2017,8 @@ the timer when no buffers need to be checked."
 
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
                          js2-mode json-mode lua-mode
-                         python-mode sh-mode web-mode go-mode))
+                         python-mode sh-mode web-mode go-mode
+                         protobuf-mode))
     (sp-local-pair mode "{" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2984,6 +2985,11 @@ Markdown document has a colon in it, then it's distractingly and
 usually wrongly fontified as a metadata block. See
 https://github.com/jrblevin/markdown-mode/issues/328."
     (prog1 nil (goto-char (point-max)))))
+
+;;;; Protobuf
+
+;; Package `protobuf-mode' provides a major mode for Protobuf.
+(use-package protobuf-mode)
 
 ;;;; Python
 ;; https://www.python.org/
