@@ -151,6 +151,17 @@ This means that FILENAME is a symlink whose target is inside
   (and (listp obj)
        (cl-every #'stringp obj)))
 
+(defun radian--path-join (path &rest segments)
+  "Join PATH with SEGMENTS using `expand-file-name'.
+First `expand-file-name' is called on the first member of
+SEGMENTS, with PATH as DEFAULT-DIRECTORY. Then `expand-file-name'
+is called on the second member, with the result of the first call
+as DEFAULT-DIRECTORY, and so on. If no SEGMENTS are passed, the
+return value is just PATH."
+  (while segments
+    (setq path (expand-file-name (pop segments) path)))
+  path)
+
 ;;; Define hooks and load local configuration
 
 ;; Reset the value of this variable so that stale functions don't
@@ -2018,7 +2029,7 @@ the timer when no buffers need to be checked."
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
                          js2-mode json-mode lua-mode
                          python-mode sh-mode web-mode go-mode
-                         protobuf-mode))
+                         protobuf-mode typescript-mode))
     (sp-local-pair mode "{" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2028,7 +2039,8 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode sh-mode js2-mode lua-mode go-mode))
+  (dolist (mode '(python-mode sh-mode js2-mode lua-mode go-mode
+                              typescript-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2042,6 +2054,16 @@ the timer when no buffers need to be checked."
   (setq sp-escape-quotes-after-insert nil)
 
   :blackout t)
+
+;;;; Code reformatting
+
+(define-minor-mode radian-reformat-on-save-mode
+  "Reformat code in current buffer on save.")
+(put 'radian-reformat-on-save-mode 'safe-local-variable #'booleanp)
+
+(define-globalized-minor-mode radian-reformat-on-save-global-mode
+  radian-reformat-on-save-mode radian-reformat-on-save-mode)
+(radian-reformat-on-save-global-mode +1)
 
 ;;;; Snippet expansion
 
@@ -2191,7 +2213,9 @@ This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
   ;; If we don't disable this, we get a warning about YASnippet not
   ;; being available, even though it is. I don't use YASnippet anyway,
   ;; so don't bother with it.
-  (setq lsp-enable-snippet nil))
+  (setq lsp-enable-snippet nil)
+
+  :blackout t)
 
 ;;;; Indentation
 
@@ -2348,7 +2372,27 @@ backends will still be included.")
 
 ;; Package `company-lsp' provides a Company backend for `lsp-mode'.
 ;; It's configured automatically by `lsp-mode'.
-(use-package company-lsp)
+(use-package company-lsp
+  :init
+
+  (use-feature lsp
+    :config
+
+    (radian-defadvice radian--company-lsp-setup (&rest _)
+      :after lsp
+      "Disable `company-prescient' sorting by length in some contexts.
+Specifically, disable sorting by length if the LSP Company
+backend returns fuzzy-matched candidates, which implies that the
+backend has already sorted the candidates into a reasonable
+order."
+      (setq-local company-prescient-sort-length-enable
+                  (cl-dolist (w lsp--buffer-workspaces)
+                    (when (thread-first w
+                            (lsp--workspace-client)
+                            (lsp--client-server-id)
+                            (memq '(jsts-ls))
+                            (not))
+                      (cl-return t)))))))
 
 ;;;; Definition location
 
@@ -2870,7 +2914,9 @@ ARG is passed to `hindent-mode' toggle function."
 
 ;; Package `web-mode' provides a major mode for HTML and related
 ;; templating languages (PHP, ASP, Handlebars, etc.). It replaces the
-;; major mode `html-mode' which comes with Emacs.
+;; major mode `html-mode' which comes with Emacs. `web-mode' also
+;; handles CSS and JavaScript, so it can be used for those languages
+;; (or any mix of them).
 (use-package web-mode
   ;; Unfortunately `web-mode' does not come with `auto-mode-alist'
   ;; autoloads. We have to establish them manually. This list comes
@@ -2885,7 +2931,9 @@ ARG is passed to `hindent-mode' toggle function."
          ("\\.djhtml\\'" . web-mode)
          ("\\.html?\\'" . web-mode)
          ;; My additions.
-         ("\\.ejs\\'" . web-mode))
+         ("\\.ejs\\'" . web-mode)
+         ("\\.jsx\\'" . web-mode)
+         ("\\.tsx\\'" . web-mode))
   :config
 
   ;; Indent by two spaces by default.
@@ -2893,12 +2941,18 @@ ARG is passed to `hindent-mode' toggle function."
   (setq web-mode-code-indent-offset 2)
 
   ;; Autocomplete </ instantly.
-  (setq web-mode-enable-auto-closing t))
+  (setq web-mode-enable-auto-closing t)
+
+  ;; When using `web-mode' to edit JavaScript files, support JSX tags.
+  (add-to-list 'web-mode-content-types-alist
+               '("jsx" . "\\.js[x]?\\'")))
 
 ;;;; JavaScript
 ;; https://developer.mozilla.org/en-US/docs/Web/JavaScript
 
-;; Feature `js' provides a major mode `js-mode' for JavaScript.
+;; Feature `js' provides a major mode `js-mode' for JavaScript. We
+;; don't use it, but we still configure some of its variables because
+;; `js2-mode' uses them.
 (use-feature js
   :config
 
@@ -2908,11 +2962,24 @@ ARG is passed to `hindent-mode' toggle function."
 ;; Package `js2-mode' provides a better major mode for JavaScript. It
 ;; builds on the major mode `js-mode' which comes with Emacs.
 (use-package js2-mode
+  :init
+
+  (defun radian-js2-or-web-mode ()
+    "Enable `js2-mode' or `web-mode' depending on buffer contents.
+If the current buffer appears to contain JSX code, enable
+`web-mode'. Otherwise, enable `js2-mode'. The purpose of this
+function is to deal with `web-mode' having much better JSX
+support than `js2-mode'."
+    (if (save-excursion
+          (goto-char (point-min))
+          (re-search-forward "</[a-z]+>" 20000 'noerror))
+        (web-mode)
+      (js2-mode)))
+
   ;; The `js2-mode' package does not come with `auto-mode-alist'
   ;; autoloads.
-  :mode (("\\.js\\'" . js2-mode)
-         ("\\.jsx\\'" . js2-jsx-mode))
-  :interpreter ("node" . js2-mode)
+  :mode (("\\.js\\'" . radian-js2-or-web-mode))
+  :interpreter ("node" . radian-js2-or-web-mode)
   :config
 
   ;; Treat shebang lines (e.g. for node) correctly.
@@ -2946,6 +3013,38 @@ ARG is passed to `hindent-mode' toggle function."
     "Enable `company-tern' in the current buffer."
     (setq-local company-backends
                 (cons 'company-tern radian--company-backends-global))))
+
+;; Package `prettier-js' runs Prettier on `before-save-hook'.
+(use-package prettier-js
+  :demand t
+  :after (:any js2-mode web-mode)
+  :config
+
+  ;; Do this ourselves because the minor mode provided by the package
+  ;; is buffer-local and dealing with that is more trouble than just
+  ;; doing this.
+
+  (defun radian--js-prettier-run-maybe ()
+    "Run Prettier on the current buffer, if allowed.
+This means that `radian-reformat-on-save-mode' is enabled."
+    (when radian-reformat-on-save-mode
+      (prettier-js)))
+
+  (defun radian--js-prettier-setup ()
+    "Set up Prettier to be run on save, if allowed.
+See also `radian--js-prettier-run-maybe'."
+    (when-let* ((project-dir
+                 (locate-dominating-file default-directory "node_modules"))
+                (prettier
+                 (radian--path-join
+                  project-dir "node_modules" ".bin" "prettier")))
+      (when (file-executable-p prettier)
+        (setq-local prettier-js-command prettier)))
+    (add-hook 'before-save-hook #'radian--js2-prettier-run-maybe
+              nil 'local))
+
+  (dolist (hook '(js2-mode-hook web-mode-hook))
+    (add-hook hook #'radian--js-prettier-setup)))
 
 ;;;; Lua
 ;; <http://www.lua.org/>
