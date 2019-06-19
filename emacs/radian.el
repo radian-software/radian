@@ -3040,7 +3040,7 @@ See also `radian--js-prettier-run-maybe'."
                   project-dir "node_modules" ".bin" "prettier")))
       (when (file-executable-p prettier)
         (setq-local prettier-js-command prettier)))
-    (add-hook 'before-save-hook #'radian--js2-prettier-run-maybe
+    (add-hook 'before-save-hook #'radian--js-prettier-run-maybe
               nil 'local))
 
   (dolist (hook '(js2-mode-hook web-mode-hook))
