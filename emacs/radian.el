@@ -2215,6 +2215,19 @@ This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
   ;; so don't bother with it.
   (setq lsp-enable-snippet nil)
 
+  (radian-defadvice radian--lsp-run-from-node-modules (command)
+    :filter-return lsp-resolve-final-function
+    "Find LSP executables inside node_modules/.bin if present."
+    (cl-block nil
+      (prog1 command
+        (when-let* ((project-dir
+                     (locate-dominating-file default-directory "node_modules"))
+                    (binary
+                     (radian--path-join
+                      project-dir "node_modules" ".bin" (car command))))
+          (when (file-executable-p binary)
+            (cl-return (cons binary (cdr command))))))))
+
   :blackout t)
 
 ;;;; Indentation
