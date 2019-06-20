@@ -2235,6 +2235,16 @@ and `lsp--error'."
           (when (file-executable-p binary)
             (cl-return (cons binary (cdr command))))))))
 
+  (radian-defhook radian--lsp-reformat-on-save ()
+    before-save-hook
+    "Reformat buffer using LSP, if allowed.
+Reformatting is allowed if `radian-reformat-on-save-mode' is
+enabled."
+    (when radian-reformat-on-save-mode
+      (condition-case _
+          (lsp-format-buffer)
+        (lsp-capability-not-supported))))
+
   :blackout t)
 
 ;;;; Indentation
