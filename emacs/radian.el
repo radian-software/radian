@@ -2266,10 +2266,10 @@ killed (which happens during Emacs shutdown)."
 
 ;;;; Indentation
 
-;; Don't use tabs for indentation. Use only spaces. Frankly, the fact
-;; that `indent-tabs-mode' is even *available* as an *option* disgusts
-;; me, much less the fact that it's *enabled* by default (meaning that
-;; *both* tabs and spaces are used at the same time).
+;; Don't use tabs for indentation. Use only spaces. Otherwise,
+;; whenever the indent level does not equal the tab width (e.g. in
+;; Emacs Lisp code, the indent level is 2 and the tab width is 8),
+;; *both* tabs and spaces will be used for indentation. Disgusting.
 (setq-default indent-tabs-mode nil)
 
 (defun radian-indent-defun ()
