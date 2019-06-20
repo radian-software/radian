@@ -2183,8 +2183,6 @@ currently active.")
              ;; triggering the autoload just for checking that, yes,
              ;; there's nothing to do for the *scratch* buffer.
              #'emacs-lisp-mode
-             ;; `go-mode' and LSP are a dumpster fire right now.
-             #'go-mode
              ;; Disable for modes that we currently use a specialized
              ;; framework for, until they are phased out in favor of
              ;; LSP.
@@ -2200,14 +2198,23 @@ currently active.")
   ;; We use Flycheck, not Flymake.
   (setq lsp-prefer-flymake nil)
 
-  (defun radian--advice-lsp-mode-silence (format &rest _)
+  (defun radian--advice-lsp-mode-silence (format &rest args)
     "Silence needless diagnostic messages from `lsp-mode'.
 
-This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
-    (member format '("No LSP server for %s."
-                     "Connected to %s.")))
+This is a `:before-until' advice for `lsp--warn', `lsp--info',
+and `lsp--error'."
+    (or
+     ;; Messages we get when trying to start LSP (happens every time
+     ;; we open a buffer).
+     (member format '("No LSP server for %s."
+                      "Connected to %s."))
+     ;; Errors we get from gopls for no good reason (I can't figure
+     ;; out why). They don't impair functionality.
+     (and args
+          (or (string-match-p "^no object for ident .+$" (car args))
+              (string-match-p "^no identifier found$" (car args))))))
 
-  (dolist (fun '(lsp--warn lsp--info))
+  (dolist (fun '(lsp--warn lsp--info lsp--error))
     (advice-add fun :before-until #'radian--advice-lsp-mode-silence))
 
   ;; If we don't disable this, we get a warning about YASnippet not
