@@ -4479,6 +4479,17 @@ as argument."
   :demand t
   :after magit)
 
+;; Package `git-gutter-fringe' adds a fringe line to the left-hand
+;; side of each window, showing which lines have been added, removed,
+;; or modified since the last Git commit.
+(use-package git-gutter-fringe
+  :defer 1.5
+  :config
+
+  (global-git-gutter-mode +1)
+
+  :blackout git-gutter-mode)
+
 ;;;; External commands
 
 ;; Feature `compile' provides a way to run a shell command from Emacs
