@@ -2254,6 +2254,14 @@ enabled."
           (lsp-format-buffer)
         (lsp-capability-not-supported))))
 
+  (radian-defhook radian--lsp-teardown ()
+    kill-emacs-hook
+    "Ignore the LSP server getting killed.
+If we don't do this, then when killing Emacs we may be prompted
+with whether we want to restart the LSP server that has just been
+killed (which happens during Emacs shutdown)."
+    (setq lsp-restart nil))
+
   :blackout t)
 
 ;;;; Indentation
