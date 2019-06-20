@@ -4490,10 +4490,30 @@ as argument."
 ;; side of each window, showing which lines have been added, removed,
 ;; or modified since the last Git commit.
 (use-package git-gutter-fringe
+  :commands (radian-git-gutter:beginning-of-hunk)
+  :init
+
+  (radian-bind-key "v p" #'git-gutter:previous-hunk)
+  (radian-bind-key "v n" #'git-gutter:next-hunk)
+  (radian-bind-key "v a" #'radian-git-gutter:beginning-of-hunk)
+  (radian-bind-key "v e" #'git-gutter:end-of-hunk)
+  (radian-bind-key "v k" #'git-gutter:revert-hunk)
+
   :defer 1.5
   :config
 
+  ;; Don't prompt when reverting hunk.
+  (setq git-gutter:ask-p nil)
+
   (global-git-gutter-mode +1)
+
+  (defun radian-git-gutter:beginning-of-hunk ()
+    "Move to beginning of current diff hunk."
+    (interactive)
+    (git-gutter:awhen (git-gutter:search-here-diffinfo git-gutter:diffinfos)
+      (let ((lines (- (git-gutter-hunk-start-line it) (line-number-at-pos))))
+        ;; This will move backwards since lines will be negative.
+        (forward-line lines))))
 
   :blackout git-gutter-mode)
 
