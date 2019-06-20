@@ -60,7 +60,7 @@
  ("jump.el" . "e4f1372cf22e811faca52fc86bdd5d817498a4d8")
  ("let-alist" . "33e71829e8814cf5f28b6e4291192aafef61b69e")
  ("loop.el" . "e22807f83a0890dc8a904c51ee0742c34efccc6c")
- ("lsp-mode" . "561c93ce505a6665745c639af6edd83fbd67dd85")
+ ("lsp-mode" . "dddefb21608fb1cbe3f3a15213f8e01c465bd876")
  ("lsp-ui" . "3ccc3e3386732c3ee22c151e6b5215a0e4c99173")
  ("lua-mode" . "95c64bb5634035630e8c59d10d4a1d1003265743")
  ("macrostep" . "424e3734a1ee526a1bd7b5c3cd1d3ef19d184267")
