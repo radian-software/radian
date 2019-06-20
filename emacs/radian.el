@@ -1239,7 +1239,16 @@ counterparts."
 
   ;; Sort files using `prescient', instead of just showing them in
   ;; lexicographic order.
-  (setq counsel-projectile-sort-files t))
+  (setq counsel-projectile-sort-files t)
+
+  ;; After switching projects, find only files rather than also
+  ;; offering buffers (which usually does not do what I want -- some
+  ;; buffers were created while inside the project, but are not
+  ;; associated, and also when the buffers are included I can no
+  ;; longer jump to a file by matching its full path within the
+  ;; project).
+  (setf (cdr (assoc "o" (cdr counsel-projectile-switch-project-action)))
+        (cdr (assoc "f" (cdr counsel-projectile-switch-project-action)))))
 
 (defun radian--advice-find-file-create-directories
     (find-file filename &rest args)
