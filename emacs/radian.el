@@ -2187,17 +2187,18 @@ currently active.")
   (radian-defhook radian--lsp-enable ()
     prog-mode-hook
     "Enable `lsp-mode' for most programming modes."
-    (unless (derived-mode-p
-             ;; `lsp-mode' doesn't support Elisp, so let's avoid
-             ;; triggering the autoload just for checking that, yes,
-             ;; there's nothing to do for the *scratch* buffer.
-             #'emacs-lisp-mode
-             ;; Disable for modes that we currently use a specialized
-             ;; framework for, until they are phased out in favor of
-             ;; LSP.
-             #'python-mode
-             #'ruby-mode
-             #'rust-mode)
+    (unless (or (null buffer-file-name)
+                (derived-mode-p
+                 ;; `lsp-mode' doesn't support Elisp, so let's avoid
+                 ;; triggering the autoload just for checking that, yes,
+                 ;; there's nothing to do for the *scratch* buffer.
+                 #'emacs-lisp-mode
+                 ;; Disable for modes that we currently use a specialized
+                 ;; framework for, until they are phased out in favor of
+                 ;; LSP.
+                 #'python-mode
+                 #'ruby-mode
+                 #'rust-mode))
       (lsp)))
 
   :config
