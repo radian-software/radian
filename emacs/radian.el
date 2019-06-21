@@ -3604,30 +3604,6 @@ several thousand errors, disable itself, and print a warning."
   ;; Fix capitalization. It's TypeScript, not typescript.
   :blackout "TypeScript")
 
-;; Package `tide' provides integration with the tsserver TypeScript
-;; language server in order to provide source navigation, a Company
-;; backend, and code formatting.
-(use-package tide
-  :demand t
-  :after typescript-mode
-  :config
-
-  (add-hook 'typescript-mode-hook #'tide-setup)
-
-  (define-minor-mode radian-tide-format-mode
-    "Minor mode to reformat buffer using tsserver on save."
-    nil nil nil
-    (if radian-tide-format-mode
-        (add-hook 'before-save-hook #'tide-format-before-save nil 'local)
-      (remove-hook 'before-save-hook #'tide-format-before-save)))
-
-  (add-hook 'tide-mode-hook #'radian-tide-format-mode)
-
-  ;; Maintain standard TypeScript indent width.
-  (setq tide-format-options '(:indentSize 2 :tabSize 2))
-
-  :blackout t)
-
 ;;;; VimScript
 ;; http://vimdoc.sourceforge.net/htmldoc/usr_41.html
 

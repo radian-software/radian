@@ -106,7 +106,6 @@
  ("swiper" . "a73e24deff45aa1bfc20fd31e7fe70d8735e71e2")
  ("sx.el" . "49358eae36dd4bb5b9207313b30df085e7f25cef")
  ("tern" . "4ba411719279c62d9c0acd1243a03477ada1ac32")
- ("tide" . "64eb602b16859ce226116e52b057cb8a038804ec")
  ("toml-mode.el" . "f6c61817b00f9c4a3cab1bae9c309e0fc45cdd06")
  ("transient" . "8bfa489644ba5c287f1775b317a5755a3f232e48")
  ("transpose-frame" . "011f420c3496b69fc22d789f64cb8091834feba7")
