@@ -2078,7 +2078,7 @@ the timer when no buffers need to be checked."
   :around save-buffer
   "Make it so \\[save-buffer] with prefix arg inhibits reformatting."
   (let ((radian-reformat-on-save-mode
-         (and (null arg) radian-reformat-on-save-mode)))
+         (and (member arg '(nil 1)) radian-reformat-on-save-mode)))
     (funcall func)))
 
 ;;;; Snippet expansion
