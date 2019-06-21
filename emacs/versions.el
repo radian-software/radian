@@ -87,7 +87,7 @@
  ("prescient.el" . "04265919c883ff26b59e1fb866d525dcf1693ceb")
  ("prettier-emacs" . "e9b73e81d3e1642aec682195f127a42dfb0b5774")
  ("projectile" . "98808e6f1ab1bec0c09c13b812d93622e771209f")
- ("protobuf" . "6153f80876b61fcd6c48a4f0c89dc51ac144a4f6")
+ ("protobuf" . "093093fa91ac31cc7024c119dde68ab29bfcdfdc")
  ("pyvenv" . "fa6a028349733b0ecb407c4cfb3a715b71931eec")
  ("queue" . "52206c0f78afc0dfb9a287cb928c1e725103336d")
  ("restart-emacs" . "9aa90d3df9e08bc420e1c9845ee3ff568e911bd9")
