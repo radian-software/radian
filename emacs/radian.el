@@ -3081,7 +3081,6 @@ See also `radian--js-prettier-run-maybe'."
 
 ;; Package `markdown-mode' provides a major mode for Markdown.
 (use-package markdown-mode
-
   :mode (;; Extension used by Hugo.
          ("\\.mmark\\'" . markdown-mode))
 
