@@ -2074,6 +2074,13 @@ the timer when no buffers need to be checked."
   radian-reformat-on-save-mode radian-reformat-on-save-mode)
 (radian-reformat-on-save-global-mode +1)
 
+(radian-defadvice radian--save-buffer-reformat-maybe (func &optional arg)
+  :around save-buffer
+  "Make it so \\[save-buffer] with prefix arg inhibits reformatting."
+  (let ((radian-reformat-on-save-mode
+         (and (null arg) radian-reformat-on-save-mode)))
+    (funcall func)))
+
 ;;;; Snippet expansion
 
 ;; Feature `abbrev' provides functionality for expanding user-defined
