@@ -3038,29 +3038,6 @@ support than `js2-mode'."
   :blackout ((js2-mode . "JavaScript")
              (js2-jsx-mode . "JSX")))
 
-;; Package `tern' provides a static code analyzer for JavaScript. This
-;; includes ElDoc and jump-to-definition out of the box.
-(use-package tern
-  :demand t
-  :after js2-mode
-  :config
-
-  (add-hook 'js2-mode-hook #'tern-mode)
-
-  :blackout t)
-
-;; Package `company-tern' provides a Company backend which uses Tern.
-(use-package company-tern
-  :demand t
-  :after (:all js2-mode company tern)
-  :config
-
-  (radian-defhook radian--company-tern-enable ()
-    js2-mode-hook
-    "Enable `company-tern' in the current buffer."
-    (setq-local company-backends
-                (cons 'company-tern radian--company-backends-global))))
-
 ;; Package `prettier-js' runs Prettier on `before-save-hook'.
 (use-package prettier-js
   :demand t
