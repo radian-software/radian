@@ -2195,11 +2195,9 @@ currently active.")
              ;; Disable for modes that we currently use a specialized
              ;; framework for, until they are phased out in favor of
              ;; LSP.
-             #'js2-mode
              #'python-mode
              #'ruby-mode
-             #'rust-mode
-             #'typescript-mode)
+             #'rust-mode)
       (lsp)))
 
   :config
