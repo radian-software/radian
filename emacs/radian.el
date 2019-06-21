@@ -3067,7 +3067,7 @@ See also `radian--js-prettier-run-maybe'."
     (add-hook 'before-save-hook #'radian--js-prettier-run-maybe
               nil 'local))
 
-  (dolist (hook '(js2-mode-hook web-mode-hook))
+  (dolist (hook '(js2-mode-hook typescript-mode-hook web-mode-hook))
     (add-hook hook #'radian--js-prettier-setup)))
 
 ;;;; Lua
