@@ -3191,6 +3191,10 @@ See https://emacs.stackexchange.com/a/3338/12534."
 
   (elpy-enable)
 
+  ;; Don't bind things on C-g. It's extremely rude. (This removes the
+  ;; bindings for `elpy-pdb-map', which I don't use anyway.)
+  (unbind-key "C-c C-g" elpy-mode-map)
+
   :blackout t)
 
 ;;;; ReST
