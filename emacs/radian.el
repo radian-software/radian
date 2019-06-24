@@ -493,7 +493,9 @@ Only do this once, unless AGAIN is non-nil."
                         (cl-loop for (var value) on results by #'cddr do
                                  (setenv var value)
                                  (when (string= var "PATH")
-                                   (setq exec-path (parse-colon-path value))))
+                                   (setq exec-path (append
+                                                    (parse-colon-path value)
+                                                    (list exec-directory)))))
                         (setq radian--env-setup-p t))
                     (message
                      "Loading %s produced malformed result; see buffer %S"
