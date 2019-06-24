@@ -2062,6 +2062,10 @@ the timer when no buffers need to be checked."
   ;; Work around https://github.com/Fuco1/smartparens/issues/783.
   (setq sp-escape-quotes-after-insert nil)
 
+  ;; Quiet some silly messages.
+  (dolist (key '(:unmatched-expression :no-matching-tag))
+    (setf (cdr (assq key sp-message-alist)) nil))
+
   :blackout t)
 
 ;;;; Code reformatting
