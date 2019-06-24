@@ -3174,7 +3174,11 @@ See https://emacs.stackexchange.com/a/3338/12534."
       ;; modules won't be available. But calling the executables
       ;; directly will work.
       (setq-local flycheck-python-pylint-executable "pylint")
-      (setq-local flycheck-python-flake8-executable "flake8"))))
+      (setq-local flycheck-python-flake8-executable "flake8")))
+
+  ;; I honestly don't understand why people like their packages to
+  ;; spew so many messages.
+  (setq python-indent-guess-indent-offset-verbose nil))
 
 ;; Package `elpy' provides a language server for Python, including
 ;; integration with most other packages that need to draw information
