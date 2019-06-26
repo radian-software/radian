@@ -1722,6 +1722,11 @@ loaded since the file was changed outside of Emacs."
 
 ;;;; Navigation
 
+;; When you move point past the end of the window, scroll only one
+;; line, rather than jumping half a screen. See
+;; <https://www.gnu.org/software/emacs/manual/html_node/efaq/Scrolling-only-one-line.html>.
+(setq scroll-conservatively most-positive-fixnum)
+
 ;; Feature `subword' provides a minor mode which causes the
 ;; `forward-word' and `backward-word' commands to stop at
 ;; capitalization changes within a word, so that you can step through
