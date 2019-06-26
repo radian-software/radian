@@ -4559,6 +4559,12 @@ command."
         ;; This will move backwards since lines will be negative.
         (forward-line lines))))
 
+  (radian-defadvice radian--git-gutter-on-window-change (&rest _)
+    :after select-window
+    "Update `git-gutter' after changing windows."
+    (when git-gutter-mode
+      (git-gutter)))
+
   :blackout git-gutter-mode)
 
 ;;;; External commands
