@@ -4543,6 +4543,11 @@ command."
   (radian-bind-key "v e" #'git-gutter:end-of-hunk)
   (radian-bind-key "v k" #'git-gutter:revert-hunk)
 
+  ;; Disable in Org mode, as per
+  ;; <https://github.com/syl20bnr/spacemacs/issues/10555> and
+  ;; <https://github.com/syohex/emacs-git-gutter/issues/24>.
+  (setq git-gutter:disabled-modes '(org-mode))
+
   :defer 1.5
   :config
 
