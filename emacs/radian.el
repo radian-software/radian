@@ -4530,10 +4530,10 @@ command."
     (unless (file-executable-p emacsql-sqlite-executable)
       (emacsql-sqlite-compile 2))))
 
-;; Package `git-gutter-fringe' adds a fringe line to the left-hand
-;; side of each window, showing which lines have been added, removed,
-;; or modified since the last Git commit.
-(use-package git-gutter-fringe
+;; Package `git-gutter' adds a column to the left-hand side of each
+;; window, showing which lines have been added, removed, or modified
+;; since the last Git commit.
+(use-package git-gutter
   :commands (radian-git-gutter:beginning-of-hunk)
   :init
 
@@ -4571,6 +4571,13 @@ command."
       (git-gutter)))
 
   :blackout git-gutter-mode)
+
+;; Package `git-gutter-fringe' integrates with `git-gutter' to make
+;; the gutter display use the window fringe rather than a column of
+;; text.
+(use-package git-gutter-fringe
+  :demand t
+  :after git-gutter)
 
 ;;;; External commands
 
