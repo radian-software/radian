@@ -4546,7 +4546,12 @@ command."
   ;; Disable in Org mode, as per
   ;; <https://github.com/syl20bnr/spacemacs/issues/10555> and
   ;; <https://github.com/syohex/emacs-git-gutter/issues/24>.
-  (setq git-gutter:disabled-modes '(org-mode))
+  ;; Apparently, the mode-enabling function for global minor modes
+  ;; gets called for new buffers while they are still in
+  ;; `fundamental-mode', before a major mode has been assigned. I
+  ;; don't know why this is the case, but adding `fundamental-mode'
+  ;; here fixes the issue.
+  (setq git-gutter:disabled-modes '(fundamental-mode org-mode))
 
   :defer 1.5
   :config
