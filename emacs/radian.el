@@ -2892,7 +2892,36 @@ overwrites the message from *that* command."
 ;; https://golang.org/
 
 ;; Package `go-mode' provides a major mode for Go.
-(use-package go-mode)
+(use-package go-mode
+  :config
+
+  (use-feature lsp-ui
+    :config
+
+    (radian-defadvice radian--advice-lsp-ui-organize-imports-more-cleanly
+        (func actions &rest args)
+      :around lsp-ui-sideline--code-actions
+      "Clean up the \"Organize Imports\" code actions for Go.
+Firstly, don't display \"Organize Imports\" or \"Organize All
+Imports\" in the sideline, as gopls sometimes reports these code
+actions when the indentation is wrong (rather than when imports
+need to be changed). Secondly, filter out \"Organize All
+Imports\" internally, so that applying a code action will default
+to \"Organize Imports\" instead of prompting you to decide
+between that and \"Organize All Imports\" (which does the same
+thing as far as I can tell)."
+      (let ((actions-to-keep nil)
+            (actions-to-render nil))
+        (dolist (action actions)
+          (unless (equal "Organize All Imports" (gethash "title" action))
+            (push action actions-to-keep)
+            (unless (equal "Organize Imports" (gethash "title" action))
+              (push action actions-to-render))))
+        (setq actions-to-keep (nreverse actions-to-keep))
+        (setq actions-to-render (nreverse actions-to-render))
+        (when actions-to-render
+          (apply func actions-to-render args))
+        (setq lsp-ui-sideline--code-actions actions-to-keep)))))
 
 ;;;; Haskell
 ;; https://www.haskell.org/
