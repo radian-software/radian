@@ -2616,7 +2616,15 @@ nor requires Flycheck to be loaded."
   ;; noisy, and there appears to currently be a bug where they prevent
   ;; Flycheck errors from being shown (the errors flash briefly and
   ;; then disappear).
-  (setq lsp-ui-sideline-show-hover nil))
+  (setq lsp-ui-sideline-show-hover nil)
+
+  (use-feature lsp-mode
+    :config
+
+    ;; With `lsp-ui', there's no need for the ElDoc integration
+    ;; provided by `lsp-mode', and in fact for Bash it is very
+    ;; annoying since all the hover information is multiline.
+    (setq lsp-eldoc-enable-hover nil)))
 
 ;;; Language support
 ;;;; Text-based languages

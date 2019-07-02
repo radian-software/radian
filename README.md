@@ -124,6 +124,7 @@ you prefer something different, substitute to taste.
 * Emacs: `pacman -S emacs python`; (optional for improved startup
   time) `yay -S watchexec`
   * LSP
+    * Bash: `yarn global add bash-language-server`
     * C/C++: `pacman -S clang`
     * Flow: `yarn global add flow-bin`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
