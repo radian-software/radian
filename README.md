@@ -118,13 +118,38 @@ setting; watchexec is optional for improved startup time.
 
 #### Arch Linux
 
+I use [Yay](https://github.com/Jguer/yay) to install AUR packages. If
+you prefer something different, substitute to taste.
+
 * Emacs: `pacman -S emacs python`; (optional for improved startup
-  time) install `watchexec` from AUR
-* Zsh: `pacman -S zsh`; `mkdir ~/.zplugin`; `git clone
-  git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
+  time) `yay -S watchexec`
+  * LSP
+    * C/C++: `pacman -S clang`
+    * Flow: ??
+    * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
+      to your `$PATH`
+    * Javascript/TypeScript:
+
+          $ git clone git@github.com:sourcegraph/javascript-typescript-langserver.git
+          $ cd javascript-typescript-langserver
+          $ npm install
+          $ npm run build
+          $ chmod +x lib/language-server-stdio.js
+          $ ln -s $PWD/lib/language-server-stdio.js ~/.local/bin/javascript-typescript-stdio
+
+    * Python: `yay -S microsoft-python-language-server`
+* Zsh:
+
+      $ pacman -S zsh
+      $ mkdir ~/.zplugin
+      $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+
 * Tmux: `pacman -S tmux`
 * Git: `pacman -S git`
-* Leiningen: `pacman -S jdk8-openjdk`; install `leiningen` from AUR
+* Leiningen:
+
+      $ pacman -S jdk8-openjdk
+      $ yay -S leiningen
 
 ### Installing configuration
 
