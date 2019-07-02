@@ -2837,22 +2837,6 @@ https://github.com/haskell/haskell-mode/issues/1594."
   ;; already have them from Flycheck.
   (setq haskell-process-show-overlays nil)
 
-  ;; Work around upstream bug, see
-  ;; https://github.com/haskell/haskell-mode/issues/1553.
-
-  (setq haskell-process-args-ghci
-        '("-ferror-spans" "-fshow-loaded-modules"))
-
-  (setq haskell-process-args-cabal-repl
-        '("--ghc-options=-ferror-spans -fshow-loaded-modules"))
-
-  (setq haskell-process-args-stack-ghci
-        '("--ghci-options=-ferror-spans -fshow-loaded-modules"
-          "--no-build" "--no-load"))
-
-  (setq haskell-process-args-cabal-new-repl
-        '("--ghc-options=-ferror-spans -fshow-loaded-modules"))
-
   ;; Allow `haskell-mode' to use Stack with the global project instead
   ;; of trying to invoke GHC directly, if not inside any sort of
   ;; project.
