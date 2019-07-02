@@ -141,6 +141,27 @@ This means that FILENAME is a symlink whose target is inside
               ((symbol-function #'message) #'ignore))
      ,@body))
 
+(defmacro radian--with-silent-message (regexps &rest body)
+  "Execute BODY, silencing any `message' calls that match REGEXPS.
+REGEXPS is a list of strings; if `message' would display a
+message string (not including the trailing newline) matching any
+element of REGEXPS, nothing happens. The REGEXPS need not match
+the entire message; include ^ and $ if necessary. REGEXPS may
+also be a single string."
+  (declare (indent 1))
+  (when (stringp regexps)
+    (setq regexps (list regexps)))
+  `(cl-letf* ((message (symbol-function #'message))
+              ((symbol-function #'message)
+               (lambda (format &rest args)
+                 (let ((str (apply #'format format args)))
+                   (cl-block nil
+                     (dolist (regexp ',regexps)
+                       (when (string-match-p regexp str)
+                         (cl-return)))
+                     (message "%s" str))))))
+     ,@body))
+
 (defun radian--random-string ()
   "Return a random string designed to be globally unique."
   (md5 (format "%s%s%s%s"
@@ -2195,7 +2216,10 @@ currently active.")
 ;;;;; Python
 
 ;; Package `pyvenv' provides functions for activating and deactivating
-;; Python virtualenvs within Emacs.
+;; Python virtualenvs within Emacs. It's mostly not needed anymore now
+;; that `lsp-python-ms' is configured to discover the appropriate
+;; Pipenv or Poetry virtualenv, but maybe it will come in handy
+;; someday.
 (use-package pyvenv)
 
 ;;;; Language servers
@@ -2219,7 +2243,6 @@ currently active.")
                  ;; Disable for modes that we currently use a specialized
                  ;; framework for, until they are phased out in favor of
                  ;; LSP.
-                 #'python-mode
                  #'ruby-mode
                  #'rust-mode))
       (lsp)))
@@ -2284,7 +2307,16 @@ with whether we want to restart the LSP server that has just been
 killed (which happens during Emacs shutdown)."
     (setq lsp-restart nil))
 
-  :blackout t)
+  :blackout " LSP")
+
+;; Feature `lsp-clients' from package `lsp-mode' defines how to
+;; interface with the various popular LSP servers.
+(use-feature lsp-clients
+  :config
+
+  ;; We want to make sure the PATH is set up correctly by now, since
+  ;; otherwise we might not be able to find the LSP server binaries.
+  (radian-env-setup))
 
 ;;;; Indentation
 
@@ -2459,7 +2491,7 @@ order."
                     (when (thread-first w
                             (lsp--workspace-client)
                             (lsp--client-server-id)
-                            (memq '(jsts-ls))
+                            (memq '(jsts-ls mspyls))
                             (not))
                       (cl-return t)))))))
 
@@ -3219,32 +3251,64 @@ See https://emacs.stackexchange.com/a/3338/12534."
 
   ;; I honestly don't understand why people like their packages to
   ;; spew so many messages.
-  (setq python-indent-guess-indent-offset-verbose nil))
+  (setq python-indent-guess-indent-offset-verbose nil)
 
-;; Package `elpy' provides a language server for Python, including
-;; integration with most other packages that need to draw information
-;; from it (e.g. Company).
-(use-package elpy
+  (defun radian--python-find-virtualenv ()
+    "Find a virtualenv corresponding to the current buffer.
+Return either a string or nil."
+    (cl-block nil
+      (when (and (executable-find "poetry")
+                 (locate-dominating-file default-directory "pyproject.toml"))
+        (with-temp-buffer
+          ;; May create virtualenv, but whatever.
+          (when (= 0 (call-process
+                      "poetry" nil '(t nil) nil "run" "which" "python"))
+            (goto-char (point-min))
+            (when (looking-at "\\(.+\\)/bin/python\n")
+              (let ((venv (match-string 1)))
+                (when (file-directory-p venv)
+                  (cl-return venv)))))))
+      (when (and (executable-find "pipenv")
+                 (locate-dominating-file default-directory "Pipfile"))
+        (with-temp-buffer
+          ;; May create virtualenv, but whatever.
+          (when (= 0 (call-process "pipenv" nil '(t nil) nil "--venv"))
+            (goto-char (point-min))
+            (let ((venv (string-trim (buffer-string))))
+              (when (file-directory-p venv)
+                (cl-return venv)))))))))
+
+;; Package `lsp-python-ms' downloads Microsoft's LSP server for Python
+;; and configures it with `lsp-mode'. Microsoft's server behaves
+;; better than Palantir's in my opinion.
+(use-package lsp-python-ms
   :demand t
-  :after python
+  :after (:all lsp-clients python)
   :config
 
-  ;; Don't highlight indentation levels, as it looks rather weird.
-  (setq elpy-modules (remq 'elpy-module-highlight-indentation elpy-modules))
+  (setq lsp-python-ms-executable "mspyls")
 
-  ;; Don't use Flymake, since we use Flycheck instead.
-  (setq elpy-modules (remq 'elpy-module-flymake elpy-modules))
+  (radian-defadvice radian--lsp-python-ms-silence (func &rest args)
+    :around lsp-python-ms--language-server-started-callback
+    "Inhibit a silly message."
+    (radian--with-silent-message "Python language server started"
+      (apply func args)))
 
-  ;; Use the correct version of Python.
-  (setq elpy-rpc-python-command python-shell-interpreter)
-
-  (elpy-enable)
-
-  ;; Don't bind things on C-g. It's extremely rude. (This removes the
-  ;; bindings for `elpy-pdb-map', which I don't use anyway.)
-  (unbind-key "C-c C-g" elpy-mode-map)
-
-  :blackout t)
+  (radian-defadvice radian--lsp-python-ms-discover-virtualenvs
+      (func &rest args)
+    :around lsp-python-ms--get-python-ver-and-syspath
+    "Automatically discover Pipenv and Poetry virtualenvs."
+    (cl-letf* ((executable-find (symbol-function #'executable-find))
+               ((symbol-function #'executable-find)
+                (lambda (command)
+                  (cl-block nil
+                    (when (equal command "python")
+                      (when-let ((venv (radian--python-find-virtualenv)))
+                        (cl-return
+                         (expand-file-name
+                          "python" (expand-file-name "bin" venv)))))
+                    (funcall executable-find command)))))
+      (apply func args))))
 
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
