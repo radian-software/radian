@@ -2233,6 +2233,7 @@ currently active.")
                  ;; Disable for modes that we currently use a specialized
                  ;; framework for, until they are phased out in favor of
                  ;; LSP.
+                 #'clojure-mode
                  #'ruby-mode
                  #'rust-mode))
       (lsp)))
