@@ -738,7 +738,6 @@ Remaps built-in functions to counsel replacements."
 
   (defcustom counsel-mode-override-describe-bindings nil
     "Whether to override `describe-bindings' when `counsel-mode' is active."
-    :group 'ivy
     :type 'boolean)
 
   (define-minor-mode counsel-mode
@@ -749,7 +748,6 @@ replacements.
 
 Local bindings (`counsel-mode-map'):
 \\{counsel-mode-map}"
-    :group 'ivy
     :global t
     :keymap counsel-mode-map
     (el-patch-remove
@@ -787,8 +785,7 @@ Note: don't use single quotes for the regex."
         "\n\nSupport for searching compressed files and for
 reporting results in a deterministic order has been added by
 `el-patch'."))
-    :type 'string
-    :group 'ivy)
+    :type 'string)
 
   :blackout t)
 
@@ -1159,14 +1156,14 @@ Otherwise behave as if called interactively.
         (add-hook 'find-file-hook 'projectile-find-file-hook-function)
         (add-hook 'projectile-find-dir-hook #'projectile-track-known-projects-find-file-hook t)
         (add-hook 'dired-before-readin-hook #'projectile-track-known-projects-find-file-hook t t)
-        (ad-activate 'compilation-find-file)
-        (ad-activate 'delete-file)))
+        (advice-add 'compilation-find-file :around #'compilation-find-file-projectile-find-compilation-buffer)
+        (advice-add 'delete-file :before #'delete-file-projectile-remove-from-cache)))
      (el-patch-remove
        (t
         (remove-hook 'find-file-hook #'projectile-find-file-hook-function)
         (remove-hook 'dired-before-readin-hook #'projectile-track-known-projects-find-file-hook t)
-        (ad-deactivate 'compilation-find-file)
-        (ad-deactivate 'delete-file)))))
+        (advice-remove 'compilation-find-file #'compilation-find-file-projectile-find-compilation-buffer)
+        (advice-remove 'delete-file #'delete-file-projectile-remove-from-cache)))))
 
   :init
 
@@ -1960,7 +1957,8 @@ the timer when no buffers need to be checked."
         ;; Check if we should cancel the timer.
         (when (and (not global-auto-revert-mode)
                    (null auto-revert-buffer-list))
-          (cancel-timer auto-revert-timer)
+          (if (timerp auto-revert-timer)
+              (cancel-timer auto-revert-timer))
           (setq auto-revert-timer nil)))))
 
   :config
