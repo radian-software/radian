@@ -1542,9 +1542,6 @@ unquote it using a comma."
 (radian-register-dotfile ".gitexclude" "g e")
 (radian-register-dotfile ".gitconfig.local" "g l")
 
-;; Leiningen
-(radian-register-dotfile ".lein/profiles.clj" "l p")
-
 ;; Shell
 (radian-register-dotfile ".profile" "p r")
 (radian-register-dotfile ".profile.local" "p l")
@@ -2700,112 +2697,7 @@ nor requires Flycheck to be loaded."
 ;; https://clojure.org/
 
 ;; Package `clojure-mode' provides a major mode for Clojure.
-(use-package clojure-mode
-  :config/el-patch
-
-  ;; `clojure-mode' does not correctly identify the docstrings of
-  ;; protocol methods as docstrings, and as such electric indentation
-  ;; does not work for them. Additionally, when you hack a
-  ;; clojure.core function, such as defonce or defrecord, to provide
-  ;; docstring functionality, those docstrings are (perhaps rightly,
-  ;; but annoyingly) not recognized as docstrings either. However,
-  ;; there is an easy way to get electric indentation working for all
-  ;; potential docstrings: simply tell `clojure-mode' that *all*
-  ;; strings are docstrings. This will not change the font locking,
-  ;; because for some weird reason `clojure-mode' determines whether
-  ;; you're in a docstring by the font color instead of the other way
-  ;; around. Note that this will cause electric indentation by two
-  ;; spaces in *all* multiline strings, but since there are not very
-  ;; many non-docstring multiline strings in Clojure this is not too
-  ;; inconvenient.
-  ;;
-  ;; Unfortunately, `clojure-in-docstring-p' is defined as an inline
-  ;; function, so after changing it, we also have to replace
-  ;; `clojure-indent-line'. That is done in an advice in the
-  ;; `radian-clojure-strings-as-docstrings-mode' minor mode.
-
-  (defsubst (el-patch-swap clojure-in-docstring-p
-                           radian--clojure-in-string-p)
-    ()
-    (el-patch-concat
-      "Check whether point is in "
-      (el-patch-swap "a docstring" "any type of string")
-      ".")
-    (let ((ppss (syntax-ppss)))
-      ;; are we in a string?
-      (when (nth 3 ppss)
-        ;; check font lock at the start of the string
-        ((el-patch-swap eq memq)
-         (get-text-property (nth 8 ppss) 'face)
-         (el-patch-wrap 1
-           ('font-lock-string-face 'font-lock-doc-face))))))
-
-  (defun (el-patch-swap clojure-indent-line
-                        radian--advice-clojure-strings-as-docstrings)
-      ()
-    (el-patch-concat
-      "Indent current line as Clojure code."
-      (el-patch-add
-        "\n\nThis is an `:override' advice for `clojure-indent-line'."))
-    (if (el-patch-swap
-          (clojure-in-docstring-p)
-          (radian--clojure-in-string-p))
-        (save-excursion
-          (beginning-of-line)
-          (when (and (looking-at "^\\s-*")
-                     (<= (string-width (match-string-no-properties 0))
-                         (string-width (clojure-docstring-fill-prefix))))
-            (replace-match (clojure-docstring-fill-prefix))))
-      (lisp-indent-line)))
-
-  :config
-
-  ;; Customize indentation like this:
-  ;;
-  ;; (some-function
-  ;;   argument
-  ;;   argument)
-  ;;
-  ;; (some-function argument
-  ;;                argument)
-  ;;
-  ;; (-> foo
-  ;;   thread
-  ;;   thread)
-  ;;
-  ;; (->> foo
-  ;;   thread
-  ;;   thread)
-  ;;
-  ;; (:keyword
-  ;;   map)
-
-  (setq clojure-indent-style :align-arguments)
-
-  ;; Ideally, we would be able to set the identation rules for *all*
-  ;; keywords at the same time. But until we figure out how to do
-  ;; that, we just have to deal with every keyword individually. See
-  ;; https://github.com/raxod502/radian/issues/26.
-  (radian-protect-macros
-    (define-clojure-indent
-      (-> 1)
-      (->> 1)
-      (:import 0)
-      (:require 0)
-      (:use 0)))
-
-  (define-minor-mode radian-clojure-strings-as-docstrings-mode
-    "Treat all Clojure strings as docstrings.
-You want to turn this on if you want to treat strings like
-docstrings even though they technically are not, and you want to
-turn it off if you have multiline strings that are not
-docstrings."
-    nil nil nil
-    (if radian-clojure-strings-as-docstrings-mode
-        (advice-add #'clojure-indent-line :override
-                    #'radian--advice-clojure-strings-as-docstrings)
-      (advice-remove #'clojure-indent-line
-                     #'radian--advice-clojure-strings-as-docstrings))))
+(use-package clojure-mode)
 
 ;; Package `cider' provides integrated Clojure and ClojureScript REPLs
 ;; directly in Emacs, a Company backend that uses a live REPL
@@ -2841,11 +2733,6 @@ docstrings."
        (with-current-buffer nrepl-server-buffer
          (buffer-string)))))
 
-  ;; Use the :emacs profile defined in profiles.clj. This enables lots
-  ;; of cool extra features in the REPL.
-  (when (radian-managed-p "~/.lein/profiles.clj")
-    (setq cider-lein-parameters "with-profile +emacs repl :headless"))
-
   ;; The CIDER welcome message often obscures any error messages that
   ;; the above code is supposed to be making visible. So, we need to
   ;; turn off the welcome message.
@@ -2867,57 +2754,6 @@ docstrings."
   ;;
   ;; [1]: https://github.com/clojure-emacs/cider/issues/1872
   (setq cider-repl-pop-to-buffer-on-connect 'display-only)
-
-  ;; Use figwheel-sidecar for launching ClojureScript REPLs. This
-  ;; supports a fully integrated ClojureScript development experience
-  ;; in Emacs, for use with e.g. [1]. The last three forms are from
-  ;; the definition of `cider--cljs-repl-types'; the first two work
-  ;; around [2].
-  ;;
-  ;; [1]: https://github.com/reagent-project/reagent-template
-  ;; [2]: https://github.com/reagent-project/reagent-template/issues/132
-  (setq cider-cljs-lein-repl
-        "(do
-  (require 'clojure.java.shell)
-  (clojure.java.shell/sh \"lein\" \"clean\")
-  (require 'figwheel-sidecar.repl-api)
-  (figwheel-sidecar.repl-api/start-figwheel!)
-  (figwheel-sidecar.repl-api/cljs-repl))")
-
-  :blackout t)
-
-;; Package `clj-refactor' provides automated refactoring commands for
-;; Clojure code.
-(use-package clj-refactor
-  :init
-
-  (radian-defhook radian--clj-refactor-enable ()
-    clojure-mode-hook
-    "Enable `clj-refactor' mode properly.
-This means that `yas-minor-mode' also needs to be enabled, and
-the `clj-refactor' keybindings need to be installed."
-    (clj-refactor-mode +1)
-    (yas-minor-mode +1)
-    (cljr-add-keybindings-with-prefix "C-c RET"))
-
-  :config
-
-  ;; Make clj-refactor show its messages right away, instead of
-  ;; waiting for you to do another command.
-
-  (radian-defadvice radian--advice-clj-refactor-message-eagerly (&rest args)
-    :override cljr--post-command-message
-    "Make `clj-refactor' show messages right away.
-Otherwise, it waits for you to do another command, and then
-overwrites the message from *that* command."
-    (apply #'message args))
-
-  ;; Automatically sort project dependencies after changing them.
-  (setq cljr-auto-sort-project-dependencies t)
-
-  ;; Don't print a warning when starting a REPL outside of project
-  ;; context.
-  (setq cljr-suppress-no-project-warning t)
 
   :blackout t)
 

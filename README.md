@@ -76,15 +76,6 @@ These dotfiles attempt to achieve the following goals:
     * Reword a commit while preserving the index
     * Alias and unalias without messing with `git config`
     * More helpful output from `git status`, submodules, and more
-* [Leiningen]
-    * Modular profile system allowing maximal performance through
-      selecting exactly the features you want
-    * Inject useful utility functions using [Vinyasa]
-    * Pull JARs from Maven and hotload them into your REPL with
-      [Alembic]
-    * Refresh a dirty REPL without a restart, using [tools.namespace]
-    * Colorization and pretty-printing of output and stack traces in
-      the REPL
 
 ## Installation
 
@@ -114,7 +105,6 @@ setting; watchexec is optional for improved startup time.
 
 * Tmux: `brew install tmux`
 * Git: `brew install git`
-* Leiningen: `brew cask install java`; `brew install leiningen`
 
 #### Arch Linux
 
@@ -147,10 +137,6 @@ you prefer something different, substitute to taste.
 
 * Tmux: `pacman -S tmux`
 * Git: `pacman -S git`
-* Leiningen:
-
-      $ pacman -S jdk8-openjdk
-      $ yay -S leiningen
 
 ### Installing configuration
 
@@ -160,7 +146,6 @@ Use symbolic links:
     ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
     ./git/.gitconfig => ~/.gitconfig
     ./git/.gitexclude => ~/.gitexclude
-    ./leiningen/profiles.clj => ~/.lein/profiles.clj
     ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
@@ -202,7 +187,6 @@ Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* should be either obvious or
 commented.
 
-[alembic]: https://github.com/pallet/alembic
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [blackout]: https://github.com/raxod502/blackout
@@ -234,7 +218,6 @@ commented.
 [ivy]: https://github.com/abo-abo/swiper#ivy
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [latex]: https://www.latex-project.org/
-[leiningen]: http://leiningen.org/
 [lsp]: https://langserver.org/
 [lsp-mode]: https://github.com/emacs-lsp/lsp-mode
 [macrostep]: https://github.com/joddie/macrostep
@@ -259,12 +242,10 @@ commented.
 [straight.el]: https://github.com/raxod502/straight.el
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
-[tools.namespace]: https://github.com/clojure/tools.namespace
 [transpose-frame]: https://www.emacswiki.org/emacs/TransposeFrame
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
-[vinyasa]: http://docs.caudate.me/lucidity/
 [visual-regexp]: https://github.com/benma/visual-regexp.el
 [webpaste.el]: https://github.com/etu/webpaste.el
 [yasnippet]: https://github.com/joaotavora/yasnippet
