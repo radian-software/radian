@@ -3528,7 +3528,13 @@ command `sh-reset-indent-vars-to-global-values'."
     (interactive)
     (mapc 'make-local-variable sh-var-list)
     (el-patch-remove
-      (message "Indentation variables are now local."))))
+      (message "Indentation variables are now local.")))
+
+  (radian-defhook radian--sh-prettify-mode-line ()
+    sh-mode-hook
+    "Instead of \"Shell[bash]\", display mode name as \"Bash\"."
+    (setq mode-line-process nil)
+    (setq mode-name (capitalize (symbol-name sh-shell)))))
 
 ;;;; Swift
 ;; https://developer.apple.com/swift/
