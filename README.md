@@ -125,7 +125,7 @@ you prefer something different, substitute to taste.
   time) `yay -S watchexec`
   * LSP
     * C/C++: `pacman -S clang`
-    * Flow: ??
+    * Flow: `yarn global add flow-bin`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
     * Javascript/TypeScript:
