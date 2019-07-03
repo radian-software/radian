@@ -73,22 +73,30 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
      (advice-add ',place ',where #',name)
      ',name))
 
-(defmacro radian-defhook (name arglist hook docstring &rest body)
+(defmacro radian-defhook (name arglist hooks docstring &rest body)
   "Define a function called NAME and add it to a hook.
-ARGLIST is as in `defun'. HOOK is the hook to which to add the
-function. DOCSTRING and BODY are as in `defun'."
+ARGLIST is as in `defun'. HOOKS is a list of hooks to which to
+add the function, or just a single hook. DOCSTRING and BODY are
+as in `defun'."
   (declare (indent 2)
            (doc-string 4))
-  (unless (string-match-p "-hook$" (symbol-name hook))
-    (error "Symbol `%S' is not a hook" hook))
+  (unless (listp hooks)
+    (setq hooks (list hooks)))
+  (dolist (hook hooks)
+    (unless (string-match-p "-hook$" (symbol-name hook))
+      (error "Symbol `%S' is not a hook" hook)))
   (unless (stringp docstring)
     (error "radian-defhook: no docstring provided"))
-  `(progn
-     (defun ,name ,arglist
-       ,(format "%s\n\nThis function is for use in `%S'."
-                docstring hook)
-       ,@body)
-     (add-hook ',hook ',name)))
+  (let ((hooks-str (format "`%S'" (car hooks))))
+    (dolist (hook (cdr hooks))
+      (setq hooks-str (format "%s\nand `%S'" hooks-str hook)))
+    `(progn
+       (defun ,name ,arglist
+         ,(format "%s\n\nThis function is for use in %s."
+                  docstring hooks-str)
+         ,@body)
+       (dolist (hook ',hooks)
+         (add-hook hook ',name)))))
 
 (defmacro radian-operating-system-p (os)
   "Return non-nil if OS matches the system type.
@@ -2222,7 +2230,7 @@ currently active.")
   :init
 
   (radian-defhook radian--lsp-enable ()
-    prog-mode-hook
+    (prog-mode-hook text-mode-hook)
     "Enable `lsp-mode' for most programming modes."
     (unless (or (null buffer-file-name)
                 (derived-mode-p
@@ -2482,7 +2490,7 @@ order."
                     (when (thread-first w
                             (lsp--workspace-client)
                             (lsp--client-server-id)
-                            (memq '(jsts-ls mspyls))
+                            (memq '(jsts-ls mspyls bash-ls texlab))
                             (not))
                       (cl-return t)))))))
 
@@ -3501,14 +3509,11 @@ This prevents them from getting in the way of buffer selection."
   ;; sizes.
   (setq font-latex-fontify-sectioning 1))
 
-;; Package `company-auctex' provides a Company backend that uses
-;; information from AUCTeX for autocompletion.
-(use-package company-auctex
+;; Package `lsp-latex' provides an `lsp-mode' client for LaTeX.
+(use-package lsp-latex
+  :straight (:host github :repo "ROCKTAKEY/lsp-latex")
   :demand t
-  :after (:all company tex)
-  :config
-
-  (company-auctex-init))
+  :after (:all lsp-clients tex))
 
 ;;;; TypeScript
 ;; https://www.typescriptlang.org/

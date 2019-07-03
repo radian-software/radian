@@ -128,6 +128,11 @@ you prefer something different, substitute to taste.
           $ chmod +x lib/language-server-stdio.js
           $ ln -s $PWD/lib/language-server-stdio.js ~/.local/bin/javascript-typescript-stdio
 
+    * LaTeX:
+
+          $ wget -O ~/.local/bin/texlab.jar
+              https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
+
     * Python: `yay -S microsoft-python-language-server`
 * Zsh:
 
