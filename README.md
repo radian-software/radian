@@ -134,7 +134,11 @@ you prefer something different, substitute to taste.
           $ wget -O ~/.local/bin/texlab.jar
               https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
 
-    * Python: `yay -S microsoft-python-language-server`
+    * Python:
+
+          $ yay -S microsoft-python-language-server
+          $ pacman -S python-black
+
 * Zsh:
 
       $ pacman -S zsh

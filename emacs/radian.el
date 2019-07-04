@@ -2220,6 +2220,23 @@ currently active.")
 ;; someday.
 (use-package pyvenv)
 
+;; Package `blacken' allows you to run the code formatter Black on
+;; your Python code.
+(use-package blacken
+  :demand t
+  :after python
+  :config
+
+  (radian-defhook radian--black-run-maybe ()
+    before-save-hook
+    "Run Black on the current buffer, if allowed.
+Allowed means that `radian-reformat-on-save-mode' is enabled and
+we are in `python-mode'."
+    (when (and radian-reformat-on-save-mode
+               (derived-mode-p 'python-mode)
+               (executable-find "black"))
+      (blacken-buffer t))))
+
 ;;;; Language servers
 
 ;; Package `lsp-mode' is an Emacs client for the Language Server
