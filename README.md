@@ -113,7 +113,7 @@ you prefer something different, substitute to taste.
 
 * Emacs: `pacman -S emacs python`; (optional for improved startup
   time) `yay -S watchexec`
-  * LSP
+  * Code intelligence
     * Bash: `yarn global add bash-language-server`
     * C/C++: `pacman -S clang`
     * Flow: `yarn global add flow-bin`
@@ -127,6 +127,7 @@ you prefer something different, substitute to taste.
           $ npm run build
           $ chmod +x lib/language-server-stdio.js
           $ ln -s $PWD/lib/language-server-stdio.js ~/.local/bin/javascript-typescript-stdio
+          $ pacman -S prettier
 
     * LaTeX:
 
