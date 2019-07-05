@@ -3133,8 +3133,6 @@ Return either a string or nil."
   :after (:all lsp-clients python)
   :config
 
-  (setq lsp-python-ms-executable "mspyls")
-
   (radian-defadvice radian--lsp-python-ms-silence (func &rest args)
     :around lsp-python-ms--language-server-started-callback
     "Inhibit a silly message."

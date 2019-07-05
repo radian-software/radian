@@ -134,9 +134,10 @@ you prefer something different, substitute to taste.
           $ wget -O ~/.local/bin/texlab.jar
               https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
 
-    * Python:
+    * Python: the language server is downloaded automatically courtesy
+      of
+      [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
 
-          $ yay -S microsoft-python-language-server
           $ pacman -S python-black
 
 * Zsh:
