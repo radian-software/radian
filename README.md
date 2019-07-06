@@ -15,7 +15,7 @@ These dotfiles attempt to achieve the following goals:
 
 ## Software configured, features
 
-* [Emacs]
+* [Emacs] (**minimum version supported: 25.2**)
     * Next-generation package manager, [`straight.el`][straight.el]
     * Clean and DRY package customizations using
       [`use-package`][use-package]
@@ -23,11 +23,15 @@ These dotfiles attempt to achieve the following goals:
     * Sorting by frecency and usage on all commands using
       [`prescient.el`][prescient.el]
     * IDE features for expanding library of programming languages with
-      [LSP] via [`lsp-mode`][lsp-mode]
+      [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, [Flow], [Go],
+      [JavaScript], [TypeScript], [JSX]/[TSX], [LaTeX], [Python] with
+      [Poetry] and [Pipenv] virtualenvs autodetected), featuring
+      optional code formatting by LSP, [Black], and [Prettier]
     * Informative but minimal mode-line showing file modification
       status, buffer name, point position, and active modes (with
       optional right-alignment support)
-    * Extremely clean mode lighters thanks to [Blackout]
+    * Extremely clean mode lighters with prettier names thanks to
+      [Blackout]
     * Aggressive startup optimization: 0.7s or less for a fully
       configured graphical frame, from cold boot
     * Aggressively consistent coding style and documentation,
@@ -46,15 +50,14 @@ These dotfiles attempt to achieve the following goals:
     * Configured packages: [Atomic Chrome][atomic-chrome] (with
       [Firefox] support), [Autorevert], [buffer-move], [Company],
       [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-      [ElDoc], [ESUP], [Flycheck], [Forge], [git-link], [Helpful],
-      [Ivy], [Macrostep], [Magit], [no-littering], [Org],
+      [ElDoc], [ESUP], [Flycheck], [Forge],
+      [`git-gutter-fringe.el`][git-gutter-fringe.el] [git-link],
+      [Helpful], [Ivy], [Macrostep], [Magit], [no-littering], [Org],
       [Projectile], [pyvenv], [Smartparens], [Swiper],
       [transpose-frame], [undo-tree], [use-package], [visual-regexp],
       [webpaste.el], and more
-    * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
-      [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
-      more
-    * Major modes for editing many configuration file types
+    * Major modes for editing many languages and configuration file
+      types
 * [Zsh]
     * Extremely fast and flexible package manager, [zplugin]
     * No-nonsense prompt showing username, hostname, working
@@ -86,8 +89,6 @@ configuration, and optionally installing local configuration.
 #### macOS
 ##### Emacs
 
-**Minimum version supported: Emacs 25.2**
-
     $ brew cask install emacs
 
 Install support tools. Python is required for environment variable
@@ -106,7 +107,7 @@ setting; watchexec is optional for improved startup time.
 * Tmux: `brew install tmux`
 * Git: `brew install git`
 
-#### Arch Linux
+#### Arch/Manjaro Linux
 
 I use [Yay](https://github.com/Jguer/yay) to install AUR packages. If
 you prefer something different, substitute to taste.
@@ -119,7 +120,7 @@ you prefer something different, substitute to taste.
     * Flow: `yarn global add flow-bin`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
-    * Javascript/TypeScript:
+    * JavaScript/TypeScript:
 
           $ git clone git@github.com:sourcegraph/javascript-typescript-langserver.git
           $ cd javascript-typescript-langserver
@@ -202,7 +203,6 @@ commented.
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [blackout]: https://github.com/raxod502/blackout
 [buffer-move]: https://github.com/lukhas/buffer-move
-[clojure]: https://clojure.org/
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
 [counsel]: https://github.com/abo-abo/swiper#counsel
@@ -222,7 +222,6 @@ commented.
 [forge]: https://github.com/magit/forge
 [git]: https://git-scm.com/
 [git-link]: https://github.com/sshaw/git-link
-[haskell]: https://www.haskell.org/
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [issues]: https://github.com/raxod502/radian/issues
@@ -233,8 +232,6 @@ commented.
 [lsp-mode]: https://github.com/emacs-lsp/lsp-mode
 [macrostep]: https://github.com/joddie/macrostep
 [magit]: https://magit.vc/
-[markdown-mode]: http://jblevins.org/projects/markdown-mode/
-[markdown]: https://daringfireball.net/projects/markdown/syntax
 [no-littering]: https://github.com/tarsius/no-littering
 [org]: http://orgmode.org/
 [powerline]: https://github.com/powerline/powerline
@@ -246,8 +243,6 @@ commented.
 [racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
-[ruby]: https://www.ruby-lang.org/
-[rust]: https://www.rust-lang.org/
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
@@ -263,3 +258,12 @@ commented.
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [zplugin]: https://github.com/zdharma/zplugin
 [zsh]: http://zsh.sourceforge.net/
+[flow]: https://flow.org/
+[go]: https://golang.org/
+[jsx]: https://reactjs.org/docs/introducing-jsx.html
+[tsx]: https://www.typescriptlang.org/docs/handbook/jsx.html
+[prettier]: https://github.com/prettier/prettier
+[black]: https://github.com/python/black
+[pipenv]: https://docs.pipenv.org/en/latest/
+[poetry]: https://poetry.eustace.io/
+[git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
