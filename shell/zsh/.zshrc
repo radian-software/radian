@@ -16,10 +16,22 @@ fi
 
 ## zplugin
 
-if [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
+radian_zplugin=
+
+if [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
+    radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
+elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
+    radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
+fi
+
+if [[ -n $radian_zplugin ]]; then
+    # zplugin will happily keep adding the same entry to PATH every
+    # time you run it. Get rid of stale PATH entries. Thanks to
+    # <https://stackoverflow.com/a/41876600/3538165>.
+    path=(${path:#*/.zplugin/*})
 
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . ~/.zplugin/bin/zplugin.zsh
+    . $radian_zplugin
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
@@ -623,7 +635,7 @@ if (( $+commands[git] )); then
     alias gfa='git fetch --all --prune'
 
     alias gu='git pull'
-    alias gur='git pull --rebase'
+    alias gur='git pull --rebase --autostash'
     alias gum='git pull --no-rebase'
 
     alias gp='git push'

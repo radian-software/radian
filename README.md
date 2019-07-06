@@ -41,13 +41,16 @@ These dotfiles attempt to achieve the following goals:
       dotfiles
     * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
       partly on [`restart-emacs`][restart-emacs]
+    * Automatic insertion of whitespace and indentation when pressing
+      newline after inserting a pair of delimiters
     * Configured packages: [Atomic Chrome][atomic-chrome] (with
       [Firefox] support), [Autorevert], [buffer-move], [Company],
       [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-      [ElDoc], [ESUP], [Flycheck], [git-link], [Helpful], [Ivy],
-      [Magit], [no-littering], [Org], [Projectile], [pyvenv],
-      [Smartparens], [Swiper], [transpose-frame], [undo-tree],
-      [use-package], [visual-regexp], [webpaste.el], and more
+      [ElDoc], [ESUP], [Flycheck], [Forge], [git-link], [Helpful],
+      [Ivy], [Macrostep], [Magit], [no-littering], [Org],
+      [Projectile], [pyvenv], [Smartparens], [Swiper],
+      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
+      [webpaste.el], and more
     * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
       [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
       more
@@ -92,6 +95,8 @@ configuration, and optionally installing local configuration.
 #### macOS
 ##### Emacs
 
+**Minimum version supported: Emacs 25.2**
+
     $ brew cask install emacs
 
 Install support tools. Python is required for environment variable
@@ -133,7 +138,7 @@ Use symbolic links:
     ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
-    ./shell/zsh/.zshenv => ~/.zshenv
+    ./shell/zsh/.zprofile => ~/.zprofile
     ./tmux/.tmux.conf => ~/.tmux.conf
 
 Do not attempt to use the `emacs` subdirectory of this repository as
@@ -193,6 +198,7 @@ commented.
 [firefox]: https://www.mozilla.org/en-US/firefox/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
+[forge]: https://github.com/magit/forge
 [git]: https://git-scm.com/
 [git-link]: https://github.com/sshaw/git-link
 [haskell]: https://www.haskell.org/
@@ -205,6 +211,7 @@ commented.
 [leiningen]: http://leiningen.org/
 [lsp]: https://langserver.org/
 [lsp-mode]: https://github.com/emacs-lsp/lsp-mode
+[macrostep]: https://github.com/joddie/macrostep
 [magit]: https://magit.vc/
 [markdown-mode]: http://jblevins.org/projects/markdown-mode/
 [markdown]: https://daringfireball.net/projects/markdown/syntax

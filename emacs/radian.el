@@ -258,33 +258,25 @@ binding the variable dynamically over the entire init-file."
 
 (setq straight-current-profile 'radian)
 
-;; Treat loading the init-file as a transaction. See the straight.el
-;; documentation for more information about this.
-
-(radian-defhook radian--finalize-straight-transaction ()
-  radian--finalize-init-hook
-  "Finalize the init-file's straight.el transaction."
-  (setq straight-treat-as-init nil)
-  ;; Just in case the straight.el bootstrap failed, do not mask the
-  ;; error with a void-function error.
-  (when (fboundp 'straight-finalize-transaction)
-    (straight-finalize-transaction)))
-
-(setq straight-treat-as-init t)
-
-;; Use the develop branch of straight.el, so we have access to all the
-;; latest features.
-(setq straight-repository-branch "develop")
+;; Use the master branch of straight.el on Radian's master branch.
+;; (On Radian's develop branch, we use the develop branch of
+;; straight.el.)
+(setq straight-repository-branch "master")
 
 ;; If watchexec and Python are installed, use file watchers to detect
 ;; package modifications. This saves time at startup. Otherwise, use
-;; the less robust but equally fast `before-save-hook' modification
-;; checker. In both cases, allow using find(1) when explicitly
-;; requested.
+;; the ever-reliable find(1).
 (if (and (executable-find "watchexec")
          (executable-find "python3"))
     (setq straight-check-for-modifications '(watch-files find-when-checking))
-  (setq straight-check-for-modifications '(check-on-save find-when-checking)))
+  (setq straight-check-for-modifications '(find-at-startup find-when-checking)))
+
+;; Use my Emacsmirror mirror, which improves initial clone time by
+;; several orders of magnitude.
+(setq straight-recipes-emacsmirror-use-mirror t)
+
+;; Clear out recipe overrides (in case of re-init).
+(setq straight-recipe-overrides nil)
 
 (radian--run-hook 'radian-before-straight-hook)
 
@@ -459,7 +451,7 @@ This keymap is bound under M-P.")
 (defun radian-env-setup (&optional again)
   "Load ~/.profile and set environment variables exported therein.
 Only do this once, unless AGAIN is non-nil."
-  (interactive)
+  (interactive (list 'again))
   ;; No need to worry about race conditions because Elisp isn't
   ;; concurrent (yet).
   (unless (and radian--env-setup-p (not again))
@@ -580,32 +572,38 @@ This is used to prevent duplicate entries in the kill ring.")
 
 ;;;; Mouse integration
 
-;; On macOS, mouse integration works out of the box in windowed mode
-;; but not terminal mode. The following code to fix it was based on
-;; https://stackoverflow.com/a/8859057/3538165.
-(radian-with-operating-system macOS
-  (unless (display-graphic-p)
+(if (radian-operating-system-p macOS)
+    ;; On macOS, mouse integration works out of the box in windowed
+    ;; mode but not terminal mode. The following code to fix it was
+    ;; based on <https://stackoverflow.com/a/8859057/3538165>.
+    (unless (display-graphic-p)
 
-    ;; Enable basic mouse support (click and drag).
-    (xterm-mouse-mode t)
+      ;; Enable basic mouse support (click and drag).
+      (xterm-mouse-mode t)
 
-    ;; Note that the reason for the next two functions is that
-    ;; `scroll-down' and `scroll-up' scroll by a "near full screen" by
-    ;; default, whereas we want a single line.
+      ;; Note that the reason for the next two functions is that
+      ;; `scroll-down' and `scroll-up' scroll by a "near full screen"
+      ;; by default, whereas we want a single line.
 
-    (defun radian-scroll-down ()
-      "Scroll down one line."
-      (interactive)
-      (scroll-down 1))
+      (defun radian-scroll-down ()
+        "Scroll down one line."
+        (interactive)
+        (scroll-down 1))
 
-    (defun radian-scroll-up ()
-      "Scroll up one line."
-      (interactive)
-      (scroll-up 1))
+      (defun radian-scroll-up ()
+        "Scroll up one line."
+        (interactive)
+        (scroll-up 1))
 
-    ;; Enable scrolling with the mouse wheel.
-    (bind-keys ("<mouse-4>" . radian-scroll-down)
-               ("<mouse-5>" . radian-scroll-up))))
+      ;; Enable scrolling with the mouse wheel.
+      (bind-keys ("<mouse-4>" . radian-scroll-down)
+                 ("<mouse-5>" . radian-scroll-up)))
+
+  ;; Although it works fine on macOS, scrolling is *way* too fast on
+  ;; Linux. Decreasing the number of lines that we scroll per scroll
+  ;; event helps the problem, although scrolling experience is still
+  ;; sub-optimal.
+  (setq mouse-wheel-scroll-amount '(1)))
 
 ;;; Candidate selection
 
@@ -615,13 +613,6 @@ This is used to prevent duplicate entries in the kill ring.")
 ;; improvement over the default Emacs interface for candidate
 ;; selection.
 (use-package ivy
-  ;; Use my fork until https://github.com/abo-abo/swiper/issues/1632
-  ;; is fixed.
-  :straight (:host github :repo "abo-abo/swiper"
-                   :files (:defaults
-                           (:exclude "swiper.el" "counsel.el" "ivy-hydra.el")
-                           "doc/ivy-help.org")
-                   :fork (:repo "raxod502/swiper" :branch "fork/1"))
   :init/el-patch
 
   (defvar ivy-mode-map
@@ -1453,12 +1444,24 @@ unquote it using a comma."
          (defun-form `(defun ,defun-name ()
                         ,docstring
                         (interactive)
-                        (find-file ,full-filename)))
+                        (when (or (file-exists-p ,full-filename)
+                                  (yes-or-no-p
+                                   ,(format
+                                     "Does not exist, really visit %s? "
+                                     (file-name-nondirectory
+                                      full-filename))))
+                          (find-file ,full-filename))))
          (defun-other-window-form
            `(defun ,defun-other-window-name ()
               ,docstring-other-window
               (interactive)
-              (find-file-other-window ,full-filename)))
+              (when (or (file-exists-p ,full-filename)
+                        (yes-or-no-p
+                         ,(format
+                           "Does not exist, really visit %s? "
+                           (file-name-nondirectory
+                            full-filename))))
+                (find-file-other-window ,full-filename))))
          (full-keybinding
           (when keybinding
             (radian-join-keys "e" keybinding)))
@@ -1655,6 +1658,14 @@ invocation will kill the newline."
 
 ;;;; Undo/redo
 
+;; Feature `warnings' allows us to enable and disable warnings.
+(use-feature warnings
+  :config
+
+  ;; Ignore the warning we get when a huge buffer is reverted and the
+  ;; undo information is too large to be recorded.
+  (add-to-list 'warning-suppress-log-types '(undo discard-info)))
+
 ;; Package `undo-tree' replaces the default Emacs undo system, which
 ;; is poorly designed and hard to use, with a much more powerful
 ;; tree-based system. In basic usage, you don't even have to think
@@ -1813,6 +1824,10 @@ the reverse direction from \\[pop-global-mark]."
 
 ;;; Electricity: automatic things
 ;;;; Autorevert
+
+;; On macOS, Emacs has a nice keybinding to revert the current buffer.
+;; On other platforms such a binding is missing; we re-add it here.
+(bind-key "s-u" #'revert-buffer)
 
 ;; Feature `autorevert' allows the use of file-watchers or polling in
 ;; order to detect when the file visited by a buffer has changed, and
@@ -2003,8 +2018,9 @@ the timer when no buffers need to be checked."
       (add-to-list 'sp--special-self-insert-commands fun)))
 
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
-                         js2-mode json-mode
-                         python-mode sh-mode web-mode))
+                         js2-mode json-mode lua-mode
+                         python-mode sh-mode web-mode go-mode
+                         protobuf-mode))
     (sp-local-pair mode "{" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2014,7 +2030,7 @@ the timer when no buffers need to be checked."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode sh-mode))
+  (dolist (mode '(python-mode sh-mode js2-mode lua-mode go-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
@@ -2147,6 +2163,8 @@ currently active.")
              ;; triggering the autoload just for checking that, yes,
              ;; there's nothing to do for the *scratch* buffer.
              #'emacs-lisp-mode
+             ;; `go-mode' and LSP are a dumpster fire right now.
+             #'go-mode
              ;; Disable for modes that we currently use a specialized
              ;; framework for, until they are phased out in favor of
              ;; LSP.
@@ -2170,7 +2188,12 @@ This is a `:before-until' advice for `lsp--warn' and `lsp--info'."
                      "Connected to %s.")))
 
   (dolist (fun '(lsp--warn lsp--info))
-    (advice-add fun :before-until #'radian--advice-lsp-mode-silence)))
+    (advice-add fun :before-until #'radian--advice-lsp-mode-silence))
+
+  ;; If we don't disable this, we get a warning about YASnippet not
+  ;; being available, even though it is. I don't use YASnippet anyway,
+  ;; so don't bother with it.
+  (setq lsp-enable-snippet nil))
 
 ;;;; Indentation
 
@@ -2722,11 +2745,6 @@ docstrings."
 ;; Package `clj-refactor' provides automated refactoring commands for
 ;; Clojure code.
 (use-package clj-refactor
-  ;; Use my fork which has support for automatically sorting project
-  ;; dependencies after adding them to the project.clj.
-  :straight (:host github :repo "clojure-emacs/clj-refactor.el"
-                   :fork (:repo "raxod502/clj-refactor.el" :branch "fork/3")
-                   :files (:defaults "CHANGELOG.md"))
   :init
 
   (radian-defhook radian--clj-refactor-enable ()
@@ -2867,7 +2885,9 @@ ARG is passed to `hindent-mode' toggle function."
          ("\\.erb\\'" . web-mode)
          ("\\.mustache\\'" . web-mode)
          ("\\.djhtml\\'" . web-mode)
-         ("\\.html?\\'" . web-mode))
+         ("\\.html?\\'" . web-mode)
+         ;; My additions.
+         ("\\.ejs\\'" . web-mode))
   :config
 
   ;; Indent by two spaces by default.
@@ -2929,6 +2949,12 @@ ARG is passed to `hindent-mode' toggle function."
     (setq-local company-backends
                 (cons 'company-tern radian--company-backends-global))))
 
+;;;; Lua
+;; <http://www.lua.org/>
+
+;; Package `lua-mode' provides a major mode for Lua code.
+(use-package lua-mode)
+
 ;;;; Markdown
 ;; https://daringfireball.net/projects/markdown/
 
@@ -2961,6 +2987,11 @@ Markdown document has a colon in it, then it's distractingly and
 usually wrongly fontified as a metadata block. See
 https://github.com/jrblevin/markdown-mode/issues/328."
     (prog1 nil (goto-char (point-max)))))
+
+;;;; Protobuf
+
+;; Package `protobuf-mode' provides a major mode for Protobuf.
+(use-package protobuf-mode)
 
 ;;;; Python
 ;; https://www.python.org/
@@ -3423,7 +3454,7 @@ This prevents them from getting in the way of buffer selection."
     "If inside node_modules, disable the `typescript-tslint' Flycheck checker.
 If we don't disable it, then it will generally just generate
 several thousand errors, disable itself, and print a warning."
-    (when (locate-dominating-file "node_modules")
+    (when (locate-dominating-file buffer-file-name "node_modules")
       (radian--flycheck-disable-checkers 'typescript-tslint)))
 
   ;; Fix capitalization. It's TypeScript, not typescript.
@@ -3533,7 +3564,33 @@ This function calls `json-mode--update-auto-mode' to change the
 
   (defvar json-mode--auto-mode-entry
     (json-mode--update-auto-mode json-mode-auto-mode-list)
-    "Regexp generated from the `json-mode-auto-mode-list'."))
+    "Regexp generated from the `json-mode-auto-mode-list'.")
+
+  :config
+
+  (radian-defhook radian--fix-json-indentation ()
+    json-mode-hook
+    "Set the tab width to 2 for JSON."
+    (setq-local tab-width 2))
+
+  (use-feature flycheck
+    :config
+
+    ;; Handle an error message that occurs when the buffer has only
+    ;; whitespace, and in some other circumstances, which for some
+    ;; bizarre reason still isn't handled correctly by Flycheck.
+    (radian-protect-macros
+      (cl-pushnew
+       (cons
+        (flycheck-rx-to-string
+         `(and
+           line-start
+           (message "No JSON object could be decoded")
+           line-end)
+         'no-group)
+        'error)
+       (flycheck-checker-get 'json-python-json 'error-patterns)
+       :test #'equal))))
 
 ;; Package `pip-requirements' provides a major mode for
 ;; requirements.txt files used by Pip.
@@ -3623,8 +3680,7 @@ unhelpful."
 
     ;; Have the alternate "help" action for `counsel-M-x' use Helpful
     ;; instead of the default Emacs help.
-    (setf (nth 0 (alist-get "h" (plist-get ivy--actions-list 'counsel-M-x)
-                            nil nil #'equal))
+    (setf (nth 0 (cdr (assoc "h" (plist-get ivy--actions-list 'counsel-M-x))))
           (lambda (x) (helpful-function (intern x)))))
 
   :bind (;; Remap standard commands.
@@ -3743,8 +3799,7 @@ to `radian-reload-init'."
         (setq name (buffer-name)))
       (let ((load-file-name (buffer-file-name)))
         (message "Evaluating %s..." name)
-        (straight-transaction
-          (eval-region start end))
+        (eval-region start end)
         (message "Evaluating %s...done" name)))))
 
 ;; This keybinding is used for evaluating a buffer of Clojure code in
@@ -4063,10 +4118,6 @@ non-nil value to enable trashing for file operations."
   (osx-trash-setup))
 
 ;;;;; Dired
-
-;; For some reason, the autoloads from `dired-aux' and `dired-x' are
-;; not loaded automatically. Do it.
-(require 'dired-loaddefs)
 
 ;; Dired has some trouble parsing out filenames that have e.g. leading
 ;; spaces, unless the ls program used has support for Dired. GNU ls
@@ -4658,6 +4709,14 @@ This is passed to `set-frame-font'."
 ;; Smartparens.
 (setq blink-matching-paren nil)
 
+(radian-defadvice radian--advice-read-passwd-hide-char (func &rest args)
+  :around read-passwd
+  "Display passwords as **** rather than .... in the minibuffer.
+This is the default behavior is Emacs 27, so this advice only has
+an effect for Emacs 26 or below."
+  (let ((read-hide-char (or read-hide-char ?*)))
+    (apply func args)))
+
 ;; Disable the contextual menu that pops up when you right-click.
 (unbind-key "<C-down-mouse-1>")
 
@@ -4775,8 +4834,9 @@ buffer-local."
                          (with-temp-buffer
                            ;; First attempt uses symbolic-ref, which
                            ;; returns the branch name if it exists.
-                           (call-process "git" nil '(t nil) nil
-                                         "symbolic-ref" "HEAD")
+                           (ignore-errors
+                             (call-process "git" nil '(t nil) nil
+                                           "symbolic-ref" "HEAD"))
                            (if (> (buffer-size) 0)
                                ;; It actually returns something like
                                ;; refs/heads/master, though, so let's
@@ -4794,8 +4854,9 @@ buffer-local."
                              ;; should show the abbreviated commit hash
                              ;; (e.g. b007692).
                              (erase-buffer)
-                             (call-process "git" nil '(t nil) nil
-                                           "rev-parse" "--short" "HEAD")
+                             (ignore-errors
+                               (call-process "git" nil '(t nil) nil
+                                             "rev-parse" "--short" "HEAD"))
                              (if (> (buffer-size) 0)
                                  (string-trim (buffer-string))
                                ;; We shouldn't get here. Unfortunately,
@@ -4804,8 +4865,9 @@ buffer-local."
                                "???")))))
                       (dirty (when git
                                (with-temp-buffer
-                                 (call-process "git" nil t nil
-                                               "status" "--porcelain")
+                                 (ignore-errors
+                                   (call-process "git" nil t nil
+                                                 "status" "--porcelain"))
                                  (if (> (buffer-size) 0)
                                      "*" "")))))
                  (cond
