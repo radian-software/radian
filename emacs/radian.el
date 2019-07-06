@@ -2235,7 +2235,7 @@ we are in `python-mode'."
     (when (and radian-reformat-on-save-mode
                (derived-mode-p 'python-mode)
                (executable-find "black"))
-      (blacken-buffer t))))
+      (blacken-buffer))))
 
 ;;;; Language servers
 
