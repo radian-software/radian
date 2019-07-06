@@ -25,8 +25,8 @@ These dotfiles attempt to achieve the following goals:
     * IDE features for expanding library of programming languages with
       [LSP] via [`lsp-mode`][lsp-mode]
     * Informative but minimal mode-line showing file modification
-      status, buffer name, point position, current project, Git
-      branch, and active modes (with optional right-alignment support)
+      status, buffer name, point position, and active modes (with
+      optional right-alignment support)
     * Extremely clean mode lighters thanks to [Blackout]
     * Aggressive startup optimization: 0.7s or less for a fully
       configured graphical frame, from cold boot
