@@ -3030,8 +3030,39 @@ See also `radian--js-prettier-run-maybe'."
          ;; Same for C-c C-s q.
          :map markdown-mode-style-map
               ("C-p" . markdown-insert-pre)
-              ("C-q" . markdown-insert-blockquote))
+              ("C-q" . markdown-insert-blockquote)
+              :map markdown-mode-map
+              ("TAB" . radian-markdown-tab)
+              ;; Try to override all the bindings in
+              ;; `markdown-mode-map'...
+              ("<S-iso-lefttab>" . radian-markdown-shifttab)
+              ("<S-tab>" . radian-markdown-shifttab)
+              ("<backtab>" . radian-markdown-shifttab))
   :config
+
+  (defun radian-markdown-tab ()
+    "Do something reasonable when the user presses TAB.
+This means moving forward a table cell, indenting a list item, or
+performing normal indentation."
+    (interactive)
+    (cond
+     ((markdown-table-at-point-p)
+      (markdown-table-forward-cell))
+     ((markdown-list-item-at-point-p)
+      (markdown-demote-list-item))
+     (t
+      (indent-for-tab-command))))
+
+  (defun radian-markdown-shifttab ()
+    "Do something reasonable when the user presses S-TAB.
+This means moving backward a table cell or unindenting a list
+item."
+    (interactive)
+    (cond
+     ((markdown-table-at-point-p)
+      (markdown-table-backward-cell))
+     ((markdown-list-item-at-point-p)
+      (markdown-promote-list-item))))
 
   (radian-defhook radian--flycheck-markdown-setup ()
     markdown-mode-hook
