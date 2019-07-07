@@ -476,6 +476,18 @@ This keymap is bound under M-P.")
 \(radian--join-keys \"M-P\" \"\" \"e i\") => \"M-P e i\""
   (string-join (remove "" (mapcar #'string-trim (remove nil keys))) " "))
 
+(radian-defadvice radian--quoted-insert-allow-quit (quoted-insert &rest args)
+  :around quoted-insert
+  "Allow quitting out of \\[quoted-insert] with \\[keyboard-quit]."
+  (cl-letf* ((insert-and-inherit (symbol-function #'insert-and-inherit))
+             ((symbol-function #'insert-and-inherit)
+              (lambda (&rest args)
+                (dolist (arg args)
+                  (when (equal arg ?\C-g)
+                    (signal 'quit nil)))
+                (apply insert-and-inherit args))))
+    (apply quoted-insert args)))
+
 ;;; Environment
 ;;;; Environment variables
 
