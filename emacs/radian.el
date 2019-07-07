@@ -3051,7 +3051,11 @@ performing normal indentation."
      ((markdown-list-item-at-point-p)
       (markdown-demote-list-item))
      (t
-      (indent-for-tab-command))))
+      ;; Ew. But `markdown-indent-line' checks to see if
+      ;; `this-command' is `markdown-cycle' before doing something
+      ;; useful, so we have to.
+      (let ((this-command 'markdown-cycle))
+        (indent-for-tab-command)))))
 
   (defun radian-markdown-shifttab ()
     "Do something reasonable when the user presses S-TAB.
