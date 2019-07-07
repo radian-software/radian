@@ -16,69 +16,69 @@ These dotfiles attempt to achieve the following goals:
 ## Software configured, features
 
 * [Emacs] (**minimum version supported: 25.2**)
-    * Next-generation package manager, [`straight.el`][straight.el]
-    * Clean and DRY package customizations using
-      [`use-package`][use-package]
-    * Future-proof customizations using [`el-patch`][el-patch]
-    * Sorting by frecency and usage on all commands using
-      [`prescient.el`][prescient.el]
-    * IDE features for expanding library of programming languages with
-      [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, [Flow], [Go],
-      [JavaScript], [TypeScript], [JSX]/[TSX], [LaTeX], [Python] with
-      [Poetry] and [Pipenv] virtualenvs autodetected), featuring
-      optional code formatting by LSP, [Black], and [Prettier]
-    * Informative but minimal mode-line showing file modification
-      status, buffer name, point position, and active modes (with
-      optional right-alignment support)
-    * Extremely clean mode lighters with prettier names thanks to
-      [Blackout]
-    * Aggressive startup optimization: 0.7s or less for a fully
-      configured graphical frame, from cold boot
-    * Aggressively consistent coding style and documentation,
-      including heavy use of macros to automate and foolproof common
-      operations
-    * Delightful color scheme that works in the terminal ([Zerodark])
-    * Clipboard, mouse, and PATH integration for macOS
-    * Automatic creation and interactive removal of parent directories
-      when finding files
-    * Extensible system for defining mnemonic key sequences to jump to
-      dotfiles
-    * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
-      partly on [`restart-emacs`][restart-emacs]
-    * Automatic insertion of whitespace and indentation when pressing
-      newline after inserting a pair of delimiters
-    * Configured packages: [Atomic Chrome][atomic-chrome] (with
-      [Firefox] support), [Autorevert], [buffer-move], [Company],
-      [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-      [ElDoc], [ESUP], [Flycheck], [Forge],
-      [`git-gutter-fringe.el`][git-gutter-fringe.el] [git-link],
-      [Helpful], [Ivy], [Macrostep], [Magit], [no-littering], [Org],
-      [Projectile], [pyvenv], [Smartparens], [Swiper],
-      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
-      [webpaste.el], and more
-    * Major modes for editing many languages and configuration file
-      types
+  * Next-generation package manager, [`straight.el`][straight.el]
+  * Clean and DRY package customizations using
+    [`use-package`][use-package]
+  * Future-proof customizations using [`el-patch`][el-patch]
+  * Sorting by frecency and usage on all commands using
+    [`prescient.el`][prescient.el]
+  * IDE features for expanding library of programming languages with
+    [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, [Flow], [Go],
+    [JavaScript], [TypeScript], [JSX]/[TSX], [LaTeX], [Python] with
+    [Poetry] and [Pipenv] virtualenvs autodetected), featuring
+    optional code formatting by LSP, [Black], and [Prettier]
+  * Informative but minimal mode-line showing file modification
+    status, buffer name, point position, and active modes (with
+    optional right-alignment support)
+  * Extremely clean mode lighters with prettier names thanks to
+    [Blackout]
+  * Aggressive startup optimization: 0.7s or less for a fully
+    configured graphical frame, from cold boot
+  * Aggressively consistent coding style and documentation,
+    including heavy use of macros to automate and foolproof common
+    operations
+  * Delightful color scheme that works in the terminal ([Zerodark])
+  * Clipboard, mouse, and PATH integration for macOS
+  * Automatic creation and interactive removal of parent directories
+    when finding files
+  * Extensible system for defining mnemonic key sequences to jump to
+    dotfiles
+  * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
+    partly on [`restart-emacs`][restart-emacs]
+  * Automatic insertion of whitespace and indentation when pressing
+    newline after inserting a pair of delimiters
+  * Configured packages: [Atomic Chrome][atomic-chrome] (with
+    [Firefox] support), [Autorevert], [buffer-move], [Company],
+    [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
+    [ElDoc], [ESUP], [Flycheck], [Forge],
+    [`git-gutter-fringe.el`][git-gutter-fringe.el] [git-link],
+    [Helpful], [Ivy], [Macrostep], [Magit], [no-littering], [Org],
+    [Projectile], [pyvenv], [Smartparens], [Swiper],
+    [transpose-frame], [undo-tree], [use-package], [visual-regexp],
+    [webpaste.el], and more
+  * Major modes for editing many languages and configuration file
+    types
 * [Zsh]
-    * Extremely fast and flexible package manager, [zplugin]
-    * No-nonsense prompt showing username, hostname, working
-      directory, and Git status, colored by exit code
-    * Substring completion everywhere
-    * GUI-like file/directory copy/paste functions on the command line
-    * Extensive library of clean and consistent [Git] aliases
-    * Colored man pages
+  * Extremely fast and flexible package manager, [zplugin]
+  * No-nonsense prompt showing username, hostname, working
+    directory, and Git status, colored by exit code
+  * Substring completion everywhere
+  * GUI-like file/directory copy/paste functions on the command line
+  * Extensive library of clean and consistent [Git] aliases
+  * Colored man pages
 * [Tmux]
-    * Keybindings for inserting new windows and shifting them left and
-      right
-    * No-nonsense but stylish status bar à la [powerline] but without
-      the dependencies
-    * Spectacular hack to leverage [reattach-to-user-namespace] on
-      macOS with minimal side effects
+  * Keybindings for inserting new windows and shifting them left and
+    right
+  * No-nonsense but stylish status bar à la [powerline] but without
+    the dependencies
+  * Spectacular hack to leverage [reattach-to-user-namespace] on
+    macOS with minimal side effects
 * [Git]
-    * Create a repository and a root commit all at once
-    * Rename stashes
-    * Reword a commit while preserving the index
-    * Alias and unalias without messing with `git config`
-    * More helpful output from `git status`, submodules, and more
+  * Create a repository and a root commit all at once
+  * Rename stashes
+  * Reword a commit while preserving the index
+  * Alias and unalias without messing with `git config`
+  * More helpful output from `git status`, submodules, and more
 
 ## Installation
 
