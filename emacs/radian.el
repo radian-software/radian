@@ -2321,6 +2321,20 @@ with whether we want to restart the LSP server that has just been
 killed (which happens during Emacs shutdown)."
     (setq lsp-restart nil))
 
+  ;; Looks like `lsp-mode' doesn't know about LaTeX yet.
+  (add-to-list 'lsp-language-id-configuration '(latex-mode . "latex"))
+
+  ;; Also, it has a bunch of regexps which are completely wrong.
+  (setq lsp-language-id-configuration
+        (mapcar
+         (lambda (link)
+           (if (and (stringp (car link))
+                    (string-match "\\`\\.\\*\\.\\(.+\\)\\'" (car link)))
+               (cons
+                (format "\\.%s\\'" (match-string 1 (car link))) (cdr link))
+             link))
+         lsp-language-id-configuration))
+
   :blackout " LSP")
 
 ;; Feature `lsp-clients' from package `lsp-mode' defines how to
