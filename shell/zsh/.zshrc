@@ -174,7 +174,7 @@ zle -N self-insert url-quote-magic
 zstyle ':completion:*' menu select
 
 # Allow usage of shift-tab (backtab) to go backward in the completion
-# menu.
+# menu. See <https://stackoverflow.com/a/842370/3538165>.
 bindkey '^[[Z' reverse-menu-complete
 
 # Substring completions. Not fuzzy. Sometimes they have weird
