@@ -3396,7 +3396,17 @@ command `sh-reset-indent-vars-to-global-values'."
     sh-mode-hook
     "Instead of \"Shell[bash]\", display mode name as \"Bash\"."
     (setq mode-line-process nil)
-    (setq mode-name (capitalize (symbol-name sh-shell)))))
+    (setq mode-name (capitalize (symbol-name sh-shell))))
+
+  (use-feature lsp-clients
+    :config
+
+    ;; Only activate the Bash LSP server in Bash code, not all shell
+    ;; script code. It's not very helpful to get Bash syntax errors
+    ;; while editing Zsh code.
+    (setf (lsp--client-activation-fn (gethash 'bash-ls lsp-clients))
+          (lambda (&rest _)
+            (memq sh-shell '(sh bash))))))
 
 ;;;; Swift
 ;; https://developer.apple.com/swift/
