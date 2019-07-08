@@ -3939,7 +3939,8 @@ to `radian-reload-init'."
 
 ;; This keybinding is used for evaluating a buffer of Clojure code in
 ;; CIDER, and for evaluating a buffer of Scheme code in Geiser.
-(bind-key "C-c C-k" #'radian-eval-buffer-or-region)
+(dolist (map (list emacs-lisp-mode-map lisp-interaction-mode-map))
+  (bind-key "C-c C-k" #'radian-eval-buffer-or-region map))
 
 (defun radian-find-symbol (&optional symbol)
   "Same as `xref-find-definitions' but only for Elisp symbols."
