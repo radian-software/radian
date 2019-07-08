@@ -3182,7 +3182,12 @@ Return either a string or nil."
             (goto-char (point-min))
             (let ((venv (string-trim (buffer-string))))
               (when (file-directory-p venv)
-                (cl-return venv)))))))))
+                (cl-return venv))))))))
+
+  (radian-defhook radian--flycheck-python-setup ()
+    python-mode-hook
+    "Disable some Flycheck checkers for Python."
+    (radian--flycheck-disable-checkers 'python-flake8)))
 
 ;; Package `lsp-python-ms' downloads Microsoft's LSP server for Python
 ;; and configures it with `lsp-mode'. Microsoft's server behaves
