@@ -3449,9 +3449,10 @@ command `sh-reset-indent-vars-to-global-values'."
     ;; Only activate the Bash LSP server in Bash code, not all shell
     ;; script code. It's not very helpful to get Bash syntax errors
     ;; while editing Zsh code.
-    (setf (lsp--client-activation-fn (gethash 'bash-ls lsp-clients))
-          (lambda (&rest _)
-            (memq sh-shell '(sh bash))))))
+    (radian-protect-macros
+      (setf (lsp--client-activation-fn (gethash 'bash-ls lsp-clients))
+            (lambda (&rest _)
+              (memq sh-shell '(sh bash)))))))
 
 ;;;; Swift
 ;; https://developer.apple.com/swift/
