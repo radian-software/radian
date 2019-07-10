@@ -87,22 +87,40 @@ configuration, and optionally installing local configuration.
 
 ### Installing software
 #### macOS
-##### Emacs
 
-    $ brew cask install emacs
+* Emacs: `brew install python`; `brew cask install emacs`; (optional
+  for improved startup time) `brew install watchexec`
+  * Code intelligence
+    * Bash: `yarn global add bash-language-server`
+    * C/C++: `brew install llvm`
+    * Flow: `brew install flow`
+    * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
+      to your `$PATH`
+    * JavaScript/TypeScript:
 
-Install support tools. Python is required for environment variable
-setting; watchexec is optional for improved startup time.
+          $ git clone git@github.com:sourcegraph/javascript-typescript-langserver.git
+          $ cd javascript-typescript-langserver
+          $ npm install
+          $ npm run build
+          $ chmod +x lib/language-server-stdio.js
+          $ ln -s $PWD/lib/language-server-stdio.js ~/.local/bin/javascript-typescript-stdio
+          $ brew install prettier
 
-    $ brew install python watchexec
+    * LaTeX:
 
-##### Zsh
+          $ wget -O ~/.local/bin/texlab.jar
+              https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
 
-    $ brew install zsh
-    $ mkdir ~/.zplugin
-    $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+    * Python: the language server is downloaded automatically courtesy
+      of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
 
-##### Remaining tools
+          $ brew install black
+
+* Zsh:
+
+      $ brew install zsh
+      $ mkdir ~/.zplugin
+      $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
 
 * Tmux: `brew install tmux`
 * Git: `brew install git`
@@ -136,8 +154,7 @@ you prefer something different, substitute to taste.
               https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
 
     * Python: the language server is downloaded automatically courtesy
-      of
-      [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
+      of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
 
           $ pacman -S python-black
 
@@ -178,13 +195,6 @@ Do not attempt to use the `emacs` subdirectory of this repository as
 
 I suggest versioning your local dotfiles in a separate repository, and
 symlinking them to the appropriate locations. This is what I do.
-
-### Tips and tricks
-
-In order to get `$PATH`, `ssh-agent`, and `gpg-agent` working
-correctly in graphical applications on macOS, use
-`scripts/patch-macos-app.zsh`. Note however that Emacs already sources
-`~/.profile` (and thereby `~/.profile.local`) during startup.
 
 ## Contributing
 
