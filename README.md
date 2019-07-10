@@ -91,7 +91,8 @@ configuration, and optionally installing local configuration.
 * Emacs: `brew install python`; `brew cask install emacs`; (optional
   for improved startup time) `brew install watchexec`
   * Code intelligence
-    * Bash: `yarn global add bash-language-server`
+    * Bash: `yarn global add bash-language-server`, but see [this
+      issue](https://github.com/mads-hartmann/bash-language-server/issues/131).
     * C/C++: `brew install llvm`
     * Flow: `brew install flow`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
