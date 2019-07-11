@@ -2111,20 +2111,27 @@ the timer when no buffers need to be checked."
 
 ;;;; Code reformatting
 
-(define-minor-mode radian-reformat-on-save-mode
-  "Reformat code in current buffer on save.")
-(put 'radian-reformat-on-save-mode 'safe-local-variable #'booleanp)
+;; Package `apheleia' implements a sophisticated algorithm for
+;; applying code formatters asynchronously on save without moving
+;; point or modifying the scroll position.
+(use-package apheleia
+  :straight (:host github :repo "raxod502/apheleia")
+  :init
 
-(define-globalized-minor-mode radian-reformat-on-save-global-mode
-  radian-reformat-on-save-mode radian-reformat-on-save-mode)
-(radian-reformat-on-save-global-mode +1)
+  (apheleia-global-mode +1)
 
-(radian-defadvice radian--save-buffer-reformat-maybe (func &optional arg)
-  :around save-buffer
-  "Make it so \\[save-buffer] with prefix arg inhibits reformatting."
-  (let ((radian-reformat-on-save-mode
-         (and (member arg '(nil 1)) radian-reformat-on-save-mode)))
-    (funcall func)))
+  (radian-defadvice radian--save-buffer-reformat-maybe (func &optional arg)
+    :around save-buffer
+    "Make it so \\[save-buffer] with prefix arg inhibits reformatting."
+    (let ((apheleia-mode (and apheleia-mode (member arg '(nil 1)))))
+      (funcall func)))
+
+  ;; We need to do this both before and after Apheleia is loaded
+  ;; because the autoloading is set up such that the minor mode
+  ;; definition is evaluated twice.
+  (blackout 'apheleia-mode)
+
+  :blackout t)
 
 ;;;; Snippet expansion
 
@@ -2230,23 +2237,6 @@ currently active.")
 ;; someday.
 (use-package pyvenv)
 
-;; Package `blacken' allows you to run the code formatter Black on
-;; your Python code.
-(use-package blacken
-  :demand t
-  :after python
-  :config
-
-  (radian-defhook radian--black-run-maybe ()
-    before-save-hook
-    "Run Black on the current buffer, if allowed.
-Allowed means that `radian-reformat-on-save-mode' is enabled and
-we are in `python-mode'."
-    (when (and radian-reformat-on-save-mode
-               (derived-mode-p 'python-mode)
-               (executable-find "black"))
-      (blacken-buffer))))
-
 ;;;; Language servers
 
 ;; Package `lsp-mode' is an Emacs client for the Language Server
@@ -2314,16 +2304,6 @@ and `lsp--error'."
                       project-dir "node_modules" ".bin" (car command))))
           (when (file-executable-p binary)
             (cl-return (cons binary (cdr command))))))))
-
-  (radian-defhook radian--lsp-reformat-on-save ()
-    before-save-hook
-    "Reformat buffer using LSP, if allowed.
-Reformatting is allowed if `radian-reformat-on-save-mode' is
-enabled."
-    (when radian-reformat-on-save-mode
-      (condition-case _
-          (lsp-format-buffer)
-        (lsp-capability-not-supported))))
 
   (radian-defhook radian--lsp-teardown ()
     kill-emacs-hook
@@ -2991,38 +2971,6 @@ support than `js2-mode'."
   ;; excessively wordy.
   :blackout ((js2-mode . "JavaScript")
              (js2-jsx-mode . "JSX")))
-
-;; Package `prettier-js' runs Prettier on `before-save-hook'.
-(use-package prettier-js
-  :demand t
-  :after (:any js2-mode web-mode)
-  :config
-
-  ;; Do this ourselves because the minor mode provided by the package
-  ;; is buffer-local and dealing with that is more trouble than just
-  ;; doing this.
-
-  (defun radian--js-prettier-run-maybe ()
-    "Run Prettier on the current buffer, if allowed.
-This means that `radian-reformat-on-save-mode' is enabled."
-    (when radian-reformat-on-save-mode
-      (prettier-js)))
-
-  (defun radian--js-prettier-setup ()
-    "Set up Prettier to be run on save, if allowed.
-See also `radian--js-prettier-run-maybe'."
-    (when-let* ((project-dir
-                 (locate-dominating-file default-directory "node_modules"))
-                (prettier
-                 (radian--path-join
-                  project-dir "node_modules" ".bin" "prettier")))
-      (when (file-executable-p prettier)
-        (setq-local prettier-js-command prettier)))
-    (add-hook 'before-save-hook #'radian--js-prettier-run-maybe
-              nil 'local))
-
-  (dolist (hook '(js2-mode-hook typescript-mode-hook web-mode-hook))
-    (add-hook hook #'radian--js-prettier-setup)))
 
 ;;;; Lua
 ;; <http://www.lua.org/>
