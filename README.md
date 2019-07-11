@@ -25,8 +25,9 @@ These dotfiles attempt to achieve the following goals:
   * IDE features for expanding library of programming languages with
     [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, [Flow], [Go],
     [JavaScript], [TypeScript], [JSX]/[TSX], [LaTeX], [Python] with
-    [Poetry] and [Pipenv] virtualenvs autodetected), featuring
-    optional code formatting by LSP, [Black], and [Prettier]
+    [Poetry] and [Pipenv] virtualenvs autodetected)
+  * Automatic asynchronous code reformatting without moving point
+    using [Black], [Gofmt], and [Prettier] via [Apheleia]
   * Informative but minimal mode-line showing file modification
     status, buffer name, point position, and active modes (with
     optional right-alignment support)
@@ -210,8 +211,10 @@ Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* should be either obvious or
 commented.
 
+[apheleia]: https://github.com/raxod502/apheleia
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
+[black]: https://github.com/python/black
 [blackout]: https://github.com/raxod502/blackout
 [buffer-move]: https://github.com/lukhas/buffer-move
 [company-statistics]: https://github.com/company-mode/company-statistics
@@ -228,25 +231,33 @@ commented.
 [esup]: https://github.com/jschaf/esup
 [exa]: https://the.exa.website/
 [firefox]: https://www.mozilla.org/en-US/firefox/
+[flow]: https://flow.org/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [forge]: https://github.com/magit/forge
-[git]: https://git-scm.com/
+[git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
 [git-link]: https://github.com/sshaw/git-link
+[git]: https://git-scm.com/
+[go]: https://golang.org/
+[gofmt]: https://golang.org/cmd/gofmt/
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [issues]: https://github.com/raxod502/radian/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+[jsx]: https://reactjs.org/docs/introducing-jsx.html
 [latex]: https://www.latex-project.org/
-[lsp]: https://langserver.org/
 [lsp-mode]: https://github.com/emacs-lsp/lsp-mode
+[lsp]: https://langserver.org/
 [macrostep]: https://github.com/joddie/macrostep
 [magit]: https://magit.vc/
 [no-littering]: https://github.com/tarsius/no-littering
 [org]: http://orgmode.org/
+[pipenv]: https://docs.pipenv.org/en/latest/
+[poetry]: https://poetry.eustace.io/
 [powerline]: https://github.com/powerline/powerline
 [prescient.el]: https://github.com/raxod502/prescient.el
+[prettier]: https://github.com/prettier/prettier
 [projectile]: http://batsov.com/projectile/
 [prs]: https://github.com/raxod502/radian/pulls
 [python]: https://www.python.org/
@@ -260,6 +271,7 @@ commented.
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
 [transpose-frame]: https://www.emacswiki.org/emacs/TransposeFrame
+[tsx]: https://www.typescriptlang.org/docs/handbook/jsx.html
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
@@ -269,12 +281,3 @@ commented.
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [zplugin]: https://github.com/zdharma/zplugin
 [zsh]: http://zsh.sourceforge.net/
-[flow]: https://flow.org/
-[go]: https://golang.org/
-[jsx]: https://reactjs.org/docs/introducing-jsx.html
-[tsx]: https://www.typescriptlang.org/docs/handbook/jsx.html
-[prettier]: https://github.com/prettier/prettier
-[black]: https://github.com/python/black
-[pipenv]: https://docs.pipenv.org/en/latest/
-[poetry]: https://poetry.eustace.io/
-[git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
