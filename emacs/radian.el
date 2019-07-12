@@ -277,6 +277,9 @@ Otherwise, Emacs will just get slower and slower over time."
 ;; Feature `url-http' is a library for making HTTP requests.
 (with-eval-after-load 'url-http
 
+  (eval-when-compile
+    (require 'url-http))
+
   (radian-defadvice radian--no-query-on-http-kill
       (buffer)
     :filter-return url-http
@@ -349,7 +352,16 @@ binding the variable dynamically over the entire init-file."
 ;; Package `use-package' provides a handy macro by the same name which
 ;; is essentially a wrapper around `with-eval-after-load' with a lot
 ;; of handy syntactic sugar and useful features.
-(straight-use-package 'use-package)
+(straight-use-package
+ '(use-package
+    :host github :repo "jwiegley/use-package"
+    :files (:defaults (:exclude
+                       "bind-key.el"
+                       "bind-chord.el"
+                       "use-package-chords.el"
+                       "use-package-ensure-system-package.el")
+                      "use-package-pkg.el")
+    :fork (:repo "raxod502/use-package" :branch "fork/1")))
 
 ;; When configuring a feature with `use-package', also tell
 ;; straight.el to install a package of the same name, unless otherwise
@@ -3766,6 +3778,25 @@ to `radian-reload-init'."
 ;; Elisp macros.
 (use-package macrostep
   :bind (("C-c e" . macrostep-expand)))
+
+;;;;; Emacs Lisp byte-compilation
+
+;; Feature `bytecomp' handles byte-compilation of Emacs Lisp code.
+(use-feature bytecomp
+  :config
+
+  ;; Eliminate two warnings that are essentially useless for me. The
+  ;; `make-local' warning gets triggered every time you call
+  ;; `define-minor-mode' inside of `use-package', and the `noruntime'
+  ;; warning gets triggered basically all the time for everything.
+  (setq byte-compile-warnings '(not make-local noruntime))
+
+  (defun radian-byte-compile ()
+    "Byte-compile radian.el."
+    (interactive)
+    (byte-compile-file radian-lib-file))
+
+  :blackout (emacs-lisp-compilation-mode . "Byte-Compile"))
 
 ;;;;; Emacs Lisp linting
 
