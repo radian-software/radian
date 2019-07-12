@@ -174,6 +174,7 @@ you prefer something different, substitute to taste.
 Use symbolic links:
 
     ./emacs/init.el => ~/.emacs.d/init.el
+    ./emacs/early-init.el => ~/.emacs.d/early-init.el
     ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
     ./git/.gitconfig => ~/.gitconfig
     ./git/.gitexclude => ~/.gitexclude

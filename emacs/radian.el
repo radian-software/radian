@@ -1451,6 +1451,9 @@ unquote it using a comma."
  ,(expand-file-name "init.el" user-emacs-directory)
  "e i")
 (radian-register-dotfile
+ ,(expand-file-name "early-init.el" user-emacs-directory)
+ "e e")
+(radian-register-dotfile
  ,(expand-file-name "emacs/radian.el" radian-directory)
  "e r")
 (radian-register-dotfile
