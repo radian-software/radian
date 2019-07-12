@@ -257,6 +257,10 @@ Otherwise, Emacs will just get slower and slower over time."
 ;; the GnuTLS library.
 (with-eval-after-load 'gnutls
 
+  ;; `use-package' does this for us normally.
+  (eval-when-compile
+    (require 'gnutls))
+
   ;; Do not allow insecure TLS connections.
   (setq gnutls-verify-error t)
 
