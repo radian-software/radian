@@ -165,10 +165,16 @@ also be a single string."
                  (let ((str (apply #'format format args)))
                    (cl-block nil
                      (dolist (regexp ',regexps)
-                       (when (string-match-p regexp str)
+                       (when (or (null regexp) (string-match-p regexp str))
                          (cl-return)))
                      (message "%s" str))))))
      ,@body))
+
+(defun radian--advice-silence-messages (func &rest args)
+  "Invoke FUNC with ARGS, silencing calls to `message'.
+This is an `:override' advice for many different functions."
+  (radian--with-silent-message ""
+    (apply func args)))
 
 (defun radian--random-string ()
   "Return a random string designed to be globally unique."
@@ -402,54 +408,6 @@ binding the variable dynamically over the entire init-file."
                    :repo "raxod502/el-patch"
                    :branch "develop")
   :demand t)
-
-;;; Fixes to internal functions
-
-;; Backported bugfix for `while-no-input' from Emacs 27 which helps to
-;; prevent spurious "Quit" events from being registered in some
-;; situations. See [1].
-;;
-;; [1]: https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692.
-(el-patch-defmacro while-no-input (&rest body)
-  (el-patch-concat
-    "Execute BODY only as long as there's no pending input.
-If input arrives, that ends the execution of BODY,
-and `while-no-input' returns t.  Quitting makes it return nil.
-If BODY finishes, `while-no-input' returns whatever value BODY produced."
-    (el-patch-add
-      "\n\nThis function includes a backported fix for bug#31692;
-see https://debbugs.gnu.org/cgi/bugreport.cgi?bug=31692."))
-  (declare (debug t) (indent 0))
-  (let ((catch-sym (make-symbol "input")))
-    `(with-local-quit
-       (catch ',catch-sym
-	 (let ((throw-on-input ',catch-sym)
-               (el-patch-add val))
-           (el-patch-wrap 2
-             (setq val (or (input-pending-p)
-	                   (progn ,@body))))
-           (el-patch-add
-             (cond
-              ;; When input arrives while throw-on-input is non-nil,
-              ;; kbd_buffer_store_buffered_event sets quit-flag to the
-              ;; value of throw-on-input.  If, when BODY finishes,
-              ;; quit-flag still has the same value as throw-on-input, it
-              ;; means BODY never tested quit-flag, and therefore ran to
-              ;; completion even though input did arrive before it
-              ;; finished.  In that case, we must manually simulate what
-              ;; 'throw' in process_quit_flag would do, and we must
-              ;; reset quit-flag, because leaving it set will cause us
-              ;; quit to top-level, which has undesirable consequences,
-              ;; such as discarding input etc.  We return t in that case
-              ;; because input did arrive during execution of BODY.
-              ((eq quit-flag throw-on-input)
-               (setq quit-flag nil)
-               t)
-              ;; This is for when the user actually QUITs during
-              ;; execution of BODY.
-              (quit-flag
-               nil)
-              (t val))))))))
 
 ;;; Keybindings
 
@@ -837,73 +795,22 @@ active minibuffer, even if the minibuffer is not selected."
         (minibuffer-keyboard-quit))
     (funcall keyboard-quit)))
 
-;; Split windows horizontally (into tall subwindows) rather than
-;; vertically (into wide subwindows) by default.
-(el-patch-defun split-window-sensibly (&optional window)
-  "Split WINDOW in a way suitable for `display-buffer'.
-WINDOW defaults to the currently selected window.
-If `split-height-threshold' specifies an integer, WINDOW is at
-least `split-height-threshold' lines tall and can be split
-vertically, split WINDOW into two windows one above the other and
-return the lower window.  Otherwise, if `split-width-threshold'
-specifies an integer, WINDOW is at least `split-width-threshold'
-columns wide and can be split horizontally, split WINDOW into two
-windows side by side and return the window on the right.  If this
-can't be done either and WINDOW is the only window on its frame,
-try to split WINDOW vertically disregarding any value specified
-by `split-height-threshold'.  If that succeeds, return the lower
-window.  Return nil otherwise.
-
-By default `display-buffer' routines call this function to split
-the largest or least recently used window.  To change the default
-customize the option `split-window-preferred-function'.
-
-You can enforce this function to not split WINDOW horizontally,
-by setting (or binding) the variable `split-width-threshold' to
-nil.  If, in addition, you set `split-height-threshold' to zero,
-chances increase that this function does split WINDOW vertically.
-
-In order to not split WINDOW vertically, set (or bind) the
-variable `split-height-threshold' to nil.  Additionally, you can
-set `split-width-threshold' to zero to make a horizontal split
-more likely to occur.
-
-Have a look at the function `window-splittable-p' if you want to
-know how `split-window-sensibly' determines whether WINDOW can be
-split."
-  (let ((window (or window (selected-window))))
-    (or (el-patch-let
-            (($fst (and (window-splittable-p window)
-                        ;; Split window vertically.
-                        (with-selected-window window
-                          (split-window-below))))
-             ($snd (and (window-splittable-p window t)
-                        ;; Split window horizontally.
-                        (with-selected-window window
-                          (split-window-right)))))
-          (el-patch-swap $fst $snd)
-          (el-patch-swap $snd $fst))
-        (and
-         ;; If WINDOW is the only usable window on its frame (it
-         ;; is the only one or, not being the only one, all the
-         ;; other ones are dedicated) and is not the minibuffer
-         ;; window, try to split it s/vertically/horizontally
-         ;; disregarding the value of `split-height-threshold'.
-         (let ((frame (window-frame window)))
-           (or
-            (eq window (frame-root-window frame))
-            (catch 'done
-              (walk-window-tree (lambda (w)
-                                  (unless (or (eq w window)
-                                              (window-dedicated-p w))
-                                    (throw 'done nil)))
-                                frame)
-              t)))
-         (not (window-minibuffer-p window))
-         (let ((split-height-threshold 0))
-           (when (window-splittable-p window)
-             (with-selected-window window
-               (split-window-below))))))))
+(radian-defadvice radian--advice-split-windows-horizontally
+    (split-window-sensibly &rest args)
+  :around split-window-sensibly
+  "Split windows horizontally by default, rather than vertically.
+Since the Emacs terminology is confusing: this means to split
+into tall subwindows rather than into wide subwindows by
+default."
+  (cl-letf* ((split-window-below (symbol-function #'split-window-below))
+             (split-window-right (symbol-function #'split-window-right))
+             (window-splittable-p (symbol-function #'window-splittable-p))
+             ((symbol-function #'split-window-below) split-window-right)
+             ((symbol-function #'split-window-right) split-window-below)
+             ((symbol-function #'window-splittable-p)
+              (lambda (window &optional horizontal)
+                (funcall window-splittable-p window (not horizontal)))))
+    (apply split-window-sensibly args)))
 
 ;; Feature `windmove' provides keybindings S-left, S-right, S-up, and
 ;; S-down to move between windows. This is much more convenient and
@@ -1894,11 +1801,32 @@ the reverse direction from \\[pop-global-mark]."
     "Silence messages from `auto-revert-mode' in the current buffer."
     (setq-local auto-revert-verbose nil))
 
-  :config/el-patch
+  :config
 
-  (defun auto-revert-buffers ()
-    (el-patch-concat
-      "Revert buffers as specified by Auto-Revert and Global Auto-Revert Mode.
+  ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
+  ;; We have to do this before turning on `auto-revert-mode' for the
+  ;; change to take effect. (Note that if we set this variable using
+  ;; `customize-set-variable', all it does is toggle the mode off and
+  ;; on again to make the change take effect, so that way is dumb.)
+  (setq auto-revert-interval 1)
+
+  (global-auto-revert-mode +1)
+
+  ;; Auto-revert all buffers, not only file-visiting buffers. The
+  ;; docstring warns about potential performance problems but this
+  ;; should not be an issue since we only revert visible buffers.
+  (setq global-auto-revert-non-file-buffers t)
+
+  ;; Since we automatically revert all visible buffers after one
+  ;; second, there's no point in asking the user whether or not they
+  ;; want to do it when they find a file. This disables that prompt.
+  (setq revert-without-query '(".*"))
+
+  ;; Only works in Emacs 26 or lesser.
+  (when (boundp 'auto-revert-buffers-counter)
+    (el-patch-defun auto-revert-buffers ()
+      (el-patch-concat
+        "Revert buffers as specified by Auto-Revert and Global Auto-Revert Mode.
 
 Should `global-auto-revert-mode' be active all file buffers are checked.
 
@@ -1920,82 +1848,67 @@ are checked first the next time this function is called.
 This function is also responsible for removing buffers no longer in
 Auto-Revert Mode from `auto-revert-buffer-list', and for canceling
 the timer when no buffers need to be checked."
-      (el-patch-add
-        "\n\nOnly currently displayed buffers are reverted."))
+        (el-patch-add
+          "\n\nOnly currently displayed buffers are reverted."))
 
-    (setq auto-revert-buffers-counter
-          (1+ auto-revert-buffers-counter))
+      (setq auto-revert-buffers-counter
+            (1+ auto-revert-buffers-counter))
 
-    (save-match-data
-      (let ((bufs (el-patch-wrap 2
-                    (cl-remove-if-not
-                     #'get-buffer-window
-                     (if global-auto-revert-mode
-                         (buffer-list)
-                       auto-revert-buffer-list))))
-            remaining new)
-        ;; Partition `bufs' into two halves depending on whether or not
-        ;; the buffers are in `auto-revert-remaining-buffers'.  The two
-        ;; halves are then re-joined with the "remaining" buffers at the
-        ;; head of the list.
-        (dolist (buf auto-revert-remaining-buffers)
-          (if (memq buf bufs)
-              (push buf remaining)))
-        (dolist (buf bufs)
-          (if (not (memq buf remaining))
-              (push buf new)))
-        (setq bufs (nreverse (nconc new remaining)))
-        (while (and bufs
-                    (not (and auto-revert-stop-on-user-input
-                              (input-pending-p))))
-          (let ((buf (car bufs)))
-            (with-current-buffer buf
-              (if (buffer-live-p buf)
-                  (progn
-                    ;; Test if someone has turned off Auto-Revert Mode
-                    ;; in a non-standard way, for example by changing
-                    ;; major mode.
-                    (if (and (not auto-revert-mode)
-                             (not auto-revert-tail-mode)
-                             (memq buf auto-revert-buffer-list))
-                        (auto-revert-remove-current-buffer))
-                    (when (auto-revert-active-p)
-                      ;; Enable file notification.
-                      (when (and auto-revert-use-notify
-                                 (not auto-revert-notify-watch-descriptor))
-                        (auto-revert-notify-add-watch))
-                      (auto-revert-handler)))
-                ;; Remove dead buffer from `auto-revert-buffer-list'.
-                (auto-revert-remove-current-buffer))))
-          (setq bufs (cdr bufs)))
-        (setq auto-revert-remaining-buffers bufs)
-        ;; Check if we should cancel the timer.
-        (when (and (not global-auto-revert-mode)
-                   (null auto-revert-buffer-list))
-          (if (timerp auto-revert-timer)
-              (cancel-timer auto-revert-timer))
-          (setq auto-revert-timer nil)))))
+      (save-match-data
+        (let ((bufs (el-patch-wrap 2
+                      (cl-remove-if-not
+                       #'get-buffer-window
+                       (if global-auto-revert-mode
+                           (buffer-list)
+                         auto-revert-buffer-list))))
+              remaining new)
+          ;; Partition `bufs' into two halves depending on whether or not
+          ;; the buffers are in `auto-revert-remaining-buffers'.  The two
+          ;; halves are then re-joined with the "remaining" buffers at the
+          ;; head of the list.
+          (dolist (buf auto-revert-remaining-buffers)
+            (if (memq buf bufs)
+                (push buf remaining)))
+          (dolist (buf bufs)
+            (if (not (memq buf remaining))
+                (push buf new)))
+          (setq bufs (nreverse (nconc new remaining)))
+          (while (and bufs
+                      (not (and auto-revert-stop-on-user-input
+                                (input-pending-p))))
+            (let ((buf (car bufs)))
+              (with-current-buffer buf
+                (if (buffer-live-p buf)
+                    (progn
+                      ;; Test if someone has turned off Auto-Revert Mode
+                      ;; in a non-standard way, for example by changing
+                      ;; major mode.
+                      (if (and (not auto-revert-mode)
+                               (not auto-revert-tail-mode)
+                               (memq buf auto-revert-buffer-list))
+                          (auto-revert-remove-current-buffer))
+                      (when (auto-revert-active-p)
+                        ;; Enable file notification.
+                        (when (and auto-revert-use-notify
+                                   (not auto-revert-notify-watch-descriptor))
+                          (auto-revert-notify-add-watch))
+                        (auto-revert-handler)))
+                  ;; Remove dead buffer from `auto-revert-buffer-list'.
+                  (auto-revert-remove-current-buffer))))
+            (setq bufs (cdr bufs)))
+          (setq auto-revert-remaining-buffers bufs)
+          ;; Check if we should cancel the timer.
+          (when (and (not global-auto-revert-mode)
+                     (null auto-revert-buffer-list))
+            (if (timerp auto-revert-timer)
+                (cancel-timer auto-revert-timer))
+            (setq auto-revert-timer nil))))))
 
-  :config
-
-  ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
-  ;; We have to do this before turning on `auto-revert-mode' for the
-  ;; change to take effect. (Note that if we set this variable using
-  ;; `customize-set-variable', all it does is toggle the mode off and
-  ;; on again to make the change take effect, so that way is dumb.)
-  (setq auto-revert-interval 1)
-
-  (global-auto-revert-mode +1)
-
-  ;; Auto-revert all buffers, not only file-visiting buffers. The
-  ;; docstring warns about potential performance problems but this
-  ;; should not be an issue since we only revert visible buffers.
-  (setq global-auto-revert-non-file-buffers t)
-
-  ;; Since we automatically revert all visible buffers after one
-  ;; second, there's no point in asking the user whether or not they
-  ;; want to do it when they find a file. This disables that prompt.
-  (setq revert-without-query '(".*"))
+  ;; Only works in Emacs 27 or greater.
+  (radian-defadvice radian--autorevert-only-visible (bufs)
+    :filter-return auto-revert--polled-buffers
+    "Prevent `autorevert' from reverting buffers not displayed in any window."
+    (cl-remove-if-not #'get-buffer-window bufs))
 
   :blackout auto-revert-mode)
 
@@ -3284,120 +3197,10 @@ https://github.com/flycheck/flycheck/issues/953."
 ;; http://www.zsh.org/
 
 (use-feature sh-script
-  :config/el-patch
+  :config
 
-  ;; Inhibit the "Indentation setup for shell type *sh" message.
-  (defun sh-set-shell (shell &optional no-query-flag insert-flag)
-    (el-patch-concat
-      "Set this buffer's shell to SHELL (a string).
-When used interactively, insert the proper starting #!-line,
-and make the visited file executable via `executable-set-magic',
-perhaps querying depending on the value of `executable-query'.
-
-When this function is called noninteractively, INSERT-FLAG (the third
-argument) controls whether to insert a #!-line and think about making
-the visited file executable, and NO-QUERY-FLAG (the second argument)
-controls whether to query about making the visited file executable.
-
-Calls the value of `sh-set-shell-hook' if set.
-
-Shell script files can cause this function be called automatically
-when the file is visited by having a `sh-shell' file-local variable
-whose value is the shell name (don't quote it)."
-      (el-patch-add
-        "\n\nThis function does not print superfluous messages."))
-    (interactive (list (completing-read
-                        (format "Shell (default %s): "
-                                sh-shell-file)
-                        ;; This used to use interpreter-mode-alist, but that is
-                        ;; no longer appropriate now that uses regexps.
-                        ;; Maybe there could be a separate variable that lists
-                        ;; the shells, used here and to construct i-mode-alist.
-                        ;; But the following is probably good enough:
-                        (append (mapcar (lambda (e) (symbol-name (car e)))
-                                        sh-ancestor-alist)
-                                '("csh" "rc" "sh"))
-                        nil nil nil nil sh-shell-file)
-                       (eq executable-query 'function)
-                       t))
-    (if (string-match "\\.exe\\'" shell)
-        (setq shell (substring shell 0 (match-beginning 0))))
-    (setq sh-shell (sh-canonicalize-shell shell))
-    (if insert-flag
-        (setq sh-shell-file
-              (executable-set-magic shell (sh-feature sh-shell-arg)
-                                    no-query-flag insert-flag)))
-    (setq mode-line-process (format "[%s]" sh-shell))
-    (setq-local sh-shell-variables nil)
-    (setq-local sh-shell-variables-initialized nil)
-    (setq-local imenu-generic-expression
-                (sh-feature sh-imenu-generic-expression))
-    (let ((tem (sh-feature sh-mode-syntax-table-input)))
-      (when tem
-        (setq-local sh-mode-syntax-table
-                    (apply 'sh-mode-syntax-table tem))
-        (set-syntax-table sh-mode-syntax-table)))
-    (dolist (var (sh-feature sh-variables))
-      (sh-remember-variable var))
-    (if (setq-local sh-indent-supported-here
-                    (sh-feature sh-indent-supported))
-        (progn
-          (el-patch-remove
-            (message "Setting up indent for shell type %s" sh-shell))
-          (let ((mksym (lambda (name)
-                         (intern (format "sh-smie-%s-%s"
-                                         sh-indent-supported-here name)))))
-            (add-function :around (local 'smie--hanging-eolp-function)
-                          (lambda (orig)
-                            (if (looking-at "[ \t]*\\\\\n")
-                                (goto-char (match-end 0))
-                              (funcall orig))))
-            (add-hook 'smie-indent-functions #'sh-smie--indent-continuation nil t)
-            (smie-setup (symbol-value (funcall mksym "grammar"))
-                        (funcall mksym "rules")
-                        :forward-token  (funcall mksym "forward-token")
-                        :backward-token (funcall mksym "backward-token")))
-          (setq-local parse-sexp-lookup-properties t)
-          (unless sh-use-smie
-            (setq-local sh-kw-alist (sh-feature sh-kw))
-            (let ((regexp (sh-feature sh-kws-for-done)))
-              (if regexp
-                  (setq-local sh-regexp-for-done
-                              (sh-mkword-regexpr (regexp-opt regexp t)))))
-            (el-patch-remove
-              (message "setting up indent stuff"))
-            ;; sh-mode has already made indent-line-function local
-            ;; but do it in case this is called before that.
-            (setq-local indent-line-function 'sh-indent-line))
-          (if sh-make-vars-local
-              (sh-make-vars-local))
-          (el-patch-remove
-            (message "Indentation setup for shell type %s" sh-shell)))
-      (el-patch-remove
-        (message "No indentation for this shell type."))
-      (setq-local indent-line-function 'sh-basic-indent-line))
-    (when font-lock-mode
-      (setq font-lock-set-defaults nil)
-      (font-lock-set-defaults)
-      (font-lock-flush))
-    (setq sh-shell-process nil)
-    (run-hooks 'sh-set-shell-hook))
-
-  ;; Inhibit the "Indentation variables are now local" message.
-  (defun sh-make-vars-local ()
-    (el-patch-concat
-      "Make the indentation variables local to this buffer.
-Normally they already are local.  This command is provided in case
-variable `sh-make-vars-local' has been set to nil.
-
-To revert all these variables to the global values, use
-command `sh-reset-indent-vars-to-global-values'."
-      (el-patch-add
-        "\n\nThis function does not print superfluous messages."))
-    (interactive)
-    (mapc 'make-local-variable sh-var-list)
-    (el-patch-remove
-      (message "Indentation variables are now local.")))
+  (dolist (func '(sh-set-shell sh-make-vars-local))
+    (advice-add func :around #'radian--advice-silence-messages))
 
   (radian-defhook radian--sh-prettify-mode-line ()
     sh-mode-hook
