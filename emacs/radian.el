@@ -240,7 +240,7 @@ appropriately."
 Otherwise, Emacs will just get slower and slower over time."
   (setq gc-cons-threshold radian--orig-gc-cons-threshold))
 
-(setq gc-cons-threshold (* 5 1000 1000))
+(setq gc-cons-threshold (* 50 1000 1000))
 
 ;;; Networking
 
