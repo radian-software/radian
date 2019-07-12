@@ -361,6 +361,8 @@ binding the variable dynamically over the entire init-file."
                        "use-package-chords.el"
                        "use-package-ensure-system-package.el")
                       "use-package-pkg.el")
+    ;; Use until <https://github.com/jwiegley/use-package/pull/783> is
+    ;; merged.
     :fork (:repo "raxod502/use-package" :branch "fork/1")))
 
 ;; When configuring a feature with `use-package', also tell
