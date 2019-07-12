@@ -61,6 +61,8 @@ Unlike `after-init-hook', this hook is run every time the
 init-file is loaded, not just once.")
 
         (unwind-protect
-            ;; Load the main Radian configuration code.
-            (load radian-lib-file nil 'nomessage)
+            ;; Load the main Radian configuration code. Disable
+            ;; `file-name-handler-alist' to improve load time.
+            (let ((file-name-handler-alist nil))
+              (load radian-lib-file nil 'nomessage))
           (run-hooks 'radian--finalize-init-hook))))))
