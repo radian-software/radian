@@ -167,13 +167,13 @@ also be a single string."
                      (dolist (regexp ',regexps)
                        (when (or (null regexp) (string-match-p regexp str))
                          (cl-return)))
-                     (message "%s" str))))))
+                     (funcall message "%s" str))))))
      ,@body))
 
 (defun radian--advice-silence-messages (func &rest args)
   "Invoke FUNC with ARGS, silencing calls to `message'.
 This is an `:override' advice for many different functions."
-  (radian--with-silent-message ""
+  (cl-letf (((symbol-function #'message) #'ignore))
     (apply func args)))
 
 (defun radian--random-string ()
@@ -917,11 +917,6 @@ default."
   ;; `projectile-mode-map' to be defined.
   :init/el-patch
 
-  (defcustom projectile-keymap-prefix nil
-    "Projectile keymap prefix."
-    :group 'projectile
-    :type 'string)
-
   (defvar projectile-command-map
     (let ((map (make-sparse-keymap)))
       (define-key map (kbd "4 a") #'projectile-find-other-file-other-window)
@@ -989,8 +984,9 @@ default."
 
   (defvar projectile-mode-map
     (let ((map (make-sparse-keymap)))
-      (when projectile-keymap-prefix
-        (define-key map projectile-keymap-prefix 'projectile-command-map))
+      (el-patch-remove
+        (when projectile-keymap-prefix
+          (define-key map projectile-keymap-prefix 'projectile-command-map)))
       (easy-menu-define projectile-mode-menu map
         "Menu for Projectile"
         '("Projectile"
@@ -1194,6 +1190,13 @@ counterparts."
   ;; project).
   (setf (cdr (assoc "o" (cdr counsel-projectile-switch-project-action)))
         (cdr (assoc "f" (cdr counsel-projectile-switch-project-action)))))
+
+(defvar radian--dirs-to-delete nil
+  "List of directories to try to delete when killing buffer.
+This is used to implement the neat feature where if you kill a
+new buffer without saving it, then Radian will prompt to see if
+you want to also delete the parent directories that were
+automatically created.")
 
 (defun radian--advice-find-file-create-directories
     (find-file filename &rest args)
@@ -1517,7 +1520,7 @@ Interactively, reverse the characters in the current region."
 
 ;; Trigger auto-fill after punctutation characters, not just
 ;; whitespace.
-(mapcar
+(mapc
  (lambda (c)
    (set-char-table-range auto-fill-chars c t))
  "!-=+]};:'\",.?")
@@ -3093,8 +3096,8 @@ Return either a string or nil."
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
 
-;; Feature `rst-mode' provides a major mode for ReST.
-(use-feature rst-mode
+;; Feature `rst' provides a major mode for ReST.
+(use-feature rst
   :config
 
   (radian-defhook radian--flycheck-rst-setup ()
@@ -3614,7 +3617,7 @@ unhelpful."
     :global t
     (if radian-universal-keyboard-quit-mode
         (radian-defadvice radian--advice-helpful-key-allow-keyboard-quit
-            (func &rest args)
+            (&rest _)
           :before helpful-key
           "Make C-g work in `helpful-key'."
           ;; The docstring of `add-function' says that if we make our
@@ -3752,8 +3755,9 @@ to `radian-reload-init'."
   (put 'checkdoc-package-keywords-flag 'safe-local-variable #'booleanp))
 
 ;; Package `elisp-lint', not installed, provides a linting framework
-;; for Elisp code.
-(use-feature elisp-lint
+;; for Elisp code. We use `with-eval-after-load' because `use-package'
+;; is configured to try to `require' features during byte-compilation.
+(with-eval-after-load 'elisp-lint
   :init
 
   ;; From the package. We need this because some packages set this as
@@ -4086,7 +4090,7 @@ the problematic case.)"
 
   (radian-with-operating-system macOS
     (radian-defadvice radian--advice-dired-guess-open-on-macos
-        (orig-fun &rest args)
+        (&rest _)
       :override dired-guess-default
       "Cause Dired's '!' command to use open(1).
 This advice is only activated on macOS, where it is helpful since
