@@ -63,6 +63,11 @@ init-file is loaded, not just once.")
         (unwind-protect
             ;; Load the main Radian configuration code. Disable
             ;; `file-name-handler-alist' to improve load time.
-            (let ((file-name-handler-alist nil))
-              (load radian-lib-file nil 'nomessage))
+            ;;
+            ;; Make sure not to load an out-of-date .elc file. Since
+            ;; we byte-compile asynchronously in the background after
+            ;; init succeeds, this case will happen often.
+            (let ((file-name-handler-alist nil)
+                  (load-prefer-newer t))
+              (load (file-name-sans-extension radian-lib-file) nil 'nomessage))
           (run-hooks 'radian--finalize-init-hook))))))

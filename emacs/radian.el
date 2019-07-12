@@ -232,7 +232,7 @@ appropriately."
   ;; Load local customizations.
   (load radian-local-init-file 'noerror 'nomessage))
 
-;;; Disable GC during startup
+;;; Startup optimizations
 
 ;; Disabling GC (by setting `gc-cons-threshold' to a very large value,
 ;; in this case 500MB) during startup is said to improve startup time
@@ -248,6 +248,11 @@ Otherwise, Emacs will just get slower and slower over time."
   (setq gc-cons-threshold radian--orig-gc-cons-threshold))
 
 (setq gc-cons-threshold (* 50 1000 1000))
+
+;; After we enabled `load-prefer-newer' in init.el, disable it again
+;; for the duration of init. Presumably, it slows things down, and we
+;; shouldn't need it for anything but loading radian.el itself.
+(setq load-prefer-newer nil)
 
 ;;; Networking
 
@@ -419,7 +424,8 @@ binding the variable dynamically over the entire init-file."
 ;; provides a much prettier API for manipulating keymaps than
 ;; `define-key' and `global-set-key' do. It's also the same API that
 ;; `:bind' and similar keywords in `use-package' use.
-(use-package bind-key)
+(use-package bind-key
+  :demand t)
 
 (defvar radian-keymap (make-sparse-keymap)
   "Keymap for Radian commands that should be put under a prefix.
