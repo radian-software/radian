@@ -59,17 +59,18 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
   (unless (stringp docstring)
     (error "radian-defadvice: no docstring provided"))
   `(progn
-     (defun ,name ,arglist
-       ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
-                           "an"
-                         "a")))
-          (format "%s\n\nThis is %s `%S' advice for `%S'."
-                  docstring article where
-                  (if (and (listp place)
-                           (memq (car place) ''function))
-                      (cadr place)
-                    place)))
-       ,@body)
+     (eval-and-compile
+       (defun ,name ,arglist
+         ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
+                             "an"
+                           "a")))
+            (format "%s\n\nThis is %s `%S' advice for `%S'."
+                    docstring article where
+                    (if (and (listp place)
+                             (memq (car place) ''function))
+                        (cadr place)
+                      place)))
+         ,@body))
      (advice-add ',place ',where #',name)
      ',name))
 
@@ -276,9 +277,7 @@ Otherwise, Emacs will just get slower and slower over time."
     :filter-return url-http
     "Disable query-on-exit for all network connections.
 This prevents Emacs shutdown from being interrupted just because
-there is a pending network request. (It also works around a bug
-in `anaconda-mode' which causes unanswered network connections to
-pile up, and then interrupt Emacs shutdown.)"
+there is a pending network request."
     (prog1 buffer
       (set-process-query-on-exit-flag
        (get-buffer-process buffer) nil))))
@@ -526,48 +525,49 @@ startup.")
       "The last text that was copied to the system clipboard.
 This is used to prevent duplicate entries in the kill ring.")
 
-    (defun radian--clipboard-paste ()
-      "Return the contents of the macOS clipboard, as a string."
-      (let* (;; Setting `default-directory' to a directory that is
-             ;; sure to exist means that this code won't error out
-             ;; when the directory for the current buffer does not
-             ;; exist.
-             (default-directory "/")
-             ;; Command pbpaste returns the clipboard contents as a
-             ;; string.
-             (text (shell-command-to-string "pbpaste")))
-        ;; If this function returns nil then the system clipboard is
-        ;; ignored and the first element in the kill ring (which, if
-        ;; the system clipboard has not been modified since the last
-        ;; kill, will be the same) is used instead. Including this
-        ;; `unless' clause prevents you from getting the same text
-        ;; yanked the first time you run `yank-pop'. (Of course, this
-        ;; is less relevant due to `counsel-yank-pop', but still is
-        ;; definitely the correct behavior.)
-        (unless (string= text radian--clipboard-last-copy)
-          text)))
+    (eval-and-compile
+      (defun radian--clipboard-paste ()
+        "Return the contents of the macOS clipboard, as a string."
+        (let* (;; Setting `default-directory' to a directory that is
+               ;; sure to exist means that this code won't error out
+               ;; when the directory for the current buffer does not
+               ;; exist.
+               (default-directory "/")
+               ;; Command pbpaste returns the clipboard contents as a
+               ;; string.
+               (text (shell-command-to-string "pbpaste")))
+          ;; If this function returns nil then the system clipboard is
+          ;; ignored and the first element in the kill ring (which, if
+          ;; the system clipboard has not been modified since the last
+          ;; kill, will be the same) is used instead. Including this
+          ;; `unless' clause prevents you from getting the same text
+          ;; yanked the first time you run `yank-pop'. (Of course, this
+          ;; is less relevant due to `counsel-yank-pop', but still is
+          ;; definitely the correct behavior.)
+          (unless (string= text radian--clipboard-last-copy)
+            text)))
 
-    (defun radian--clipboard-copy (text)
-      "Set the contents of the macOS clipboard to given TEXT string."
-      (let* (;; Setting `default-directory' to a directory that is
-             ;; sure to exist means that this code won't error out
-             ;; when the directory for the current buffer does not
-             ;; exist.
-             (default-directory "/")
-             ;; Setting `process-connection-type' makes Emacs use a pipe to
-             ;; communicate with pbcopy, rather than a pty (which is
-             ;; overkill).
-             (process-connection-type nil)
-             ;; The nil argument tells Emacs to discard stdout and
-             ;; stderr. Note, we aren't using `call-process' here
-             ;; because we want this command to be asynchronous.
-             ;;
-             ;; Command pbcopy writes stdin to the clipboard until it
-             ;; receives EOF.
-             (proc (start-process "pbcopy" nil "pbcopy")))
-        (process-send-string proc text)
-        (process-send-eof proc))
-      (setq radian--clipboard-last-copy text))
+      (defun radian--clipboard-copy (text)
+        "Set the contents of the macOS clipboard to given TEXT string."
+        (let* (;; Setting `default-directory' to a directory that is
+               ;; sure to exist means that this code won't error out
+               ;; when the directory for the current buffer does not
+               ;; exist.
+               (default-directory "/")
+               ;; Setting `process-connection-type' makes Emacs use a pipe to
+               ;; communicate with pbcopy, rather than a pty (which is
+               ;; overkill).
+               (process-connection-type nil)
+               ;; The nil argument tells Emacs to discard stdout and
+               ;; stderr. Note, we aren't using `call-process' here
+               ;; because we want this command to be asynchronous.
+               ;;
+               ;; Command pbcopy writes stdin to the clipboard until it
+               ;; receives EOF.
+               (proc (start-process "pbcopy" nil "pbcopy")))
+          (process-send-string proc text)
+          (process-send-eof proc))
+        (setq radian--clipboard-last-copy text)))
 
     (setq interprogram-paste-function #'radian--clipboard-paste)
     (setq interprogram-cut-function #'radian--clipboard-copy)))
@@ -595,15 +595,16 @@ This is used to prevent duplicate entries in the kill ring.")
       ;; `scroll-down' and `scroll-up' scroll by a "near full screen"
       ;; by default, whereas we want a single line.
 
-      (defun radian-scroll-down ()
-        "Scroll down one line."
-        (interactive)
-        (scroll-down 1))
+      (eval-and-compile
+        (defun radian-scroll-down ()
+          "Scroll down one line."
+          (interactive)
+          (scroll-down 1))
 
-      (defun radian-scroll-up ()
-        "Scroll up one line."
-        (interactive)
-        (scroll-up 1))
+        (defun radian-scroll-up ()
+          "Scroll up one line."
+          (interactive)
+          (scroll-up 1)))
 
       ;; Enable scrolling with the mouse wheel.
       (bind-keys ("<mouse-4>" . radian-scroll-down)
@@ -1967,8 +1968,16 @@ the timer when no buffers need to be checked."
 
   ;; Disable Smartparens in Org-related modes, since the keybindings
   ;; conflict.
-  (add-to-list 'sp-ignore-modes-list #'org-mode)
-  (add-to-list 'sp-ignore-modes-list #'org-agenda-mode)
+
+  (use-feature org
+    :config
+
+    (add-to-list 'sp-ignore-modes-list #'org-mode))
+
+  (use-feature org-agenda
+    :config
+
+    (add-to-list 'sp-ignore-modes-list #'org-agenda-mode))
 
   ;; Make C-k kill the sexp following point in Lisp modes, instead of
   ;; just the current line.
@@ -2494,14 +2503,17 @@ order."
   ;; Original code from
   ;; https://github.com/PythonNut/emacs-config/blob/1a92a1ff1d563fa6a9d7281bbcaf85059c0c40d4/modules/config-intel.el#L130-L137,
   ;; thanks!
-  (radian-defadvice radian--advice-disable-eldoc-on-flycheck
-      (&rest _)
-    :after-while eldoc-display-message-no-interference-p
-    "Disable ElDoc when point is on a Flycheck overlay.
+
+  (use-feature flycheck
+    :config
+
+    (radian-defadvice radian--advice-disable-eldoc-on-flycheck
+        (&rest _)
+      :after-while eldoc-display-message-no-interference-p
+      "Disable ElDoc when point is on a Flycheck overlay.
 This prevents ElDoc and Flycheck from fighting over the echo
 area."
-    (not (and (bound-and-true-p flycheck-mode)
-              (flycheck-overlay-errors-at (point)))))
+      (not (flycheck-overlay-errors-at (point)))))
 
   :blackout t)
 
@@ -3302,12 +3314,13 @@ FORCE is not nil.")
       (TeX-load-style-file file)
     :around TeX-load-style-file
     "Inhibit the \"Loading **/auto/*.el (source)...\" messages."
-    (cl-letf* (((symbol-function #'raw-load) (symbol-function #'load))
+    (cl-letf* ((load (symbol-function #'load))
                ((symbol-function #'load)
                 (lambda (file &optional
                               noerror _nomessage
                               nosuffix must-suffix)
-                  (raw-load file noerror 'nomessage nosuffix must-suffix))))
+                  (funcall
+                   load file noerror 'nomessage nosuffix must-suffix))))
       (funcall TeX-load-style-file file)))
 
   (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
@@ -4417,7 +4430,7 @@ command."
     "Return non-nil if \\[browse-url-at-point] should be rebound."
     ;; All of these major modes provide more featureful bindings for
     ;; C-c C-o than `browse-url-at-point'.
-    (not (derived-mode-p 'markdown-mode 'org-mode 'org-agenda-mode)))
+    (not (derived-mode-p #'markdown-mode #'org-mode #'org-agenda-mode)))
 
   :bind* (:filter (radian--browse-url-predicate)
                   ("C-c C-o" . browse-url-at-point)))
