@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 ;; This file is loaded before package.el is initialized, and before
 ;; the first graphical frame is initialized, by Emacs 27 (but not by
 ;; any previous version of Emacs). Trivia: I was the person to
