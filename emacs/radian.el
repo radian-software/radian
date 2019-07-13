@@ -143,7 +143,10 @@ This means that FILENAME is a symlink whose target is inside
 `radian-directory'."
   (let ((truename (file-truename filename)))
     (string-prefix-p radian-directory truename
-                     (when (file-name-case-insensitive-p truename)
+                     (when (if (fboundp 'file-name-case-insensitive-p)
+                               (file-name-case-insensitive-p truename)
+                             (radian-with-operating-system macOS
+                               t))
                        'ignore-case))))
 
 (defmacro radian--with-silent-load (&rest body)
@@ -170,7 +173,7 @@ This means that FILENAME is a symlink whose target is inside
      ,@body))
 
 (defmacro radian--with-silent-message (regexps &rest body)
-  "Execute BODY, silencing any messages that match REGEXPS.
+  "Silencing any messages that match REGEXPS, execute BODY.
 REGEXPS is a list of strings; if `message' would display a
 message string (not including the trailing newline) matching any
 element of REGEXPS, nothing happens. The REGEXPS need not match
@@ -1844,6 +1847,8 @@ the reverse direction from \\[pop-global-mark]."
 ;; Feature `isearch' provides a basic and fast mechanism for jumping
 ;; forward or backward to occurrences of a given search string.
 (use-feature isearch
+  ;; File does not provide the feature in Emacs 25.
+  :no-require t
   :config
 
   ;; Eliminate the 0.25s idle delay for isearch highlighting, as in my
@@ -1904,94 +1909,21 @@ the reverse direction from \\[pop-global-mark]."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
-  ;; Only works in Emacs 26 or lesser.
-  (when (boundp 'auto-revert-buffers-counter)
-    (el-patch-defun auto-revert-buffers ()
-      (el-patch-concat
-        "Revert buffers as specified "
-        "by Auto-Revert and Global Auto-Revert Mode.
-
-Should `global-auto-revert-mode' be active all file buffers are checked.
-
-Should `auto-revert-mode' be active in some buffers, those buffers
-are checked.
-
-Non-file buffers that have a custom `revert-buffer-function' and
-`buffer-stale-function' are reverted either when Auto-Revert
-Mode is active in that buffer, or when the variable
-`global-auto-revert-non-file-buffers' is non-nil and Global
-Auto-Revert Mode is active.
-
-This function stops whenever there is user input.  The buffers not
-checked are stored in the variable `auto-revert-remaining-buffers'.
-
-To avoid starvation, the buffers in `auto-revert-remaining-buffers'
-are checked first the next time this function is called.
-
-This function is also responsible for removing buffers no longer in
-Auto-Revert Mode from `auto-revert-buffer-list', and for canceling
-the timer when no buffers need to be checked."
-        (el-patch-add
-          "\n\nOnly currently displayed buffers are reverted."))
-
-      (setq auto-revert-buffers-counter
-            (1+ auto-revert-buffers-counter))
-
-      (save-match-data
-        (let ((bufs (el-patch-wrap 2
+  (if (version<= emacs-version "26")
+      (radian-defadvice radian--autorevert-only-visible
+          (auto-revert-buffers &rest args)
+        :around auto-revert-buffers
+        "Inhibit `autorevert' for buffers not displayed in any window."
+        (cl-letf* ((buffer-list (symbol-function #'buffer-list))
+                   ((symbol-function #'buffer-list)
+                    (lambda (&rest args)
                       (cl-remove-if-not
-                       #'get-buffer-window
-                       (if global-auto-revert-mode
-                           (buffer-list)
-                         auto-revert-buffer-list))))
-              remaining new)
-          ;; Partition `bufs' into two halves depending on whether or not
-          ;; the buffers are in `auto-revert-remaining-buffers'.  The two
-          ;; halves are then re-joined with the "remaining" buffers at the
-          ;; head of the list.
-          (dolist (buf auto-revert-remaining-buffers)
-            (if (memq buf bufs)
-                (push buf remaining)))
-          (dolist (buf bufs)
-            (if (not (memq buf remaining))
-                (push buf new)))
-          (setq bufs (nreverse (nconc new remaining)))
-          (while (and bufs
-                      (not (and auto-revert-stop-on-user-input
-                                (input-pending-p))))
-            (let ((buf (car bufs)))
-              (with-current-buffer buf
-                (if (buffer-live-p buf)
-                    (progn
-                      ;; Test if someone has turned off Auto-Revert Mode
-                      ;; in a non-standard way, for example by changing
-                      ;; major mode.
-                      (if (and (not auto-revert-mode)
-                               (not auto-revert-tail-mode)
-                               (memq buf auto-revert-buffer-list))
-                          (auto-revert-remove-current-buffer))
-                      (when (auto-revert-active-p)
-                        ;; Enable file notification.
-                        (when (and auto-revert-use-notify
-                                   (not auto-revert-notify-watch-descriptor))
-                          (auto-revert-notify-add-watch))
-                        (auto-revert-handler)))
-                  ;; Remove dead buffer from `auto-revert-buffer-list'.
-                  (auto-revert-remove-current-buffer))))
-            (setq bufs (cdr bufs)))
-          (setq auto-revert-remaining-buffers bufs)
-          ;; Check if we should cancel the timer.
-          (when (and (not global-auto-revert-mode)
-                     (null auto-revert-buffer-list))
-            (if (timerp auto-revert-timer)
-                (cancel-timer auto-revert-timer))
-            (setq auto-revert-timer nil))))))
-
-  ;; Only works in Emacs 27 or greater.
-  (radian-defadvice radian--autorevert-only-visible (bufs)
-    :filter-return auto-revert--polled-buffers
-    "Prevent `autorevert' from reverting buffers not displayed in any window."
-    (cl-remove-if-not #'get-buffer-window bufs))
+                       #'get-buffer-window (apply buffer-list args)))))
+          (apply auto-revert-buffers args)))
+    (radian-defadvice radian--autorevert-only-visible (bufs)
+      :filter-return auto-revert--polled-buffers
+      "Inhibit `autorevert' for buffers not displayed in any window."
+      (cl-remove-if-not #'get-buffer-window bufs)))
 
   :blackout auto-revert-mode)
 
@@ -2301,11 +2233,11 @@ and `lsp--error'."
     "Find LSP executables inside node_modules/.bin if present."
     (cl-block nil
       (prog1 command
-        (when-let* ((project-dir
-                     (locate-dominating-file default-directory "node_modules"))
-                    (binary
-                     (radian--path-join
-                      project-dir "node_modules" ".bin" (car command))))
+        (when-let ((project-dir
+                    (locate-dominating-file default-directory "node_modules"))
+                   (binary
+                    (radian--path-join
+                     project-dir "node_modules" ".bin" (car command))))
           (when (file-executable-p binary)
             (cl-return (cons binary (cdr command))))))))
 
@@ -2678,6 +2610,8 @@ nor requires Flycheck to be loaded."
 
 ;; Feature `text-mode' provides a major mode for editing plain text.
 (use-feature text-mode
+  ;; File does not provide the feature in Emacs 25.
+  :no-require t
   :config
 
   (add-hook 'text-mode-hook #'auto-fill-mode)
@@ -4614,14 +4548,14 @@ Also run `radian-atomic-chrome-setup-hook'."
   (radian-defhook radian--atomic-chrome-switch-back ()
     atomic-chrome-edit-done-hook
     "Switch back to the browser after finishing with `atomic-chrome'."
-    (when-let* ((conn (websocket-server-conn
-                       (atomic-chrome-get-websocket (current-buffer))))
-                (browser
-                 (cond
-                  ((eq conn atomic-chrome-server-ghost-text)
-                    "Firefox")
-                   ((eq conn atomic-chrome-server-atomic-chrome)
-                    "Google Chrome"))))
+    (when-let ((conn (websocket-server-conn
+                      (atomic-chrome-get-websocket (current-buffer))))
+               (browser
+                (cond
+                 ((eq conn atomic-chrome-server-ghost-text)
+                  "Firefox")
+                 ((eq conn atomic-chrome-server-atomic-chrome)
+                  "Google Chrome"))))
       (cond
        ((radian-operating-system-p macOS)
         (call-process "open" nil nil nil "-a" browser))
