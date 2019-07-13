@@ -1,0 +1,24 @@
+version: v1.0
+name: Radian
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
+blocks:
+  - name: Radian CI
+    task:
+      jobs:
+        - name: Radian CI
+          matrix:
+            - env_var: EMACS_VERSION
+              values:
+                - "25.2"
+                - "25.3"
+                - "26.1"
+                - "26.2"
+          commands:
+            - checkout
+            - >-
+              make docker
+              VERSION="$EMACS_VERSION"
+              CMD="make -k compile checkdoc longlines"
