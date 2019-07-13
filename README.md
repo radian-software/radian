@@ -76,8 +76,6 @@ These dotfiles attempt to achieve the following goals:
     macOS with minimal side effects
 * [Git]
   * Create a repository and a root commit all at once
-  * Rename stashes
-  * Reword a commit while preserving the index
   * Alias and unalias without messing with `git config`
   * More helpful output from `git status`, submodules, and more
 
@@ -100,12 +98,14 @@ configuration, and optionally installing local configuration.
       to your `$PATH`
     * JavaScript/TypeScript:
 
-          $ git clone git@github.com:sourcegraph/javascript-typescript-langserver.git
+          $ git clone
+              git@github.com:sourcegraph/javascript-typescript-langserver.git
           $ cd javascript-typescript-langserver
           $ npm install
           $ npm run build
           $ chmod +x lib/language-server-stdio.js
-          $ ln -s $PWD/lib/language-server-stdio.js ~/.local/bin/javascript-typescript-stdio
+          $ ln -s $PWD/lib/language-server-stdio.js
+                  ~/.local/bin/javascript-typescript-stdio
           $ brew install prettier
 
     * LaTeX:
@@ -142,12 +142,14 @@ you prefer something different, substitute to taste.
       to your `$PATH`
     * JavaScript/TypeScript:
 
-          $ git clone git@github.com:sourcegraph/javascript-typescript-langserver.git
+          $ git clone
+              git@github.com:sourcegraph/javascript-typescript-langserver.git
           $ cd javascript-typescript-langserver
           $ npm install
           $ npm run build
           $ chmod +x lib/language-server-stdio.js
-          $ ln -s $PWD/lib/language-server-stdio.js ~/.local/bin/javascript-typescript-stdio
+          $ ln -s $PWD/lib/language-server-stdio.js
+                  ~/.local/bin/javascript-typescript-stdio
           $ pacman -S prettier
 
     * LaTeX:

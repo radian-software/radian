@@ -345,7 +345,8 @@ binding the variable dynamically over the entire init-file."
 (if (and (executable-find "watchexec")
          (executable-find "python3"))
     (setq straight-check-for-modifications '(watch-files find-when-checking))
-  (setq straight-check-for-modifications '(find-at-startup find-when-checking)))
+  (setq straight-check-for-modifications
+        '(find-at-startup find-when-checking)))
 
 ;; Clear out recipe overrides (in case of re-init).
 (setq straight-recipe-overrides nil)
@@ -355,7 +356,8 @@ binding the variable dynamically over the entire init-file."
 ;; Bootstrap the package manager, straight.el.
 (defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -976,14 +978,16 @@ default."
       (define-key map (kbd "4 D") #'projectile-dired-other-window)
       (define-key map (kbd "4 f") #'projectile-find-file-other-window)
       (define-key map (kbd "4 g") #'projectile-find-file-dwim-other-window)
-      (define-key map (kbd "4 t") #'projectile-find-implementation-or-test-other-window)
+      (define-key
+        map (kbd "4 t") #'projectile-find-implementation-or-test-other-window)
       (define-key map (kbd "5 a") #'projectile-find-other-file-other-frame)
       (define-key map (kbd "5 b") #'projectile-switch-to-buffer-other-frame)
       (define-key map (kbd "5 d") #'projectile-find-dir-other-frame)
       (define-key map (kbd "5 D") #'projectile-dired-other-frame)
       (define-key map (kbd "5 f") #'projectile-find-file-other-frame)
       (define-key map (kbd "5 g") #'projectile-find-file-dwim-other-frame)
-      (define-key map (kbd "5 t") #'projectile-find-implementation-or-test-other-frame)
+      (define-key
+        map (kbd "5 t") #'projectile-find-implementation-or-test-other-frame)
       (define-key map (kbd "!") #'projectile-run-shell-command-in-root)
       (define-key map (kbd "&") #'projectile-run-async-shell-command-in-root)
       (define-key map (kbd "a") #'projectile-find-other-file)
@@ -1015,7 +1019,8 @@ default."
       (define-key map (kbd "s r") #'projectile-ripgrep)
       (define-key map (kbd "s s") #'projectile-ag)
       (define-key map (kbd "S") #'projectile-save-project-buffers)
-      (define-key map (kbd "t") #'projectile-toggle-between-implementation-and-test)
+      (define-key
+        map (kbd "t") #'projectile-toggle-between-implementation-and-test)
       (define-key map (kbd "T") #'projectile-find-test-file)
       (define-key map (kbd "u") #'projectile-run-project)
       (define-key map (kbd "v") #'projectile-vc)
@@ -1041,13 +1046,15 @@ default."
         "Menu for Projectile"
         '("Projectile"
           ["Find file" projectile-find-file]
-          ["Find file in known projects" projectile-find-file-in-known-projects]
+          ["Find file in known projects"
+           projectile-find-file-in-known-projects]
           ["Find test file" projectile-find-test-file]
           ["Find directory" projectile-find-dir]
           ["Find file in directory" projectile-find-file-in-directory]
           ["Find other file" projectile-find-other-file]
           ["Switch to buffer" projectile-switch-to-buffer]
-          ["Jump between implementation file and test file" projectile-toggle-between-implementation-and-test]
+          ["Jump between implementation file and test file"
+           projectile-toggle-between-implementation-and-test]
           ["Kill project buffers" projectile-kill-buffers]
           ["Save project buffers" projectile-save-project-buffers]
           ["Recent files" projectile-recentf]
@@ -1059,7 +1066,8 @@ default."
           "--"
           ["Switch to project" projectile-switch-project]
           ["Switch to open project" projectile-switch-open-project]
-          ["Discover projects in directory" projectile-discover-projects-in-directory]
+          ["Discover projects in directory"
+           projectile-discover-projects-in-directory]
           ["Browse dirty projects" projectile-browse-dirty-projects]
           ["Open project in dired" projectile-dired]
           "--"
@@ -1125,16 +1133,28 @@ Otherwise behave as if called interactively.
         (projectile--cleanup-known-projects)
         (projectile-discover-projects-in-search-path)
         (add-hook 'find-file-hook 'projectile-find-file-hook-function)
-        (add-hook 'projectile-find-dir-hook #'projectile-track-known-projects-find-file-hook t)
-        (add-hook 'dired-before-readin-hook #'projectile-track-known-projects-find-file-hook t t)
-        (advice-add 'compilation-find-file :around #'compilation-find-file-projectile-find-compilation-buffer)
-        (advice-add 'delete-file :before #'delete-file-projectile-remove-from-cache)))
+        (add-hook
+         'projectile-find-dir-hook
+         #'projectile-track-known-projects-find-file-hook t)
+        (add-hook
+         'dired-before-readin-hook
+         #'projectile-track-known-projects-find-file-hook t t)
+        (advice-add
+         'compilation-find-file :around
+         #'compilation-find-file-projectile-find-compilation-buffer)
+        (advice-add
+         'delete-file :before #'delete-file-projectile-remove-from-cache)))
      (el-patch-remove
        (t
         (remove-hook 'find-file-hook #'projectile-find-file-hook-function)
-        (remove-hook 'dired-before-readin-hook #'projectile-track-known-projects-find-file-hook t)
-        (advice-remove 'compilation-find-file #'compilation-find-file-projectile-find-compilation-buffer)
-        (advice-remove 'delete-file #'delete-file-projectile-remove-from-cache)))))
+        (remove-hook
+         'dired-before-readin-hook
+         #'projectile-track-known-projects-find-file-hook t)
+        (advice-remove
+         'compilation-find-file
+         #'compilation-find-file-projectile-find-compilation-buffer)
+        (advice-remove
+         'delete-file #'delete-file-projectile-remove-from-cache)))))
 
   :init
 
@@ -1213,7 +1233,8 @@ counterparts."
       (projectile-mode)
       (dolist (binding counsel-projectile-key-bindings)
         (if (functionp (car binding))
-            (define-key projectile-mode-map `[remap ,(car binding)] (cdr binding))
+            (define-key
+              projectile-mode-map `[remap ,(car binding)] (cdr binding))
           (define-key projectile-command-map (car binding) (cdr binding)))))
      (t
       (dolist (binding counsel-projectile-key-bindings)
@@ -1774,7 +1795,8 @@ the reverse direction from \\[pop-global-mark]."
         ;; behavior.
         (setq global-mark-ring (nconc (list (car (last global-mark-ring)))
                                       (butlast global-mark-ring)))
-        (while (and global-mark-ring (not (marker-buffer (car (last global-mark-ring)))))
+        (while (and global-mark-ring
+                    (not (marker-buffer (car (last global-mark-ring)))))
           (setq global-mark-ring (butlast global-mark-ring)))
         (let* ((marker (car (last global-mark-ring)))
                (buffer (marker-buffer marker))
@@ -1784,7 +1806,8 @@ the reverse direction from \\[pop-global-mark]."
                    (<= position (point-max)))
               (if widen-automatically
                   (widen)
-                (error "Global mark position is outside accessible part of buffer")))
+                (error
+                 "Global mark position is outside accessible part of buffer")))
           (goto-char position)
           (switch-to-buffer buffer)))
     (funcall pop-global-mark)))
@@ -1885,7 +1908,8 @@ the reverse direction from \\[pop-global-mark]."
   (when (boundp 'auto-revert-buffers-counter)
     (el-patch-defun auto-revert-buffers ()
       (el-patch-concat
-        "Revert buffers as specified by Auto-Revert and Global Auto-Revert Mode.
+        "Revert buffers as specified "
+        "by Auto-Revert and Global Auto-Revert Mode.
 
 Should `global-auto-revert-mode' be active all file buffers are checked.
 
@@ -2623,7 +2647,8 @@ nor requires Flycheck to be loaded."
   :bind (("C-c f" . lsp-ui-sideline-apply-code-actions))
   :config
 
-  (radian-defadvice radian--advice-lsp-ui-apply-single-fix (orig-fun &rest args)
+  (radian-defadvice radian--advice-lsp-ui-apply-single-fix
+      (orig-fun &rest args)
     :around lsp-ui-sideline-apply-code-actions
     "Apply code fix immediately if only one is possible."
     (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
@@ -3211,11 +3236,16 @@ https://github.com/flycheck/flycheck/issues/953."
   (defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
-      (define-key map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
+      (define-key
+        map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
       (define-key map [remap newline] 'ruby-electric-space/return)
       (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
-      (define-key map [remap electric-newline-and-maybe-indent] 'ruby-electric-space/return)
-      (define-key map [remap reindent-then-newline-and-indent] 'ruby-electric-space/return)
+      (define-key
+        map [remap electric-newline-and-maybe-indent]
+        'ruby-electric-space/return)
+      (define-key
+        map [remap reindent-then-newline-and-indent]
+        'ruby-electric-space/return)
       (el-patch-remove
         (dolist (x ruby-electric-delimiters-alist)
           (let* ((delim   (car x))
@@ -3225,7 +3255,8 @@ https://github.com/flycheck/flycheck/issues/953."
                  (closing (plist-get plist :closing)))
             (define-key map (char-to-string delim) func)
             (if closing
-                (define-key map (char-to-string closing) 'ruby-electric-closing-char)))))
+                (define-key
+                  map (char-to-string closing) 'ruby-electric-closing-char)))))
       map)
     (el-patch-concat
       "Keymap used in ruby-electric-mode"
@@ -4044,7 +4075,8 @@ prevents a delay on killing Emacs when Org was not yet loaded."
     (when (and org-clock-persist (not org-clock-loaded))
       (if (not (file-readable-p org-clock-persist-file))
 	  (el-patch-swap
-            (message "Not restoring clock data; %S not found" org-clock-persist-file)
+            (message
+             "Not restoring clock data; %S not found" org-clock-persist-file)
             nil)
         (el-patch-remove
           (message "Restoring clock data"))
@@ -4318,8 +4350,9 @@ as argument."
                   ;; Some Git implementations (e.g. Windows) won't have
                   ;; this program; if we fail the first time, stop trying.
                   ((debug error)
-                   (remove-hook 'magit-credential-hook
-                                #'magit-maybe-start-credential-cache-daemon)))))))
+                   (remove-hook
+                    'magit-credential-hook
+                    #'magit-maybe-start-credential-cache-daemon)))))))
 
 
   :config
@@ -4344,11 +4377,12 @@ as argument."
   ;; to see them.
   (setq magit-save-repository-buffers nil)
 
-  (transient-append-suffix 'magit-merge "-s"
-    '("-u" "Allow unrelated" "--allow-unrelated-histories"))
+  (transient-append-suffix
+   'magit-merge "-s"
+   '("-u" "Allow unrelated" "--allow-unrelated-histories"))
 
   (transient-append-suffix 'magit-pull "-r"
-    '("-a" "Autostash" "--autostash")))
+                           '("-a" "Autostash" "--autostash")))
 
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
@@ -4652,9 +4686,10 @@ Also run `radian-atomic-chrome-setup-hook'."
               (defvar radian-local-init-file
                 (expand-file-name "init.local.el" user-emacs-directory))
               (setq package-enable-at-startup nil)
-              (setq custom-file (expand-file-name
-                                 (format "custom-%d-%d.el" (emacs-pid) (random))
-                                 temporary-file-directory))
+              (setq custom-file
+                    (expand-file-name
+                     (format "custom-%d-%d.el" (emacs-pid) (random))
+                     temporary-file-directory))
               (defvar radian-lib-file ,radian-lib-file)
               (defvar radian--finalize-init-hook nil))
            (current-buffer))
@@ -4765,15 +4800,18 @@ with which Emacs should be "
                               args))
            (restart-args (append translated-args
                                  ;; When Emacs is started with a -Q
-                                 ;; restart-emacs's autoloads would not be present
-                                 ;; causing the the --restart-emacs-desktop
-                                 ;; argument to be unhandled
+                                 ;; restart-emacs's autoloads would
+                                 ;; not be present causing the the
+                                 ;; --restart-emacs-desktop argument
+                                 ;; to be unhandled
                                  (unless (member "-Q" translated-args)
                                    (restart-emacs--frame-restore-args))))
            (el-patch-remove
-             (kill-emacs-hook (append kill-emacs-hook
-                                      (list (apply-partially #'restart-emacs--launch-other-emacs
-                                                             restart-args))))))
+             (kill-emacs-hook
+              (append kill-emacs-hook
+                      (list (apply-partially
+                             #'restart-emacs--launch-other-emacs
+                             restart-args))))))
       (el-patch-swap
         (save-buffers-kill-emacs)
         (restart-emacs--launch-other-emacs restart-args)))))
@@ -4975,6 +5013,6 @@ your local configuration."
 ;; Local Variables:
 ;; checkdoc-symbol-words: ("top-level")
 ;; indent-tabs-mode: nil
-;; outline-regexp: ";;;;* "
+;; outline-regexp: ";;;+ "
 ;; sentence-end-double-space: nil
 ;; End:
