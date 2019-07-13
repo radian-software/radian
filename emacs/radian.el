@@ -74,7 +74,7 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
   (declare (indent 2)
            (doc-string 5))
   (unless (stringp docstring)
-    (error "radian-defadvice: no docstring provided"))
+    (error "Radian: no docstring provided for `radian-defadvice'"))
   `(progn
      (eval-and-compile
        (defun ,name ,arglist
@@ -104,7 +104,7 @@ as in `defun'."
     (unless (string-match-p "-hook$" (symbol-name hook))
       (error "Symbol `%S' is not a hook" hook)))
   (unless (stringp docstring)
-    (error "radian-defhook: no docstring provided"))
+    (error "Radian: no docstring provided for `radian-defhook'"))
   (let ((hooks-str (format "`%S'" (car hooks))))
     (dolist (hook (cdr hooks))
       (setq hooks-str (format "%s\nand `%S'" hooks-str hook)))
@@ -117,7 +117,7 @@ as in `defun'."
          (add-hook hook ',name)))))
 
 (defmacro radian-operating-system-p (os)
-  "Return non-nil if OS matches the system type.
+  "Return non-nil if OS corresponds to the current operating system.
 Allowable values for OS (not quoted) are `macOS', `osx',
 `windows', `linux', `unix'."
   (pcase os
@@ -128,7 +128,9 @@ Allowable values for OS (not quoted) are `macOS', `osx',
     (`windows `(memq system-type '(ms-dos windows-nt cygwin)))))
 
 (defmacro radian-with-operating-system (os &rest body)
-  "If OS matches the system type, eval and return BODY. Else return nil.
+  "If OS corresponds to the current operating system, eval and return BODY.
+If not, return nil.
+
 Allowable values for OS (not quoted) are `macOS', `osx',
 `windows', `linux', `unix'."
   (declare (indent 1))
@@ -145,7 +147,7 @@ This means that FILENAME is a symlink whose target is inside
                        'ignore-case))))
 
 (defmacro radian--with-silent-load (&rest body)
-  "Execute BODY, silencing any calls to `load' within."
+  "Execute BODY, with the function `load' made silent."
   (declare (indent 0))
   `(cl-letf* ((load-orig (symbol-function #'load))
               ((symbol-function #'load)
@@ -154,7 +156,7 @@ This means that FILENAME is a symlink whose target is inside
      ,@body))
 
 (defmacro radian--with-silent-write (&rest body)
-  "Execute BODY, silencing any calls to `write-region' within."
+  "Execute BODY, with the function `write-region' made silent."
   (declare (indent 0))
   `(cl-letf* ((write-region-orig (symbol-function #'write-region))
               ((symbol-function #'write-region)
@@ -168,7 +170,7 @@ This means that FILENAME is a symlink whose target is inside
      ,@body))
 
 (defmacro radian--with-silent-message (regexps &rest body)
-  "Execute BODY, silencing any `message' calls that match REGEXPS.
+  "Execute BODY, silencing any messages that match REGEXPS.
 REGEXPS is a list of strings; if `message' would display a
 message string (not including the trailing newline) matching any
 element of REGEXPS, nothing happens. The REGEXPS need not match
@@ -189,7 +191,7 @@ also be a single string."
      ,@body))
 
 (defun radian--advice-silence-messages (func &rest args)
-  "Invoke FUNC with ARGS, silencing calls to `message'.
+  "Invoke FUNC with ARGS, silencing all messages.
 This is an `:override' advice for many different functions."
   (cl-letf (((symbol-function #'message) #'ignore))
     (apply func args)))
@@ -395,7 +397,8 @@ binding the variable dynamically over the entire init-file."
 (setq use-package-always-defer t)
 
 (defmacro use-feature (name &rest args)
-  "Like `use-package', but with `straight-use-package-by-default' disabled."
+  "Like `use-package', but with `straight-use-package-by-default' disabled.
+NAME and ARGS are as in `use-package'."
   (declare (indent defun))
   `(use-package ,name
      :straight nil
@@ -460,18 +463,21 @@ binding the variable dynamically over the entire init-file."
 
 (defvar radian-keymap (make-sparse-keymap)
   "Keymap for Radian commands that should be put under a prefix.
-This keymap is bound under M-P.")
+This keymap is bound under \\[radian-keymap].")
 
 (bind-key* "M-P" radian-keymap)
 
 (defmacro radian-bind-key (key-name command &optional predicate)
-  "Bind a key in `radian-keymap'."
+  "Bind a key in `radian-keymap'.
+KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
   `(bind-key ,key-name ,command radian-keymap ,predicate))
 
 (defun radian-join-keys (&rest keys)
-  "Join key sequences. Empty strings and nils are discarded.
-\(radian--join-keys \"M-P e\" \"e i\") => \"M-P e e i\"
-\(radian--join-keys \"M-P\" \"\" \"e i\") => \"M-P e i\""
+  "Join key sequences KEYS. Empty strings and nils are discarded.
+\(radian--join-keys \"\\[radian-keymap] e\" \"e i\")
+  => \"\\[radian-keymap] e e i\"
+\(radian--join-keys \"\\[radian-keymap]\" \"\" \"e i\")
+  => \"\\[radian-keymap] e i\""
   (string-join (remove "" (mapcar #'string-trim (remove nil keys))) " "))
 
 (radian-defadvice radian--quoted-insert-allow-quit (quoted-insert &rest args)
@@ -1253,7 +1259,10 @@ created directories if they kill the buffer without saving it.
 This advice has no effect for remote files.
 
 This is an `:around' advice for `find-file' and similar
-functions."
+functions.
+
+FIND-FILE is the original `find-file'; FILENAME and ARGS are its
+arguments."
   (if (file-remote-p filename)
       (apply find-file filename args)
     (let ((orig-filename filename)
@@ -1410,16 +1419,16 @@ directory. Two interactive functions are created: one to find the
 file in the current window, and one to find it in another window.
 
 If KEYBINDING is non-nil, the first function is bound to that key
-sequence after it is prefixed by \"M-P e\", and the second
-function is bound to the same key sequence, but prefixed instead
-by \"M-P o\".
+sequence after it is prefixed by \"\\[radian-keymap] e\", and the
+second function is bound to the same key sequence, but prefixed
+instead by \"\\[radian-keymap] o\".
 
 This is best demonstrated by example. Suppose FILENAME is
 \".emacs.d/init.el\" and KEYBINDING is \"e i\". Then
 `radian-register-dotfile' will create the interactive functions
 `radian-find-init-el' and `radian-find-init-el-other-window', and
-it will bind them to the key sequences \"M-P e e i\" and \"M-P o
-e i\" respectively.
+it will bind them to the key sequences \"\\[radian-keymap] e e
+i\" and \"\\[radian-keymap] o e i\" respectively.
 
 If PRETTY-FILENAME, a string, is non-nil, then it will be used in
 place of \"init-el\" in this example. Otherwise, that string will
@@ -3734,6 +3743,7 @@ unhelpful."
   :blackout (lisp-interaction-mode . "Lisp-Interaction"))
 
 (defun radian-reload-init ()
+  "Reload the init-file."
   (interactive)
   (message "Reloading init-file...")
   (load user-init-file nil 'nomessage)
@@ -3772,7 +3782,8 @@ to `radian-reload-init'."
   (bind-key "C-c C-k" #'radian-eval-buffer-or-region map))
 
 (defun radian-find-symbol (&optional symbol)
-  "Same as `xref-find-definitions' but only for Elisp symbols."
+  "Same as `xref-find-definitions' but only for Elisp symbols.
+SYMBOL is as in `xref-find-definitions'."
   (interactive)
   (let ((xref-backend-functions '(elisp--xref-backend))
         ;; Make this command behave the same as `find-function' and
@@ -4050,7 +4061,7 @@ prevents a delay on killing Emacs when Org was not yet loaded."
 	  (`(,(and file (pred file-exists-p)) . ,position)
 	   (with-current-buffer (find-file-noselect file)
 	     (when (or (not org-clock-persist-query-resume)
-		       (y-or-n-p (format "Resume clock (%s) "
+		       (y-or-n-p (format "Resume clock (%s)? "
 				         (save-excursion
 					   (goto-char position)
 					   (org-get-heading t t)))))
@@ -4962,6 +4973,8 @@ your local configuration."
     (load-theme 'zerodark 'no-confirm)))
 
 ;; Local Variables:
+;; checkdoc-symbol-words: ("top-level")
 ;; indent-tabs-mode: nil
 ;; outline-regexp: ";;;;* "
+;; sentence-end-double-space: nil
 ;; End:
