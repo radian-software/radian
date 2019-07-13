@@ -68,6 +68,17 @@ init-file is loaded, not just once.")
             ;; we byte-compile asynchronously in the background after
             ;; init succeeds, this case will happen often.
             (let ((file-name-handler-alist nil)
-                  (load-prefer-newer t))
-              (load (file-name-sans-extension radian-lib-file) nil 'nomessage))
+                  (load-prefer-newer t)
+                  (stale-bytecode t))
+              (catch 'stale-bytecode
+                (load
+                 (file-name-sans-extension radian-lib-file)
+                 nil 'nomessage)
+                (setq stale-bytecode nil))
+              (when stale-bytecode
+                ;; Don't bother trying to recompile, unlike in
+                ;; straight.el, since we are going to handle that
+                ;; later, asynchronously.
+                (delete-file (concat radian-lib-file "c"))
+                (load radian-lib-file nil 'nomessage)))
           (run-hooks 'radian--finalize-init-hook))))))

@@ -5,6 +5,23 @@
 ;; variable declarations in each section, run M-x occur with the
 ;; following query: ^;;;;* \|^(
 
+;;; Detect stale bytecode
+
+;; If Emacs version changed, the bytecode is no longer valid and we
+;; must recompile. Also, if the location of Radian changed, our
+;; dotfile-finding functions are defined incorrectly and we must
+;; recompile.
+(eval
+ `(unless (equal
+           (list
+            (emacs-version)
+            radian-lib-file)
+           ',(eval-when-compile
+               (list
+                (emacs-version)
+                radian-lib-file)))
+    (throw 'stale-bytecode nil)))
+
 ;;; Load built-in utility libraries
 
 (require 'cl-lib)
