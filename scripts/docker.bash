@@ -10,6 +10,11 @@ fi
 
 tag="${1:-latest}"
 
+args=(bash)
+if [[ -n "$2" ]]; then
+    args=("${args[@]}" -c "$2")
+fi
+
 docker() {
     if [[ "$OSTYPE" != darwin* ]] && [[ "$EUID" != 0 ]]; then
         command sudo docker "$@"
@@ -18,9 +23,9 @@ docker() {
     fi
 }
 
-docker build . -t "radian:$tag" --build-arg "VERSION=$tag" $args
+docker build . -t "radian:$tag" --build-arg "VERSION=$tag"
 docker run -it --rm \
        -v "$PWD:/root/radian" \
        -v "$HOME/.emacs.d/straight/repos:/root/.emacs.d/straight/repos" \
        -w /root/radian \
-       "radian:$tag"
+       "radian:$tag" "${args[@]}"
