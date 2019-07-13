@@ -41,7 +41,13 @@
       (let ((link-target
              ;; This function returns the target of the link. If the
              ;; init-file is not a symlink, then we abort.
-             (file-symlink-p user-init-file)))
+             ;;
+             ;; We may be loading init.el in batch mode, in which case
+             ;; `user-init-file' is nil. In that case, we should have
+             ;; some backup options to try.
+             (file-symlink-p (or user-init-file
+                                 load-file-name
+                                 buffer-file-name))))
 
         (unless link-target
           (error "Init-file %S is not a symlink" this-file))
