@@ -3,9 +3,14 @@
 set -e
 set -o pipefail
 
+# If you pass an argument to this script, it is assumed to be where
+# the Radian repository will go. This is used by docker-install.bash,
+# which runs this script in a temporary directory rather than from
+# Radian.
+
 script="$(realpath "$0")"
 scripts="$(dirname "$script")"
-radian="$(dirname "$scripts")"
+radian="${1:-$(dirname "$scripts")}"
 
 safe_link() {
     if [[ -e "$2" && ! -L "$2" ]]; then

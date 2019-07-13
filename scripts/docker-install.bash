@@ -21,6 +21,6 @@ apt-get update
 apt-get install -y $(grep -v "^#" <<< "$packages")
 rm -rf /var/lib/apt/lists/*
 
-/tmp/symlink-dotfiles.bash
+/tmp/symlink-dotfiles.bash "$HOME/radian"
 
 rm /tmp/docker-install.bash /tmp/symlink-dotfiles.bash
