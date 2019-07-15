@@ -602,6 +602,14 @@ This is used to prevent duplicate entries in the kill ring.")
 
 ;;;; Mouse integration
 
+;; Scrolling is way too fast on macOS with Emacs 27 and on Linux in
+;; general. Decreasing the number of lines we scroll per mouse event
+;; improves the situation. Normally, holding shift allows this slower
+;; scrolling; instead, we make it so that holding shift accelerates
+;; the scrolling.
+(setq mouse-wheel-scroll-amount
+      '(1 ((shift) . 5) ((control))))
+
 (if (radian-operating-system-p macOS)
     ;; On macOS, mouse integration works out of the box in windowed
     ;; mode but not terminal mode. The following code to fix it was
@@ -628,13 +636,7 @@ This is used to prevent duplicate entries in the kill ring.")
 
       ;; Enable scrolling with the mouse wheel.
       (bind-keys ("<mouse-4>" . radian-scroll-down)
-                 ("<mouse-5>" . radian-scroll-up)))
-
-  ;; Although it works fine on macOS, scrolling is *way* too fast on
-  ;; Linux. Decreasing the number of lines that we scroll per scroll
-  ;; event helps the problem, although scrolling experience is still
-  ;; sub-optimal.
-  (setq mouse-wheel-scroll-amount '(1)))
+                 ("<mouse-5>" . radian-scroll-up))))
 
 ;;; Candidate selection
 
