@@ -4423,7 +4423,30 @@ command."
 ;; text.
 (use-package git-gutter-fringe
   :demand t
-  :after git-gutter)
+  :after git-gutter
+  :config
+
+  (fringe-helper-define 'radian--git-gutter-blank nil
+    "........"
+    "........"
+    "........"
+    "........"
+    "........"
+    "........"
+    "........"
+    "........")
+
+  (radian-defadvice radian--advice-git-gutter-remove-bitmaps (func &rest args)
+    :around git-gutter-fr:view-diff-infos
+    "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
+Instead, display simply a flat colored region in the fringe."
+    (cl-letf* ((fringe-helper-insert-region
+                (symbol-function #'fringe-helper-insert-region))
+               ((symbol-function #'fringe-helper-insert-region)
+                (lambda (beg end _bitmap &rest args)
+                  (apply fringe-helper-insert-region
+                         beg end 'radian--git-gutter-blank args))))
+      (apply func args))))
 
 ;;;; External commands
 
