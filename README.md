@@ -33,7 +33,7 @@ These dotfiles attempt to achieve the following goals:
     optional right-alignment support)
   * Extremely clean mode lighters with prettier names thanks to
     [Blackout]
-  * Aggressive startup optimization: 0.7s or less for a fully
+  * Aggressive startup optimization: 0.6s or less for a fully
     configured graphical frame, from cold boot
   * Aggressively consistent coding style and documentation,
     including heavy use of macros to automate and foolproof common
