@@ -3549,7 +3549,8 @@ This function calls `json-mode--update-auto-mode' to change the
 (use-package pkgbuild-mode)
 
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
-(use-package ssh-config-mode)
+(use-package ssh-config-mode
+  :blackout "SSH-Config")
 
 ;; Package `terraform-mode' provides major modes for Terraform
 ;; configuration files.
