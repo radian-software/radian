@@ -2304,7 +2304,7 @@ killed (which happens during Emacs shutdown)."
 ;; Company allows for multiple frontends to display the candidates,
 ;; such as a tooltip menu. Company stands for "Complete Anything".
 (use-package company
-  :defer 3
+  :defer 0.5
   :init
 
   (defvar radian--company-backends-global
