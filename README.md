@@ -87,8 +87,8 @@ configuration, and optionally installing local configuration.
 ### Installing software
 #### macOS
 
-* Emacs: `brew install python`; `brew cask install emacs`; (optional
-  for improved startup time) `brew install watchexec`
+* Emacs: `brew install bash python`; `brew cask install emacs`;
+  (optional for improved startup time) `brew install watchexec`
   * Code intelligence
     * Bash: `yarn global add bash-language-server`, but see [this
       issue](https://github.com/mads-hartmann/bash-language-server/issues/131).

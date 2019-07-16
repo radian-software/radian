@@ -1,7 +1,7 @@
 VERSION ?=
 CMD ?=
 
-longlines_files := $(shell find -name .git -prune -o -print)
+longlines_files := $(shell find . -name .git -prune -o -print)
 
 .PHONY: help
 help: ## Show this message
