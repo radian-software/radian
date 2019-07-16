@@ -1868,8 +1868,6 @@ the reverse direction from \\[pop-global-mark]."
 ;; Feature `isearch' provides a basic and fast mechanism for jumping
 ;; forward or backward to occurrences of a given search string.
 (use-feature isearch
-  ;; File does not provide the feature in Emacs 25.
-  :no-require t
   :config
 
   ;; Eliminate the 0.25s idle delay for isearch highlighting, as in my
@@ -2647,8 +2645,6 @@ nor requires Flycheck to be loaded."
 
 ;; Feature `text-mode' provides a major mode for editing plain text.
 (use-feature text-mode
-  ;; File does not provide the feature in Emacs 25.
-  :no-require t
   :config
 
   (add-hook 'text-mode-hook #'auto-fill-mode)
