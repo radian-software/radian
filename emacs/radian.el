@@ -4552,8 +4552,11 @@ changes, which means that `git-gutter' needs to be re-run.")
     (let ((new (cons (current-buffer) (selected-window))))
       (unless (equal new radian--git-gutter-last-buffer-and-window)
         (setq radian--git-gutter-last-buffer-and-window new)
-        (when git-gutter-mode
-          (git-gutter)))))
+        ;; Sometimes the current buffer has not gotten updated yet
+        ;; after switching window, for example after `quit-window'.
+        (with-current-buffer (window-buffer)
+          (when git-gutter-mode
+            (git-gutter))))))
 
   (use-feature autorevert
     :config
