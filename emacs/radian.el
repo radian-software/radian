@@ -4424,7 +4424,12 @@ command."
   ;; here fixes the issue.
   (setq git-gutter:disabled-modes '(fundamental-mode org-mode))
 
-  :defer 1.5
+  (radian-defhook radian--git-gutter-load ()
+    find-file-hook
+    "Load `git-gutter' when initially finding a file."
+    (require 'git-gutter)
+    (remove-hook 'find-file-hook #'radian--git-gutter-load))
+
   :config
 
   ;; Don't prompt when reverting hunk.
