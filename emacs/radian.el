@@ -4407,11 +4407,47 @@ command."
         ;; This will move backwards since lines will be negative.
         (forward-line lines))))
 
-  (radian-defadvice radian--git-gutter-on-window-change (&rest _)
-    :after select-window
-    "Update `git-gutter' after changing windows."
-    (when git-gutter-mode
-      (git-gutter)))
+  ;; Shuffle around all the hooks. `git-gutter' puts itself on a bunch
+  ;; of different things, but not exactly the right things. Remove all
+  ;; its meddling, and then do the right thing (run on window or
+  ;; buffer switch after a top-level command, after a buffer revert,
+  ;; and after Apheleia runs).
+
+  (remove-hook 'post-command-hook #'git-gutter:post-command-hook)
+  (ad-deactivate #'quit-window)
+  (ad-deactivate #'switch-to-buffer)
+
+  (defvar radian--git-gutter-last-buffer-and-window nil
+    "Cons of current buffer and selected window before last command.
+This is used to detect when the current buffer or selected window
+changes, which means that `git-gutter' needs to be re-run.")
+
+  (radian-defhook radian--git-gutter-on-buffer-or-window-change ()
+    post-command-hook
+    "Update `git-gutter' when current buffer or selected window changes."
+    (let ((new (cons (current-buffer) (selected-window))))
+      (unless (equal new radian--git-gutter-last-buffer-and-window)
+        (setq radian--git-gutter-last-buffer-and-window new)
+        (when git-gutter-mode
+          (git-gutter)))))
+
+  (use-feature autorevert
+    :config
+
+    (radian-defhook radian--git-gutter-after-autorevert ()
+      after-revert-hook
+      "Update `git-gutter' after the buffer is autoreverted."
+      (when git-gutter-mode
+        (git-gutter))))
+
+  (use-feature apheleia
+    :config
+
+    (radian-defhook radian--git-gutter-after-apheleia ()
+      apheleia-post-format-hook
+      "Update `git-gutter' after Apheleia formats the buffer."
+      (when git-gutter-mode
+        (git-gutter))))
 
   :blackout git-gutter-mode)
 
