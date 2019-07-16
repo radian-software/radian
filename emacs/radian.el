@@ -1623,6 +1623,35 @@ Interactively, reverse the characters in the current region."
    (set-char-table-range auto-fill-chars c t))
  "!-=+]};:'\",.?")
 
+(radian-defadvice radian--advice-auto-fill-only-text (&rest _)
+  :before-while do-auto-fill
+  "Only perform auto-fill in text, comments, or docstrings."
+  (cl-block nil
+    ;; Don't auto-fill on the first line of a docstring, since it
+    ;; shouldn't be wrapped into the body.
+    (when (and (derived-mode-p #'emacs-lisp-mode)
+               (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+               (save-excursion
+                 (beginning-of-line)
+                 (looking-at-p "[[:space:]]*\"")))
+      (cl-return))
+    (or (derived-mode-p 'text-mode)
+        ;; https://emacs.stackexchange.com/a/14716/12534
+        (when-let ((faces (get-text-property (point) 'face)))
+          (unless (listp faces)
+            (setq faces (list faces)))
+          (cl-some
+           (lambda (face)
+             (memq face '(font-lock-comment-face
+                          font-lock-comment-delimiter-face
+                          font-lock-doc-face)))
+           faces)))))
+
+(blackout 'auto-fill-mode)
+
+;; https://www.gnu.org/software/emacs/manual/html_node/efaq/Turning-on-auto_002dfill-by-default.html
+(setq-default auto-fill-function #'do-auto-fill)
+
 (defun radian--auto-fill-disable ()
   "Disable `auto-fill-mode' in the current buffer."
   (auto-fill-mode -1))
@@ -2646,8 +2675,6 @@ nor requires Flycheck to be loaded."
 ;; Feature `text-mode' provides a major mode for editing plain text.
 (use-feature text-mode
   :config
-
-  (add-hook 'text-mode-hook #'auto-fill-mode)
 
   (radian-defhook radian--flycheck-text-setup ()
     text-mode-hook
@@ -3735,6 +3762,13 @@ unhelpful."
               ((symbol-function #'describe-variable) #'helpful-variable)
               ((symbol-function #'help-buffer) #'current-buffer))
       (apply func args)))
+
+  (radian-defadvice radian--advice-fill-elisp-docstrings-correctly (&rest _)
+    :before-until fill-context-prefix
+    "Prevent `auto-fill-mode' from adding indentation to Elisp docstrings."
+    (when (and (derived-mode-p #'emacs-lisp-mode)
+               (eq (get-text-property (point) 'face) 'font-lock-doc-face))
+      ""))
 
   ;; The default mode lighter has a space instead of a hyphen.
   ;; Disgusting!

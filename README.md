@@ -48,6 +48,8 @@ These dotfiles attempt to achieve the following goals:
     partly on [`restart-emacs`][restart-emacs]
   * Automatic insertion of whitespace and indentation when pressing
     newline after inserting a pair of delimiters
+  * Global auto-fill configured to activate only in comments,
+    docstrings, and text
   * Configured packages: [Atomic Chrome][atomic-chrome] (with
     [Firefox] support), [Autorevert], [buffer-move], [Company],
     [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
