@@ -2810,6 +2810,58 @@ nor requires Flycheck to be loaded."
 (use-package go-mode
   :config
 
+  (defvar radian--go-defun-regexp
+    "^\\(const\\|func\\|import\\|interface\\|package\\|type\\|var\\)"
+    "Regexp matching top-level declarations in Go.")
+
+  (defun radian--go-beginning-of-defun (&optional arg)
+    "Move to beginning of current or previous top-level declaration."
+    (cond
+     ((null arg)
+      (cl-block nil
+        (while t
+          (re-search-backward radian--go-defun-regexp nil 'noerror)
+          (when (or (bobp)
+                    (eq (get-text-property (point) 'face)
+                        'font-lock-keyword-face))
+            (cl-return)))))
+     ((> arg 0)
+      (dotimes (_ arg)
+        (radian--go-beginning-of-defun)))
+     ((< arg 0)
+      ;; Yuck -- but we need to implement this, otherwise
+      ;; `end-of-defun' just does the wrong thing :/
+      (dotimes (_ (- arg))
+        (radian--go-beginning-of-defun)
+        (radian--go-end-of-defun)
+        (radian--go-end-of-defun))
+      (radian--go-beginning-of-defun))))
+
+  (defun radian--go-end-of-defun ()
+    "Move to end of current or previous top-level declaration.
+Only works if `radian--go-beginning-of-defun' was just called
+previously."
+    (dotimes (_ 2)
+      (cl-block nil
+        (while t
+          (re-search-forward radian--go-defun-regexp nil 'noerror)
+          (when (or (eobp)
+                    (save-excursion
+                      (beginning-of-line)
+                      (eq (get-text-property (point) 'face)
+                          'font-lock-keyword-face)))
+            (cl-return)))))
+    (beginning-of-line)
+    (go--backward-irrelevant 'stop-at-string)
+    (next-line))
+
+  (radian-defhook radian--go-defun-setup ()
+    go-mode-hook
+    "Set up \\[beginning-of-defun] and \\[end-of-defun] correctly.
+See <https://github.com/dominikh/go-mode.el/issues/232>."
+    (setq-local beginning-of-defun-function #'radian--go-beginning-of-defun)
+    (setq-local end-of-defun-function #'radian--go-end-of-defun))
+
   (use-feature lsp-ui
     :config
 
