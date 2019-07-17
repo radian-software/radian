@@ -2,7 +2,7 @@
  ("a.el" . "18966975db7110d0aac726be95b593e2fc3d44ed")
  ("all-the-icons.el" . "f996fafa5b2ea072d0ad1df9cd98acc75820f530")
  ("apache-mode" . "354f9302a8d805ac80d846adcd1cef10830b3d51")
- ("apheleia" . "f2ae6c7f29f282b2774edd984c5dc194e6c9c451")
+ ("apheleia" . "4e9f797210bd0e3777bf4f973ce137c43b1506fb")
  ("apples-mode" . "83a9ab0d6ba82496e2f7df386909b1a55701fccb")
  ("atomic-chrome" . "d8bff0b7db228b8a428f0db621702c665fb33570")
  ("auctex" . "d81f1a0a5b18ecc7668bb9d6469e3d882510a3d7")
