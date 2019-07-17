@@ -397,18 +397,7 @@ binding the variable dynamically over the entire init-file."
 ;; Package `use-package' provides a handy macro by the same name which
 ;; is essentially a wrapper around `with-eval-after-load' with a lot
 ;; of handy syntactic sugar and useful features.
-(straight-use-package
- '(use-package
-    :host github :repo "jwiegley/use-package"
-    :files (:defaults (:exclude
-                       "bind-key.el"
-                       "bind-chord.el"
-                       "use-package-chords.el"
-                       "use-package-ensure-system-package.el")
-                      "use-package-pkg.el")
-    ;; Use until <https://github.com/jwiegley/use-package/pull/783> is
-    ;; merged.
-    :fork (:repo "raxod502/use-package" :branch "fork/1")))
+(straight-use-package 'use-package)
 
 ;; When configuring a feature with `use-package', also tell
 ;; straight.el to install a package of the same name, unless otherwise

@@ -102,7 +102,7 @@
  ("treepy.el" . "b40e6b09eb9be45da67b8c9e4990a5a0d7a2a09d")
  ("typescript.el" . "08ceb01ff3983f6d743a83fa19dbf78f2a1609d2")
  ("undo-tree" . "d54ef13e3c69655e39f977b8bf75399a6d2b5e42")
- ("use-package" . "fd399d545f00c54f80cd2a2d04d020b8109466e5")
+ ("use-package" . "1d5ffb2e0d1427066ced58febbba68c1328bf001")
  ("vimrc-mode" . "13bc150a870d5d4a95f1111e4740e2b22813c30e")
  ("visual-regexp-steroids.el" . "a6420b25ec0fbba43bf57875827092e1196d8a9e")
  ("visual-regexp.el" . "3e3ed81a3cbadef1f1f4cb16f9112a58641d70ca")
