@@ -2842,7 +2842,7 @@ previously."
             (cl-return)))))
     (beginning-of-line)
     (go--backward-irrelevant 'stop-at-string)
-    (next-line))
+    (forward-line))
 
   (radian-defhook radian--go-defun-setup ()
     go-mode-hook
