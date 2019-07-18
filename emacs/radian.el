@@ -1612,8 +1612,12 @@ Interactively, reverse the characters in the current region."
    (set-char-table-range auto-fill-chars c t))
  "!-=+]};:'\",.?")
 
-(radian-defadvice radian--advice-auto-fill-only-text (&rest _)
-  :before-while do-auto-fill
+;; We could maybe use the variable `comment-auto-fill-only-comments'
+;; for this, but I wrote this code before I knew about it. Also, I'm
+;; not sure how well it handles the edge cases for docstrings and
+;; such.
+(radian-defadvice radian--advice-auto-fill-only-text (func &rest args)
+  :around internal-auto-fill
   "Only perform auto-fill in text, comments, or docstrings."
   (cl-block nil
     ;; Don't auto-fill on the first line of a docstring, since it
@@ -1624,17 +1628,35 @@ Interactively, reverse the characters in the current region."
                  (beginning-of-line)
                  (looking-at-p "[[:space:]]*\"")))
       (cl-return))
-    (or (derived-mode-p 'text-mode)
-        ;; https://emacs.stackexchange.com/a/14716/12534
-        (when-let ((faces (get-text-property (point) 'face)))
-          (unless (listp faces)
-            (setq faces (list faces)))
-          (cl-some
-           (lambda (face)
-             (memq face '(font-lock-comment-face
-                          font-lock-comment-delimiter-face
-                          font-lock-doc-face)))
-           faces)))))
+    (when (derived-mode-p 'text-mode)
+      (apply func args)
+      (cl-return))
+    ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
+    (when-let ((faces (save-excursion
+                        ;; In `web-mode', the end of the line isn't
+                        ;; fontified, so we have to step backwards by
+                        ;; one character before checking the
+                        ;; properties.
+                        (ignore-errors
+                          (backward-char))
+                        (get-text-property (point) 'face))))
+      (unless (listp faces)
+        (setq faces (list faces)))
+      (when (cl-some
+             (lambda (face)
+               (memq face '(font-lock-comment-face
+                            font-lock-comment-delimiter-face
+                            font-lock-doc-face
+                            web-mode-javascript-comment-face)))
+             faces)
+        ;; Fill Elisp docstrings to the appropriate column. Why
+        ;; docstrings are filled to a different column, I don't know.
+        (let ((fill-column (if (and
+                                (derived-mode-p #'emacs-lisp-mode)
+                                (memq 'font-lock-doc-face faces))
+                               emacs-lisp-docstring-fill-column
+                             fill-column)))
+          (apply func args))))))
 
 (blackout 'auto-fill-mode)
 
@@ -1664,6 +1686,30 @@ newline."
 (radian-fix-whitespace-global-mode +1)
 
 (put 'radian-fix-whitespace-mode 'safe-local-variable #'booleanp)
+
+;; Feature `newcomment' provides commands for commenting and
+;; uncommenting code, and editing comments.
+(use-feature newcomment
+  :bind (([remap default-indent-new-line] . radian-continue-comment))
+  :config
+
+  (defun radian-continue-comment ()
+    "Continue current comment, preserving trailing whitespace.
+This differs from `default-indent-new-line' in the following way:
+
+If you have a comment like \";; Some text\" with point at the end
+of the line, then running `default-indent-new-line' will get you
+a new line with \";; \", but running it again will get you a line
+with only \";;\" (no trailing whitespace). This is annoying for
+inserting a new paragraph in a comment. With this command, the
+two inserted lines are the same."
+    (interactive)
+    ;; `default-indent-new-line' uses `delete-horizontal-space'
+    ;; because in auto-filling we want to avoid the space character at
+    ;; the end of the line from being put at the beginning of the next
+    ;; line. But when continuing a comment it's not desired.
+    (cl-letf (((symbol-function #'delete-horizontal-space) #'ignore))
+      (default-indent-new-line))))
 
 ;; Feature `whitespace' provides a minor mode for highlighting
 ;; whitespace in various special ways.
@@ -2045,19 +2091,19 @@ the reverse direction from \\[pop-global-mark]."
       (add-to-list 'sp--special-self-insert-commands fun)))
 
   (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
-                         js2-mode json-mode lua-mode
+                         json-mode lua-mode
                          python-mode sh-mode web-mode go-mode
                          protobuf-mode typescript-mode))
     (sp-local-pair mode "{" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(js2-mode json-mode python-mode web-mode))
+  (dolist (mode '(json-mode python-mode web-mode))
     (sp-local-pair mode "[" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(python-mode sh-mode js2-mode lua-mode go-mode
+  (dolist (mode '(python-mode sh-mode lua-mode go-mode
                               typescript-mode web-mode))
     (sp-local-pair mode "(" nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
@@ -2947,88 +2993,6 @@ ARG is passed to `hindent-mode' toggle function."
 
   :blackout t)
 
-;;;; HTML
-;; https://www.w3.org/TR/html5/
-
-;; Package `web-mode' provides a major mode for HTML and related
-;; templating languages (PHP, ASP, Handlebars, etc.). It replaces the
-;; major mode `html-mode' which comes with Emacs. `web-mode' also
-;; handles CSS and JavaScript, so it can be used for those languages
-;; (or any mix of them).
-(use-package web-mode
-  ;; Unfortunately `web-mode' does not come with `auto-mode-alist'
-  ;; autoloads. We have to establish them manually. This list comes
-  ;; from the official website at http://web-mode.org/ as of
-  ;; 2018-07-09.
-  :mode (("\\.phtml\\'" . web-mode)
-         ("\\.tpl\\.php\\'" . web-mode)
-         ("\\.[agj]sp\\'" . web-mode)
-         ("\\.as[cp]x\\'" . web-mode)
-         ("\\.erb\\'" . web-mode)
-         ("\\.mustache\\'" . web-mode)
-         ("\\.djhtml\\'" . web-mode)
-         ("\\.html?\\'" . web-mode)
-         ;; My additions.
-         ("\\.ejs\\'" . web-mode)
-         ("\\.jsx\\'" . web-mode)
-         ("\\.tsx\\'" . web-mode))
-  :config
-
-  ;; Indent by two spaces by default.
-  (setq web-mode-markup-indent-offset 2)
-  (setq web-mode-code-indent-offset 2)
-
-  ;; Autocomplete </ instantly.
-  (setq web-mode-enable-auto-closing t)
-
-  ;; When using `web-mode' to edit JavaScript files, support JSX tags.
-  (add-to-list 'web-mode-content-types-alist
-               '("jsx" . "\\.js[x]?\\'")))
-
-;;;; JavaScript
-;; https://developer.mozilla.org/en-US/docs/Web/JavaScript
-
-;; Feature `js' provides a major mode `js-mode' for JavaScript. We
-;; don't use it, but we still configure some of its variables because
-;; `js2-mode' uses them.
-(use-feature js
-  :config
-
-  ;; Indent by two spaces by default.
-  (setq js-indent-level 2))
-
-;; Package `js2-mode' provides a better major mode for JavaScript. It
-;; builds on the major mode `js-mode' which comes with Emacs.
-(use-package js2-mode
-  :init
-
-  (defun radian-js2-or-web-mode ()
-    "Enable `js2-mode' or `web-mode' depending on buffer contents.
-If the current buffer appears to contain JSX code, enable
-`web-mode'. Otherwise, enable `js2-mode'. The purpose of this
-function is to deal with `web-mode' having much better JSX
-support than `js2-mode'."
-    (if (save-excursion
-          (goto-char (point-min))
-          (re-search-forward "</[a-z]+>" 20000 'noerror))
-        (web-mode)
-      (js2-mode)))
-
-  ;; The `js2-mode' package does not come with `auto-mode-alist'
-  ;; autoloads.
-  :mode (("\\.js\\'" . radian-js2-or-web-mode))
-  :interpreter ("node" . radian-js2-or-web-mode)
-  :config
-
-  ;; Treat shebang lines (e.g. for node) correctly.
-  (setq js2-skip-preprocessor-directives t)
-
-  ;; Replace the mode lighters. By default they are Javascript-IDE and
-  ;; JSX-IDE, which are not only improperly capitalized but also
-  ;; excessively wordy.
-  :blackout ((js2-mode . "JavaScript")
-             (js2-jsx-mode . "JSX")))
-
 ;;;; Lua
 ;; <http://www.lua.org/>
 
@@ -3500,27 +3464,6 @@ This prevents them from getting in the way of buffer selection."
   :demand t
   :after (:all lsp-clients tex))
 
-;;;; TypeScript
-;; https://www.typescriptlang.org/
-
-;; Package `typescript-mode' provides a major mode for TypeScript.
-(use-package typescript-mode
-  :config
-
-  ;; The standard TypeScript indent width is two spaces, not four.
-  (setq typescript-indent-level 2)
-
-  (radian-defhook radian--flycheck-typescript-setup ()
-    typescript-mode-hook
-    "If inside node_modules, disable the `typescript-tslint' Flycheck checker.
-If we don't disable it, then it will generally just generate
-several thousand errors, disable itself, and print a warning."
-    (when (locate-dominating-file buffer-file-name "node_modules")
-      (radian--flycheck-disable-checkers 'typescript-tslint)))
-
-  ;; Fix capitalization. It's TypeScript, not typescript.
-  :blackout "TypeScript")
-
 ;;;; VimScript
 ;; http://vimdoc.sourceforge.net/htmldoc/usr_41.html
 
@@ -3535,6 +3478,73 @@ several thousand errors, disable itself, and print a warning."
     ;; Based on https://stackoverflow.com/a/1819405/3538165.
     (setq-local tab-width 2)
     (setq-local indent-line-function 'insert-tab)))
+
+;;;; Web
+;; https://developer.mozilla.org/en-US/docs/web/HTML
+;; https://developer.mozilla.org/en-US/docs/Web/CSS
+;; https://developer.mozilla.org/en-US/docs/Web/JavaScript
+
+;; Package `web-mode' provides a major mode for HTML, CSS, JavaScript,
+;; and every conceivable thing adjacent (TypeScript, JSX, TSX, PSP,
+;; ASP, Handlebars, etc.) all at once.
+(use-package web-mode
+  ;; Unfortunately `web-mode' does not come with `auto-mode-alist'
+  ;; autoloads. We have to establish them manually. This list comes
+  ;; from the official website at <http://web-mode.org/> as of
+  ;; 2018-07-09.
+  :mode (("\\.phtml\\'" . web-mode)
+         ("\\.tpl\\.php\\'" . web-mode)
+         ("\\.[agj]sp\\'" . web-mode)
+         ("\\.as[cp]x\\'" . web-mode)
+         ("\\.erb\\'" . web-mode)
+         ("\\.mustache\\'" . web-mode)
+         ("\\.djhtml\\'" . web-mode)
+         ("\\.html?\\'" . web-mode)
+         ;; My additions.
+         ("\\.ejs\\'" . web-mode)
+         ("\\.jsx?\\'" . web-mode)
+         ("\\.tsx?\\'" . web-mode))
+  ;; Use `web-mode' rather than `js-mode' for scripts.
+  :interpreter (("js" . web-mode)
+                ("node" . web-mode))
+  :config
+
+  ;; Indent by two spaces by default.
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+
+  ;; Autocomplete </ instantly.
+  (setq web-mode-enable-auto-closing t)
+
+  ;; When using `web-mode' to edit JavaScript files, support JSX tags.
+  (add-to-list 'web-mode-content-types-alist
+               '("jsx" . "\\.js[x]?\\'"))
+
+  ;; Create line comments instead of block comments by default in
+  ;; JavaScript. See <https://github.com/fxbois/web-mode/issues/619>.
+  (let ((types '("javascript" "jsx")))
+    (setq web-mode-comment-formats
+          (cl-remove-if (lambda (item)
+                          (member (car item) types))
+                        web-mode-comment-formats))
+    (dolist (type types)
+      (push (cons type "//") web-mode-comment-formats)))
+
+  (radian-defhook radian--web-js-fix-comments ()
+    web-mode-hook
+    "Fix comment handling in `web-mode' for JavaScript."
+    (when (member web-mode-content-type '("javascript" "jsx"))
+
+      ;; For some reason the default is to insert HTML comments even
+      ;; in JavaScript.
+      (setq-local comment-start "//")
+      (setq-local comment-end "")
+
+      ;; Needed since otherwise the default value generated by
+      ;; `comment-normalize-vars' will key off the syntax and think
+      ;; that a single "/" starts a comment, which completely borks
+      ;; auto-fill.
+      (setq-local comment-start-skip "// *"))))
 
 ;;; Configuration file formats
 
