@@ -67,9 +67,10 @@ but can wrap at any higher level up to the top-level form."
 
 (defmacro radian-flet (bindings &rest body)
   "Temporarily override function definitions using `cl-letf*'.
-NAME is the function to override. It has access to the original
-function as a lexically bound variable by the same name, for use
-with `funcall'. ARGLIST and BODY are as in `defun'.
+BINDINGS are composed of `defun'-ish forms. NAME is the function
+to override. It has access to the original function as a
+lexically bound variable by the same name, for use with
+`funcall'. ARGLIST and BODY are as in `defun'.
 
 \(fn ((defun NAME ARGLIST &rest BODY) ...) BODY...)"
   (declare (indent defun))

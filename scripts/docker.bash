@@ -23,9 +23,17 @@ docker() {
     fi
 }
 
-docker build . -t "radian:$tag" --build-arg "VERSION=$tag"
+docker build . -t "radian:$tag" \
+       --build-arg "UID=$UID" \
+       --build-arg "VERSION=$tag"
+
+repos=".emacs.d/straight/repos"
+
+# If we don't do this, then the directory gets created in the host
+# filesystem with root ownership :/
+mkdir -p "$HOME/${repos}"
+
 docker run -it --rm \
-       -v "$PWD:/root/radian" \
-       -v "$HOME/.emacs.d/straight/repos:/root/.emacs.d/straight/repos" \
-       -w /root/radian \
+       -v "$PWD:/home/docker/radian" \
+       -v "$HOME/${repos}:/home/docker/${repos}" \
        "radian:$tag" "${args[@]}"

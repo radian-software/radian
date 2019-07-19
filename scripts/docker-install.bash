@@ -3,6 +3,13 @@
 set -e
 set -o pipefail
 
+if (( $# != 1 )); then
+    echo "usage: docker-install.bash UID" >&2
+    exit 1
+fi
+
+uid="$1"
+
 packages="
 
 # needed to run build system
@@ -21,6 +28,6 @@ apt-get update
 apt-get install -y $(grep -v "^#" <<< "$packages")
 rm -rf /var/lib/apt/lists/*
 
-/tmp/symlink-dotfiles.bash "$HOME/radian"
+useradd --uid="$uid" --create-home docker
 
-rm /tmp/docker-install.bash /tmp/symlink-dotfiles.bash
+rm "$0"
