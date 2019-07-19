@@ -1628,7 +1628,8 @@ Interactively, reverse the characters in the current region."
                  (beginning-of-line)
                  (looking-at-p "[[:space:]]*\"")))
       (cl-return))
-    (when (derived-mode-p 'text-mode)
+    (when (and (derived-mode-p 'text-mode)
+               (not (derived-mode-p 'yaml-mode)))
       (apply func args)
       (cl-return))
     ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
@@ -1662,10 +1663,6 @@ Interactively, reverse the characters in the current region."
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/efaq/Turning-on-auto_002dfill-by-default.html
 (setq-default auto-fill-function #'do-auto-fill)
-
-(defun radian--auto-fill-disable ()
-  "Disable `auto-fill-mode' in the current buffer."
-  (auto-fill-mode -1))
 
 (define-minor-mode radian-fix-whitespace-mode
   "Minor mode to automatically fix whitespace on save.
@@ -3648,10 +3645,7 @@ This function calls `json-mode--update-auto-mode' to change the
   :blackout "TOML")
 
 ;; Package `yaml-mode' provides a major mode for YAML.
-(use-package yaml-mode
-  :config
-
-  (add-hook 'yaml-mode-hook #'radian--auto-fill-disable))
+(use-package yaml-mode)
 
 ;;; Introspection
 ;;;; Help
