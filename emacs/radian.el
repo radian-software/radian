@@ -2090,34 +2090,17 @@ the reverse direction from \\[pop-global-mark]."
     (dolist (fun '(c-electric-paren c-electric-brace))
       (add-to-list 'sp--special-self-insert-commands fun)))
 
-  (dolist (mode '(c-mode c++-mode css-mode objc-mode java-mode
-                         json-mode lua-mode
-                         python-mode sh-mode web-mode go-mode
-                         protobuf-mode typescript-mode))
-    (sp-local-pair mode "{" nil :post-handlers
+  (defun radian--smartparens-pair-setup (mode delim)
+    "In major mode MODE, set up DELIM with newline-and-indent."
+    (sp-local-pair mode delim nil :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (mode '(json-mode python-mode web-mode))
-    (sp-local-pair mode "[" nil :post-handlers
-                   '((radian--smartparens-indent-new-pair "RET")
-                     (radian--smartparens-indent-new-pair "<return>"))))
-
-  (dolist (mode '(python-mode sh-mode lua-mode go-mode
-                              typescript-mode web-mode))
-    (sp-local-pair mode "(" nil :post-handlers
-                   '((radian--smartparens-indent-new-pair "RET")
-                     (radian--smartparens-indent-new-pair "<return>"))))
-
-  (dolist (mode '(python-mode))
-    (sp-local-pair mode "\"\"\"" "\"\"\"" :post-handlers
-                   '((radian--smartparens-indent-new-pair "RET")
-                     (radian--smartparens-indent-new-pair "<return>"))))
-
-  (dolist (mode '(latex-mode))
-    (sp-local-pair mode "\\[" "\\]" :post-handlers
-                   '((radian--smartparens-indent-new-pair "RET")
-                     (radian--smartparens-indent-new-pair "<return>"))))
+  (radian--smartparens-pair-setup #'prog-mode "(")
+  (radian--smartparens-pair-setup #'prog-mode "[")
+  (radian--smartparens-pair-setup #'prog-mode "{")
+  (radian--smartparens-pair-setup #'python-mode "\"\"\"")
+  (radian--smartparens-pair-setup #'latex-mode "\\[")
 
   ;; Work around https://github.com/Fuco1/smartparens/issues/783.
   (setq sp-escape-quotes-after-insert nil)
