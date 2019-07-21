@@ -86,5 +86,5 @@ init-file is loaded, not just once.")
                 ;; straight.el, since we are going to handle that
                 ;; later, asynchronously.
                 (delete-file (concat radian-lib-file "c"))
-                (load radian-lib-file nil 'nomessage)))
+                (load radian-lib-file nil 'nomessage 'nosuffix)))
           (run-hooks 'radian--finalize-init-hook))))))

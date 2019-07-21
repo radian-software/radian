@@ -5,7 +5,7 @@ shared: &shared
   steps:
     - checkout
     # This command will pick up $VERSION from the environment.
-    - run: make docker CMD="make -k compile checkdoc longlines"
+    - run: make docker CMD="make -k link build compile checkdoc longlines"
 jobs:
   emacs-25.2:
     <<: *shared

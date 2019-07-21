@@ -17,11 +17,11 @@ link: ## Symlink dotfiles into home directory
 	@scripts/symlink-dotfiles.bash
 
 .PHONY: build
-build: link ## Make sure straight.el dependencies are built
+build: ## Make sure straight.el dependencies are built
 	@scripts/build.bash
 
 .PHONY: compile
-compile: link build ## Byte-compile radian.el
+compile: ## Byte-compile radian.el
 	@scripts/byte-compile.bash
 
 .PHONY: checkdoc
