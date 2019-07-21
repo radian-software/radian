@@ -28,7 +28,12 @@
 (require 'map)
 (require 'subr-x)
 
-;;; Define Radian customization group
+;;; Define Radian customization groups
+
+(defgroup radian-hooks nil
+  "Startup hooks for Radian Emacs."
+  :group 'radian
+  :link '(url-link :tag "GitHub" "https://github.com/raxod502/radian"))
 
 (defgroup radian nil
   "Customize your Radian Emacs experience."
@@ -185,7 +190,7 @@ This means that FILENAME is a symlink whose target is inside
   (declare (indent 0))
   `(cl-letf* ((write-region-orig (symbol-function #'write-region))
               ((symbol-function #'write-region)
-               (lambda (start end filename &optional append visit lockname
+               (lambda (start end filename &optional append _visit lockname
                               mustbenew)
                  (funcall write-region-orig start end filename append 0
                           lockname mustbenew)
@@ -249,19 +254,102 @@ return value is just PATH."
 (setq radian--finalize-init-hook nil)
 
 (defcustom radian-before-straight-hook nil
-  "Hook run just before Radian bootstraps straight.el."
+  "Hook run just before Radian bootstraps straight.el.
+For use with `radian-local-on-hook' in init.local.el."
+  :group 'radian-hooks
   :type 'hook)
+
+(defcustom radian-after-init-hook nil
+  "Hook run after at the very end of init.
+For use with `radian-local-on-hook' in init.local.el."
+  :group 'radian-hooks
+  :type 'hook)
+
+(defvar radian--hook-contents nil
+  "Alist mapping local init hooks to lists of forms.
+This is used to embed local init hook code directly into the
+init-file at the appropriate places during byte-compilation,
+without breaking macro-expansion.")
+
+;; Idempotency.
+(setq radian--hook-contents nil)
 
 ;; Allow binding this variable dynamically before straight.el has been
 ;; loaded.
 (defvar straight-current-profile)
 
-(defun radian--run-hook (hook)
-  "Run the given local init HOOK, a symbol.
-This delegates to `run-hooks', binding `straight-current-profile'
-appropriately."
-  (let ((straight-current-profile 'radian-local))
-    (run-hooks hook)))
+(defmacro radian--load-local-init-file ()
+  "Load local init-file, with crazy hacks for byte-compilation.
+In particular, if we are byte-compiling, actually macroexpand to
+the entire contents of the local init-file, except that the
+bodies of invocations to `radian-local-on-hook' are recorded in
+`radian--hook-contents'. Otherwise just load the file like
+usual."
+  (if byte-compile-current-file
+      (let ((forms nil))
+        (with-temp-buffer
+          (ignore-errors
+            (insert-file-contents-literally radian-local-init-file))
+          (condition-case _
+              (while t
+                (let ((form (read (current-buffer))))
+                  (if (and (listp form)
+                           (eq (nth 0 form) #'radian-local-on-hook)
+                           (nth 1 form)
+                           (symbolp (nth 1 form))
+                           (nthcdr 2 form))
+                      (let* ((name (nth 1 form))
+                             (body (nthcdr 2 form))
+                             (hook (intern (format "radian-%S-hook" name)))
+                             (link (assq hook radian--hook-contents)))
+                        (unless link
+                          (setq link (cons hook nil))
+                          (push link radian--hook-contents))
+                        (dolist (subform body)
+                          (push subform (cdr link))))
+                    (push form forms))))
+            (end-of-file)))
+        (setq forms (nreverse forms))
+        (dolist (link radian--hook-contents)
+          (setf (cdr link)
+                (nreverse (cdr link))))
+        `(progn ,@forms))
+    `(load radian-local-init-file 'noerror 'nomessage)))
+
+(defmacro radian-local-on-hook (name &rest body)
+  "Register some code to be run on one of Radian's hooks.
+The hook to be used is `radian-NAME-hook', with NAME an unquoted
+symbol, and the code which is added is BODY wrapped in a `progn'.
+See \\[customize-group] RET radian-hooks RET for a list of hooks
+which you can use with this macro in your local init-file.
+
+Using this macro instead of defining functions and adding them to
+Radian's hooks manually means that a lot of magic happens which
+allows Radian to embed your entire local init-file into Radian
+during byte-compilation without breaking macroexpansion in
+unexpected ways."
+  (declare (indent 1))
+  (let ((func-name (intern (format "radian-local--%S" name)))
+        (hook (intern (format "radian-%S-hook" name))))
+    `(progn
+       (radian-defhook ,func-name ()
+         ,hook
+         "Automatically-generated local hook function."
+         (radian-protect-macros
+           ,@body)))))
+
+(defmacro radian--run-hook (name)
+  "Run the given local init HOOK.
+The hook to be used is `radian-NAME-hook', with NAME an unquoted
+symbol. This binds `straight-current-profile', and also has some
+gnarly hacks to allow Radian to embed the entire contents of the
+hook directly into the init-file during byte-compilation."
+  (declare (indent 0))
+  (let ((hook (intern (format "radian-%S-hook" name))))
+    `(let ((straight-current-profile 'radian-local))
+       (run-hooks ',hook)
+       ,@(when byte-compile-current-file
+           (alist-get hook radian--hook-contents)))))
 
 ;; Allow to disable local customizations with a
 ;; command-line argument.
@@ -274,7 +362,7 @@ appropriately."
           (delete "--no-local" command-line-args))
 
   ;; Load local customizations.
-  (load radian-local-init-file 'noerror 'nomessage))
+  (radian--load-local-init-file))
 
 ;;; Startup optimizations
 
@@ -376,7 +464,7 @@ binding the variable dynamically over the entire init-file."
 ;; Clear out recipe overrides (in case of re-init).
 (setq straight-recipe-overrides nil)
 
-(radian--run-hook 'radian-before-straight-hook)
+(radian--run-hook before-straight)
 
 ;; Bootstrap the package manager, straight.el.
 (defvar bootstrap-version)
@@ -5066,7 +5154,7 @@ your local configuration."
 
 ;;; Closing
 
-(radian--run-hook 'radian-after-init-hook)
+(radian--run-hook after-init)
 
 ;; Prune the build cache for straight.el; this will prevent it from
 ;; growing too large. Do this after the final hook to prevent packages
@@ -5105,6 +5193,10 @@ your local configuration."
                 (save-match-data
                   (save-excursion
                     (goto-char (point-min))
+                    (when (looking-at "In toplevel form:")
+                      (forward-line))
+                    (when (looking-at "radian\\.el:[0-9]+:[0-9]+:Warning: ")
+                      (goto-char (match-end 0)))
                     (message "Failed to byte-compile%s"
                              (if (looking-at ".+")
                                  (format ": %s" (match-string 0))

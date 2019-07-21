@@ -91,6 +91,17 @@ init-file is loaded, not just once.")
                   (load-prefer-newer t)
                   (stale-bytecode t))
               (catch 'stale-bytecode
+                ;; We actually embed the contents of the local
+                ;; init-file directly into the compiled radian.elc, so
+                ;; that it can get compiled as well (and its
+                ;; macroexpansion can use packages that Radian only
+                ;; loads at compile-time). So that means we have to go
+                ;; the slow path if the local init-file has been
+                ;; updated more recently than the compiled radian.elc.
+                (when (file-newer-than-file-p
+                       radian-local-init-file
+                       (concat radian-lib-file "c"))
+                  (throw 'stale-bytecode nil))
                 (load
                  (file-name-sans-extension radian-lib-file)
                  nil 'nomessage)
@@ -99,6 +110,7 @@ init-file is loaded, not just once.")
                 ;; Don't bother trying to recompile, unlike in
                 ;; straight.el, since we are going to handle that
                 ;; later, asynchronously.
-                (delete-file (concat radian-lib-file "c"))
+                (ignore-errors
+                  (delete-file (concat radian-lib-file "c")))
                 (load radian-lib-file nil 'nomessage 'nosuffix)))
           (run-hooks 'radian--finalize-init-hook)))))))

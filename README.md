@@ -39,8 +39,9 @@ These dotfiles attempt to achieve the following goals:
     that weren't designed to be lazy-loaded; by extensive use of idle
     timers; by disabling of heavy autoloads; by asynchronous
     byte-compilation of the init-file in a subprocess on successful
-    init; and by running all customizations before the first graphical
-    frame is initialized)
+    init, with the local init-file macroexpanded and embedded directly
+    into Radian during compilation; and by running all customizations
+    before the first graphical frame is initialized)
   * Aggressively consistent coding style and documentation,
     including heavy use of macros to automate and foolproof common
     operations
@@ -208,6 +209,36 @@ Do not attempt to use the `emacs` subdirectory of this repository as
 
 I suggest versioning your local dotfiles in a separate repository, and
 symlinking them to the appropriate locations. This is what I do.
+
+Here is what your `init.local.el` should probably look like:
+
+    ;; code that should be run at the very beginning of init, e.g.
+
+    (setq radian-font ...)
+    (setq radian-font-size ...)
+
+    (radian-local-on-hook before-straight
+
+      ;; code that should be run right before straight.el is bootstrapped,
+      ;; e.g.
+
+      (setq straight-vc-git-default-protocol ...)
+      (setq straight-check-for-modifications ...))
+
+    (radian-local-on-hook after-init
+
+      ;; code that should be run at the end of init, e.g.
+
+      (use-package ...))
+
+    ;; see M-x customize-group RET radian-hooks RET for which hooks you
+    ;; can use with `radian-local-on-hook'
+
+You don't have to worry about byte-compiling your local init-file;
+Radian actually macroexpands it and embeds it directly into the
+byte-compiled Radian init-file. Using the macro `radian-local-on-hook`
+instead of defining functions and adding them to Radian's hooks
+manually enables some magic that makes this actually work properly.
 
 ## Contributing
 
