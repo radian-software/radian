@@ -33,13 +33,14 @@ These dotfiles attempt to achieve the following goals:
     optional right-alignment support)
   * Extremely clean mode lighters with prettier names thanks to
     [Blackout]
-  * Aggressive startup optimization: 0.6s or less for a fully
-    configured graphical frame, from cold boot (by aggressive
-    lazy-loading of everything; using [`el-patch`][el-patch] to
-    lazy-load packages that weren't designed to be lazy-loaded; by
-    extensive use of idle timers; by disabling of heavy autoloads; and
-    by asynchronous byte-compilation of the init-file in a subprocess
-    on successful init)
+  * Aggressive startup optimization: as fast as 0.33s for a fully
+    configured graphical frame (by aggressive lazy-loading of
+    everything; using [`el-patch`][el-patch] to lazy-load packages
+    that weren't designed to be lazy-loaded; by extensive use of idle
+    timers; by disabling of heavy autoloads; by asynchronous
+    byte-compilation of the init-file in a subprocess on successful
+    init; and by running all customizations before the first graphical
+    frame is initialized)
   * Aggressively consistent coding style and documentation,
     including heavy use of macros to automate and foolproof common
     operations

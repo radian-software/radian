@@ -8,13 +8,27 @@
 ;; exporting USER_EMACS_DIRECTORY to another .emacs.d directory.
 (let ((alternate-user-emacs-directory (getenv "USER_EMACS_DIRECTORY")))
 
-  (if alternate-user-emacs-directory
-      (progn
-        (setq alternate-user-emacs-directory
-              (file-name-as-directory alternate-user-emacs-directory))
-        (setq user-emacs-directory alternate-user-emacs-directory)
-        (setq user-init-file (expand-file-name "init.el" user-emacs-directory))
-        (load user-init-file 'noerror 'nomessage))
+  (defvar radian--init-file-loaded-p nil
+    "Non-nil if the init-file has already been loaded.
+This is important for Emacs 27 and above, since our early
+init-file just loads the regular init-file, which would lead to
+loading the init-file twice if it were not for this variable.")
+
+  (cond
+   ;; If already loaded, do nothing. But still allow re-loading, just
+   ;; do it only once during init.
+   ((and (not after-init-time) radian--init-file-loaded-p))
+
+   ;; Delegate to another Emacs configuration. (We still don't want to
+   ;; load it twice.)
+   (alternate-user-emacs-directory
+    (setq alternate-user-emacs-directory
+          (file-name-as-directory alternate-user-emacs-directory))
+    (setq user-emacs-directory alternate-user-emacs-directory)
+    (setq user-init-file (expand-file-name "init.el" user-emacs-directory))
+    (load user-init-file 'noerror 'nomessage))
+   (t
+    (setq radian--init-file-loaded-p t)
 
     (defvar radian-minimum-emacs-version "25.2"
       "Radian Emacs does not support any Emacs version below this.")
@@ -87,4 +101,4 @@ init-file is loaded, not just once.")
                 ;; later, asynchronously.
                 (delete-file (concat radian-lib-file "c"))
                 (load radian-lib-file nil 'nomessage 'nosuffix)))
-          (run-hooks 'radian--finalize-init-hook))))))
+          (run-hooks 'radian--finalize-init-hook)))))))

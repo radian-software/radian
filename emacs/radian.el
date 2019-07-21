@@ -4948,19 +4948,23 @@ an effect for Emacs 26 or below."
   ;; Disable the tool bar and menu bar. See
   ;; <https://github.com/raxod502/radian/issues/180> for why we do it
   ;; this way instead of via `tool-bar-mode' and `menu-bar-mode'.
-  (push '(tool-bar-lines . 0) default-frame-alist)
-  (push '(menu-bar-lines . 0) default-frame-alist)
+  (add-to-list 'default-frame-alist '(tool-bar-lines . 0))
+  (add-to-list 'default-frame-alist '(menu-bar-lines . 0))
 
-  ;; Prevent the cursor from blinking.
-  (blink-cursor-mode -1)
+  ;; Prevent the cursor from blinking. We can't use
+  ;; `blink-cursor-mode' because that doesn't work while loading the
+  ;; early init-file.
+  (setq no-blinking-cursor t)
 
   ;; Set the default font size.
   (when radian-font-size
     (set-face-attribute 'default nil :height radian-font-size))
 
-  ;; Set the default font.
+  ;; Set the default font. No, I have no idea why we have to do it
+  ;; this way. Using `set-face-attribute' does not have an effect,
+  ;; unlike with the font size.
   (when radian-font
-    (set-frame-font radian-font 'keep-size t))
+    (add-to-list 'default-frame-alist `(font . ,radian-font)))
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
