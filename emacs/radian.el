@@ -1036,37 +1036,13 @@ default."
 
   (save-place-mode +1)
 
-  :config/el-patch
-
-  (defun save-place-alist-to-file ()
-    ;; No docstring on this function originally. To clarify, the reason
-    ;; for this patch is to silence the save.
-    (el-patch-add
-      "Write `save-place-alist' to a file, but do so silently.")
-    (let ((file (expand-file-name save-place-file))
-          (coding-system-for-write 'utf-8))
-      (with-current-buffer (get-buffer-create " *Saved Places*")
-        (delete-region (point-min) (point-max))
-        (when save-place-forget-unreadable-files
-          (save-place-forget-unreadable-files))
-        (insert (format ";;; -*- coding: %s -*-\n"
-                        (symbol-name coding-system-for-write)))
-        (let ((print-length nil)
-              (print-level nil))
-          (pp save-place-alist (current-buffer)))
-        (let ((version-control
-               (cond
-                ((null save-place-version-control) nil)
-                ((eq 'never save-place-version-control) 'never)
-                ((eq 'nospecial save-place-version-control) version-control)
-                (t
-                 t))))
-          (condition-case nil
-              ;; Don't use write-file; we don't want this buffer to visit it.
-              (write-region (point-min) (point-max) file
-                            (el-patch-add nil 'nomsg))
-            (file-error (message "Saving places: can't write %s" file)))
-          (kill-buffer (current-buffer)))))))
+  (radian-defadvice radian--advice-save-place-quickly-and-silently
+      (func &rest args)
+    :around save-place-alist-to-file
+    "Make `save-place' save more quickly and silently."
+    (radian--with-silent-write
+      (cl-letf (((symbol-function #'pp) #'prin1))
+        (apply func args)))))
 
 ;; Package `projectile' keeps track of a "project" list, which is
 ;; automatically added to as you visit Git repositories, Node.js
