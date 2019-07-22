@@ -4885,28 +4885,77 @@ spam. This advice, however, inhibits the message for everyone.")
 This is non-nil if `radian--advice-kill-emacs-dispatch' has called
 `restart-emacs'.")
 
+  (defvar radian--restart-emacs-eager-hook-functions
+    ;; This list contains hooks that I determined via profiling to be
+    ;; slow (double-digit milliseconds).
+    '(prescient--save
+      radian--org-clock-save
+      save-place-kill-emacs-hook)
+    "List of functions on `kill-emacs-hook' which can be run eagerly.
+If actually present on `kill-emacs-hook', then these functions
+are run immediately on `save-buffers-kill-emacs'. This means that
+Emacs shutdown appears to be slightly faster.
+
+Functions can only be added here if it is okay to run them even
+when shutting down Emacs is canceled. However, it is fine to put
+functions here that aren't actually present on `kill-emacs-hook'.")
+
+  (defvar radian--restart-emacs-eager-hook-functions-run nil
+    "List of functions on `kill-emacs-hook' which have been run eagerly.
+The global value of this variable is irrelevant; it is always
+bound dynamically before being used.")
+
   (radian-defadvice radian--advice-kill-emacs-dispatch
       (save-buffers-kill-emacs &optional arg)
     :around save-buffers-kill-emacs
     "Allow restarting Emacs or starting a new session on shutdown."
     (if radian--restart-in-progress
         (funcall save-buffers-kill-emacs arg)
-      (let ((prompt "Really exit (or restart, or start new) Emacs? (y/n/r/e) ")
+      (let ((radian--restart-in-progress t)
+            ;; Don't mutate the global value.
+            (radian--restart-emacs-eager-hook-functions-run nil)
+            (prompt "Really exit (or restart, or start new) Emacs? (y/n/r/e) ")
             (key nil))
+        (dolist (func radian--restart-emacs-eager-hook-functions)
+          ;; Run eager hook functions asynchronously while waiting for
+          ;; user input. Use a separate idle timer for each function
+          ;; because the order shouldn't be important, and because
+          ;; that way if we don't actually restart then we can cancel
+          ;; out faster (we don't have to wait for all the eager hook
+          ;; functions to run).
+          (run-with-idle-timer
+           0 nil
+           (lambda ()
+             (when (and radian--restart-in-progress
+                        (memq func kill-emacs-hook))
+               (funcall func)
+               ;; Thank goodness Elisp is single-threaded.
+               (push func radian--restart-emacs-eager-hook-functions-run)))))
         (while (null key)
           (let ((cursor-in-echo-area t))
             (when minibuffer-auto-raise
               (raise-frame (window-frame (minibuffer-window))))
-            (pcase (setq key
-                         (read-key (propertize prompt
-                                               'face 'minibuffer-prompt)))
-              ((or ?y ?Y) (funcall save-buffers-kill-emacs arg))
-              ((or ?n ?N))
-              ((or ?r ?R) (let ((radian--restart-in-progress t))
-                            (restart-emacs arg)))
-              ((or ?e ?E) (radian-new-emacs arg))
-              (?\C-g (signal 'quit nil))
-              (_ (setq key nil)))))
+            (setq key
+                  (read-key (propertize prompt
+                                        'face 'minibuffer-prompt)))
+            ;; No need to re-run the hooks that we already ran
+            ;; eagerly. (This is the whole point of those
+            ;; shenanigans.)
+            (let ((kill-emacs-hook
+                   (cl-remove-if
+                    (lambda (func)
+                      (memq
+                       func
+                       radian--restart-emacs-eager-hook-functions-run))
+                    kill-emacs-hook)))
+              (pcase key
+                ((or ?y ?Y) (funcall save-buffers-kill-emacs arg))
+                ((or ?n ?N))
+                ((or ?r ?R)
+                 (restart-emacs arg))
+                ((or ?e ?E) (radian-new-emacs arg))
+                (?\C-g (signal 'quit nil))
+                (_ (setq key nil))))))
         (message "%s%c" prompt key))))
 
   :config/el-patch
