@@ -5064,14 +5064,10 @@ an effect for Emacs 26 or below."
 
 (when (display-graphic-p)
 
-  ;; Disable the scroll bars.
+  ;; Disable unnecessary graphical elements.
+  (menu-bar-mode -1)
   (scroll-bar-mode -1)
-
-  ;; Disable the tool bar and menu bar. See
-  ;; <https://github.com/raxod502/radian/issues/180> for why we do it
-  ;; this way instead of via `tool-bar-mode' and `menu-bar-mode'.
-  (add-to-list 'default-frame-alist '(tool-bar-lines . 0))
-  (add-to-list 'default-frame-alist '(menu-bar-lines . 0))
+  (tool-bar-mode -1)
 
   ;; Prevent the cursor from blinking. Do it two ways: using the minor
   ;; mode only works during regular init, while using the variable
@@ -5097,14 +5093,6 @@ an effect for Emacs 26 or below."
   (radian-with-operating-system macOS
     (add-to-list 'default-frame-alist '(ns-appearance . dark))
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))))
-
-;; For terminal Emacs only, disable the menu bar the proper way (using
-;; `menu-bar-mode'). Unlike in windowed Emacs, this doesn't have a big
-;; performance impact. Furthermore, if we don't do it this way in the
-;; terminal, then you can see the menu bar during startup
-;; unfortunately.
-(unless (display-graphic-p)
-  (menu-bar-mode -1))
 
 ;;;; Mode line
 
