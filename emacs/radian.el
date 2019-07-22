@@ -5193,7 +5193,9 @@ your local configuration."
           (unless (process-live-p proc)
             (with-current-buffer (process-buffer proc)
               (if (= 0 (process-exit-status proc))
-                  (insert "Byte-compilation completed successfully!\n")
+                  (progn
+                    (insert "Byte-compilation completed successfully!\n")
+                    (message "Byte-compiled updated configuration"))
                 (save-match-data
                   (save-excursion
                     (goto-char (point-min))
