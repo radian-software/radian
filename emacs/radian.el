@@ -5073,9 +5073,10 @@ an effect for Emacs 26 or below."
   (add-to-list 'default-frame-alist '(tool-bar-lines . 0))
   (add-to-list 'default-frame-alist '(menu-bar-lines . 0))
 
-  ;; Prevent the cursor from blinking. We can't use
-  ;; `blink-cursor-mode' because that doesn't work while loading the
-  ;; early init-file.
+  ;; Prevent the cursor from blinking. Do it two ways: using the minor
+  ;; mode only works during regular init, while using the variable
+  ;; only works during early init.
+  (blink-cursor-mode -1)
   (setq no-blinking-cursor t)
 
   ;; Set the default font size.
@@ -5093,7 +5094,7 @@ an effect for Emacs 26 or below."
   (set-face-attribute 'fixed-pitch nil :family 'unspecified)
 
   ;; On macOS, set the title bar to match the frame background.
-  (when (eq window-system 'ns)
+  (radian-with-operating-system macOS
     (add-to-list 'default-frame-alist '(ns-appearance . dark))
     (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))))
 
