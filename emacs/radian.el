@@ -190,12 +190,17 @@ This means that FILENAME is a symlink whose target is inside
   (declare (indent 0))
   `(cl-letf* ((write-region-orig (symbol-function #'write-region))
               ((symbol-function #'write-region)
-               (lambda (start end filename &optional append _visit lockname
+               (lambda (start end filename &optional append visit lockname
                               mustbenew)
                  (funcall write-region-orig start end filename append 0
                           lockname mustbenew)
-                 (set-buffer-modified-p nil)
-                 (set-visited-file-modtime)))
+                 (when (or (stringp visit) (eq visit t))
+                   (setq buffer-file-name
+                         (if (stringp visit)
+                             visit
+                           filename))
+                   (set-visited-file-modtime)
+                   (set-buffer-modified-p nil))))
               ((symbol-function #'message) #'ignore))
      ,@body))
 
