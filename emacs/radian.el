@@ -552,8 +552,12 @@ NAME and ARGS are as in `use-package'."
 (use-package el-patch
   :straight (:host github
                    :repo "raxod502/el-patch"
-                   :branch "develop")
-  :demand t)
+                   :branch "develop"))
+
+;; Only needed at compile time, thanks to Jon
+;; <https://github.com/raxod502/el-patch/pull/11>.
+(eval-when-compile
+  (require 'el-patch))
 
 ;;; Keybindings
 
