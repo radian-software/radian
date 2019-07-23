@@ -3538,6 +3538,15 @@ This prevents them from getting in the way of buffer selection."
 ;; https://developer.mozilla.org/en-US/docs/Web/CSS
 ;; https://developer.mozilla.org/en-US/docs/Web/JavaScript
 
+;; Feature `js' provides a major mode `js-mode' for JavaScript. We
+;; don't use it (because `web-mode' is better), but we still configure
+;; some of its variables because `json-mode' uses them.
+(use-feature js
+  :config
+
+  ;; Default is 4, and nobody should indent JSON with four spaces.
+  (setq js-indent-level 2))
+
 ;; Package `web-mode' provides a major mode for HTML, CSS, JavaScript,
 ;; and every conceivable thing adjacent (TypeScript, JSX, TSX, PSP,
 ;; ASP, Handlebars, etc.) all at once.
