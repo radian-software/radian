@@ -2142,11 +2142,11 @@ the reverse direction from \\[pop-global-mark]."
   (bind-key [remap kill-line] #'sp-kill-hybrid-sexp smartparens-mode-map
             (apply #'derived-mode-p sp-lisp-modes))
 
-  ;; When pressing RET after a newly entered pair, add an extra
-  ;; newline and indent. See
-  ;; https://github.com/Fuco1/smartparens/issues/80#issuecomment-18910312.
-  ;;
-  ;; What is currently here is to be considered a hack.
+  ;; Smartparens is broken in `cc-mode' as of Emacs 27. See
+  ;; <https://github.com/Fuco1/smartparens/issues/963>.
+  (when (version<= "27" emacs-version)
+    (dolist (fun '(c-electric-paren c-electric-brace))
+      (add-to-list 'sp--special-self-insert-commands fun)))
 
   (defun radian--smartparens-indent-new-pair (&rest _)
     "Insert an extra newline after point, and reindent."
@@ -2155,11 +2155,13 @@ the reverse direction from \\[pop-global-mark]."
     (forward-line -1)
     (indent-according-to-mode))
 
-  ;; Smartparens is broken in `cc-mode' as of Emacs 27. See
-  ;; <https://github.com/Fuco1/smartparens/issues/963>.
-  (when (version<= "27" emacs-version)
-    (dolist (fun '(c-electric-paren c-electric-brace))
-      (add-to-list 'sp--special-self-insert-commands fun)))
+  ;; The following is a really absurdly stupid hack that I can barely
+  ;; stand to look at. It needs to be fixed.
+  ;;
+  ;; Nevertheless, I can't live without the feature it provides (which
+  ;; should really come out of the box IMO): when pressing RET after
+  ;; inserting a pair, add an extra newline and indent. See
+  ;; <https://github.com/Fuco1/smartparens/issues/80#issuecomment-18910312>.
 
   (defun radian--smartparens-pair-setup (mode delim)
     "In major mode MODE, set up DELIM with newline-and-indent."
@@ -2172,6 +2174,9 @@ the reverse direction from \\[pop-global-mark]."
   (radian--smartparens-pair-setup #'prog-mode "{")
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'latex-mode "\\[")
+
+  ;; It's unclear to me why this is needed.
+  (radian--smartparens-pair-setup #'json-mode "{")
 
   ;; Work around https://github.com/Fuco1/smartparens/issues/783.
   (setq sp-escape-quotes-after-insert nil)
