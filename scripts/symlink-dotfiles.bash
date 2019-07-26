@@ -22,6 +22,7 @@ safe_link() {
 }
 
 mkdir -p "$HOME/.emacs.d/straight/versions"
+safe_link "$radian/emacs/early-init.el" "$HOME/.emacs.d/early-init.el"
 safe_link "$radian/emacs/init.el" "$HOME/.emacs.d/init.el"
 safe_link "$radian/emacs/versions.el" \
           "$HOME/.emacs.d/straight/versions/radian.el"
