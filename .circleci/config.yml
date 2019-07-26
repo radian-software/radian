@@ -23,6 +23,10 @@ jobs:
     <<: *shared
     environment:
       VERSION: "26.2"
+  emacs-master:
+    <<: *shared
+    environment:
+      VERSION: "master"
 workflows:
   version: 2
   ci:
@@ -31,3 +35,4 @@ workflows:
       - emacs-25.3
       - emacs-26.1
       - emacs-26.2
+      - emacs-master
