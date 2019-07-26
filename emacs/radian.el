@@ -2517,6 +2517,13 @@ backends will still be included.")
 
   :config
 
+  ;; Make completions display twice as soon.
+  (setq company-idle-delay 0.15)
+
+  ;; Make completions display when you have only typed one character,
+  ;; instead of three.
+  (setq company-minimum-prefix-length 1)
+
   ;; Always display the entire suggestion list onscreen, placing it
   ;; above the cursor if necessary.
   (setq company-tooltip-minimum company-tooltip-limit)
