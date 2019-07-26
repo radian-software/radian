@@ -22,7 +22,8 @@
       ;; are actually in a tty environment).
       initial-window-system))
 
-  (advice-add #'display-graphic-p :around #'radian--advice-fix-display-graphic-p)
+  (advice-add #'display-graphic-p :around
+              #'radian--advice-fix-display-graphic-p)
 
   (defun radian--advice-disable-x-resource-application ()
     "Disable `x-apply-session-resources'.
