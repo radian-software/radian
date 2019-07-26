@@ -2176,6 +2176,7 @@ the reverse direction from \\[pop-global-mark]."
   (radian--smartparens-pair-setup #'latex-mode "\\[")
 
   ;; It's unclear to me why this is needed.
+  (radian--smartparens-pair-setup #'json-mode "[")
   (radian--smartparens-pair-setup #'json-mode "{")
 
   ;; Work around https://github.com/Fuco1/smartparens/issues/783.
