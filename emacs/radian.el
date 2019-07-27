@@ -4189,47 +4189,9 @@ prevents a delay on killing Emacs when Org was not yet loaded."
           ("C-c C-x C-j" . org-clock-goto)
           ("C-c C-x C-q" . org-clock-cancel))
 
-  :config/el-patch
-
-  ;; Silence the messages that are usually printed when the clock data
-  ;; is loaded from disk.
-  (defun org-clock-load ()
-    (el-patch-concat
-      "Load clock-related data from disk, maybe resuming a stored clock."
-      (el-patch-add "\n\nDo so without emitting any superfluous messages."))
-    (when (and org-clock-persist (not org-clock-loaded))
-      (if (not (file-readable-p org-clock-persist-file))
-	  (el-patch-swap
-            (message
-             "Not restoring clock data; %S not found" org-clock-persist-file)
-            nil)
-        (el-patch-remove
-          (message "Restoring clock data"))
-        ;; Load history.
-        (el-patch-wrap 1
-          (radian--with-silent-load
-            (load-file org-clock-persist-file)))
-        (setq org-clock-loaded t)
-        (pcase-dolist (`(,(and file (pred file-exists-p)) . ,position)
-		       org-clock-stored-history)
-	  (org-clock-history-push position (find-file-noselect file)))
-        ;; Resume clock.
-        (pcase org-clock-stored-resume-clock
-	  (`(,(and file (pred file-exists-p)) . ,position)
-	   (with-current-buffer (find-file-noselect file)
-	     (when (or (not org-clock-persist-query-resume)
-		       (y-or-n-p (format "Resume clock (%s)? "
-				         (save-excursion
-					   (goto-char position)
-					   (org-get-heading t t)))))
-	       (goto-char position)
-	       (let ((org-clock-in-resume 'auto-restart)
-		     (org-clock-auto-clock-resolution nil))
-	         (org-clock-in)
-	         (when (org-invisible-p) (org-show-context))))))
-	  (_ nil)))))
-
   :config
+
+  (advice-add #'org-clock-load :around #'radian--advice-silence-messages)
 
   (defun radian--advice-org-clock-load-automatically (&rest _)
     "Run `org-clock-load'.
