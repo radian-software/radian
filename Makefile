@@ -32,6 +32,10 @@ checkdoc: ## Check docstring style in radian.el
 longlines: ## Check for long lines
 	@scripts/check-line-length.bash
 
+.PHONY: validate
+validate: ## Validate el-patches
+	@scripts/validate-patches.bash
+
 .PHONY: clean
 clean: ## Remove build artifacts
 	@rm -f emacs/radian.elc
