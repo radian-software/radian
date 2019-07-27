@@ -2174,6 +2174,7 @@ the reverse direction from \\[pop-global-mark]."
   (radian--smartparens-pair-setup #'prog-mode "{")
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'latex-mode "\\[")
+  (radian--smartparens-pair-setup #'markdown-mode "```")
 
   ;; It's unclear to me why this is needed.
   (radian--smartparens-pair-setup #'json-mode "[")
