@@ -128,7 +128,7 @@ as in `defun'."
   (unless (listp hooks)
     (setq hooks (list hooks)))
   (dolist (hook hooks)
-    (unless (string-match-p "-hook$" (symbol-name hook))
+    (unless (string-match-p "-\\(hook\\|functions\\)$" (symbol-name hook))
       (error "Symbol `%S' is not a hook" hook)))
   (unless (stringp docstring)
     (error "Radian: no docstring provided for `radian-defhook'"))
@@ -5053,6 +5053,17 @@ an effect for Emacs 26 or below."
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (tool-bar-mode -1)
+
+  (radian-with-operating-system macOS
+
+    (radian-defhook radian--disable-menu-bar-again-on-macos (_)
+      after-make-frame-functions
+      "Disable the menu bar again, because macOS is dumb.
+On macOS, for some reason you can't disable the menu bar once it
+appears, and also `menu-bar-mode' doesn't prevent the menu bar
+from appearing when run during early init. So we do a hack and
+turn it off again after creating the first frame."
+      (menu-bar-mode -1)))
 
   ;; Prevent the cursor from blinking. Do it two ways: using the minor
   ;; mode only works during regular init, while using the variable
