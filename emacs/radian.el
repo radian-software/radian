@@ -294,7 +294,9 @@ usual."
       (let ((forms nil))
         (with-temp-buffer
           (ignore-errors
-            (insert-file-contents-literally radian-local-init-file))
+            ;; Can't do this literally because it breaks Unicode
+            ;; characters.
+            (insert-file-contents radian-local-init-file))
           (condition-case _
               (while t
                 (let ((form (read (current-buffer))))
