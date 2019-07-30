@@ -985,7 +985,15 @@ default."
   :demand t
   :config
 
-  (windmove-default-keybindings))
+  (windmove-default-keybindings)
+
+  ;; Introduced in Emacs 27:
+
+  (when (fboundp 'windmove-display-default-keybindings)
+    (windmove-display-default-keybindings))
+
+  (when (fboundp 'windmove-delete-default-keybindings)
+    (windmove-delete-default-keybindings)))
 
 ;; Feature `winner' provides an undo/redo stack for window
 ;; configurations, with undo and redo being C-c left and C-c right,
