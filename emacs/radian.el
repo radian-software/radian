@@ -908,23 +908,11 @@ Local bindings (`counsel-mode-map'):
   :bind* (;; Keybinding suggested by the documentation of Counsel, see
           ;; https://github.com/abo-abo/swiper.
           ("C-c k" . counsel-rg))
-  :config/el-patch
+  :config
 
-  (defcustom counsel-rg-base-command
-    (el-patch-concat
-      "rg -S --no-heading --line-number --color never "
-      (el-patch-add
-        "-z --sort path ")
-      "%s .")
-    (el-patch-concat
-      "Alternative to `counsel-ag-base-command' using ripgrep.
-
-Note: don't use single quotes for the regex."
-      (el-patch-add
-        "\n\nSupport for searching compressed files and for
-reporting results in a deterministic order has been added by
-`el-patch'."))
-    :type 'string)
+  (unless (string-match-p "-z --sort path" counsel-rg-base-command)
+    (setq counsel-rg-base-command
+          (concat counsel-rg-base-command " -z --sort path")))
 
   :blackout t)
 
@@ -1986,9 +1974,8 @@ the reverse direction from \\[pop-global-mark]."
 (use-feature bookmark
   :config
 
-  (radian-defadvice radian--advice-bookmark-silence (&rest _)
-    :override bookmark-maybe-message
-    "Silence useless messages from bookmark.el."))
+  (dolist (func '(bookmark-load bookmark-write-file))
+    (advice-add func :around #'radian--advice-silence-messages)))
 
 ;;;; Find and replace
 
@@ -2366,11 +2353,11 @@ and `lsp--error'."
     (or
      ;; Messages we get when trying to start LSP (happens every time
      ;; we open a buffer).
-     (member format '("No LSP server for %s."
+     (member format '("No LSP server for %s(check *lsp-log*)."
                       "Connected to %s."))
      ;; Errors we get from gopls for no good reason (I can't figure
      ;; out why). They don't impair functionality.
-     (and args
+     (and (stringp (car args))
           (or (string-match-p "^no object for ident .+$" (car args))
               (string-match-p "^no identifier found$" (car args))))))
 
