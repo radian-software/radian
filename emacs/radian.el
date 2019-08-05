@@ -2177,6 +2177,9 @@ the reverse direction from \\[pop-global-mark]."
   (radian--smartparens-pair-setup #'json-mode "[")
   (radian--smartparens-pair-setup #'json-mode "{")
 
+  ;; Deal with `protobuf-mode' not using `define-minor-mode'.
+  (radian--smartparens-pair-setup #'protobuf-mode "{")
+
   ;; Work around https://github.com/Fuco1/smartparens/issues/783.
   (setq sp-escape-quotes-after-insert nil)
 
