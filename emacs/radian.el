@@ -3067,6 +3067,16 @@ ARG is passed to `hindent-mode' toggle function."
 ;; Package `lua-mode' provides a major mode for Lua code.
 (use-package lua-mode)
 
+;;;; Makefile
+
+;; Feature `make-mode' provides major modes for editing Makefiles.
+(use-feature make-mode
+  :blackout ((makefile-automake-mode . "Makefile")
+             (makefile-gmake-mode . "Makefile")
+             (makefile-makepp-mode . "Makefile")
+             (makefile-bsdmake-mode . "Makefile")
+             (makefile-imake-mode . "Makefile")))
+
 ;;;; Markdown
 ;; https://daringfireball.net/projects/markdown/
 
