@@ -3387,8 +3387,11 @@ https://github.com/flycheck/flycheck/issues/953."
   (radian-defhook radian--sh-prettify-mode-line ()
     sh-mode-hook
     "Instead of \"Shell[bash]\", display mode name as \"Bash\"."
+    ;; Only do this for `sh-mode', not derived modes such as
+    ;; `pkgbuild-mode'.
     (setq mode-line-process nil)
-    (setq mode-name (capitalize (symbol-name sh-shell))))
+    (when (eq major-mode 'sh-mode)
+      (setq mode-name (capitalize (symbol-name sh-shell)))))
 
   (use-feature lsp-clients
     :config
