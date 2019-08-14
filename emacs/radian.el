@@ -2327,21 +2327,26 @@ currently active.")
   :init
 
   (radian-defhook radian--lsp-enable ()
-    (prog-mode-hook text-mode-hook)
-    "Enable `lsp-mode' for most programming modes."
-    (unless (or (null buffer-file-name)
-                (derived-mode-p
-                 ;; `lsp-mode' doesn't support Elisp, so let's avoid
-                 ;; triggering the autoload just for checking that, yes,
-                 ;; there's nothing to do for the *scratch* buffer.
-                 #'emacs-lisp-mode
-                 ;; Disable for modes that we currently use a specialized
-                 ;; framework for, until they are phased out in favor of
-                 ;; LSP.
-                 #'clojure-mode
-                 #'ruby-mode
-                 #'rust-mode))
-      (lsp)))
+    after-change-major-mode-hook
+    "Enable `lsp-mode' for most programming modes.
+Do this on `after-change-major-mode-hook' instead of
+`prog-mode-hook' and `text-mode-hook' because we want to make
+sure regular mode hooks get a chance to run first, for example to
+set LSP configuration (see `lsp-python-ms')."
+    (when (derived-mode-p #'prog-mode #'text-mode)
+      (unless (or (null buffer-file-name)
+                  (derived-mode-p
+                   ;; `lsp-mode' doesn't support Elisp, so let's avoid
+                   ;; triggering the autoload just for checking that, yes,
+                   ;; there's nothing to do for the *scratch* buffer.
+                   #'emacs-lisp-mode
+                   ;; Disable for modes that we currently use a specialized
+                   ;; framework for, until they are phased out in favor of
+                   ;; LSP.
+                   #'clojure-mode
+                   #'ruby-mode
+                   #'rust-mode))
+        (lsp))))
 
   :config
 
@@ -3188,9 +3193,9 @@ See https://emacs.stackexchange.com/a/3338/12534."
    (t
     (setq python-shell-interpreter "python")))
 
-  (radian-defhook radian--python-use-correct-flycheck-executables ()
+  (radian-defhook radian--python-use-correct-executables ()
     python-mode-hook
-    "Use the correct Python executables for Flycheck."
+    "Use the correct Python executables for tooling."
     (let ((executable python-shell-interpreter))
       (save-excursion
         (save-match-data
@@ -3204,7 +3209,9 @@ See https://emacs.stackexchange.com/a/3338/12534."
       ;; modules won't be available. But calling the executables
       ;; directly will work.
       (setq-local flycheck-python-pylint-executable "pylint")
-      (setq-local flycheck-python-flake8-executable "flake8")))
+      (setq-local flycheck-python-flake8-executable "flake8")
+      ;; Use the correct executable for the language server.
+      (setq-local lsp-python-executable-cmd executable)))
 
   ;; I honestly don't understand why people like their packages to
   ;; spew so many messages.
