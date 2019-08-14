@@ -7,5 +7,5 @@ set -o pipefail
        --eval "(setq straight-safe-mode t)" \
        --load "$HOME/.emacs.d/init.el" \
        --funcall radian-byte-compile 2>&1 \
-     | grep -v "Warning: Package cl is deprecated" \
+     | (grep -v "Warning: Package cl is deprecated" || true) \
      | (! grep .)) || (rm -f emacs/radian.elc; false)
