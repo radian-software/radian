@@ -2351,20 +2351,24 @@ currently active.")
   (defun radian--advice-lsp-mode-silence (format &rest args)
     "Silence needless diagnostic messages from `lsp-mode'.
 
-This is a `:before-until' advice for `lsp--warn', `lsp--info',
-and `lsp--error'."
+This is a `:before-until' advice for several `lsp-mode' logging
+functions."
     (or
      ;; Messages we get when trying to start LSP (happens every time
      ;; we open a buffer).
-     (member format '("No LSP server for %s(check *lsp-log*)."
-                      "Connected to %s."))
+     (member format `("No LSP server for %s(check *lsp-log*)."
+                      "Connected to %s."
+                      ,(concat
+                        "Unable to calculate the languageId for current "
+                        "buffer. Take a look at "
+                        "lsp-language-id-configuration.")))
      ;; Errors we get from gopls for no good reason (I can't figure
      ;; out why). They don't impair functionality.
      (and (stringp (car args))
           (or (string-match-p "^no object for ident .+$" (car args))
               (string-match-p "^no identifier found$" (car args))))))
 
-  (dolist (fun '(lsp--warn lsp--info lsp--error))
+  (dolist (fun '(lsp-warn lsp--warn lsp--info lsp--error))
     (advice-add fun :before-until #'radian--advice-lsp-mode-silence))
 
   ;; If we don't disable this, we get a warning about YASnippet not
