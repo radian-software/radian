@@ -2173,9 +2173,10 @@ the reverse direction from \\[pop-global-mark]."
   (radian--smartparens-pair-setup #'latex-mode "\\[")
   (radian--smartparens-pair-setup #'markdown-mode "```")
 
-  ;; It's unclear to me why this is needed.
+  ;; It's unclear to me why any of this is needed.
   (radian--smartparens-pair-setup #'json-mode "[")
   (radian--smartparens-pair-setup #'json-mode "{")
+  (radian--smartparens-pair-setup #'tex-mode "{")
 
   ;; Deal with `protobuf-mode' not using `define-minor-mode'.
   (radian--smartparens-pair-setup #'protobuf-mode "{")
