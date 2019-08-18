@@ -3503,7 +3503,14 @@ FORCE is not nil.")
   (radian-defhook radian--flycheck-tex-setup ()
     TeX-mode-hook
     "Disable some Flycheck checkers in TeX buffers."
-    (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck)))
+    (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck))
+
+  (radian-defadvice radian--advice-tex-simplify-mode-name (&rest _)
+    :after TeX-set-mode-name
+    "Remove frills from the `mode-name' in TeX modes.
+In practice, this means removing the stuff that comes after the
+slash, e.g. \"LaTeX/P\" becomes just \"LaTeX\"."
+    (setq mode-name TeX-base-mode-name)))
 
 ;; Feature `tex-buf' from package `auctex' provides support for
 ;; running TeX commands and displaying their output.
