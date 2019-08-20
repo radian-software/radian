@@ -200,8 +200,10 @@ Do not attempt to use the `emacs` subdirectory of this repository as
 
 ### Installing local configuration
 
-* Emacs: `~/.emacs.d/init.local.el`,
-  `~/.emacs.d/straight/versions/radian-local.el`
+* Emacs: `~/.emacs.d/init.local.el` (local configuration) and
+  `~/.emacs.d/straight/versions/radian-local.el` (optional, local
+  lockfile for `straight.el`; will be created when you run `M-x
+  straight-freeze-versions`)
 * All shells: `~/.profile.local`
 * Zsh: `~/.zshrc.local`
 * Tmux: `~/.tmux.local.conf`
