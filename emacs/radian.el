@@ -5107,11 +5107,11 @@ turn it off again after creating the first frame."
   (when radian-font-size
     (set-face-attribute 'default nil :height radian-font-size))
 
-  ;; Set the default font. No, I have no idea why we have to do it
-  ;; this way. Using `set-face-attribute' does not have an effect,
-  ;; unlike with the font size.
+  ;; Set the default font. Formerly, this was done through
+  ;; `default-frame-alist' as `set-face-attribute' appeared to have no
+  ;; effect, but now the situation appears to be reversed. Go figure.
   (when radian-font
-    (add-to-list 'default-frame-alist `(font . ,radian-font)))
+    (set-face-attribute 'default nil :font radian-font))
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
