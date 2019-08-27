@@ -4019,10 +4019,54 @@ SYMBOL is as in `xref-find-definitions'."
   ;; warning gets triggered basically all the time for everything.
   (setq byte-compile-warnings '(not make-local noruntime))
 
-  (defun radian-byte-compile ()
-    "Byte-compile radian.el."
-    (interactive)
+  (defun radian-batch-byte-compile ()
+    "Byte-compile radian.el. For usage in batch mode."
     (byte-compile-file radian-lib-file))
+
+  (defun radian-byte-compile (&optional report-progress)
+    "Byte-compile radian.el. For interactive usage.
+REPORT-PROGRESS non-nil (or interactively) means to print more
+messages."
+    (interactive (list 'report-progress))
+    (cl-block nil
+      (unless (file-newer-than-file-p
+               radian-lib-file
+               (concat radian-lib-file "c"))
+        (when report-progress
+          (message "Byte-compiled configuration already up to date"))
+        (cl-return))
+      (when report-progress
+        (message "Byte-compiling updated configuration..."))
+      (ignore-errors
+        (kill-buffer " *radian-byte-compile*"))
+      (let ((default-directory radian-directory))
+        (make-process
+         :name "radian-byte-compile"
+         :buffer " *radian-byte-compile*"
+         :command '("make" "compile")
+         :noquery t
+         :sentinel
+         (lambda (proc _event)
+           (unless (process-live-p proc)
+             (with-current-buffer (process-buffer proc)
+               (if (= 0 (process-exit-status proc))
+                   (progn
+                     (insert "Byte-compilation completed successfully!\n")
+                     (message
+                      (if report-progress
+                          "Byte-compiling updated configuration...done"
+                        "Byte-compiled updated configuration")))
+                 (save-match-data
+                   (save-excursion
+                     (goto-char (point-min))
+                     (when (looking-at "In toplevel form:")
+                       (forward-line))
+                     (when (looking-at "radian\\.el:[0-9]+:[0-9]+:Warning: ")
+                       (goto-char (match-end 0)))
+                     (message "Failed to byte-compile%s"
+                              (if (looking-at ".+")
+                                  (format ": %s" (match-string 0))
+                                " (no output)"))))))))))))
 
   :blackout (emacs-lisp-compilation-mode . "Byte-Compile"))
 
@@ -5226,40 +5270,10 @@ your local configuration."
 
 ;; We should only get here if init was successful. If we do,
 ;; byte-compile this file asynchronously in a subprocess using the
-;; Radian Makefile. That way, the next startup will be fast.
+;; Radian Makefile. That way, the next startup will be fast(er).
 (run-with-idle-timer
  1 nil
- (lambda ()
-   (when (file-newer-than-file-p
-          radian-lib-file
-          (concat radian-lib-file "c"))
-     (ignore-errors
-       (kill-buffer " *radian-byte-compile*"))
-     (let ((default-directory radian-directory))
-       (make-process
-        :name "radian-byte-compile"
-        :buffer " *radian-byte-compile*"
-        :command '("make" "compile")
-        :noquery t
-        :sentinel
-        (lambda (proc _event)
-          (unless (process-live-p proc)
-            (with-current-buffer (process-buffer proc)
-              (if (= 0 (process-exit-status proc))
-                  (progn
-                    (insert "Byte-compilation completed successfully!\n")
-                    (message "Byte-compiled updated configuration"))
-                (save-match-data
-                  (save-excursion
-                    (goto-char (point-min))
-                    (when (looking-at "In toplevel form:")
-                      (forward-line))
-                    (when (looking-at "radian\\.el:[0-9]+:[0-9]+:Warning: ")
-                      (goto-char (match-end 0)))
-                    (message "Failed to byte-compile%s"
-                             (if (looking-at ".+")
-                                 (format ": %s" (match-string 0))
-                               " (no output)")))))))))))))
+ #'radian-byte-compile)
 
 ;; Enable color theme as late as is humanly possible. This reduces
 ;; frame flashing and other artifacts during startup.
