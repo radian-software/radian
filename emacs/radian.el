@@ -218,10 +218,16 @@ also be a single string."
               ((symbol-function #'message)
                (lambda (format &rest args)
                  (let ((str (apply #'format format args)))
-                   (cl-block nil
+                   ;; Can't use an unnamed block because during
+                   ;; byte-compilation, some idiot loads `cl', which
+                   ;; sticks an advice onto `dolist' that makes it
+                   ;; behave like `cl-dolist' (i.e., wrap it in
+                   ;; another unnamed block) and therefore breaks this
+                   ;; code.
+                   (cl-block done
                      (dolist (regexp ',regexps)
                        (when (or (null regexp) (string-match-p regexp str))
-                         (cl-return)))
+                         (cl-return-from done)))
                      (funcall message "%s" str))))))
      ,@body))
 
