@@ -2922,12 +2922,6 @@ nor requires Flycheck to be loaded."
 
   :blackout t)
 
-;;;; Coq
-
-;; Package `proof-general' provides major modes for Coq and other
-;; theorem-proving languages.
-(use-package proof-general)
-
 ;;;; Go
 ;; https://golang.org/
 

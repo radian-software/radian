@@ -1,5 +1,4 @@
 (("Emacs-wgrep" . "379afd89ebd76f63842c8589127d66096a8bb595")
- ("PG" . "d53ded580e30d49e7a783280fd9ba96bc9c1c39c")
  ("a.el" . "18966975db7110d0aac726be95b593e2fc3d44ed")
  ("all-the-icons.el" . "f996fafa5b2ea072d0ad1df9cd98acc75820f530")
  ("apache-mode" . "a66dc1f246cd4ce0960773989bc43188f0394948")
