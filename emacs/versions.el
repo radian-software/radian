@@ -92,7 +92,7 @@
  ("smartparens" . "7080e7fba9f478c2e5d4c18a325c3a5d60f6be76")
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
  ("ssh-config-mode-el" . "4c1dfa57d452cb5654453bf186c8ff63e1e71b56")
- ("straight.el" . "323dd77da15a1f01a8860e5b4c246ea32c2a5607")
+ ("straight.el" . "3794237a251c759262fb0b1a2579344aba4caf9a")
  ("swift-mode" . "be8d7700cdbf47576d7c4e0a7e0855cce0fe9ad8")
  ("swiper" . "d3e4514fd72f217c704ae18afdf711bb9036a04d")
  ("sx.el" . "49358eae36dd4bb5b9207313b30df085e7f25cef")
@@ -111,4 +111,4 @@
  ("yaml-mode" . "5b4a0db384f996554454b5642e4531c502421de8")
  ("yasnippet" . "d91dd66f2aed9bbaef32813a68b105ea77e83890")
  ("zerodark-theme" . "df22536a244293591575e56970bf83814faa7c14"))
-:pluto
+:alpha
