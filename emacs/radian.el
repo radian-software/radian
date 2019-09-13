@@ -4981,7 +4981,8 @@ bound dynamically before being used.")
       (let ((radian--restart-in-progress t)
             ;; Don't mutate the global value.
             (radian--restart-emacs-eager-hook-functions-run nil)
-            (prompt "Really exit (or restart, or start new) Emacs? (y/n/r/e) ")
+            (prompt (concat "Really exit (or restart, or start new, or kill) "
+                            "Emacs? (y/n/r/e/k) "))
             (key nil))
         (dolist (func radian--restart-emacs-eager-hook-functions)
           ;; Run eager hook functions asynchronously while waiting for
@@ -5021,6 +5022,7 @@ bound dynamically before being used.")
                 ((or ?r ?R)
                  (restart-emacs arg))
                 ((or ?e ?E) (radian-new-emacs arg))
+                ((or ?k ?K) (radian-really-kill-emacs))
                 (?\C-g (signal 'quit nil))
                 (_ (setq key nil))))))
         (message "%s%c" prompt key))))
