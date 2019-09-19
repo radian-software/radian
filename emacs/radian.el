@@ -4665,7 +4665,9 @@ changes, which means that `git-gutter' needs to be re-run.")
         ;; after switching window, for example after `quit-window'.
         (with-current-buffer (window-buffer)
           (when git-gutter-mode
-            (git-gutter))))))
+            (when buffer-file-name
+              (unless (file-remote-p buffer-file-name)
+                (git-gutter))))))))
 
   (use-feature autorevert
     :config
