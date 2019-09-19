@@ -3528,6 +3528,15 @@ This prevents them from getting in the way of buffer selection."
   ;; as per `delete-selection-mode'.
   (put 'LaTeX-insert-left-brace 'delete-selection t)
 
+  (radian-defhook radian--latex-environment-kill-extra-newline
+      (_environment _env-start _env-end)
+    LaTeX-after-insert-env-hook
+    "Dispose of the superfluous extra newline inserted with a new environment."
+    (save-excursion
+      (LaTeX-find-matching-end)
+      (when (looking-at-p "\n\n")
+        (delete-char 1))))
+
   (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
 ;; Feature `font-latex' from package `auctex' provides the syntax
