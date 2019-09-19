@@ -954,23 +954,6 @@ active minibuffer, even if the minibuffer is not selected."
         (minibuffer-keyboard-quit))
     (funcall keyboard-quit)))
 
-(radian-defadvice radian--advice-split-windows-horizontally
-    (split-window-sensibly &rest args)
-  :around split-window-sensibly
-  "Split windows horizontally by default, rather than vertically.
-Since the Emacs terminology is confusing: this means to split
-into tall subwindows rather than into wide subwindows by
-default."
-  (cl-letf* ((split-window-below (symbol-function #'split-window-below))
-             (split-window-right (symbol-function #'split-window-right))
-             (window-splittable-p (symbol-function #'window-splittable-p))
-             ((symbol-function #'split-window-below) split-window-right)
-             ((symbol-function #'split-window-right) split-window-below)
-             ((symbol-function #'window-splittable-p)
-              (lambda (window &optional horizontal)
-                (funcall window-splittable-p window (not horizontal)))))
-    (apply split-window-sensibly args)))
-
 ;; Feature `windmove' provides keybindings S-left, S-right, S-up, and
 ;; S-down to move between windows. This is much more convenient and
 ;; efficient than using the default binding, C-x o, to cycle through
