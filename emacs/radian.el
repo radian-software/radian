@@ -2330,6 +2330,9 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; triggering the autoload just for checking that, yes,
                    ;; there's nothing to do for the *scratch* buffer.
                    #'emacs-lisp-mode
+                   ;; Bash is currently broken, see
+                   ;; <https://github.com/emacs-lsp/lsp-mode/issues/1032>.
+                   #'shell-script-mode
                    ;; Disable for modes that we currently use a specialized
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
