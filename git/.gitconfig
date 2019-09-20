@@ -10,11 +10,8 @@
 # https://stackoverflow.com/questions/957928#comment9747528_957978.
 	exec = "!exec "
 	msg = log --format=%B -1
-	reword = "!_() { uuid=$(uuidgen) && (saved=\"$(git stash save $uuid | grep $uuid)\"; git commit --amend; (if [[ -n \"$saved\" ]]; then git stash pop > /dev/null; fi);) }; _"
-	rework = "!_() { if [[ -n \"$1\" ]]; then git rebase -i HEAD~$1; else git rebase -i \"origin/$(git rev-parse --abbrev-ref HEAD)\"; fi; }; _"
 	root = rev-list --max-parents=0 HEAD
 	setup = !git init && git commit --allow-empty -m \"Initial commit\"
-	stash-rename = "!_() { newmsg=\"$1\" && stash=${2:-\"stash@{0}\"} && newbranch=\"$3\" && sha=$(git rev-parse \"$stash\") && olddesc=\"$(git stash list --format=%gs -1 \"$stash\")\" && newdesc=\"$(if [[ \"$newbranch\" = \".\" ]]; then echo \"$newmsg\"; else if [[ -n \"$newbranch\" ]]; then echo \"On $newbranch: $newmsg\"; else if [[ \"$olddesc\" =~ \":\" ]]; then echo \"$(echo \"$olddesc\" | cut -f1 -d\":\"): $newmsg\"; else echo \"$newmsg\"; fi; fi; fi)\" && git stash drop \"$stash\" > /dev/null || exit 1; git stash store -m \"$newdesc\" \"$sha\" && git stash list; }; _"
 	unalias = "!_() { git config --global --unset alias.$1; }; _"
 [branch]
 	autosetupmerge = true
@@ -31,6 +28,10 @@
 	mnemonicprefix = true
 	renames = copies
 	submodule = log
+[fetch]
+	# Automatically prune stale branches from the remote on every
+	# fetch.
+	prune = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	required = true

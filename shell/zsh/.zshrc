@@ -84,6 +84,8 @@ radian_prompt_prefix='%{$fg[yellow]%}{%n@%m} %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 # for the user's input.
 radian_prompt_suffix='%(?.%{$fg[blue]%}.%{$fg[red]%}) %# %{$reset_color%}'
 
+PROMPT=
+
 if (( $+commands[git] )); then
 
     # Usage: radian_prompt_git_dirty
@@ -114,16 +116,12 @@ if (( $+commands[git] )); then
 
     # Reset the color and display the Git branch and modification
     # status.
-    radian_prompt_git_info='%{$reset_color%}$(radian_prompt_git_info)'
-
-    # The actual prompt.
-    PROMPT="${radian_prompt_prefix}${radian_prompt_git_info}${radian_prompt_suffix}"
-
-else
-
-    PROMPT="${radian_prompt_prefix}${radian_prompt_suffix}"
+    PROMPT='%{$reset_color%}$(radian_prompt_git_info)'
 
 fi
+
+PROMPT="${radian_prompt_prefix}${PROMPT}"
+PROMPT="${PROMPT}${radian_prompt_suffix}"
 
 ### Command line
 
@@ -174,7 +172,7 @@ zle -N self-insert url-quote-magic
 zstyle ':completion:*' menu select
 
 # Allow usage of shift-tab (backtab) to go backward in the completion
-# menu.
+# menu. See <https://stackoverflow.com/a/842370/3538165>.
 bindkey '^[[Z' reverse-menu-complete
 
 # Substring completions. Not fuzzy. Sometimes they have weird
@@ -303,18 +301,36 @@ alias ds='dirs -v | head -10'
 #### ls, exa
 
 if (( $+commands[exa] )); then
-    alias l='exa --all --header --long --color-scale'
-    alias lg='exa --all --grid --header --long --color-scale'
-    alias lt='exa --all --header --long --tree --color-scale --ignore-glob ".git|.svn"'
+
+    function l {
+        emulate -LR zsh
+        exa --all --header --long --color-scale $@
+    }
+
+    function lg {
+        emulate -LR zsh
+        l --grid $@
+    }
+
+    function lt {
+        emulate -LR zsh
+        l --tree --ignore-glob ".git|.svn" $@
+    }
+
     function lti {
         emulate -LR zsh
-        exa --all --header --long --tree --color-scale --ignore-glob ".git|.svn|$1" ${@:2}
+        l --tree --ignore-glob ".git|.svn|$1" ${@:2}
     }
-    alias ltl='exa --all --header --long --tree --color-scale --ignore-glob ".git|.svn" --level'
-    function ltli {
+
+    function ltl {
         emulate -LR zsh
-        exa --all --header --long --tree --color-scale --level $1 --ignore-glob ".git|.svn|$2" ${@:3}
+        lt --level $@
     }
+
+    function ltli {
+        l --tree --level $1 --ignore-glob ".git|.svn|$2" ${@:3}
+    }
+
 else
     # We alias gls to a git command elsewhere, so we use "command"
     # here to prevent it from being interpreted as said git command.
@@ -680,19 +696,6 @@ elif (( $+commands[vi] )); then
 fi
 
 ## External command configuration
-### Leiningen
-
-if (( $+commands[lein] )); then
-    # Prevent Leiningen tasks (I'm looking at you, lein uberjar) from
-    # showing up in the Mac app switcher. See [1]. Also, attempt to
-    # reduce the incidence of exceptions with missing traces in
-    # Clojure. See [2].
-    #
-    # [1]: http://stackoverflow.com/q/24619300/3538165
-    # [2]: https://dzone.com/articles/clojurejava-prevent-exceptions
-    export LEIN_JVM_OPTS='-Dapple.awt.UIElement=true -XX:-OmitStackTraceInFastThrow'
-fi
-
 ### man
 
 # We define a function that wraps man to provide some basic

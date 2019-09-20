@@ -5,6 +5,7 @@ Use the following ordering for `use-package` keywords:
 * `:commands`
 * `:init/el-patch`
 * `:init`
+* `:magic`
 * `:mode`
 * `:interpreter`
 * `:hook`
@@ -17,4 +18,4 @@ Use the following ordering for `use-package` keywords:
 * `:after`
 * `:config/el-patch`
 * `:config`
-* `:delight`
+* `:blackout`

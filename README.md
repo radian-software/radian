@@ -15,76 +15,78 @@ These dotfiles attempt to achieve the following goals:
 
 ## Software configured, features
 
-* [Emacs]
-    * Next-generation package manager, [`straight.el`][straight.el]
-    * Clean and DRY package customizations using
-      [`use-package`][use-package]
-    * Future-proof customizations using [`el-patch`][el-patch]
-    * Sorting by frecency and usage on all commands using
-      [`prescient.el`][prescient.el]
-    * IDE features for expanding library of programming languages with
-      [LSP] via [`lsp-mode`][lsp-mode]
-    * Informative but minimal mode-line showing file modification
-      status, buffer name, point position, current project, Git
-      branch, and active modes (with optional right-alignment support)
-    * Extremely clean mode lighters thanks to [Blackout]
-    * Aggressive startup optimization: 0.7s or less for a fully
-      configured graphical frame, from cold boot
-    * Aggressively consistent coding style and documentation,
-      including heavy use of macros to automate and foolproof common
-      operations
-    * Delightful color scheme that works in the terminal ([Zerodark])
-    * Clipboard, mouse, and PATH integration for macOS
-    * Automatic creation and interactive removal of parent directories
-      when finding files
-    * Extensible system for defining mnemonic key sequences to jump to
-      dotfiles
-    * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
-      partly on [`restart-emacs`][restart-emacs]
-    * Automatic insertion of whitespace and indentation when pressing
-      newline after inserting a pair of delimiters
-    * Configured packages: [Atomic Chrome][atomic-chrome] (with
-      [Firefox] support), [Autorevert], [buffer-move], [Company],
-      [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-      [ElDoc], [ESUP], [Flycheck], [Forge], [git-link], [Helpful],
-      [Ivy], [Macrostep], [Magit], [no-littering], [Org],
-      [Projectile], [pyvenv], [Smartparens], [Swiper],
-      [transpose-frame], [undo-tree], [use-package], [visual-regexp],
-      [webpaste.el], and more
-    * Supported languages: C/C++, [Clojure], [Haskell], [JavaScript],
-      [LaTeX], [Markdown], [Python], [Ruby], [Rust], [TypeScript], and
-      more
-    * Major modes for editing many configuration file types
+* [Emacs] (**minimum version supported: 25.2**)
+  * Next-generation package manager, [`straight.el`][straight.el]
+  * Clean and DRY package customizations using
+    [`use-package`][use-package]
+  * Future-proof customizations using [`el-patch`][el-patch]
+  * Sorting by frecency and usage on all commands using
+    [`prescient.el`][prescient.el]
+  * IDE features for expanding library of programming languages with
+    [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, [Flow], [Go],
+    [JavaScript], [TypeScript], [JSX]/[TSX], [LaTeX], [Python] with
+    [Poetry] and [Pipenv] virtualenvs autodetected)
+  * Automatic asynchronous code reformatting without moving point
+    using [Black], [Gofmt], and [Prettier] via [Apheleia]
+  * Informative but minimal mode-line showing file modification
+    status, buffer name, point position, and active modes (with
+    optional right-alignment support)
+  * Extremely clean mode lighters with prettier names thanks to
+    [Blackout]
+  * Aggressive startup optimization: as fast as 0.33s for a fully
+    configured graphical frame (by aggressive lazy-loading of
+    everything; using [`el-patch`][el-patch] to lazy-load packages
+    that weren't designed to be lazy-loaded; by extensive use of idle
+    timers; by disabling of heavy autoloads; by asynchronous
+    byte-compilation of the init-file in a subprocess on successful
+    init, with the local init-file macroexpanded and embedded directly
+    into Radian during compilation; and by running all customizations
+    before the first graphical frame is initialized)
+  * Aggressively consistent coding style and documentation,
+    including heavy use of macros to automate and foolproof common
+    operations
+  * Delightful color scheme that works in the terminal ([Zerodark])
+  * Clipboard, mouse, and PATH integration for macOS
+  * Automatic creation and interactive removal of parent directories
+    when finding files
+  * Extensible system for defining mnemonic key sequences to jump to
+    dotfiles
+  * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
+    partly on [`restart-emacs`][restart-emacs]
+  * Automatic insertion of whitespace and indentation when pressing
+    newline after inserting a pair of delimiters
+  * Global auto-fill configured to activate only in comments,
+    docstrings, and text
+  * Configured packages: [Atomic Chrome][atomic-chrome] (with
+    [Firefox] support), [Autorevert], [buffer-move], [Company],
+    [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
+    [ElDoc], [ESUP], [Flycheck], [Forge],
+    [`git-gutter-fringe.el`][git-gutter-fringe.el] [git-link],
+    [Helpful], [Ivy], [Macrostep], [Magit], [no-littering], [Org],
+    [Projectile], [pyvenv], [Smartparens], [Swiper],
+    [transpose-frame], [undo-tree], [use-package], [visual-regexp],
+    [webpaste.el], and more
+  * Major modes for editing many languages and configuration file
+    types
 * [Zsh]
-    * Extremely fast and flexible package manager, [zplugin]
-    * No-nonsense prompt showing username, hostname, working
-      directory, and Git status, colored by exit code
-    * Substring completion everywhere
-    * GUI-like file/directory copy/paste functions on the command line
-    * Extensive library of clean and consistent [Git] aliases
-    * Colored man pages
+  * Extremely fast and flexible package manager, [zplugin]
+  * No-nonsense prompt showing username, hostname, working
+    directory, and Git status, colored by exit code
+  * Substring completion everywhere
+  * GUI-like file/directory copy/paste functions on the command line
+  * Extensive library of clean and consistent [Git] aliases
+  * Colored man pages
 * [Tmux]
-    * Keybindings for inserting new windows and shifting them left and
-      right
-    * No-nonsense but stylish status bar à la [powerline] but without
-      the dependencies
-    * Spectacular hack to leverage [reattach-to-user-namespace] on
-      macOS with minimal side effects
+  * Keybindings for inserting new windows and shifting them left and
+    right
+  * No-nonsense but stylish status bar à la [powerline] but without
+    the dependencies
+  * Spectacular hack to leverage [reattach-to-user-namespace] on
+    macOS with minimal side effects
 * [Git]
-    * Create a repository and a root commit all at once
-    * Rename stashes
-    * Reword a commit while preserving the index
-    * Alias and unalias without messing with `git config`
-    * More helpful output from `git status`, submodules, and more
-* [Leiningen]
-    * Modular profile system allowing maximal performance through
-      selecting exactly the features you want
-    * Inject useful utility functions using [Vinyasa]
-    * Pull JARs from Maven and hotload them into your REPL with
-      [Alembic]
-    * Refresh a dirty REPL without a restart, using [tools.namespace]
-    * Colorization and pretty-printing of output and stack traces in
-      the REPL
+  * Create a repository and a root commit all at once
+  * Alias and unalias without messing with `git config`
+  * More helpful output from `git status`, submodules, and more
 
 ## Installation
 
@@ -93,48 +95,100 @@ configuration, and optionally installing local configuration.
 
 ### Installing software
 #### macOS
-##### Emacs
 
-**Minimum version supported: Emacs 25.2**
+* Emacs: `brew install bash python`; `brew cask install emacs`;
+  (optional for improved startup time) `brew install watchexec`
+  * Code intelligence
+    * Bash: `yarn global add bash-language-server`, but see [this
+      issue](https://github.com/mads-hartmann/bash-language-server/issues/131).
+    * C/C++: `brew install llvm`
+    * Flow: `brew install flow`
+    * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
+      to your `$PATH`
+    * JavaScript/TypeScript:
 
-    $ brew cask install emacs
+          $ git clone
+              git@github.com:sourcegraph/javascript-typescript-langserver.git
+          $ cd javascript-typescript-langserver
+          $ npm install
+          $ npm run build
+          $ chmod +x lib/language-server-stdio.js
+          $ ln -s $PWD/lib/language-server-stdio.js
+                  ~/.local/bin/javascript-typescript-stdio
+          $ brew install prettier
 
-Install support tools. Python is required for environment variable
-setting; watchexec is optional for improved startup time.
+    * LaTeX:
 
-    $ brew install python watchexec
+          $ wget -O ~/.local/bin/texlab.jar
+              https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
 
-##### Zsh
+    * Python: the language server is downloaded automatically courtesy
+      of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
 
-    $ brew install zsh
-    $ mkdir ~/.zplugin
-    $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+          $ brew install black
 
-##### Remaining tools
+* Zsh:
+
+      $ brew install zsh
+      $ mkdir ~/.zplugin
+      $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
 
 * Tmux: `brew install tmux`
 * Git: `brew install git`
-* Leiningen: `brew cask install java`; `brew install leiningen`
 
-#### Arch Linux
+#### Arch/Manjaro Linux
+
+I use [Yay](https://github.com/Jguer/yay) to install AUR packages. If
+you prefer something different, substitute to taste.
 
 * Emacs: `pacman -S emacs python`; (optional for improved startup
-  time) install `watchexec` from AUR
-* Zsh: `pacman -S zsh`; `mkdir ~/.zplugin`; `git clone
-  git@github.com:zdharma/zplugin.git ~/.zplugin/bin`
+  time) `yay -S watchexec`
+  * Code intelligence
+    * Bash: `yarn global add bash-language-server`
+    * C/C++: `pacman -S clang`
+    * Flow: `yarn global add flow-bin`
+    * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
+      to your `$PATH`
+    * JavaScript/TypeScript:
+
+          $ git clone
+              git@github.com:sourcegraph/javascript-typescript-langserver.git
+          $ cd javascript-typescript-langserver
+          $ npm install
+          $ npm run build
+          $ chmod +x lib/language-server-stdio.js
+          $ ln -s $PWD/lib/language-server-stdio.js
+                  ~/.local/bin/javascript-typescript-stdio
+          $ pacman -S prettier
+
+    * LaTeX:
+
+          $ wget -O ~/.local/bin/texlab.jar
+              https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
+
+    * Python: the language server is downloaded automatically courtesy
+      of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
+
+          $ pacman -S python-black
+
+* Zsh:
+
+      $ pacman -S zsh
+      $ mkdir ~/.zplugin
+      $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+
 * Tmux: `pacman -S tmux`
 * Git: `pacman -S git`
-* Leiningen: `pacman -S jdk8-openjdk`; install `leiningen` from AUR
 
 ### Installing configuration
 
 Use symbolic links:
 
     ./emacs/init.el => ~/.emacs.d/init.el
+    ./emacs/early-init.el => ~/.emacs.d/early-init.el
     ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
     ./git/.gitconfig => ~/.gitconfig
     ./git/.gitexclude => ~/.gitexclude
-    ./leiningen/profiles.clj => ~/.lein/profiles.clj
     ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
@@ -146,8 +200,10 @@ Do not attempt to use the `emacs` subdirectory of this repository as
 
 ### Installing local configuration
 
-* Emacs: `~/.emacs.d/init.local.el`,
-  `~/.emacs.d/straight/versions/radian-local.el`
+* Emacs: `~/.emacs.d/init.local.el` (local configuration) and
+  `~/.emacs.d/straight/versions/radian-local.el` (optional, local
+  lockfile for `straight.el`; will be created when you run `M-x
+  straight-freeze-versions`)
 * All shells: `~/.profile.local`
 * Zsh: `~/.zshrc.local`
 * Tmux: `~/.tmux.local.conf`
@@ -156,12 +212,35 @@ Do not attempt to use the `emacs` subdirectory of this repository as
 I suggest versioning your local dotfiles in a separate repository, and
 symlinking them to the appropriate locations. This is what I do.
 
-### Tips and tricks
+Here is what your `init.local.el` should probably look like:
 
-In order to get `$PATH`, `ssh-agent`, and `gpg-agent` working
-correctly in graphical applications on macOS, use
-`scripts/patch-macos-app.zsh`. Note however that Emacs already sources
-`~/.profile` (and thereby `~/.profile.local`) during startup.
+    ;; code that should be run at the very beginning of init, e.g.
+
+    (setq radian-font ...)
+    (setq radian-font-size ...)
+
+    (radian-local-on-hook before-straight
+
+      ;; code that should be run right before straight.el is bootstrapped,
+      ;; e.g.
+
+      (setq straight-vc-git-default-protocol ...)
+      (setq straight-check-for-modifications ...))
+
+    (radian-local-on-hook after-init
+
+      ;; code that should be run at the end of init, e.g.
+
+      (use-package ...))
+
+    ;; see M-x customize-group RET radian-hooks RET for which hooks you
+    ;; can use with `radian-local-on-hook'
+
+You don't have to worry about byte-compiling your local init-file;
+Radian actually macroexpands it and embeds it directly into the
+byte-compiled Radian init-file. Using the macro `radian-local-on-hook`
+instead of defining functions and adding them to Radian's hooks
+manually enables some magic that makes this actually work properly.
 
 ## Contributing
 
@@ -176,12 +255,12 @@ Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* should be either obvious or
 commented.
 
-[alembic]: https://github.com/pallet/alembic
+[apheleia]: https://github.com/raxod502/apheleia
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
+[black]: https://github.com/python/black
 [blackout]: https://github.com/raxod502/blackout
 [buffer-move]: https://github.com/lukhas/buffer-move
-[clojure]: https://clojure.org/
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
 [counsel]: https://github.com/abo-abo/swiper#counsel
@@ -196,29 +275,33 @@ commented.
 [esup]: https://github.com/jschaf/esup
 [exa]: https://the.exa.website/
 [firefox]: https://www.mozilla.org/en-US/firefox/
+[flow]: https://flow.org/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [forge]: https://github.com/magit/forge
-[git]: https://git-scm.com/
+[git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
 [git-link]: https://github.com/sshaw/git-link
-[haskell]: https://www.haskell.org/
+[git]: https://git-scm.com/
+[go]: https://golang.org/
+[gofmt]: https://golang.org/cmd/gofmt/
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [issues]: https://github.com/raxod502/radian/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+[jsx]: https://reactjs.org/docs/introducing-jsx.html
 [latex]: https://www.latex-project.org/
-[leiningen]: http://leiningen.org/
-[lsp]: https://langserver.org/
 [lsp-mode]: https://github.com/emacs-lsp/lsp-mode
+[lsp]: https://langserver.org/
 [macrostep]: https://github.com/joddie/macrostep
 [magit]: https://magit.vc/
-[markdown-mode]: http://jblevins.org/projects/markdown-mode/
-[markdown]: https://daringfireball.net/projects/markdown/syntax
 [no-littering]: https://github.com/tarsius/no-littering
 [org]: http://orgmode.org/
+[pipenv]: https://docs.pipenv.org/en/latest/
+[poetry]: https://poetry.eustace.io/
 [powerline]: https://github.com/powerline/powerline
 [prescient.el]: https://github.com/raxod502/prescient.el
+[prettier]: https://github.com/prettier/prettier
 [projectile]: http://batsov.com/projectile/
 [prs]: https://github.com/raxod502/radian/pulls
 [python]: https://www.python.org/
@@ -226,19 +309,16 @@ commented.
 [racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
-[ruby]: https://www.ruby-lang.org/
-[rust]: https://www.rust-lang.org/
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
-[tools.namespace]: https://github.com/clojure/tools.namespace
 [transpose-frame]: https://www.emacswiki.org/emacs/TransposeFrame
+[tsx]: https://www.typescriptlang.org/docs/handbook/jsx.html
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
-[vinyasa]: http://docs.caudate.me/lucidity/
 [visual-regexp]: https://github.com/benma/visual-regexp.el
 [webpaste.el]: https://github.com/etu/webpaste.el
 [yasnippet]: https://github.com/joaotavora/yasnippet
