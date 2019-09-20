@@ -68,6 +68,8 @@ These dotfiles attempt to achieve the following goals:
     [webpaste.el], and more
   * Major modes for editing many languages and configuration file
     types
+  * [Tested on CircleCI](https://circleci.com/gh/raxod502/radian) with
+    [Docker] configuration included for all supported Emacs versions
 * [Zsh]
   * Extremely fast and flexible package manager, [zplugin]
   * No-nonsense prompt showing username, hostname, working
@@ -266,6 +268,7 @@ commented.
 [counsel]: https://github.com/abo-abo/swiper#counsel
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
+[docker]: https://www.docker.com/
 [dotman]: https://github.com/raxod502/dotman
 [dumb-jump]: https://github.com/jacktasia/dumb-jump
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html
