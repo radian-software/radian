@@ -20,7 +20,11 @@
 [core]
 	autocrlf = false
 	excludesfile = ~/.gitexclude
-	pager = less -FRSX
+	# Always use the pager. This is important for Yay, which uses
+	# 'git diff' to print diffs, which may disappear off the top
+	# of the screen if the pager doesn't get invoked for each one.
+	# See <https://stackoverflow.com/a/12352224/3538165>.
+	pager = less -+F
 [credential]
 	helper =
 	helper = cache --timeout 86400
