@@ -1722,8 +1722,27 @@ Interactively, reverse the characters in the current region."
 
 (blackout 'auto-fill-mode)
 
+(defun radian--do-auto-fill ()
+  "Replacement for `do-auto-fill' that respects `normal-auto-fill-function'.
+The reason we need this is that in order to enable auto-fill
+globally, we are supposed to set the default value of
+`auto-fill-function'. However, some major modes set
+`normal-auto-fill-function' (itself normally set to
+`do-auto-fill', which is what we generally set the default value
+of `auto-fill-function' to), expecting `auto-fill-mode' to be
+enabled afterwards (which copies the value of
+`normal-auto-fill-function' into `auto-fill-function'). However,
+since we enable auto-fill globally by means of setting
+`auto-fill-function' directly, this setting gets lost. The
+workaround is to set `auto-fill-function' globally to a function
+which looks up the value of `normal-auto-fill-function'
+(generally just `do-auto-fill') and calls that. This is a slight
+inversion of the usual flow of control and might make you
+slightly uncomfortable, but we'll just have to live with it :3"
+  (funcall normal-auto-fill-function))
+
 ;; https://www.gnu.org/software/emacs/manual/html_node/efaq/Turning-on-auto_002dfill-by-default.html
-(setq-default auto-fill-function #'do-auto-fill)
+(setq-default auto-fill-function #'radian--do-auto-fill)
 
 (define-minor-mode radian-fix-whitespace-mode
   "Minor mode to automatically fix whitespace on save.
