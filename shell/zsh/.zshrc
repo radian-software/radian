@@ -596,6 +596,7 @@ if (( $+commands[git] )); then
     alias gds='git diff --stat'
     alias gdc='git diff --cached'
     alias gdcs='git diff --cached --stat'
+    alias gdn='git diff --no-index'
 
     alias gbl='git blame'
 
