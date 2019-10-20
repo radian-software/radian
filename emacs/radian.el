@@ -3547,14 +3547,21 @@ This prevents them from getting in the way of buffer selection."
   ;; as per `delete-selection-mode'.
   (put 'LaTeX-insert-left-brace 'delete-selection t)
 
-  (radian-defhook radian--latex-environment-kill-extra-newline
-      (_environment _env-start _env-end)
-    LaTeX-after-insert-env-hook
-    "Dispose of the superfluous extra newline inserted with a new environment."
-    (save-excursion
-      (LaTeX-find-matching-end)
-      (when (looking-at-p "\n\n")
-        (delete-char 1))))
+  (radian-defadvice radian--latex-environment-kill-extra-newline
+      (func &rest args)
+    :around LaTeX-insert-environment
+    "Prevent inserting a new environment from adding an unnecessary newline.
+Specifically, this fixes a bug that happens when you insert a new
+environment with point at the end of a non-empty line of text."
+    (let ((needs-fixup (save-excursion
+                         (beginning-of-line)
+                         (re-search-forward
+                          "[^[:space:]]" (point-at-eol) 'noerror))))
+      (prog1 (apply func args)
+        (when needs-fixup
+          (save-excursion
+            (forward-line 2)
+            (delete-char 1))))))
 
   (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
