@@ -3561,7 +3561,8 @@ environment with point at the end of a non-empty line of text."
         (when needs-fixup
           (save-excursion
             (forward-line 2)
-            (delete-char 1))))))
+            (when (looking-at "\n")
+              (delete-char 1)))))))
 
   (put 'LaTeX-using-Biber 'safe-local-variable #'booleanp))
 
