@@ -75,7 +75,7 @@
  ("pkgbuild-mode" . "e30e37730b5f30bc0dd5b9328fbf4cb3e6f46fdd")
  ("popup-el" . "80829dd46381754639fb764da11c67235fe63282")
  ("pos-tip" . "051e08fec5cf30b7574bdf439f79fef7d42d689d")
- ("prescient.el" . "2f01b640e3a487718dbc481d14406005c0212ed9")
+ ("prescient.el" . "95056580ed743da92b05aaf86f943ee05600c28d")
  ("projectile" . "71a01f409a319d57eb3832e93e8a412fbc9d7a65")
  ("protobuf" . "a450e13a9516febcc110560a14535e649e1c5ef9")
  ("pyvenv" . "fa6a028349733b0ecb407c4cfb3a715b71931eec")
