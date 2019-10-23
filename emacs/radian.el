@@ -937,6 +937,11 @@ Local bindings (`counsel-mode-map'):
   :after ivy
   :config
 
+  ;; Need to do this before we enable `ivy-prescient-mode' as Counsel
+  ;; sticks some weird stuff on the Ivy user options that
+  ;; `ivy-prescient-mode' needs to undo.
+  (require 'counsel)
+
   ;; Use `prescient' for Ivy menus.
   (ivy-prescient-mode +1))
 
