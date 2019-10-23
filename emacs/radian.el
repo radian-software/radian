@@ -4493,7 +4493,12 @@ are probably not going to be installed."
   :bind (;; This is the primary entry point for Magit. Binding to C-x
          ;; g is recommended in the manual:
          ;; https://magit.vc/manual/magit.html#Getting-Started
-         ("C-x g" . magit-status))
+         ("C-x g" . magit-status)
+         ;; Alternate transient entry point; binding recommended in
+         ;; <https://magit.vc/manual/magit.html#Transient-Commands>.
+         ("C-x M-g" . magit-dispatch)
+         ;; Completing the trio of bindings in `magit-file-mode-map'.
+         ("C-c M-g" . magit-file-dispatch))
 
   :init
 
@@ -4546,10 +4551,6 @@ as argument."
 
 
   :config
-
-  ;; Enable C-c M-g as a shortcut to go to a popup of Magit commands
-  ;; relevant to the current file.
-  (global-magit-file-mode +1)
 
   ;; The default location for git-credential-cache is in
   ;; ~/.config/git/credential. However, if ~/.git-credential-cache/
