@@ -59,7 +59,7 @@
  ("lsp-mode" . "9ffbc9d0910d1622fbe1a40229c4d30b4a0981aa")
  ("lsp-python-ms" . "60b663c82a55613009632ee83aad8cdc1c410a84")
  ("lsp-ui" . "3ccc3e3386732c3ee22c151e6b5215a0e4c99173")
- ("lua-mode" . "95c64bb5634035630e8c59d10d4a1d1003265743")
+ ("lua-mode" . "52cc3e465a2d35dbcbad8a87fd5fe548840f5822")
  ("macrostep" . "424e3734a1ee526a1bd7b5c3cd1d3ef19d184267")
  ("magit" . "872788b195bd319563e85259885c135ed70199db")
  ("markdown-mode" . "f3c54e34cc5228001af36a5301883325319f21d4")
