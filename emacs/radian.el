@@ -3966,6 +3966,21 @@ unhelpful."
   "Reload the init-file."
   (interactive)
   (message "Reloading init-file...")
+  ;; Total hack here. I have no idea why it's needed. But, probably
+  ;; due to some kind of disgusting Gilardi scenario, if we don't
+  ;; explicitly load it here, the autoloading does not quite suffice
+  ;; to make everything work out. Specifically, if we byte-compile the
+  ;; init-file, start up using that init-file, then make a
+  ;; modification to the init-file and reload using
+  ;; `radian-reload-init', then all the `use-package' declarations
+  ;; fail to recognize `:straight' as a supported keyword, strongly
+  ;; suggesting there is some kind of eager macroexpansion that fails
+  ;; because straight.el has not yet installed the `use-package'
+  ;; integration. I would have thought that putting a `require'
+  ;; statement inside `eval-when-compile' (or even a bare `require')
+  ;; after we request `use-package' from straight.el would solve the
+  ;; problem, but unfortunately it does not. As such, the hack.
+  (require 'use-package)
   (load user-init-file nil 'nomessage)
   (message "Reloading init-file...done"))
 
