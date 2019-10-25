@@ -922,6 +922,43 @@ Local bindings (`counsel-mode-map'):
 
   :blackout t)
 
+;; This is kind of a hack, and you probably don't even want to know
+;; why it's needed here. Basically, we want to make sure
+;; `ivy-prescient-mode' gets enabled as soon as Ivy is loaded, so that
+;; we get sorting and filtering. However, we need to make sure Counsel
+;; is loaded *before* `ivy-prescient-mode' is enabled, as otherwise
+;; Counsel overrides our customizations. You might think that an
+;; elegant and modular solution to this problem is to
+;; `with-eval-after-load' on `ivy' and within that form require
+;; `counsel' and enable `ivy-prescient-mode'. Unfortunately, this has
+;; catastrophic side effects. Specifically, if the first command you
+;; run is provided by Counsel, then `counsel' will be required, which
+;; will require `ivy' as a dependency (via `swiper' because screw
+;; modularity). Then once `ivy' is provided, our customizations will
+;; run. We will start by requiring `counsel' as suggested, which will
+;; be loaded again (as it's not yet been provided, and we haven't hit
+;; the recursive load limit). That will load `swiper' again, but `ivy'
+;; won't be loaded again. Once `counsel' has been loaded and provided,
+;; we'll enable `ivy-prescient-mode'. At this point all is well.
+;; Unfortunately, we are not done yet. After our customizations run,
+;; we are back to loading `swiper' (which required `ivy', whose
+;; provision triggered our customizations) and then `counsel'. The
+;; second loading of `counsel' causes `ivy-prescient-mode' to get
+;; overridden.
+;;
+;; Hence this solution, which neatly sidesteps the problem at a slight
+;; cost to modularity. We just enable `ivy-prescient-mode' on the
+;; `with-eval-after-load' hook for `counsel', and make sure to require
+;; `counsel' from `ivy' to make sure we don't wait to enable sorting
+;; and filtering if only Ivy commands are used.
+;;
+;; The real solution is to not use Ivy/Counsel, and instead develop
+;; some other package whose API isn't a total mess.
+(use-feature ivy
+  :config
+
+  (require 'counsel))
+
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
 (use-package prescient
@@ -934,13 +971,11 @@ Local bindings (`counsel-mode-map'):
 ;; for candidates in Ivy menus.
 (use-package ivy-prescient
   :demand t
-  :after ivy
+  ;; Need to load after Counsel, because otherwise Counsel overrides
+  ;; our Ivy customizations. See
+  ;; <https://github.com/raxod502/prescient.el/issues/46>.
+  :after counsel
   :config
-
-  ;; Need to do this before we enable `ivy-prescient-mode' as Counsel
-  ;; sticks some weird stuff on the Ivy user options that
-  ;; `ivy-prescient-mode' needs to undo.
-  (require 'counsel)
 
   ;; Use `prescient' for Ivy menus.
   (ivy-prescient-mode +1))
