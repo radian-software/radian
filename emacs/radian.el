@@ -4913,12 +4913,17 @@ Also run `radian-atomic-chrome-setup-hook'."
                  ((eq conn atomic-chrome-server-ghost-text)
                   "Firefox")
                  ((eq conn atomic-chrome-server-atomic-chrome)
-                  "Google Chrome"))))
+                  "Chromium")))
+               (alt-browser
+                (when (eq conn atomic-chrome-server-atomic-chrome)
+                  "Google Chrome")))
       (cond
        ((radian-operating-system-p macOS)
         (call-process "open" nil nil nil "-a" browser))
        ((executable-find "wmctrl")
-        (call-process "wmctrl" nil nil nil "-a" browser)))))
+        (unless (or (zerop (call-process "wmctrl" nil nil nil "-a" browser))
+                    (not alt-browser))
+          (call-process "wmctrl" nil nil nil "-a" alt-browser))))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
