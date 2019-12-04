@@ -509,34 +509,41 @@ if (( $+commands[git] )); then
     alias gsh='git show'
     alias gshs='git show --stat'
 
-    for all in "" a; do
-        local all_flags=
-        if [[ -n $all ]]; then
-            all_flags=" --all"
+    for nograph in "" n; do
+        local graph_flags=
+        if [[ -z $nograph ]]; then
+            graph_flags=" --graph"
         fi
-        for oneline in "" o; do
-            local oneline_flags=
-            if [[ -n $oneline ]]; then
-                oneline_flags=" --oneline"
+        for all in "" a; do
+            local all_flags=
+            if [[ -n $all ]]; then
+                all_flags=" --all"
             fi
-            for diff in "" s p ps sp; do
-                local diff_flags=
-                case $diff in
-                    s) diff_flags=" --stat";;
-                    p) diff_flags=" --patch";;
-                    ps|sp) diff_flags=" --patch --stat";;
-                esac
-                for search in "" g G S; do
-                    local search_flags=
-                    case $search in
-                        g) search_flags=" --grep";;
-                        G) search_flags=" -G";;
-                        S) search_flags=" -S";;
+            for oneline in "" o; do
+                local oneline_flags=
+                if [[ -n $oneline ]]; then
+                    oneline_flags=" --oneline"
+                fi
+                for diff in "" s p ps sp; do
+                    local diff_flags=
+                    case $diff in
+                        s) diff_flags=" --stat";;
+                        p) diff_flags=" --patch";;
+                        ps|sp) diff_flags=" --patch --stat";;
                     esac
-                    alias="gl${all}${oneline}${diff}${search}="
-                    alias+="git log --graph --decorate${all_flags}"
-                    alias+="${oneline_flags}${diff_flags}${search_flags}"
-                    alias $alias
+                    for search in "" g G S; do
+                        local search_flags=
+                        case $search in
+                            g) search_flags=" --grep";;
+                            G) search_flags=" -G";;
+                            S) search_flags=" -S";;
+                        esac
+                        alias="gl${nograph}${all}${oneline}${diff}${search}="
+                        alias+="git log --decorate"
+                        alias+="${graph_flags}${all_flags}"
+                        alias+="${oneline_flags}${diff_flags}${search_flags}"
+                        alias $alias
+                    done
                 done
             done
         done
