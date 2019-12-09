@@ -4639,7 +4639,7 @@ as argument."
   (setq magit-save-repository-buffers nil)
 
   (transient-append-suffix
-   'magit-merge "-s"
+   'magit-merge "-n"
    '("-u" "Allow unrelated" "--allow-unrelated-histories"))
 
   (transient-append-suffix 'magit-pull "-r"
