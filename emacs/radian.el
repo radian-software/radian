@@ -823,8 +823,7 @@ disgusting."
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
 ;; to provide extra features.
 (use-package counsel
-  :bind (([remap find-file] . counsel-find-file)
-         ([remap yank-pop] . counsel-yank-pop))
+  :bind (([remap find-file] . counsel-find-file))
   :bind* (;; Keybinding suggested by the documentation of Counsel, see
           ;; https://github.com/abo-abo/swiper.
           ("C-c k" . counsel-rg))
