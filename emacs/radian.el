@@ -790,49 +790,6 @@ This is used to prevent duplicate entries in the kill ring.")
 ;; improvement over the default Emacs interface for candidate
 ;; selection.
 (use-package ivy
-  :init/el-patch
-
-  (defvar ivy-mode-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map [remap switch-to-buffer]
-        'ivy-switch-buffer)
-      (define-key map [remap switch-to-buffer-other-window]
-        'ivy-switch-buffer-other-window)
-      map)
-    "Keymap for `ivy-mode'.")
-
-  (define-minor-mode ivy-mode
-    (el-patch-concat
-      "Toggle Ivy mode on or off.
-Turn Ivy mode on if ARG is positive, off otherwise.
-Turning on Ivy mode sets `completing-read-function' to
-`ivy-completing-read'.
-
-Global bindings:
-\\{ivy-mode-map}
-
-Minibuffer bindings:
-\\{ivy-minibuffer-map}"
-      (el-patch-add
-        "\n\nTo make it easier to lazy-load `ivy', this function
-sets `completion-in-region-function' regardless of the value of
-`ivy-do-completion-in-region'."))
-    :group 'ivy
-    :global t
-    :keymap ivy-mode-map
-    (el-patch-remove
-      :lighter " ivy")
-    (if ivy-mode
-        (progn
-          (setq completing-read-function 'ivy-completing-read)
-          (el-patch-splice 2
-            (when ivy-do-completion-in-region
-              (setq completion-in-region-function 'ivy-completion-in-region))))
-      (setq completing-read-function 'completing-read-default)
-      (setq completion-in-region-function 'completion--in-region)))
-
-  (ivy-mode +1)
-
   :config
 
   ;; With enough packages loaded, it is easy to get commands like
@@ -866,66 +823,8 @@ disgusting."
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
 ;; to provide extra features.
 (use-package counsel
-  :init/el-patch
-
-  (defvar counsel-mode-map
-    (let ((map (make-sparse-keymap)))
-      (dolist (binding
-               '((execute-extended-command . counsel-M-x)
-                 (describe-bindings . counsel-descbinds)
-                 (el-patch-remove
-                   (describe-function . counsel-describe-function)
-                   (describe-variable . counsel-describe-variable))
-                 (apropos-command . counsel-apropos)
-                 (describe-face . counsel-describe-face)
-                 (list-faces-display . counsel-faces)
-                 (find-file . counsel-find-file)
-                 (find-library . counsel-find-library)
-                 (imenu . counsel-imenu)
-                 (load-library . counsel-load-library)
-                 (load-theme . counsel-load-theme)
-                 (yank-pop . counsel-yank-pop)
-                 (info-lookup-symbol . counsel-info-lookup-symbol)
-                 (pop-to-mark-command . counsel-mark-ring)
-                 (bookmark-jump . counsel-bookmark)))
-        (define-key map (vector 'remap (car binding)) (cdr binding)))
-      map)
-    (el-patch-concat
-      "Map for `counsel-mode'.
-Remaps built-in functions to counsel replacements."
-      (el-patch-add
-        "\n\nBindings that are remapped by `helpful' have been removed.")))
-
-  (defcustom counsel-mode-override-describe-bindings nil
-    "Whether to override `describe-bindings' when `counsel-mode' is active."
-    :type 'boolean)
-
-  (define-minor-mode counsel-mode
-    "Toggle Counsel mode on or off.
-Turn Counsel mode on if ARG is positive, off otherwise. Counsel
-mode remaps built-in emacs functions that have counsel
-replacements.
-
-Local bindings (`counsel-mode-map'):
-\\{counsel-mode-map}"
-    :global t
-    :keymap counsel-mode-map
-    (el-patch-remove
-      :lighter " counsel")
-    (if counsel-mode
-        (progn
-          (when (and (fboundp 'advice-add)
-                     counsel-mode-override-describe-bindings)
-            (advice-add #'describe-bindings :override #'counsel-descbinds))
-          (define-key minibuffer-local-map (kbd "C-r")
-            'counsel-minibuffer-history))
-      (when (fboundp 'advice-remove)
-        (advice-remove #'describe-bindings #'counsel-descbinds))))
-
-  :init
-
-  (counsel-mode +1)
-
+  :bind (([remap find-file] . counsel-find-file)
+         ([remap yank-pop] . counsel-yank-pop))
   :bind* (;; Keybinding suggested by the documentation of Counsel, see
           ;; https://github.com/abo-abo/swiper.
           ("C-c k" . counsel-rg))
@@ -974,6 +873,19 @@ Local bindings (`counsel-mode-map'):
 
   (require 'counsel))
 
+;; Package `selectrum' is an incremental completion and narrowing
+;; framework. Like Ivy and Helm, which it improves on, Selectrum
+;; provides a user interface for choosing from a list of options by
+;; typing a query to narrow the list, and then selecting one of the
+;; remaining candidates. This offers a significant improvement over
+;; the default Emacs interface for candidate selection.
+(use-package selectrum
+  :straight (:host github :repo "raxod502/selectrum")
+  :demand t
+  :config
+
+  (selectrum-mode +1))
+
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
 (use-package prescient
@@ -994,6 +906,16 @@ Local bindings (`counsel-mode-map'):
 
   ;; Use `prescient' for Ivy menus.
   (ivy-prescient-mode +1))
+
+;; Package `selectrum-prescient' provides intelligent sorting and
+;; filtering for candidates in Selectrum menus.
+(use-package selectrum-prescient
+  :straight (:host github :repo "raxod502/prescient.el"
+                   :files ("selectrum-prescient.el"))
+  :demand t
+  :config
+
+  (selectrum-prescient-mode +1))
 
 ;;; Window management
 
@@ -1297,6 +1219,10 @@ Otherwise behave as if called interactively.
   :defer 1
   :config
 
+  ;; Use Selectrum (via `completing-read') for Projectile instead of
+  ;; IDO.
+  (setq projectile-completion-system 'default)
+
   ;; Enable the mode again now that we have all the supporting hooks
   ;; and stuff defined.
   (projectile-mode +1)
@@ -1309,87 +1235,6 @@ Otherwise behave as if called interactively.
        #'radian--projectile-indexing-method-p)
 
   :blackout t)
-
-;; Package `counsel-projectile' provides alternate versions of
-;; Projectile commands which use Counsel.
-(use-package counsel-projectile
-  :init/el-patch
-
-  (defcustom counsel-projectile-key-bindings
-    '((projectile-find-file        . counsel-projectile-find-file)
-      (projectile-find-file-dwim   . counsel-projectile-find-file-dwim)
-      (projectile-find-dir         . counsel-projectile-find-dir)
-      (projectile-switch-to-buffer . counsel-projectile-switch-to-buffer)
-      (projectile-grep             . counsel-projectile-grep)
-      (projectile-ag               . counsel-projectile-ag)
-      (projectile-ripgrep          . counsel-projectile-rg)
-      (projectile-switch-project   . counsel-projectile-switch-project)
-      (" "                         . counsel-projectile)
-      ("si"                        . counsel-projectile-git-grep)
-      ("Oc"                        . counsel-projectile-org-capture)
-      ("Oa"                        . counsel-projectile-org-agenda))
-    "Alist of counsel-projectile key bindings.
-
-Each element is of the form \(KEY . DEF\) where KEY is either a
-key sequence to bind in `projectile-command-map' or a projectile
-command to remap in `projectile-mode-map', and DEF is the
-counsel-projectile command to which KEY is remapped or bound."
-    :type '(alist :key-type (choice (function :tag "Projectile command")
-                                    key-sequence)
-                  :value-type (function :tag "Counsel-projectile command"))
-    :group 'counsel-projectile)
-
-  (define-minor-mode counsel-projectile-mode
-    "Toggle Counsel-Projectile mode on or off.
-
-With a prefix argument ARG, enable the mode if ARG is positive,
-and disable it otherwise.  If called from Lisp, enable the mode
-if ARG is omitted or nil, and toggle it if ARG is `toggle'.
-
-Counsel-Projectile mode turns on Projectile mode, thus enabling
-all projectile key bindings, and adds the counsel-projectile key
-bindings on top of them.
-
-The counsel-projectile key bindings either remap existing
-projectile commands to their counsel-projectile replacements or
-bind keys to counsel-projectile commands that have no projectile
-counterparts."
-    :group 'counsel-projectile
-    :require 'counsel-projectile
-    :global t
-    (cond
-     (counsel-projectile-mode
-      (projectile-mode)
-      (dolist (binding counsel-projectile-key-bindings)
-        (if (functionp (car binding))
-            (define-key
-              projectile-mode-map `[remap ,(car binding)] (cdr binding))
-          (define-key projectile-command-map (car binding) (cdr binding)))))
-     (t
-      (dolist (binding counsel-projectile-key-bindings)
-        (if (functionp (car binding))
-            (define-key projectile-mode-map `[remap ,(car binding)] nil)
-          (define-key projectile-command-map (car binding) nil)))
-      (projectile-mode -1))))
-
-  :init
-
-  (counsel-projectile-mode +1)
-
-  :config
-
-  ;; Sort files using `prescient', instead of just showing them in
-  ;; lexicographic order.
-  (setq counsel-projectile-sort-files t)
-
-  ;; After switching projects, find only files rather than also
-  ;; offering buffers (which usually does not do what I want -- some
-  ;; buffers were created while inside the project, but are not
-  ;; associated, and also when the buffers are included I can no
-  ;; longer jump to a file by matching its full path within the
-  ;; project).
-  (setf (cdr (assoc "o" (cdr counsel-projectile-switch-project-action)))
-        (cdr (assoc "f" (cdr counsel-projectile-switch-project-action)))))
 
 (defvar radian--dirs-to-delete nil
   "List of directories to try to delete when killing buffer.
@@ -5213,6 +5058,10 @@ This is passed to `set-frame-font'."
 ;; entirely.
 (setq echo-keystrokes 1e-6)
 
+;; Don't suggest shorter ways to type commands in M-x, since they
+;; don't apply when using Selectrum.
+(setq suggest-key-bindings nil)
+
 ;; Don't blink the cursor on the opening paren when you insert a
 ;; closing paren, as we already have superior handling of that from
 ;; Smartparens.
@@ -5382,7 +5231,22 @@ your local configuration."
     :demand t
     :config
 
-    (load-theme 'zerodark 'no-confirm)))
+    (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
+          (class '((class color) (min-colors 89)))
+          (green (if (true-color-p) "#98be65" "#87af5f"))
+          (orange (if (true-color-p) "#da8548" "#d7875f"))
+          (purple (if (true-color-p) "#c678dd" "#d787d7")))
+      (custom-theme-set-faces
+       'zerodark
+       `(selectrum-current-candidate
+         ((,class (:background
+                   ,background-purple
+                   :weight bold
+                   :foreground ,purple))))
+       `(selectrum-primary-highlight ((,class (:foreground ,orange))))
+       `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
+
+    (enable-theme 'zerodark)))
 
 ;; Local Variables:
 ;; checkdoc-symbol-words: ("top-level")
