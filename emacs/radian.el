@@ -554,7 +554,13 @@ NAME and ARGS are as in `use-package'."
 ;; depend on Org, they will not accidentally cause the Emacs-provided
 ;; (outdated and duplicated) version of Org to be loaded before the
 ;; real one is registered.
-(straight-use-package 'org)
+;;
+;; Use my mirror of Org because the upstream has *shockingly*
+;; atrocious uptime (namely, the entire service will just go down for
+;; more than a day at a time on a regular basis). Unacceptable because
+;; it keeps breaking Radian CI.
+(straight-use-package
+ '(org :host github :repo "emacs-straight/org-mode" :local-repo "org"))
 
 ;;; el-patch
 
