@@ -822,18 +822,7 @@ disgusting."
 ;; Package `counsel' provides purpose-built replacements for many
 ;; built-in Emacs commands that use enhanced configurations of `ivy'
 ;; to provide extra features.
-(use-package counsel
-  :bind (([remap find-file] . counsel-find-file))
-  :bind* (;; Keybinding suggested by the documentation of Counsel, see
-          ;; https://github.com/abo-abo/swiper.
-          ("C-c k" . counsel-rg))
-  :config
-
-  (unless (string-match-p "-z --sort path" counsel-rg-base-command)
-    (setq counsel-rg-base-command
-          (concat counsel-rg-base-command " -z --sort path")))
-
-  :blackout t)
+(use-package counsel)
 
 ;; This is kind of a hack, and you probably don't even want to know
 ;; why it's needed here. Basically, we want to make sure
@@ -4695,7 +4684,18 @@ Instead, display simply a flat colored region in the fringe."
 
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
-(use-package rg)
+(use-package rg
+  :bind* (("C-c k" . radian-rg))
+  :config
+
+  (defun radian-rg (&optional only-current-type)
+    "Search for string in current project.
+With ONLY-CURRENT-TYPE non-nil, or interactively with prefix
+argument, search only in files matching current type."
+    (interactive "P")
+    (rg-run (rg-read-pattern nil)
+            (if only-current-type 'current "*")
+            (rg-project-root buffer-file-name))))
 
 ;;;; Internet applications
 
