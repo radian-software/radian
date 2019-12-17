@@ -59,9 +59,9 @@ These dotfiles attempt to achieve the following goals:
     docstrings, and text
   * Configured packages: [Atomic Chrome][atomic-chrome] (with
     [Firefox] support), [Autorevert], [buffer-move], [Company],
-    [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-    [ElDoc], [ESUP], [Flycheck], [Forge],
-    [`git-gutter-fringe.el`][git-gutter-fringe.el] [git-link],
+    [Counsel], [delete-selection-mode], [Dired], [dumb-jump], [ElDoc],
+    [ESUP], [Flycheck], [Forge],
+    [`git-gutter-fringe.el`][git-gutter-fringe.el], [git-link],
     [Helpful], [Ivy], [Macrostep], [Magit], [no-littering], [Org],
     [Projectile], [pyvenv], [Smartparens], [Swiper],
     [transpose-frame], [undo-tree], [use-package], [visual-regexp],
