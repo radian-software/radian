@@ -458,6 +458,7 @@ if (( $+commands[emacs] )); then
     alias eq='emacs -nw -Q'
     alias ew='emacs'
     alias eqw='emacs -Q'
+    alias ue='USER_EMACS_DIRECTORY=$PWD e'
 fi
 
 if (( $+commands[emacsclient] )); then
@@ -595,6 +596,7 @@ if (( $+commands[git] )); then
     alias gds='git diff --stat'
     alias gdc='git diff --cached'
     alias gdcs='git diff --cached --stat'
+    alias gdn='git diff --no-index'
 
     alias gbl='git blame'
 
