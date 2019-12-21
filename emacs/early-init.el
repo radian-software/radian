@@ -25,6 +25,16 @@
   (advice-add #'display-graphic-p :around
               #'radian--advice-fix-display-graphic-p)
 
+  (defun radian--advice-fix-xw-display-color-p (func &optional display)
+    "Fix `xw-display-color-p' so it works while loading the early init-file."
+    (if (or display after-init-time)
+        (funcall func display)
+      ;; Make an educated guess.
+      initial-window-system))
+
+  (advice-add #'xw-display-color-p :around
+              #'radian--advice-fix-xw-display-color-p)
+
   (defun radian--advice-disable-x-resource-application ()
     "Disable `x-apply-session-resources'.
 Now, `x-apply-session-resources' normally gets called before
@@ -42,4 +52,5 @@ resources.")
    (expand-file-name "init.el" user-emacs-directory) nil 'nomessage 'nosuffix)
 
   ;; Avoid messing with things more than necessary.
-  (advice-remove #'display-graphic-p #'radian--advice-fix-display-graphic-p))
+  (advice-remove #'display-graphic-p #'radian--advice-fix-display-graphic-p)
+  (advice-remove #'xw-display-color-p #'radian--advice-fix-xw-display-color-p))
