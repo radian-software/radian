@@ -5083,10 +5083,12 @@ an effect for Emacs 26 or below."
 ;; Disable the contextual menu that pops up when you right-click.
 (unbind-key "<C-down-mouse-1>")
 
+;; The menu bar appears in both graphical and tty frames. Kill it.
+(menu-bar-mode -1)
+
 (when (display-graphic-p)
 
   ;; Disable unnecessary graphical elements.
-  (menu-bar-mode -1)
   (scroll-bar-mode -1)
   (tool-bar-mode -1)
 
