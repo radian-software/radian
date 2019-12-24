@@ -2668,7 +2668,7 @@ thing as far as I can tell)."
 Otherwise, it just moves point to column 0, which is wrong.
 
 This works around an upstream bug; see
-https://github.com/haskell/haskell-mode/issues/1594."
+<https://github.com/haskell/haskell-mode/issues/1594>."
     (if (derived-mode-p 'literate-haskell-mode)
         (progn
           (beginning-of-line 1)
