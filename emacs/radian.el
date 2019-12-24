@@ -4920,6 +4920,8 @@ functions here that aren't actually present on `kill-emacs-hook'.")
 The global value of this variable is irrelevant; it is always
 bound dynamically before being used.")
 
+  (autoload #'restart-emacs--translate-prefix-to-args "restart-emacs")
+
   (radian-defadvice radian--advice-kill-emacs-dispatch
       (save-buffers-kill-emacs &optional arg)
     :around save-buffers-kill-emacs
