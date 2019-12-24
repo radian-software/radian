@@ -5082,6 +5082,8 @@ an effect for Emacs 26 or below."
   (let ((read-hide-char (or read-hide-char ?*)))
     (apply func args)))
 
+(setq minibuffer-message-properties '(face minibuffer-prompt))
+
 ;; Disable the contextual menu that pops up when you right-click.
 (unbind-key "<C-down-mouse-1>")
 
