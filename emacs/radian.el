@@ -1217,6 +1217,17 @@ Otherwise behave as if called interactively.
   ;; IDO.
   (setq projectile-completion-system 'default)
 
+  ;; When switching projects, give the option to choose what to do.
+  ;; This is a way better interface than having to remember ahead of
+  ;; time to use a prefix argument on `projectile-switch-project'
+  ;; (because, and please be honest here, when was the last time you
+  ;; actually remembered to do that?).
+  (setq projectile-switch-project-action 'projectile-commander)
+
+  (def-projectile-commander-method ?\C-m
+    "Find file in project."
+    (projectile-find-file))
+
   ;; Enable the mode again now that we have all the supporting hooks
   ;; and stuff defined.
   (projectile-mode +1)
