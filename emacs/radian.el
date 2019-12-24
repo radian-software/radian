@@ -2287,6 +2287,18 @@ This prevents ElDoc and Flycheck from fighting over the echo
 area."
       (not (flycheck-overlay-errors-at (point)))))
 
+  (radian-defadvice radian--advice-eldoc-better-display-message-p (&rest _)
+    :override eldoc--message-command-p
+    "Make ElDoc smarter about when to display its messages.
+By default ElDoc has a customizable whitelist of commands that it
+will display its messages after. The idea of this is to not
+trample on messages that other commands may have printed.
+However, this is a hopeless endeavour because there are a
+virtually unlimited number of commands that don't conflict with
+ElDoc. A better approach is to simply check to see if a message
+was printed, and only have ElDoc display if one wasn't."
+    (member (current-message) (list nil eldoc-last-message)))
+
   :blackout t)
 
 ;;;; Syntax checking and code linting
