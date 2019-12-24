@@ -1,1 +1,3 @@
-((nil . ((compile-command . "make lint"))))
+((nil
+  . ((compile-command
+      . "make -sC \"$(git rev-parse --show-toplevel)\" lint"))))
