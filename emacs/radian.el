@@ -2535,6 +2535,34 @@ nor requires Flycheck to be loaded."
 
   :blackout t)
 
+;; Feature `cider-doc' from package `cider' handles rendering Clojure
+;; function and variable docstrings, etc.
+(use-feature cider-doc
+  :init
+
+  ;; Here we deal with a really weird and dumb bug
+  ;; <https://github.com/raxod502/radian/issues/446>. The problem is
+  ;; fundamentally that CIDER wants to do some color calculations when
+  ;; it's loaded, whereas in fact there's no reason to do this until
+  ;; something is actually rendered.
+
+  (setq cider-docview-code-background-color nil)
+
+  :config
+
+  ;; Wherein we hope nobody else is relying on sticking obsolete
+  ;; advices onto these functions.
+  (ad-deactivate 'enable-theme)
+  (ad-deactivate 'disable-theme)
+
+  (radian-defadvice radian--advice-cider-hack-color-calculation (&rest _)
+    :before cider-docview-fontify-code-blocks
+    "Set `cider-docview-code-background-color'.
+This is needed because we have ripped out the code that would
+normally set it (since that code will run during early init,
+which is a problem)."
+    (setq cider-docview-code-background-color (cider-scale-background-color))))
+
 ;;;; Go
 ;; https://golang.org/
 
