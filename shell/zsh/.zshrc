@@ -44,7 +44,7 @@ if [[ -n $radian_zplugin ]]; then
     zplugin light raxod502/wdx
 
     # If a previous command starts with what you have typed, show it
-    # in dimmied color after the cursor, and allow completing it.
+    # in dimmed color after the cursor, and allow completing it.
     zplugin light zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
