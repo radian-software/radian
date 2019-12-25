@@ -1915,8 +1915,9 @@ the reverse direction from \\[pop-global-mark]."
   :blackout t)
 
 ;; Package `yasnippet' allows the expansion of user-defined
-;; abbreviations into fillable templates. It is also used by
-;; `clj-refactor' for some of its refactorings.
+;; abbreviations into fillable templates. The only reason we have it
+;; here is because it gets pulled in by LSP, and we need to unbreak
+;; some stuff.
 (use-package yasnippet
   :bind (:map yas-minor-mode-map
 
