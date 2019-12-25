@@ -1384,48 +1384,49 @@ Interactively, reverse the characters in the current region."
 ;; for this, but I wrote this code before I knew about it. Also, I'm
 ;; not sure how well it handles the edge cases for docstrings and
 ;; such.
-(radian-defadvice radian--advice-auto-fill-only-text (func &rest args)
-  :around #'internal-auto-fill
-  "Only perform auto-fill in text, comments, or docstrings."
-  (cl-block nil
-    ;; Don't auto-fill on the first line of a docstring, since it
-    ;; shouldn't be wrapped into the body.
-    (when (and (derived-mode-p #'emacs-lisp-mode)
-               (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-               (save-excursion
-                 (beginning-of-line)
-                 (looking-at-p "[[:space:]]*\"")))
-      (cl-return))
-    (when (and (derived-mode-p 'text-mode)
-               (not (derived-mode-p 'yaml-mode)))
-      (apply func args)
-      (cl-return))
-    ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
-    (when-let ((faces (save-excursion
-                        ;; In `web-mode', the end of the line isn't
-                        ;; fontified, so we have to step backwards by
-                        ;; one character before checking the
-                        ;; properties.
-                        (ignore-errors
-                          (backward-char))
-                        (get-text-property (point) 'face))))
-      (unless (listp faces)
-        (setq faces (list faces)))
-      (when (cl-some
-             (lambda (face)
-               (memq face '(font-lock-comment-face
-                            font-lock-comment-delimiter-face
-                            font-lock-doc-face
-                            web-mode-javascript-comment-face)))
-             faces)
-        ;; Fill Elisp docstrings to the appropriate column. Why
-        ;; docstrings are filled to a different column, I don't know.
-        (let ((fill-column (if (and
-                                (derived-mode-p #'emacs-lisp-mode)
-                                (memq 'font-lock-doc-face faces))
-                               emacs-lisp-docstring-fill-column
-                             fill-column)))
-          (apply func args))))))
+(radian-when-compiletime (version<= "26" emacs-version)
+  (radian-defadvice radian--advice-auto-fill-only-text (func &rest args)
+    :around #'internal-auto-fill
+    "Only perform auto-fill in text, comments, or docstrings."
+    (cl-block nil
+      ;; Don't auto-fill on the first line of a docstring, since it
+      ;; shouldn't be wrapped into the body.
+      (when (and (derived-mode-p #'emacs-lisp-mode)
+                 (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+                 (save-excursion
+                   (beginning-of-line)
+                   (looking-at-p "[[:space:]]*\"")))
+        (cl-return))
+      (when (and (derived-mode-p 'text-mode)
+                 (not (derived-mode-p 'yaml-mode)))
+        (apply func args)
+        (cl-return))
+      ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
+      (when-let ((faces (save-excursion
+                          ;; In `web-mode', the end of the line isn't
+                          ;; fontified, so we have to step backwards
+                          ;; by one character before checking the
+                          ;; properties.
+                          (ignore-errors
+                            (backward-char))
+                          (get-text-property (point) 'face))))
+        (unless (listp faces)
+          (setq faces (list faces)))
+        (when (cl-some
+               (lambda (face)
+                 (memq face '(font-lock-comment-face
+                              font-lock-comment-delimiter-face
+                              font-lock-doc-face
+                              web-mode-javascript-comment-face)))
+               faces)
+          ;; Fill Elisp docstrings to the appropriate column. Why
+          ;; docstrings are filled to a different column, I don't know.
+          (let ((fill-column (if (and
+                                  (derived-mode-p #'emacs-lisp-mode)
+                                  (memq 'font-lock-doc-face faces))
+                                 emacs-lisp-docstring-fill-column
+                               fill-column)))
+            (apply func args)))))))
 
 (blackout 'auto-fill-mode)
 
