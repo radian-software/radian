@@ -2211,6 +2211,23 @@ backends will still be included.")
   ;; right-hand side. This usually makes it look neater.
   (setq company-tooltip-align-annotations t)
 
+  (defvar-local radian--company-buffer-modified-counter nil
+    "Last return value of `buffer-chars-modified-tick'.
+Used to ensure that Company only initiates a completion when the
+buffer is modified.")
+
+  (radian-defadvice radian--advice-company-complete-on-change ()
+    :override company--should-begin
+    "Make Company trigger a completion when the buffer is modified.
+This is in contrast to the default behavior, which is to trigger
+a completion when one of a whitelisted set of commands is used.
+One specific improvement this brings about is that you get
+completions automatically when backspacing into a symbol."
+    (let ((tick (buffer-chars-modified-tick)))
+      (unless (equal tick radian--company-buffer-modified-counter)
+        (prog1 t
+          (setq radian--company-buffer-modified-counter tick)))))
+
   (global-company-mode +1)
 
   :blackout t)
