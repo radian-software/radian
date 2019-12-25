@@ -47,6 +47,10 @@ if [[ -n $radian_zplugin ]]; then
     # in dimmed color after the cursor, and allow completing it.
     zplugin light zsh-users/zsh-autosuggestions
 
+    # Pressing <up> and <down> when you've already typed in part of a
+    # command will only show you history entries matching that text.
+    zplugin light zsh-users/zsh-history-substring-search
+
     # Configure tab-completions for many external commands.
     #
     # Not sure exactly what the blockf does here, but it's used in the
@@ -234,6 +238,11 @@ setopt hist_reduce_blanks
 # instead of executing the command immediately. This currently has no
 # effect since history expansion is disabled.
 setopt hist_verify
+
+# Recommended setup for zsh-history-substring-search, see
+# <https://github.com/zsh-users/zsh-history-substring-search#usage>.
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
 
 ### Filesystem navigation
 
