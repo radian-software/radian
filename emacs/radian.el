@@ -3485,7 +3485,8 @@ keymaps."
         (lambda (m)
           (and (boundp m)
                (keymapp (symbol-value m))))
-        'require-match))))
+        'require-match
+        nil nil (thing-at-point 'symbol)))))
     (with-help-window (help-buffer)
       (with-current-buffer (help-buffer)
         (insert (format "Keymap `%S' defines the following bindings:" keymap)
