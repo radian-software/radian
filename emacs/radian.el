@@ -3771,6 +3771,33 @@ SYMBOL is as in `xref-find-definitions'."
 (bind-key "C-h C-o" #'radian-find-symbol)
 (bind-key "C-h C-l" #'find-library)
 
+;; Let's establish a standard location for the Emacs source code.
+(setq source-directory (expand-file-name "src" user-emacs-directory))
+
+;; Feature `find-func' provides the ability for you to locate the
+;; definitions of Emacs Lisp functions and variables.
+(use-feature find-func
+  :config
+
+  (radian-defadvice radian--advice-find-func-clone-source (func &rest args)
+    :around #'find-function-C-source
+    "Prompt user to clone Emacs source repository when needed."
+    (unless (file-directory-p source-directory)
+      (unless (yes-or-no-p "Clone Emacs source repository? ")
+        (user-error "Emacs source repository is not available"))
+      (make-directory (file-name-directory source-directory) 'parents)
+      (let ((compilation-buffer-name-function
+             (lambda (&rest _)
+               "*clone-emacs-src*")))
+        (compile
+         (format
+          "git clone https://github.com/emacs-mirror/emacs.git %s"
+          (shell-quote-argument source-directory))))
+      (user-error "Please wait until Emacs source repository is cloned"))
+    (let ((find-function-C-source-directory
+           (expand-file-name "src" source-directory)))
+      (apply func args)))))
+
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (use-package macrostep
