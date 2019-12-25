@@ -1634,6 +1634,8 @@ the reverse direction from \\[pop-global-mark]."
 
 ;;;; Find and replace
 
+(radian-bind-key "c" #'toggle-case-fold-search)
+
 ;; Package `visual-regexp' provides an alternate version of
 ;; `query-replace' which highlights matches and replacements as you
 ;; type.
