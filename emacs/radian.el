@@ -215,30 +215,27 @@ This means that FILENAME is a symlink whose target is inside
 (defmacro radian--with-silent-load (&rest body)
   "Execute BODY, with the function `load' made silent."
   (declare (indent 0))
-  `(cl-letf* ((load-orig (symbol-function #'load))
-              ((symbol-function #'load)
-               (lambda (file &optional noerror _nomessage &rest args)
-                 (apply load-orig file noerror 'nomessage args))))
+  `(radian-flet ((defun load (file &optional noerror _nomessage &rest args)
+                   (apply load file noerror 'nomessage args)))
      ,@body))
 
 (defmacro radian--with-silent-write (&rest body)
   "Execute BODY, with the function `write-region' made silent."
   (declare (indent 0))
-  `(cl-letf* ((write-region-orig (symbol-function #'write-region))
-              ((symbol-function #'write-region)
-               (lambda (start end filename &optional append visit lockname
-                              mustbenew)
-                 (funcall write-region-orig start end filename append 0
-                          lockname mustbenew)
-                 (when (or (stringp visit) (eq visit t))
-                   (setq buffer-file-name
-                         (if (stringp visit)
-                             visit
-                           filename))
-                   (set-visited-file-modtime)
-                   (set-buffer-modified-p nil))))
-              ((symbol-function #'message) #'ignore))
-     ,@body))
+  `(radian-flet ((defun write-region
+                     (start end filename &optional append visit lockname
+                            mustbenew)
+                   (funcall write-region start end filename append 0
+                            lockname mustbenew)
+                   (when (or (stringp visit) (eq visit t))
+                     (setq buffer-file-name
+                           (if (stringp visit)
+                               visit
+                             filename))
+                     (set-visited-file-modtime)
+                     (set-buffer-modified-p nil))))
+     (cl-letf (((symbol-function #'message) #'ignore))
+       ,@body)))
 
 (defmacro radian--with-silent-message (regexps &rest body)
   "Silencing any messages that match REGEXPS, execute BODY.
@@ -250,21 +247,19 @@ also be a single string."
   (declare (indent 1))
   (when (stringp regexps)
     (setq regexps (list regexps)))
-  `(cl-letf* ((message (symbol-function #'message))
-              ((symbol-function #'message)
-               (lambda (format &rest args)
-                 (let ((str (apply #'format format args)))
-                   ;; Can't use an unnamed block because during
-                   ;; byte-compilation, some idiot loads `cl', which
-                   ;; sticks an advice onto `dolist' that makes it
-                   ;; behave like `cl-dolist' (i.e., wrap it in
-                   ;; another unnamed block) and therefore breaks this
-                   ;; code.
-                   (cl-block done
-                     (dolist (regexp ',regexps)
-                       (when (or (null regexp) (string-match-p regexp str))
-                         (cl-return-from done)))
-                     (funcall message "%s" str))))))
+  `(radian-flet ((defun message (format &rest args)
+                   (let ((str (apply #'format format args)))
+                     ;; Can't use an unnamed block because during
+                     ;; byte-compilation, some idiot loads `cl', which
+                     ;; sticks an advice onto `dolist' that makes it
+                     ;; behave like `cl-dolist' (i.e., wrap it in
+                     ;; another unnamed block) and therefore breaks
+                     ;; this code.
+                     (cl-block done
+                       (dolist (regexp ',regexps)
+                         (when (or (null regexp) (string-match-p regexp str))
+                           (cl-return-from done)))
+                       (funcall message "%s" str)))))
      ,@body))
 
 (defun radian--advice-silence-messages (func &rest args)
@@ -671,13 +666,11 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
 (radian-defadvice radian--quoted-insert-allow-quit (quoted-insert &rest args)
   :around #'quoted-insert
   "Allow quitting out of \\[quoted-insert] with \\[keyboard-quit]."
-  (cl-letf* ((insert-and-inherit (symbol-function #'insert-and-inherit))
-             ((symbol-function #'insert-and-inherit)
-              (lambda (&rest args)
-                (dolist (arg args)
-                  (when (equal arg ?\C-g)
-                    (signal 'quit nil)))
-                (apply insert-and-inherit args))))
+  (radian-flet ((defun insert-and-inherit (&rest args)
+                  (dolist (arg args)
+                    (when (equal arg ?\C-g)
+                      (signal 'quit nil)))
+                  (apply insert-and-inherit args)))
     (apply quoted-insert args)))
 
 ;;; Environment
@@ -1366,22 +1359,19 @@ password that the user has decided not to save.")
         (setq blacklist nil))
       (if (member key blacklist)
           ?n
-        (cl-letf* ((orig-read-char-choice
-                    (symbol-function #'auth-source-read-char-choice))
-                   ((symbol-function #'auth-source-read-char-choice)
-                    (lambda (prompt choices)
-                      (let ((choice (funcall orig-read-char-choice
-                                             prompt choices)))
-                        (when (= choice ?N)
-                          (push key blacklist)
-                          (make-directory
-                           (file-name-directory
-                            radian--auth-source-blacklist-file)
-                           'parents)
-                          (with-temp-file radian--auth-source-blacklist-file
-                            (print blacklist (current-buffer)))
-                          (setq choice ?n))
-                        choice))))
+        (radian-flet ((defun auth-source-read-char-choice (prompt choices)
+                        (let ((choice (funcall auth-source-read-char-choice
+                                               prompt choices)))
+                          (when (= choice ?N)
+                            (push key blacklist)
+                            (make-directory
+                             (file-name-directory
+                              radian--auth-source-blacklist-file)
+                             'parents)
+                            (with-temp-file radian--auth-source-blacklist-file
+                              (print blacklist (current-buffer)))
+                            (setq choice ?n))
+                          choice)))
           (funcall func file add))))))
 
 ;;; Saving files
@@ -1822,11 +1812,9 @@ the reverse direction from \\[pop-global-mark]."
           (auto-revert-buffers &rest args)
         :around #'auto-revert-buffers
         "Inhibit `autorevert' for buffers not displayed in any window."
-        (cl-letf* ((buffer-list (symbol-function #'buffer-list))
-                   ((symbol-function #'buffer-list)
-                    (lambda (&rest args)
-                      (cl-remove-if-not
-                       #'get-buffer-window (apply buffer-list args)))))
+        (radian-flet ((defun buffer-list (&rest args)
+                        (cl-remove-if-not
+                         #'get-buffer-window (apply buffer-list args))))
           (apply auto-revert-buffers args)))
     (radian-defadvice radian--autorevert-only-visible (bufs)
       :filter-return #'auto-revert--polled-buffers
@@ -2534,12 +2522,10 @@ nor requires Flycheck to be loaded."
       (orig-fun &rest args)
     :around #'lsp-ui-sideline-apply-code-actions
     "Apply code fix immediately if only one is possible."
-    (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
-               ((symbol-function #'completing-read)
-                (lambda (prompt collection &rest args)
-                  (if (= (safe-length collection) 1)
-                      (car collection)
-                    (apply orig-completing-read prompt collection args)))))
+    (radian-flet ((defun completing-read (prompt collection &rest args)
+                    (if (= (safe-length collection) 1)
+                        (car collection)
+                      (apply completing-read prompt collection args))))
       (apply orig-fun args)))
 
   ;; Don't show symbol definitions in the sideline. They are pretty
@@ -3303,13 +3289,11 @@ FORCE is not nil.")
       (TeX-load-style-file file)
     :around #'TeX-load-style-file
     "Inhibit the \"Loading **/auto/*.el (source)...\" messages."
-    (cl-letf* ((load (symbol-function #'load))
-               ((symbol-function #'load)
-                (lambda (file &optional
-                              noerror _nomessage
-                              nosuffix must-suffix)
-                  (funcall
-                   load file noerror 'nomessage nosuffix must-suffix))))
+    (radian-flet ((defun load (file &optional
+                                    noerror _nomessage
+                                    nosuffix must-suffix)
+                    (funcall
+                     load file noerror 'nomessage nosuffix must-suffix)))
       (funcall TeX-load-style-file file)))
 
   (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
@@ -4611,12 +4595,10 @@ changes, which means that `git-gutter' needs to be re-run.")
     :around #'git-gutter-fr:view-diff-infos
     "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
 Instead, display simply a flat colored region in the fringe."
-    (cl-letf* ((fringe-helper-insert-region
-                (symbol-function #'fringe-helper-insert-region))
-               ((symbol-function #'fringe-helper-insert-region)
-                (lambda (beg end _bitmap &rest args)
-                  (apply fringe-helper-insert-region
-                         beg end 'radian--git-gutter-blank args))))
+    (radian-flet ((defun fringe-helper-insert-region
+                      (beg end _bitmap &rest args)
+                    (apply fringe-helper-insert-region
+                           beg end 'radian--git-gutter-blank args)))
       (apply func args))))
 
 ;;;; External commands
