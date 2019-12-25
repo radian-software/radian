@@ -4134,6 +4134,7 @@ If NEWNAME is a directory then extend it with the basename of
     (when (equal newname (file-name-as-directory newname))
       (setq newname
             (concat newname (file-name-nondirectory buffer-file-name))))
+    (make-directory (file-name-directory newname) 'parents)
     ;; Passing integer as OK-IF-ALREADY-EXISTS means prompt for
     ;; confirmation before overwriting. Why? Who can say...
     (dired-rename-file buffer-file-name newname 0))
