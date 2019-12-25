@@ -581,10 +581,10 @@ NAME and ARGS are as in `use-package'."
 ;;; Keybindings
 
 ;; Package `bind-key' provides a macro by the same name (along with
-;; `bind-key*', `bind-keys', `bind-keys*', and `unbind-key') which
-;; provides a much prettier API for manipulating keymaps than
-;; `define-key' and `global-set-key' do. It's also the same API that
-;; `:bind' and similar keywords in `use-package' use.
+;; `bind-key*' and `unbind-key') which provides a much prettier API
+;; for manipulating keymaps than `define-key' and `global-set-key' do.
+;; It's also the same API that `:bind' and similar keywords in
+;; `use-package' use.
 (use-package bind-key
   :demand t)
 
@@ -782,8 +782,8 @@ This is used to prevent duplicate entries in the kill ring.")
       (scroll-up 1)))
 
   ;; Enable scrolling with the mouse wheel.
-  (bind-keys ("<mouse-4>" . radian-scroll-down)
-             ("<mouse-5>" . radian-scroll-up)))
+  (bind-key "<mouse-4>" #'radian-scroll-down)
+  (bind-key "<mouse-5>" #'radian-scroll-up))
 
 ;;; Candidate selection
 
@@ -908,7 +908,7 @@ active minibuffer, even if the minibuffer is not selected."
 ;; Feature `ibuffer' provides a more modern replacement for the
 ;; `list-buffers' command.
 (use-feature ibuffer
-  :bind (([remap list-buffers] . ibuffer)))
+  :bind (([remap list-buffers] . #'ibuffer)))
 
 ;;; Finding files
 
@@ -1414,7 +1414,7 @@ newline."
 ;; Feature `newcomment' provides commands for commenting and
 ;; uncommenting code, and editing comments.
 (use-feature newcomment
-  :bind (([remap default-indent-new-line] . radian-continue-comment))
+  :bind (([remap default-indent-new-line] . #'radian-continue-comment))
   :config
 
   (defun radian-continue-comment ()
@@ -1531,7 +1531,7 @@ invocation will kill the newline."
          ;; This overrides the default binding of M-/, which is to
          ;; `dabbrev-expand'.
          :map undo-tree-map
-         ("M-/" . undo-tree-redo))
+         ("M-/" . #'undo-tree-redo))
   :config
 
   (global-undo-tree-mode +1)
@@ -1640,7 +1640,7 @@ the reverse direction from \\[pop-global-mark]."
 ;; `query-replace' which highlights matches and replacements as you
 ;; type.
 (use-package visual-regexp
-  :bind (([remap query-replace] . vr/query-replace)))
+  :bind (([remap query-replace] . #'vr/query-replace)))
 
 ;; Package `visual-regexp-steroids' allows `visual-regexp' to use
 ;; regexp engines other than Emacs'; for example, Python or Perl
@@ -1648,7 +1648,7 @@ the reverse direction from \\[pop-global-mark]."
 (use-package visual-regexp-steroids
   :demand t
   :after visual-regexp
-  :bind (([remap query-replace-regexp] . radian-query-replace-literal))
+  :bind (([remap query-replace-regexp] . #'radian-query-replace-literal))
   :config
 
   ;; Use Emacs-style regular expressions by default, instead of
@@ -2125,8 +2125,8 @@ backends will still be included.")
          ;; completion to instead use Company. You might think this
          ;; could be put in the `:bind*' declaration below, but it
          ;; seems that `bind-key*' does not work with remappings.
-         ([remap completion-at-point] . company-manual-begin)
-         ([remap complete-symbol] . company-manual-begin)
+         ([remap completion-at-point] . #'company-manual-begin)
+         ([remap complete-symbol] . #'company-manual-begin)
 
          ;; The following are keybindings that take effect whenever
          ;; the completions menu is visible, even if the user has not
@@ -2136,8 +2136,8 @@ backends will still be included.")
 
          ;; Make TAB always complete the current selection, instead of
          ;; only completing a common prefix.
-         ("<tab>" . company-complete-selection)
-         ("TAB" . company-complete-selection)
+         ("<tab>" . #'company-complete-selection)
+         ("TAB" . #'company-complete-selection)
 
          ;; The following are keybindings that only take effect if the
          ;; user has explicitly interacted with Company. Note that
@@ -2149,8 +2149,8 @@ backends will still be included.")
          ;; Make RET trigger a completion if and only if the user has
          ;; explicitly interacted with Company, instead of always
          ;; doing so.
-         ("<return>" . company-complete-selection)
-         ("RET" . company-complete-selection)
+         ("<return>" . #'company-complete-selection)
+         ("RET" . #'company-complete-selection)
 
          ;; We then make <up> and <down> abort the completions menu
          ;; unless the user has interacted explicitly. Note that we
@@ -2166,8 +2166,8 @@ backends will still be included.")
          ;; interaction has happened yet, and note also that M-TAB
          ;; when the completions menu is open counts as an
          ;; interaction.
-         ("<up>" . company-select-previous)
-         ("<down>" . company-select-next))
+         ("<up>" . #'company-select-previous)
+         ("<down>" . #'company-select-next))
 
   :bind* (;; The default keybinding for `completion-at-point' and
           ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
@@ -2175,7 +2175,7 @@ backends will still be included.")
           ;; above. Here we make sure that they definitely invoke
           ;; `company-manual-begin' even if a minor mode binds M-TAB
           ;; directly.
-          ("M-TAB" . company-manual-begin))
+          ("M-TAB" . #'company-manual-begin))
 
   :config
 
@@ -2307,10 +2307,10 @@ order."
   (dumb-jump-mode +1)
 
   :bind (:map dumb-jump-mode-map
-              ("M-Q" . dumb-jump-quick-look))
-  :bind* (("C-M-d" . dumb-jump-go-prompt)
-          ("C-x 4 g" . dumb-jump-go-other-window)
-          ("C-x 4 d" . radian-dumb-jump-go-prompt-other-window))
+              ("M-Q" . #'dumb-jump-quick-look))
+  :bind* (("C-M-d" . #'dumb-jump-go-prompt)
+          ("C-x 4 g" . #'dumb-jump-go-other-window)
+          ("C-x 4 d" . #'radian-dumb-jump-go-prompt-other-window))
   :config
 
   (defun radian-dumb-jump-go-prompt-other-window ()
@@ -2382,7 +2382,7 @@ nor requires Flycheck to be loaded."
     (dolist (checker checkers)
       (cl-pushnew checker flycheck-disabled-checkers)))
 
-  :bind-keymap (("C-c !" . flycheck-command-map))
+  :bind-keymap (("C-c !" . #'flycheck-command-map))
 
   :config
 
@@ -2417,7 +2417,7 @@ nor requires Flycheck to be loaded."
 ;; well as various other UI elements that integrate with `lsp-mode'.
 ;; It's configured automatically by `lsp-mode'.
 (use-package lsp-ui
-  :bind (("C-c f" . lsp-ui-sideline-apply-code-actions))
+  :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
   (radian-defadvice radian--advice-lsp-ui-apply-single-fix
@@ -2806,15 +2806,15 @@ ARG is passed to `hindent-mode' toggle function."
   :bind (;; C-c C-s p is a really dumb binding, we prefer C-c C-s C-p.
          ;; Same for C-c C-s q.
          :map markdown-mode-style-map
-              ("C-p" . markdown-insert-pre)
-              ("C-q" . markdown-insert-blockquote)
+              ("C-p" . #'markdown-insert-pre)
+              ("C-q" . #'markdown-insert-blockquote)
               :map markdown-mode-map
-              ("TAB" . radian-markdown-tab)
+              ("TAB" . #'radian-markdown-tab)
               ;; Try to override all the bindings in
               ;; `markdown-mode-map'...
-              ("<S-iso-lefttab>" . radian-markdown-shifttab)
-              ("<S-tab>" . radian-markdown-shifttab)
-              ("<backtab>" . radian-markdown-shifttab))
+              ("<S-iso-lefttab>" . #'radian-markdown-shifttab)
+              ("<S-tab>" . #'radian-markdown-shifttab)
+              ("<backtab>" . #'radian-markdown-shifttab))
   :config
 
   (defun radian-markdown-tab ()
@@ -3507,7 +3507,7 @@ This function calls `json-mode--update-auto-mode' to change the
 ;; Feature `help' powers the *Help* buffer and related functionality.
 (use-feature help
   :bind (:map help-map
-              ("M-k" . radian-describe-keymap))
+              ("M-k" . #'radian-describe-keymap))
   :config
 
   (radian-defadvice radian--advice-help-inhibit-hints (&rest _)
@@ -3555,21 +3555,21 @@ unhelpful."
 ;; in a better format.
 (use-package helpful
   :bind (;; Remap standard commands.
-         ([remap describe-function] . helpful-callable)
-         ([remap describe-variable] . helpful-variable)
-         ([remap describe-symbol]   . helpful-symbol)
-         ([remap describe-key]      . helpful-key)
+         ([remap describe-function] . #'helpful-callable)
+         ([remap describe-variable] . #'helpful-variable)
+         ([remap describe-symbol]   . #'helpful-symbol)
+         ([remap describe-key]      . #'helpful-key)
 
          ;; Suggested bindings from the documentation at
          ;; https://github.com/Wilfred/helpful.
 
          :map help-map
-         ("F" . helpful-function)
-         ("M-f" . helpful-macro)
-         ("C" . helpful-command)
+         ("F" . #'helpful-function)
+         ("M-f" . #'helpful-macro)
+         ("C" . #'helpful-command)
 
          :map global-map
-         ("C-c C-d" . helpful-at-point))
+         ("C-c C-d" . #'helpful-at-point))
 
   :config
 
@@ -3721,16 +3721,15 @@ SYMBOL is as in `xref-find-definitions'."
 ;; some reason; note that `xref-find-definitions' is not a replacement
 ;; because it is major-mode dependent.) By further analogy, we should
 ;; bind `find-library'.
-(bind-keys*
- ("C-h C-f" . find-function)
- ("C-h C-v" . find-variable)
- ("C-h C-o" . radian-find-symbol)
- ("C-h C-l" . find-library))
+(bind-key "C-h C-f" #'find-function)
+(bind-key "C-h C-v" #'find-variable)
+(bind-key "C-h C-o" #'radian-find-symbol)
+(bind-key "C-h C-l" #'find-library)
 
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (use-package macrostep
-  :bind (("C-c e" . macrostep-expand)))
+  :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
 
@@ -3846,10 +3845,10 @@ messages."
               ;; C-<left> and C-<right> are unused by Org. C-<up> and
               ;; C-<down> are bound to `org-backward-paragraph', etc.
               ;; (but see below).
-              ("C-<left>" . org-shiftleft)
-              ("C-<right>" . org-shiftright)
-              ("C-<up>" . org-shiftup)
-              ("C-<down>" . org-shiftdown)
+              ("C-<left>" . #'org-shiftleft)
+              ("C-<right>" . #'org-shiftright)
+              ("C-<up>" . #'org-shiftup)
+              ("C-<down>" . #'org-shiftdown)
 
               ;; By default, Org maps C-<up> to
               ;; `org-backward-paragraph' instead of
@@ -3861,16 +3860,16 @@ messages."
               ;; above. So otherwise there would be no easy way to
               ;; invoke `org-backward-paragraph' and
               ;; `org-forward-paragraph'.)
-              ([remap backward-paragraph] . org-backward-paragraph)
-              ([remap forward-paragraph] . org-forward-paragraph)
+              ([remap backward-paragraph] . #'org-backward-paragraph)
+              ([remap forward-paragraph] . #'org-forward-paragraph)
 
               ;; See discussion of this function below.
-              ("C-M-RET" . radian-org-insert-heading-at-point)
-              ("C-M-<return>" . radian-org-insert-heading-at-point))
+              ("C-M-RET" . #'radian-org-insert-heading-at-point)
+              ("C-M-<return>" . #'radian-org-insert-heading-at-point))
   :bind* (;; Add the global keybindings for accessing Org Agenda and
           ;; Org Capture that are recommended in the Org manual.
-          ("C-c a" . org-agenda)
-          ("C-c c" . org-capture))
+          ("C-c a" . #'org-agenda)
+          ("C-c c" . #'org-capture))
   :config
 
   ;; If you try to insert a heading in the middle of an entry, don't
@@ -3931,8 +3930,8 @@ This runs `org-insert-heading' with
               ;; C-up and C-down because M-{ and M-} are bound to the same
               ;; commands. But I think it's best to take the same approach
               ;; as before, for consistency.
-              ("C-<left>" . org-agenda-do-date-earlier)
-              ("C-<right>" . org-agenda-do-date-later))
+              ("C-<left>" . #'org-agenda-do-date-earlier)
+              ("C-<right>" . #'org-agenda-do-date-later))
   :config
 
   (radian-defadvice radian--advice-org-agenda-default-directory
@@ -3991,11 +3990,11 @@ prevents a delay on killing Emacs when Org was not yet loaded."
       (org-clock-save)))
 
   :bind* (;; Make some `org-mode-map' bindings global instead.
-          ("C-c C-x C-i" . org-clock-in)
-          ("C-c C-x C-o" . org-clock-out)
-          ("C-c C-x C-x" . org-clock-in-last)
-          ("C-c C-x C-j" . org-clock-goto)
-          ("C-c C-x C-q" . org-clock-cancel))
+          ("C-c C-x C-i" . #'org-clock-in)
+          ("C-c C-x C-o" . #'org-clock-out)
+          ("C-c C-x C-x" . #'org-clock-in-last)
+          ("C-c C-x C-j" . #'org-clock-goto)
+          ("C-c C-x C-q" . #'org-clock-cancel))
 
   :config
 
@@ -4062,7 +4061,7 @@ non-nil value to enable trashing for file operations."
   :bind (:map dired-mode-map
               ;; This binding is way nicer than ^. It's inspired by
               ;; Sunrise Commander.
-              ("J" . dired-up-directory))
+              ("J" . #'dired-up-directory))
   :config
 
   (radian-defadvice radian--advice-dired-check-for-ls-dired (&rest _)
@@ -4095,8 +4094,8 @@ the problematic case.)"
 
 (use-feature dired-x
   :bind (;; Bindings for jumping to the current directory in Dired.
-         ("C-x C-j" . dired-jump)
-         ("C-x 4 C-j" . dired-jump-other-window))
+         ("C-x C-j" . #'dired-jump)
+         ("C-x 4 C-j" . #'dired-jump-other-window))
   :config
 
   ;; Prevent annoying "Omitted N lines" messages when auto-reverting.
@@ -4119,8 +4118,8 @@ are probably not going to be installed."
 (use-feature term
   :bind (;; Allow usage of more commands from within the terminal.
          :map term-raw-map
-         ("M-x" . execute-extended-command)
-         ("C-h" . help-command)))
+         ("M-x" . #'execute-extended-command)
+         ("C-h" . #'help-command)))
 
 ;;;; Version control
 
@@ -4198,12 +4197,12 @@ are probably not going to be installed."
   :bind (;; This is the primary entry point for Magit. Binding to C-x
          ;; g is recommended in the manual:
          ;; https://magit.vc/manual/magit.html#Getting-Started
-         ("C-x g" . magit-status)
+         ("C-x g" . #'magit-status)
          ;; Alternate transient entry point; binding recommended in
          ;; <https://magit.vc/manual/magit.html#Transient-Commands>.
-         ("C-x M-g" . magit-dispatch)
+         ("C-x M-g" . #'magit-dispatch)
          ;; Completing the trio of bindings in `magit-file-mode-map'.
-         ("C-c M-g" . magit-file-dispatch))
+         ("C-c M-g" . #'magit-file-dispatch))
 
   :init
 
@@ -4487,7 +4486,7 @@ Instead, display simply a flat colored region in the fringe."
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
 (use-package rg
-  :bind* (("C-c k" . radian-rg))
+  :bind* (("C-c k" . #'radian-rg))
   :config
 
   (defun radian-rg (&optional only-current-type)
@@ -4521,7 +4520,7 @@ See <https://github.com/dajva/rg.el/pull/70>."
     (not (derived-mode-p #'markdown-mode #'org-mode #'org-agenda-mode)))
 
   :bind* (:filter (radian--browse-url-predicate)
-                  ("C-c C-o" . browse-url-at-point)))
+                  ("C-c C-o" . #'browse-url-at-point)))
 
 ;; Feature `bug-reference' provides a mechanism for hyperlinking issue
 ;; tracker references (like #20), so that you can open them in a web
