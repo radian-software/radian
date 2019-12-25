@@ -3797,7 +3797,7 @@ SYMBOL is as in `xref-find-definitions'."
       (user-error "Please wait until Emacs source repository is cloned"))
     (let ((find-function-C-source-directory
            (expand-file-name "src" source-directory)))
-      (apply func args)))))
+      (apply func args))))
 
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
