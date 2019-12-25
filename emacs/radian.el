@@ -2281,7 +2281,10 @@ One specific improvement this brings about is that you get
 completions automatically when backspacing into a symbol."
     (let ((tick (buffer-chars-modified-tick)))
       (unless (equal tick radian--company-buffer-modified-counter)
-        (prog1 t
+        ;; Only trigger completion if previous counter value was
+        ;; non-nil (i.e., don't trigger completion just as we're
+        ;; jumping to a buffer for the first time).
+        (prog1 radian--company-buffer-modified-counter
           (setq radian--company-buffer-modified-counter tick)))))
 
   (global-company-mode +1)
