@@ -945,6 +945,10 @@ active minibuffer, even if the minibuffer is not selected."
   (put 'projectile-indexing-method 'safe-local-variable
        #'radian--projectile-indexing-method-p)
 
+  ;; Can't bind M-r because some genius bound ESC. *Never* bind ESC!
+  (dolist (key '("C-r" "R"))
+    (bind-key key #'projectile-replace-regexp projectile-command-map))
+
   :blackout t)
 
 (defvar radian--dirs-to-delete nil
@@ -1603,7 +1607,7 @@ the reverse direction from \\[pop-global-mark]."
 ;; `query-replace' which highlights matches and replacements as you
 ;; type.
 (use-package visual-regexp
-  :bind (("M-%" . vr/query-replace)))
+  :bind (([remap query-replace] . vr/query-replace)))
 
 ;; Package `visual-regexp-steroids' allows `visual-regexp' to use
 ;; regexp engines other than Emacs'; for example, Python or Perl
@@ -1611,11 +1615,18 @@ the reverse direction from \\[pop-global-mark]."
 (use-package visual-regexp-steroids
   :demand t
   :after visual-regexp
+  :bind (([remap query-replace-regexp] . radian-query-replace-literal))
   :config
 
   ;; Use Emacs-style regular expressions by default, instead of
   ;; Python-style.
-  (setq vr/engine 'emacs))
+  (setq vr/engine 'emacs)
+
+  (defun radian-query-replace-literal ()
+    "Do a literal query-replace using `visual-regexp'."
+    (interactive)
+    (let ((vr/engine 'emacs-plain))
+      (call-interactively #'vr/query-replace))))
 
 ;; Feature `isearch' provides a basic and fast mechanism for jumping
 ;; forward or backward to occurrences of a given search string.
