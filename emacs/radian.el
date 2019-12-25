@@ -4107,7 +4107,36 @@ non-nil value to enable trashing for file operations."
               ;; This binding is way nicer than ^. It's inspired by
               ;; Sunrise Commander.
               ("J" . #'dired-up-directory))
+  :bind* (("C-x w" . radian-rename-current-file))
   :config
+
+  (defun radian-rename-current-file (newname)
+    "Rename file visited by current buffer to NEWNAME.
+Interactively, prompt the user for the target filename, with
+completion.
+
+If NEWNAME is a directory then extend it with the basename of
+`buffer-file-name'. Make parent directories automatically."
+    (interactive
+     (progn
+       (unless buffer-file-name
+         (user-error "Current buffer is not visiting a file"))
+       (let ((newname (read-file-name "Rename to: " nil buffer-file-name)))
+         (when (equal (file-truename newname)
+                      (file-truename buffer-file-name))
+           (user-error "%s" "Can't rename a file to itself"))
+         (list newname))))
+    (unless buffer-file-name
+      (error "Current buffer is not visiting a file"))
+    (when (equal (file-truename newname)
+                 (file-truename buffer-file-name))
+      (error "%s: %s" "Can't rename a file to itself" newname))
+    (when (equal newname (file-name-as-directory newname))
+      (setq newname
+            (concat newname (file-name-nondirectory buffer-file-name))))
+    ;; Passing integer as OK-IF-ALREADY-EXISTS means prompt for
+    ;; confirmation before overwriting. Why? Who can say...
+    (dired-rename-file buffer-file-name newname 0))
 
   (radian-defadvice radian--advice-dired-check-for-ls-dired (&rest _)
     :before #'dired-insert-directory
