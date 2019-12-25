@@ -96,12 +96,17 @@ lexically bound variable by the same name, for use with
   "Define an advice called NAME and add it to a function.
 ARGLIST is as in `defun'. WHERE is a keyword as passed to
 `advice-add', and PLACE is the function to which to add the
-advice, like in `advice-add'. DOCSTRING and BODY are as in
-`defun'."
+advice, like in `advice-add'. PLACE should be sharp-quoted.
+DOCSTRING and BODY are as in `defun'."
   (declare (indent 2)
            (doc-string 5))
   (unless (stringp docstring)
-    (error "Radian: no docstring provided for `radian-defadvice'"))
+    (error "Radian: advice `%S' not documented'" name))
+  (unless (and (listp place)
+               (= 2 (length place))
+               (eq (nth 0 place) 'function)
+               (symbolp (nth 1 place)))
+    (error "Radian: advice `%S' does not sharp-quote place `%S'" name place))
   `(progn
      (eval-and-compile
        (defun ,name ,arglist
@@ -115,7 +120,7 @@ advice, like in `advice-add'. DOCSTRING and BODY are as in
                         (cadr place)
                       place)))
          ,@body))
-     (advice-add ',place ',where #',name)
+     (advice-add ,place ',where #',name)
      ',name))
 
 (defmacro radian-defhook (name arglist hooks docstring &rest body)
@@ -427,7 +432,7 @@ Otherwise, Emacs will just get slower and slower over time."
 
   (radian-defadvice radian--no-query-on-http-kill
       (buffer)
-    :filter-return url-http
+    :filter-return #'url-http
     "Disable query-on-exit for all network connections.
 This prevents Emacs shutdown from being interrupted just because
 there is a pending network request."
@@ -608,7 +613,7 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
   (string-join (remove "" (mapcar #'string-trim (remove nil keys))) " "))
 
 (radian-defadvice radian--quoted-insert-allow-quit (quoted-insert &rest args)
-  :around quoted-insert
+  :around #'quoted-insert
   "Allow quitting out of \\[quoted-insert] with \\[keyboard-quit]."
   (cl-letf* ((insert-and-inherit (symbol-function #'insert-and-inherit))
              ((symbol-function #'insert-and-inherit)
@@ -789,7 +794,7 @@ This is used to prevent duplicate entries in the kill ring.")
 
 (radian-defadvice radian--advice-eval-expression-save-garbage
     (func prompt &optional initial-contents keymap read &rest args)
-  :around read-from-minibuffer
+  :around #'read-from-minibuffer
   "Save user input in history even if it's not a valid sexp.
 We do this by forcing `read-from-minibuffer' to always be called
 with a nil value for READ, and then handling the effects of READ
@@ -841,7 +846,7 @@ ourselves."
 
 (radian-defadvice radian--advice-keyboard-quit-minibuffer-first
     (keyboard-quit)
-  :around keyboard-quit
+  :around #'keyboard-quit
   "Cause \\[keyboard-quit] to exit the minibuffer, if it is active.
 Normally, \\[keyboard-quit] will just act in the current buffer.
 This advice modifies the behavior so that it will instead exit an
@@ -853,7 +858,7 @@ active minibuffer, even if the minibuffer is not selected."
 
 (radian-defadvice radian--advice-kill-buffer-maybe-kill-window
     (func &optional buffer-or-name kill-window-too)
-  :around kill-buffer
+  :around #'kill-buffer
   "Make it so \\[universal-argument] \\[kill-buffer] kills the window too."
   (interactive
    (lambda (spec)
@@ -935,7 +940,7 @@ active minibuffer, even if the minibuffer is not selected."
 
   (radian-defadvice radian--advice-save-place-quickly-and-silently
       (func &rest args)
-    :around save-place-alist-to-file
+    :around #'save-place-alist-to-file
     "Make `save-place' save more quickly and silently."
     (radian--with-silent-write
       (cl-letf (((symbol-function #'pp) #'prin1))
@@ -1324,7 +1329,7 @@ Interactively, reverse the characters in the current region."
 ;; not sure how well it handles the edge cases for docstrings and
 ;; such.
 (radian-defadvice radian--advice-auto-fill-only-text (func &rest args)
-  :around internal-auto-fill
+  :around #'internal-auto-fill
   "Only perform auto-fill in text, comments, or docstrings."
   (cl-block nil
     ;; Don't auto-fill on the first line of a docstring, since it
@@ -1471,7 +1476,7 @@ two inserted lines are the same."
 
 (radian-defadvice radian--advice-stop-kill-at-whitespace
     (kill-line &rest args)
-  :around kill-line
+  :around #'kill-line
   "Prevent `kill-line' from killing through whitespace to a newline.
 This affects the case where you press \\[kill-line] when point is
 followed by some whitespace and then a newline. Without this
@@ -1489,7 +1494,7 @@ invocation will kill the newline."
 (setq kill-do-not-save-duplicates t)
 
 (radian-defadvice radian--advice-disallow-password-copying (func &rest args)
-  :around read-passwd
+  :around #'read-passwd
   "Don't allow copying a password to the kill ring."
   (cl-letf (((symbol-function #'kill-new) #'ignore)
             ((symbol-function #'kill-append) #'ignore))
@@ -1538,7 +1543,7 @@ invocation will kill the newline."
 
   (radian-defadvice radian--advice-suppress-undo-tree-buffer-modified-message
       (undo-tree-load-history &rest args)
-    :around undo-tree-load-history
+    :around #'undo-tree-load-history
     "Suppress the annoying message saying undo history could not be loaded.
 Normally, this message is printed when undo history could not be
 loaded since the file was changed outside of Emacs."
@@ -1568,7 +1573,7 @@ loaded since the file was changed outside of Emacs."
 
 (radian-defadvice radian--advice-allow-unpopping-mark
     (set-mark-command &optional arg)
-  :around set-mark-command
+  :around #'set-mark-command
   "Allow \\[set-mark-command] to step in reverse.
 If a negative prefix argument is given (like
 \\[negative-argument] \\[set-mark-command]), then it will step in
@@ -1591,7 +1596,7 @@ the reverse direction from \\[universal-argument]
 
 (radian-defadvice radian--advice-allow-unpopping-global-mark
     (pop-global-mark &optional arg)
-  :around pop-global-mark
+  :around #'pop-global-mark
   "Allow \\[pop-global-mark] to step in reverse.
 If a negative prefix argument is given (like
 \\[negative-argument] \\[pop-global-mark]), then it will step in
@@ -1714,7 +1719,7 @@ the reverse direction from \\[pop-global-mark]."
   (if (version<= emacs-version "26")
       (radian-defadvice radian--autorevert-only-visible
           (auto-revert-buffers &rest args)
-        :around auto-revert-buffers
+        :around #'auto-revert-buffers
         "Inhibit `autorevert' for buffers not displayed in any window."
         (cl-letf* ((buffer-list (symbol-function #'buffer-list))
                    ((symbol-function #'buffer-list)
@@ -1723,7 +1728,7 @@ the reverse direction from \\[pop-global-mark]."
                        #'get-buffer-window (apply buffer-list args)))))
           (apply auto-revert-buffers args)))
     (radian-defadvice radian--autorevert-only-visible (bufs)
-      :filter-return auto-revert--polled-buffers
+      :filter-return #'auto-revert--polled-buffers
       "Inhibit `autorevert' for buffers not displayed in any window."
       (cl-remove-if-not #'get-buffer-window bufs)))
 
@@ -1853,7 +1858,7 @@ the reverse direction from \\[pop-global-mark]."
   (apheleia-global-mode +1)
 
   (radian-defadvice radian--save-buffer-reformat-maybe (func &optional arg)
-    :around save-buffer
+    :around #'save-buffer
     "Make it so \\[save-buffer] with prefix arg inhibits reformatting."
     (let ((apheleia-mode (and apheleia-mode (member arg '(nil 1)))))
       (funcall func)))
@@ -1947,7 +1952,7 @@ currently active.")
 
     (radian-defadvice radian--advice-company-overrides-yasnippet
         (yas--make-control-overlay &rest args)
-      :around yas--make-control-overlay
+      :around #'yas--make-control-overlay
       "Allow `company' keybindings to override those of `yasnippet'."
       ;; The function `yas--make-control-overlay' uses the current
       ;; value of `yas-keymap' to build the Yasnippet overlay, so to
@@ -2034,7 +2039,7 @@ functions."
   (setq lsp-enable-snippet nil)
 
   (radian-defadvice radian--lsp-run-from-node-modules (command)
-    :filter-return lsp-resolve-final-function
+    :filter-return #'lsp-resolve-final-function
     "Find LSP executables inside node_modules/.bin if present."
     (cl-block nil
       (prog1 command
@@ -2231,7 +2236,7 @@ Used to ensure that Company only initiates a completion when the
 buffer is modified.")
 
   (radian-defadvice radian--advice-company-complete-on-change ()
-    :override company--should-begin
+    :override #'company--should-begin
     "Make Company trigger a completion when the buffer is modified.
 This is in contrast to the default behavior, which is to trigger
 a completion when one of a whitelisted set of commands is used.
@@ -2265,7 +2270,7 @@ completions automatically when backspacing into a symbol."
     :config
 
     (radian-defadvice radian--company-lsp-setup (&rest _)
-      :after lsp
+      :after #'lsp
       "Disable `company-prescient' sorting by length in some contexts.
 Specifically, disable sorting by length if the LSP Company
 backend returns fuzzy-matched candidates, which implies that the
@@ -2342,14 +2347,14 @@ order."
 
     (radian-defadvice radian--advice-disable-eldoc-on-flycheck
         (&rest _)
-      :after-while eldoc-display-message-no-interference-p
+      :after-while #'eldoc-display-message-no-interference-p
       "Disable ElDoc when point is on a Flycheck overlay.
 This prevents ElDoc and Flycheck from fighting over the echo
 area."
       (not (flycheck-overlay-errors-at (point)))))
 
   (radian-defadvice radian--advice-eldoc-better-display-message-p (&rest _)
-    :override eldoc--message-command-p
+    :override #'eldoc--message-command-p
     "Make ElDoc smarter about when to display its messages.
 By default ElDoc has a customizable whitelist of commands that it
 will display its messages after. The idea of this is to not
@@ -2422,7 +2427,7 @@ nor requires Flycheck to be loaded."
 
   (radian-defadvice radian--advice-lsp-ui-apply-single-fix
       (orig-fun &rest args)
-    :around lsp-ui-sideline-apply-code-actions
+    :around #'lsp-ui-sideline-apply-code-actions
     "Apply code fix immediately if only one is possible."
     (cl-letf* ((orig-completing-read (symbol-function #'completing-read))
                ((symbol-function #'completing-read)
@@ -2452,7 +2457,7 @@ nor requires Flycheck to be loaded."
   :config
 
   (radian-defadvice radian--advice-lsp-ui-doc-allow-multiline (func &rest args)
-    :around lsp-ui-doc--render-buffer
+    :around #'lsp-ui-doc--render-buffer
     "Prevent `lsp-ui-doc' from removing newlines from documentation."
     (radian-flet ((defun replace-regexp-in-string
                       (regexp rep string &rest args)
@@ -2503,7 +2508,7 @@ nor requires Flycheck to be loaded."
   :config
 
   (radian-defadvice radian--advice-inhibit-c-submode-indicators (&rest _)
-    :override c-update-modeline
+    :override #'c-update-modeline
     "Unconditionally inhibit CC submode indicators in the mode lighter.")
 
   ;; Switch to a better indentation-and-braces style. This turns the
@@ -2617,7 +2622,7 @@ nor requires Flycheck to be loaded."
   (ad-deactivate 'disable-theme)
 
   (radian-defadvice radian--advice-cider-hack-color-calculation (&rest _)
-    :before cider-docview-fontify-code-blocks
+    :before #'cider-docview-fontify-code-blocks
     "Set `cider-docview-code-background-color'.
 This is needed because we have ripped out the code that would
 normally set it (since that code will run during early init,
@@ -2688,7 +2693,7 @@ See <https://github.com/dominikh/go-mode.el/issues/232>."
 
     (radian-defadvice radian--advice-lsp-ui-organize-imports-more-cleanly
         (func actions &rest args)
-      :around lsp-ui-sideline--code-actions
+      :around #'lsp-ui-sideline--code-actions
       "Clean up the \"Organize Imports\" code actions for Go.
 Firstly, don't display \"Organize Imports\" or \"Organize All
 Imports\" in the sideline, as gopls sometimes reports these code
@@ -2724,7 +2729,7 @@ thing as far as I can tell)."
 
   (radian-defadvice radian--advice-haskell-fix-back-to-indentation
       (back-to-indentation)
-    :around back-to-indentation
+    :around #'back-to-indentation
     "Fix `back-to-indentation' in `literate-haskell-mode'.
 Otherwise, it just moves point to column 0, which is wrong.
 
@@ -2854,7 +2859,7 @@ item."
      'proselint))
 
   (radian-defadvice radian--disable-markdown-metadata-fontification (&rest _)
-    :override markdown-match-generic-metadata
+    :override #'markdown-match-generic-metadata
     "Prevent fontification of YAML metadata blocks in `markdown-mode'.
 This prevents a mis-feature wherein if the first line of a
 Markdown document has a colon in it, then it's distractingly and
@@ -2965,13 +2970,13 @@ Return either a string or nil."
   :config
 
   (radian-defadvice radian--lsp-python-ms-silence (func &rest args)
-    :around lsp-python-ms--language-server-started-callback
+    :around #'lsp-python-ms--language-server-started-callback
     "Inhibit a silly message."
     (radian--with-silent-message "Python language server started"
       (apply func args)))
 
   (radian-defadvice radian--lsp-python-ms-discover-virtualenvs (&rest _)
-    :before lsp-python-ms--extra-init-params
+    :before #'lsp-python-ms--extra-init-params
     "Automatically discover Pipenv and Poetry virtualenvs."
     (when-let ((venv (radian--python-find-virtualenv)))
       (setq-local lsp-python-ms-extra-paths
@@ -3191,7 +3196,7 @@ FORCE is not nil.")
 
   (radian-defadvice radian--advice-inhibit-tex-style-loading-message
       (TeX-load-style-file file)
-    :around TeX-load-style-file
+    :around #'TeX-load-style-file
     "Inhibit the \"Loading **/auto/*.el (source)...\" messages."
     (cl-letf* ((load (symbol-function #'load))
                ((symbol-function #'load)
@@ -3204,7 +3209,7 @@ FORCE is not nil.")
 
   (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
       (TeX-auto-list-information name)
-    :around TeX-auto-list-information
+    :around #'TeX-auto-list-information
     "Inhibit the \"Removing duplicates...\" messages."
     (let ((inhibit-message t))
       (funcall TeX-auto-list-information name)))
@@ -3215,7 +3220,7 @@ FORCE is not nil.")
     (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck))
 
   (radian-defadvice radian--advice-tex-simplify-mode-name (&rest _)
-    :after TeX-set-mode-name
+    :after #'TeX-set-mode-name
     "Remove frills from the `mode-name' in TeX modes.
 In practice, this means removing the stuff that comes after the
 slash, e.g. \"LaTeX/P\" becomes just \"LaTeX\"."
@@ -3230,7 +3235,7 @@ slash, e.g. \"LaTeX/P\" becomes just \"LaTeX\"."
   (setq TeX-save-query nil)
 
   (radian-defadvice radian--advice-hide-tex-compilation-buffers (name)
-    :filter-return TeX-process-buffer-name
+    :filter-return #'TeX-process-buffer-name
     "Hide AUCTeX compilation buffers by prepending a space to their names.
 This prevents them from getting in the way of buffer selection."
     (concat " " name)))
@@ -3249,7 +3254,7 @@ This prevents them from getting in the way of buffer selection."
 
   (radian-defadvice radian--latex-environment-kill-extra-newline
       (func &rest args)
-    :around LaTeX-insert-environment
+    :around #'LaTeX-insert-environment
     "Prevent inserting a new environment from adding an unnecessary newline.
 Specifically, this fixes a bug that happens when you insert a new
 environment with point at the end of a non-empty line of text."
@@ -3511,14 +3516,14 @@ This function calls `json-mode--update-auto-mode' to change the
   :config
 
   (radian-defadvice radian--advice-help-inhibit-hints (&rest _)
-    :override help-window-display-message
+    :override #'help-window-display-message
     "Inhibit the \"Type q in help window to delete it\" hints.
 Normally these are printed in the echo area whenever you open a
 help buffer.")
 
   (radian-defadvice radian--advice-help-disable-revert-prompt
       (help-mode-revert-buffer ignore-auto _noconfirm)
-    :around help-mode-revert-buffer
+    :around #'help-mode-revert-buffer
     "Don't ask for confirmation before reverting help buffers.
 \(Reverting is done by pressing \\<help-mode-map>\\[revert-buffer].)"
     (funcall help-mode-revert-buffer ignore-auto 'noconfirm))
@@ -3582,7 +3587,7 @@ unhelpful."
     (if radian-universal-keyboard-quit-mode
         (radian-defadvice radian--advice-helpful-key-allow-keyboard-quit
             (&rest _)
-          :before helpful-key
+          :before #'helpful-key
           "Make C-g work in `helpful-key'."
           ;; The docstring of `add-function' says that if we make our
           ;; advice interactive and the interactive spec is *not* a
@@ -3629,7 +3634,7 @@ unhelpful."
   ;; because screw modularity.
   (radian-defadvice radian--advice-company-elisp-use-helpful
       (func &rest args)
-    :around elisp--company-doc-buffer
+    :around #'elisp--company-doc-buffer
     "Cause `company' to use Helpful to show Elisp documentation."
     (cl-letf (((symbol-function #'describe-function) #'helpful-function)
               ((symbol-function #'describe-variable) #'helpful-variable)
@@ -3637,7 +3642,7 @@ unhelpful."
       (apply func args)))
 
   (radian-defadvice radian--advice-fill-elisp-docstrings-correctly (&rest _)
-    :before-until fill-context-prefix
+    :before-until #'fill-context-prefix
     "Prevent `auto-fill-mode' from adding indentation to Elisp docstrings."
     (when (and (derived-mode-p #'emacs-lisp-mode)
                (eq (get-text-property (point) 'face) 'font-lock-doc-face))
@@ -3936,7 +3941,7 @@ This runs `org-insert-heading' with
 
   (radian-defadvice radian--advice-org-agenda-default-directory
       (org-agenda &rest args)
-    :around org-agenda
+    :around #'org-agenda
     "If `org-directory' exists, set `default-directory' to it in the agenda.
 This makes the behavior of `find-file' more reasonable."
     (let ((default-directory (if (file-exists-p org-directory)
@@ -3946,7 +3951,7 @@ This makes the behavior of `find-file' more reasonable."
 
   (radian-defadvice radian--advice-blackout-org-agenda
       (&rest _)
-    :override org-agenda-set-mode-name
+    :override #'org-agenda-set-mode-name
     "Override the `org-agenda' mode lighter to just \"Org-Agenda\"."
     "Org-Agenda")
 
@@ -4049,7 +4054,7 @@ non-nil value to enable trashing for file operations."
 ;; This is in an advice so that we can defer the PATH search until
 ;; necessary.
 (radian-defadvice radian--use-gls-for-list-directory (&rest _)
-  :before list-directory
+  :before #'list-directory
   "Make Dired use GNU ls, if it is available."
   (when (executable-find "gls")
     (setq insert-directory-program "gls"))
@@ -4065,7 +4070,7 @@ non-nil value to enable trashing for file operations."
   :config
 
   (radian-defadvice radian--advice-dired-check-for-ls-dired (&rest _)
-    :before dired-insert-directory
+    :before #'dired-insert-directory
     "Check if ls --dired is supported ahead of time, and silently.
 
 This advice prevents Dired from printing a message if your ls
@@ -4104,7 +4109,7 @@ the problematic case.)"
   (radian-with-operating-system macOS
     (radian-defadvice radian--advice-dired-guess-open-on-macos
         (&rest _)
-      :override dired-guess-default
+      :override #'dired-guess-default
       "Cause Dired's '!' command to use open(1).
 This advice is only activated on macOS, where it is helpful since
 most of the Linux utilities in `dired-guess-shell-alist-default'
@@ -4311,7 +4316,7 @@ as argument."
   :config
 
   (radian-defadvice radian--forge-get-repository-lazily (&rest _)
-    :before-while forge-get-repository
+    :before-while #'forge-get-repository
     "Make `forge-get-repository' return nil if the binary isn't built yet.
 This prevents having EmacSQL try to build its binary (which may
 be annoying, inconvenient, or impossible depending on the
@@ -4320,7 +4325,7 @@ Magit."
     (file-executable-p emacsql-sqlite-executable))
 
   (radian-defadvice radian--forge-build-binary-lazily (&rest _)
-    :before forge-dispatch
+    :before #'forge-dispatch
     "Make `forge-dispatch' build the binary if necessary.
 Normally, the binary gets built as soon as Forge is loaded, which
 is terrible UX. We disable that above, so we now have to manually
@@ -4441,7 +4446,7 @@ changes, which means that `git-gutter' needs to be re-run.")
     "........")
 
   (radian-defadvice radian--advice-git-gutter-remove-bitmaps (func &rest args)
-    :around git-gutter-fr:view-diff-infos
+    :around #'git-gutter-fr:view-diff-infos
     "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
 Instead, display simply a flat colored region in the fringe."
     (cl-letf* ((fringe-helper-insert-region
@@ -4478,7 +4483,7 @@ Instead, display simply a flat colored region in the fringe."
         (lambda ()))
 
   (radian-defadvice radian--advice-compile-pop-to-buffer (buf)
-    :filter-return compilation-start
+    :filter-return #'compilation-start
     "Pop to compilation buffer on \\[compile]."
     (prog1 buf
       (select-window (get-buffer-window buf)))))
@@ -4500,7 +4505,7 @@ argument, search only in files matching current type."
 
   (radian-defadvice radian--advice-rg-fix-nil-project-error
       (func &rest args)
-    :around rg-project-root
+    :around #'rg-project-root
     "Workaround for error in `rg-project-root'.
 See <https://github.com/dajva/rg.el/pull/70>."
     (cl-letf (((symbol-function #'project-roots) #'ignore))
@@ -4560,7 +4565,7 @@ See <https://github.com/dajva/rg.el/pull/70>."
     :type 'hook)
 
   (radian-defadvice radian--advice-atomic-chrome-setup (url)
-    :after atomic-chrome-set-major-mode
+    :after #'atomic-chrome-set-major-mode
     "Save the URL in `radian-atomic-chrome-url'.
 Also run `radian-atomic-chrome-setup-hook'."
     (setq radian-atomic-chrome-url url)
@@ -4620,7 +4625,7 @@ Also run `radian-atomic-chrome-setup-hook'."
 
   (radian-defadvice radian--advice-esup-unwrap-init-file
       (esup &optional init-file)
-    :around esup
+    :around #'esup
     "Help `esup' to work with the Radian init-file."
     (if init-file
         (funcall esup init-file)
@@ -4668,7 +4673,7 @@ Also run `radian-atomic-chrome-setup-hook'."
 ;;; Startup
 
 (radian-defadvice radian--advice-inhibit-startup-message (&rest _)
-  :override display-startup-echo-area-message
+  :override #'display-startup-echo-area-message
   "Unconditionally inhibit the startup message in the echo area.
 This is the message that reads \"For more information about GNU
 Emacs...\". Emacs suggests setting
@@ -4727,7 +4732,7 @@ bound dynamically before being used.")
 
   (radian-defadvice radian--advice-kill-emacs-dispatch
       (save-buffers-kill-emacs &optional arg)
-    :around save-buffers-kill-emacs
+    :around #'save-buffers-kill-emacs
     "Allow restarting Emacs or starting a new session on shutdown."
     (if radian--restart-in-progress
         (funcall save-buffers-kill-emacs arg)
@@ -4880,7 +4885,7 @@ This is passed to `set-frame-font'."
 (setq blink-matching-paren nil)
 
 (radian-defadvice radian--advice-read-passwd-hide-char (func &rest args)
-  :around read-passwd
+  :around #'read-passwd
   "Display passwords as **** rather than .... in the minibuffer.
 This is the default behavior is Emacs 27, so this advice only has
 an effect for Emacs 26 or below."
