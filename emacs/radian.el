@@ -851,6 +851,19 @@ active minibuffer, even if the minibuffer is not selected."
         (minibuffer-keyboard-quit))
     (funcall keyboard-quit)))
 
+(radian-defadvice radian--advice-kill-buffer-maybe-kill-window
+    (func &optional buffer-or-name kill-window-too)
+  :around kill-buffer
+  "Make it so \\[universal-argument] \\[kill-buffer] kills the window too."
+  (interactive
+   (lambda (spec)
+     (append (or (advice-eval-interactive-spec spec) '(nil))
+             current-prefix-arg)))
+  (if kill-window-too
+      (with-current-buffer buffer-or-name
+        (kill-buffer-and-window))
+    (funcall func buffer-or-name)))
+
 ;; Feature `windmove' provides keybindings S-left, S-right, S-up, and
 ;; S-down to move between windows. This is much more convenient and
 ;; efficient than using the default binding, C-x o, to cycle through
