@@ -181,6 +181,25 @@ Allowable values for OS (not quoted) are `macOS', `osx',
   `(when (radian-operating-system-p ,os)
      ,@body))
 
+(defmacro radian-if-compiletime (cond then else)
+  "Like `if', but COND is evaluated at compile time.
+The macro expands directly to either THEN or ELSE, and the other
+branch is not compiled. This can be helpful to deal with code
+that uses functions only defined in a specific Emacs version."
+  (declare (indent 2))
+  (if (eval cond)
+      then
+    else))
+
+(defmacro radian-when-compiletime (cond &rest body)
+  "Like `when', but COND is evaluated at compile time.
+BODY is only compiled if COND evaluates to non-nil. This can be
+helpful to deal with code that uses functions only defined in a
+specific Emacs version."
+  (declare (indent 1))
+  (when (eval cond)
+    `(progn ,@body)))
+
 (defun radian-managed-p (filename)
   "Return non-nil if FILENAME is managed by Radian.
 This means that FILENAME is a symlink whose target is inside
@@ -1753,7 +1772,7 @@ the reverse direction from \\[pop-global-mark]."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
-  (if (version<= emacs-version "26")
+  (radian-if-compiletime (version< emacs-version "27")
       (radian-defadvice radian--autorevert-only-visible
           (auto-revert-buffers &rest args)
         :around #'auto-revert-buffers
