@@ -153,18 +153,8 @@ you prefer something different, substitute to taste.
     * Flow: `yarn global add flow-bin`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
-    * JavaScript/TypeScript:
-
-          $ git clone
-              git@github.com:sourcegraph/javascript-typescript-langserver.git
-          $ cd javascript-typescript-langserver
-          $ npm install
-          $ npm run build
-          $ chmod +x lib/language-server-stdio.js
-          $ ln -s $PWD/lib/language-server-stdio.js
-                  ~/.local/bin/javascript-typescript-stdio
-          $ pacman -S prettier
-
+    * JavaScript/TypeScript: `pacman -S prettier`; `yay -S
+      javascript-typescript-langserver`
     * LaTeX:
 
           $ wget -O ~/.local/bin/texlab.jar
