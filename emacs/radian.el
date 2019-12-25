@@ -788,6 +788,25 @@ This is used to prevent duplicate entries in the kill ring.")
 
 ;;; Candidate selection
 
+(radian-defadvice radian--advice-eval-expression-save-garbage
+    (func prompt &optional initial-contents keymap read &rest args)
+  :around read-from-minibuffer
+  "Save user input in history even if it's not a valid sexp.
+We do this by forcing `read-from-minibuffer' to always be called
+with a nil value for READ, and then handling the effects of READ
+ourselves."
+  (let ((input (apply func prompt initial-contents keymap nil args)))
+    (when read
+      ;; This is based on string_to_object in minibuf.c.
+      (let ((result (read-from-string input)))
+        (unless (string-match-p
+                 "\\`[ \t\n]*\\'" (substring input (cdr result)))
+          (signal
+           'invalid-read-syntax
+           '("Trailing garbage following expression")))
+        (setq input (car result))))
+    input))
+
 ;; Package `selectrum' is an incremental completion and narrowing
 ;; framework. Like Ivy and Helm, which it improves on, Selectrum
 ;; provides a user interface for choosing from a list of options by
