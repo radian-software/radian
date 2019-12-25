@@ -108,18 +108,30 @@ DOCSTRING and BODY are as in `defun'."
                (symbolp (nth 1 place)))
     (error "Radian: advice `%S' does not sharp-quote place `%S'" name place))
   `(progn
-     (eval-and-compile
-       (defun ,name ,arglist
-         ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
-                             "an"
-                           "a")))
-            (format "%s\n\nThis is %s `%S' advice for `%S'."
-                    docstring article where
-                    (if (and (listp place)
-                             (memq (car place) ''function))
-                        (cadr place)
-                      place)))
-         ,@body))
+     ;; You'd think I would put an `eval-and-compile' around this. It
+     ;; turns out that doing so breaks the ability of
+     ;; `elisp-completion-at-point' to complete on function arguments
+     ;; to the advice. I know, right? Apparently this is because the
+     ;; code that gets the list of lexically bound symbols at point
+     ;; tries to `macroexpand-all', and apparently macroexpanding
+     ;; `eval-and-compile' goes ahead and evals the thing and returns
+     ;; only the function symbol. No good. But the compiler does still
+     ;; want to know the function is defined (this is a Gilardi
+     ;; scenario), so we pacify it by `eval-when-compile'ing something
+     ;; similar (see below).
+     (defun ,name ,arglist
+       ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
+                           "an"
+                         "a")))
+          (format "%s\n\nThis is %s `%S' advice for `%S'."
+                  docstring article where
+                  (if (and (listp place)
+                           (memq (car place) ''function))
+                      (cadr place)
+                    place)))
+       ,@body)
+     (eval-when-compile
+       (declare-function ,name nil))
      (advice-add ,place ',where #',name)
      ',name))
 
