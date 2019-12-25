@@ -2458,6 +2458,24 @@ ElDoc. A better approach is to simply check to see if a message
 was printed, and only have ElDoc display if one wasn't."
     (member (current-message) (list nil eldoc-last-message)))
 
+  (radian-defadvice radian--advice-eldoc-avoid-trampling (func &rest args)
+    :around #'eldoc-print-current-symbol-info
+    "Prevent ElDoc from erasing messages from other commands.
+This happens because the above advice exposes (arguably) a bug in
+`eldoc-print-current-symbol-info' where if
+`eldoc-display-message-p' returns nil (indicating there will be
+interference) it goes ahead and clears the echo area. Why? We
+disable this mistake."
+    (radian-flet ((defun eldoc-message (&optional string)
+                    (if string
+                        (funcall eldoc-message string)
+                      ;; Else if you run a command that prints
+                      ;; something then you'll get the previous ElDoc
+                      ;; message printed immediately upon whatever
+                      ;; command you run next.
+                      (setq eldoc-last-message string))))
+      (apply func args)))
+
   :blackout t)
 
 ;;;; Syntax checking and code linting
