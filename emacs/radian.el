@@ -1340,6 +1340,50 @@ unquote it using a comma."
 (radian-register-dotfile ".zshrc" "z r")
 (radian-register-dotfile ".zshrc.local" "z l")
 
+;; Feature `auth-source' reads and writes secrets from files like
+;; ~/.netrc for TRAMP and related packages, so for example you can
+;; avoid having to type in a particular host's password every time.
+(use-feature auth-source
+  :config
+
+  (defvar radian--auth-source-blacklist-file
+    (no-littering-expand-var-file-name "auth-source/blacklist.el")
+    "File to store `auth-source' user blacklist.
+The contents are a list of MD5 hashes, one for each potential
+password that the user has decided not to save.")
+
+  (radian-defadvice radian--advice-auth-source-persist-blacklist
+      (func file add)
+    :around #'auth-source-netrc-saver
+    "Allow user to permanently disable prompt to save credentials."
+    (let* ((key (format "%s %s" file (rfc2104-hash 'md5 64 16 file add)))
+           (blacklist
+            (ignore-errors
+              (with-temp-buffer
+                (insert-file-contents radian--auth-source-blacklist-file)
+                (read (current-buffer))))))
+      (unless (listp blacklist)
+        (setq blacklist nil))
+      (if (member key blacklist)
+          ?n
+        (cl-letf* ((orig-read-char-choice
+                    (symbol-function #'auth-source-read-char-choice))
+                   ((symbol-function #'auth-source-read-char-choice)
+                    (lambda (prompt choices)
+                      (let ((choice (funcall orig-read-char-choice
+                                             prompt choices)))
+                        (when (= choice ?N)
+                          (push key blacklist)
+                          (make-directory
+                           (file-name-directory
+                            radian--auth-source-blacklist-file)
+                           'parents)
+                          (with-temp-file radian--auth-source-blacklist-file
+                            (print blacklist (current-buffer)))
+                          (setq choice ?n))
+                        choice))))
+          (funcall func file add))))))
+
 ;;; Saving files
 
 ;; Don't make backup files.
