@@ -526,6 +526,31 @@ NAME and ARGS are as in `use-package'."
      :straight nil
      ,@args))
 
+(defun radian--remove-sharp-quotes (form)
+  "Remove sharp quotes in all sub-forms of FORM."
+  (pcase form
+    (`(function ,x) (radian--remove-sharp-quotes x))
+    (`(,x . ,y) (cons (radian--remove-sharp-quotes x)
+                    (radian--remove-sharp-quotes y)))
+    ((pred vectorp)
+     (apply #'vector (mapcar #'radian--remove-sharp-quotes form)))
+    (x x)))
+
+(radian-defadvice radian--advice-use-package-bind-handle-sharp-quotes
+    (args)
+  :filter-args #'use-package-normalize-binder
+  "Make `use-package' handle sharp-quoted functions correctly in `:bind'.
+It is unclear to me why this is needed, as JW said explicitly to
+the contrary in
+<https://github.com/jwiegley/use-package/issues/461#issuecomment-348045772>.
+Nevertheless we hack around the issue by simply doing a recursive
+find-and-replace on sharp quotes in the arguments, because that's
+the simple solution and the performance overhead is unimportant
+since it happens during compilation anyway. (No, I'm not willing
+to give up my sharp quotes; having autocompletion is really
+nice.)"
+  (radian--remove-sharp-quotes args))
+
 ;; Package `blackout' provides a convenient function for customizing
 ;; mode lighters. It supports both major and minor modes with the same
 ;; interface, and includes `use-package' integration. The features are
