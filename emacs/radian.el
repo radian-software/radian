@@ -758,33 +758,32 @@ This is used to prevent duplicate entries in the kill ring.")
 (setq mouse-wheel-scroll-amount
       '(1 ((shift) . 5) ((control))))
 
-(if (radian-operating-system-p macOS)
-    ;; On macOS, mouse integration works out of the box in windowed
-    ;; mode but not terminal mode. The following code to fix it was
-    ;; based on <https://stackoverflow.com/a/8859057/3538165>.
-    (unless (display-graphic-p)
+;; Mouse integration works out of the box in windowed mode but not
+;; terminal mode. The following code to fix it was based on
+;; <https://stackoverflow.com/a/8859057/3538165>.
+(unless (display-graphic-p)
 
-      ;; Enable basic mouse support (click and drag).
-      (xterm-mouse-mode t)
+  ;; Enable basic mouse support (click and drag).
+  (xterm-mouse-mode t)
 
-      ;; Note that the reason for the next two functions is that
-      ;; `scroll-down' and `scroll-up' scroll by a "near full screen"
-      ;; by default, whereas we want a single line.
+  ;; Note that the reason for the next two functions is that
+  ;; `scroll-down' and `scroll-up' scroll by a "near full screen"
+  ;; by default, whereas we want a single line.
 
-      (eval-and-compile
-        (defun radian-scroll-down ()
-          "Scroll down one line."
-          (interactive)
-          (scroll-down 1))
+  (eval-and-compile
+    (defun radian-scroll-down ()
+      "Scroll down one line."
+      (interactive)
+      (scroll-down 1))
 
-        (defun radian-scroll-up ()
-          "Scroll up one line."
-          (interactive)
-          (scroll-up 1)))
+    (defun radian-scroll-up ()
+      "Scroll up one line."
+      (interactive)
+      (scroll-up 1)))
 
-      ;; Enable scrolling with the mouse wheel.
-      (bind-keys ("<mouse-4>" . radian-scroll-down)
-                 ("<mouse-5>" . radian-scroll-up))))
+  ;; Enable scrolling with the mouse wheel.
+  (bind-keys ("<mouse-4>" . radian-scroll-down)
+             ("<mouse-5>" . radian-scroll-up)))
 
 ;;; Candidate selection
 
