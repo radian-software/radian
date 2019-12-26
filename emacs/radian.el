@@ -2491,6 +2491,27 @@ order."
 ;; displayed in the echo area.
 (use-feature eldoc
   :demand t
+  :config/el-patch
+
+  (defun eldoc-print-current-symbol-info ()
+    (el-patch-concat
+      "Print the text produced by `eldoc-documentation-function'."
+      (el-patch-add "\nDon't trample on existing messages."))
+    ;; This is run from post-command-hook or some idle timer thing,
+    ;; so we need to be careful that errors aren't ignored.
+    (with-demoted-errors "eldoc error: %s"
+      (if (not (eldoc-display-message-p))
+          ;; Erase the last message if we won't display a new one.
+          (when eldoc-last-message
+            (el-patch-swap
+              (eldoc-message nil)
+              (setq eldoc-last-message nil)))
+        (let ((non-essential t))
+          ;; Only keep looking for the info as long as the user hasn't
+          ;; requested our attention.  This also locally disables inhibit-quit.
+          (while-no-input
+            (eldoc-message (funcall eldoc-documentation-function)))))))
+
   :config
 
   ;; Always truncate ElDoc messages to one line. This prevents the
@@ -2524,24 +2545,6 @@ virtually unlimited number of commands that don't conflict with
 ElDoc. A better approach is to simply check to see if a message
 was printed, and only have ElDoc display if one wasn't."
     (member (current-message) (list nil eldoc-last-message)))
-
-  (radian-defadvice radian--advice-eldoc-avoid-trampling (func &rest args)
-    :around #'eldoc-print-current-symbol-info
-    "Prevent ElDoc from erasing messages from other commands.
-This happens because the above advice exposes (arguably) a bug in
-`eldoc-print-current-symbol-info' where if
-`eldoc-display-message-p' returns nil (indicating there will be
-interference) it goes ahead and clears the echo area. Why? We
-disable this mistake."
-    (radian-flet ((defun eldoc-message (&optional string)
-                    (if string
-                        (funcall eldoc-message string)
-                      ;; Else if you run a command that prints
-                      ;; something then you'll get the previous ElDoc
-                      ;; message printed immediately upon whatever
-                      ;; command you run next.
-                      (setq eldoc-last-message string))))
-      (apply func args)))
 
   :blackout t)
 
