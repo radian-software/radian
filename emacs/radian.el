@@ -868,8 +868,65 @@ ourselves."
 ;; the default Emacs interface for candidate selection.
 (use-package selectrum
   :straight (:host github :repo "raxod502/selectrum")
-  :demand t
-  :config
+  :defer t
+  :commands (selectrum-completing-read
+             selectrum-read-buffer
+             selectrum-read-file-name
+             selectrum-read-directory-name
+             selectrum-read-library-name
+             selectrum-wrap-minibuffer-message)
+  :init/el-patch
+
+  (eval-when-compile
+    ;; For `read-library-name'.
+    (require 'find-func))
+
+  (define-minor-mode selectrum-mode
+    "Minor mode to use Selectrum for `completing-read'."
+    :global t
+    (if selectrum-mode
+        (progn
+          ;; Make sure not to blow away saved variable values if mode is
+          ;; enabled again when already on.
+          (selectrum-mode -1)
+          (setq selectrum-mode t)
+          (setq selectrum--old-completing-read-function
+                (default-value 'completing-read-function))
+          (setq-default completing-read-function
+                        #'selectrum-completing-read)
+          (setq selectrum--old-read-buffer-function
+                (default-value 'read-buffer-function))
+          (setq-default read-buffer-function
+                        #'selectrum-read-buffer)
+          (setq selectrum--old-read-file-name-function
+                (default-value 'read-file-name-function))
+          (setq-default read-file-name-function
+                        #'selectrum-read-file-name)
+          (advice-add #'read-directory-name :override
+                      #'selectrum-read-directory-name)
+          (advice-add #'read-library-name :override
+                      #'selectrum-read-library-name)
+          (advice-add #'minibuffer-message :around
+                      #'selectrum-wrap-minibuffer-message))
+      (when (equal (default-value 'completing-read-function)
+                   #'selectrum-completing-read)
+        (setq-default completing-read-function
+                      selectrum--old-completing-read-function))
+      (when (equal (default-value 'read-buffer-function)
+                   #'selectrum-read-buffer)
+        (setq-default read-buffer-function
+                      selectrum--old-read-buffer-function))
+      (when (equal (default-value 'read-file-name-function)
+                   #'selectrum-read-file-name)
+        (setq-default read-file-name-function
+                      selectrum--old-read-file-name-function))
+      (advice-remove #'read-directory-name
+                     #'selectrum-read-directory-name)
+      (advice-remove #'read-library-name #'selectrum-read-library-name)
+      (advice-remove #'minibuffer-message
+                     #'selectrum-wrap-minibuffer-message)))
+
+  :init
 
   (selectrum-mode +1))
 
@@ -887,6 +944,7 @@ ourselves."
   :straight (:host github :repo "raxod502/prescient.el"
                    :files ("selectrum-prescient.el"))
   :demand t
+  :after selectrum
   :config
 
   (selectrum-prescient-mode +1))
