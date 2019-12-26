@@ -4518,6 +4518,25 @@ as argument."
   (transient-append-suffix 'magit-pull "-r"
     '("-a" "Autostash" "--autostash")))
 
+;; Feature `magit-diff' from package `magit' handles all the stuff
+;; related to interactive Git diffs.
+(use-feature magit-diff
+  :config
+
+  (radian-defadvice radian--magit-diff-revert-before-smerge (buf _pos)
+    :before #'magit-diff-visit-file--setup
+    "Before calling `smerge-start-session', try to revert buffer.
+This is necessary because it's possible that the file being
+visited has changed on disk (due to merge conflict, for example)
+but it was already visited, and hasn't been autoreverted yet
+(because it hasn't been visible in a window, for example). But
+`smerge-start-session', which is called by Magit while jumping
+you to the file, will not wait for an autorevert. It will just
+see that there aren't any conflict markers in the file and
+disable itself. Sad."
+    (with-current-buffer buf
+      (auto-revert-handler))))
+
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
 (use-feature git-commit
