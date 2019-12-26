@@ -557,7 +557,7 @@ NAME and ARGS are as in `use-package'."
   (pcase form
     (`(function ,x) (radian--remove-sharp-quotes x))
     (`(,x . ,y) (cons (radian--remove-sharp-quotes x)
-                    (radian--remove-sharp-quotes y)))
+                      (radian--remove-sharp-quotes y)))
     ((pred vectorp)
      (apply #'vector (mapcar #'radian--remove-sharp-quotes form)))
     (x x)))
@@ -2990,15 +2990,15 @@ ARG is passed to `hindent-mode' toggle function."
   :bind (;; C-c C-s p is a really dumb binding, we prefer C-c C-s C-p.
          ;; Same for C-c C-s q.
          :map markdown-mode-style-map
-              ("C-p" . #'markdown-insert-pre)
-              ("C-q" . #'markdown-insert-blockquote)
-              :map markdown-mode-map
-              ("TAB" . #'radian-markdown-tab)
-              ;; Try to override all the bindings in
-              ;; `markdown-mode-map'...
-              ("<S-iso-lefttab>" . #'radian-markdown-shifttab)
-              ("<S-tab>" . #'radian-markdown-shifttab)
-              ("<backtab>" . #'radian-markdown-shifttab))
+         ("C-p" . #'markdown-insert-pre)
+         ("C-q" . #'markdown-insert-blockquote)
+         :map markdown-mode-map
+         ("TAB" . #'radian-markdown-tab)
+         ;; Try to override all the bindings in
+         ;; `markdown-mode-map'...
+         ("<S-iso-lefttab>" . #'radian-markdown-shifttab)
+         ("<S-tab>" . #'radian-markdown-shifttab)
+         ("<backtab>" . #'radian-markdown-shifttab))
   :config
 
   (defun radian-markdown-tab ()
@@ -4512,11 +4512,11 @@ as argument."
   (setq magit-save-repository-buffers nil)
 
   (transient-append-suffix
-   'magit-merge "-n"
-   '("-u" "Allow unrelated" "--allow-unrelated-histories"))
+    'magit-merge "-n"
+    '("-u" "Allow unrelated" "--allow-unrelated-histories"))
 
   (transient-append-suffix 'magit-pull "-r"
-                           '("-a" "Autostash" "--autostash")))
+    '("-a" "Autostash" "--autostash")))
 
 ;; Feature `git-commit' from package `magit' provides the commit
 ;; message editing capabilities of Magit.
