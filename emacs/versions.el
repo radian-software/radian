@@ -83,7 +83,7 @@
  ("ruby-electric.el" . "3553448a780a1ea5c3b0e9becd820d4762876593")
  ("rust-mode" . "c62185ae1c6edf0335261f169241eb8ee9713ad5")
  ("s.el" . "03410e6a7a2b11e47e1fea3b7d9899c7df26435e")
- ("selectrum" . "4d65a1bb90e0f890e70c6273106b0b50094c9868")
+ ("selectrum" . "b18ebafb1d476b8bcc19eeb7e59791e34759669a")
  ("sesman" . "e8bfb0e37940bf5f370ae300b896dd04afbc63c8")
  ("smartparens" . "7080e7fba9f478c2e5d4c18a325c3a5d60f6be76")
  ("spinner" . "2daa167bec1c7566d662d48613a94453536b524a")
