@@ -1000,8 +1000,8 @@ active minibuffer, even if the minibuffer is not selected."
 ;; projects, etc. It then provides commands for quickly navigating
 ;; between and within these projects.
 (use-package projectile
-  :bind-keymap* (("C-c p" . projectile-command-map))
   :defer 1
+  :bind-keymap* (("C-c p" . projectile-command-map))
   :config
 
   ;; Use Selectrum (via `completing-read') for Projectile instead of

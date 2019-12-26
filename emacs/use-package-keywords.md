@@ -2,6 +2,9 @@ Use the following ordering for `use-package` keywords:
 
 * `:preface`
 * `:straight`
+* `:demand`
+* `:defer`
+* `:after`
 * `:commands`
 * `:init/el-patch`
 * `:init`
@@ -13,9 +16,6 @@ Use the following ordering for `use-package` keywords:
 * `:bind*`
 * `:bind-keymap`
 * `:bind-keymap*`
-* `:demand`
-* `:defer`
-* `:after`
 * `:config/el-patch`
 * `:config`
 * `:blackout`
