@@ -881,6 +881,13 @@ ourselves."
     ;; For `read-library-name'.
     (require 'find-func))
 
+  (defmacro selectrum--when-compile (cond &rest body)
+    "Like `when', but COND is evaluated at compile time.
+If it's nil, BODY is not even compiled."
+    (declare (indent 1))
+    (when (eval cond)
+      `(progn ,@body)))
+
   (define-minor-mode selectrum-mode
     "Minor mode to use Selectrum for `completing-read'."
     :global t
@@ -906,8 +913,9 @@ ourselves."
                       #'selectrum-read-directory-name)
           (advice-add #'read-library-name :override
                       #'selectrum-read-library-name)
-          (advice-add #'minibuffer-message :around
-                      #'selectrum-wrap-minibuffer-message))
+          (selectrum--when-compile (version<= "27" emacs-version)
+            (advice-add #'set-minibuffer-message :after
+                        #'selectrum-fix-minibuffer-message-overlay)))
       (when (equal (default-value 'completing-read-function)
                    #'selectrum-completing-read)
         (setq-default completing-read-function
@@ -923,8 +931,9 @@ ourselves."
       (advice-remove #'read-directory-name
                      #'selectrum-read-directory-name)
       (advice-remove #'read-library-name #'selectrum-read-library-name)
-      (advice-remove #'minibuffer-message
-                     #'selectrum-wrap-minibuffer-message)))
+      (selectrum--when-compile (version<= "27" emacs-version)
+        (advice-remove #'set-minibuffer-message
+                       #'selectrum-fix-minibuffer-message-overlay))))
 
   :init
 
