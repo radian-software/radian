@@ -4704,15 +4704,7 @@ argument, search only in files matching current type."
     (interactive "P")
     (rg-run (rg-read-pattern nil)
             (if only-current-type (car (rg-default-alias)) "*")
-            (rg-project-root buffer-file-name)))
-
-  (radian-defadvice radian--advice-rg-fix-nil-project-error
-      (func &rest args)
-    :around #'rg-project-root
-    "Workaround for error in `rg-project-root'.
-See <https://github.com/dajva/rg.el/pull/70>."
-    (cl-letf (((symbol-function #'project-roots) #'ignore))
-      (apply func args))))
+            (rg-project-root buffer-file-name))))
 
 ;;;; Internet applications
 

@@ -78,7 +78,7 @@
  ("pyvenv" . "fa6a028349733b0ecb407c4cfb3a715b71931eec")
  ("queue" . "52206c0f78afc0dfb9a287cb928c1e725103336d")
  ("restart-emacs" . "9aa90d3df9e08bc420e1c9845ee3ff568e911bd9")
- ("rg.el" . "65c5b2b77ad5208ea3e473fcdce84639759ebf9b")
+ ("rg.el" . "0a7f4d637517acf8acff1639e925c08c8b3aec63")
  ("robe" . "8190cb7c7beb8385dd3abf6ea357f33d8981ae8a")
  ("ruby-electric.el" . "3553448a780a1ea5c3b0e9becd820d4762876593")
  ("rust-mode" . "c62185ae1c6edf0335261f169241eb8ee9713ad5")
