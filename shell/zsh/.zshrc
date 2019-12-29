@@ -323,12 +323,12 @@ if (( $+commands[exa] )); then
 
     function lt {
         emulate -LR zsh
-        l --tree --ignore-glob ".git|.svn" $@
+        l --tree --ignore-glob ".git|.svn|node_modules" $@
     }
 
     function lti {
         emulate -LR zsh
-        l --tree --ignore-glob ".git|.svn|$1" ${@:2}
+        l --tree --ignore-glob ".git|.svn|node_modules|$1" ${@:2}
     }
 
     function ltl {
@@ -337,7 +337,7 @@ if (( $+commands[exa] )); then
     }
 
     function ltli {
-        l --tree --level $1 --ignore-glob ".git|.svn|$2" ${@:3}
+        l --tree --level $1 --ignore-glob ".git|.svn|node_modules|$2" ${@:3}
     }
 
 else
