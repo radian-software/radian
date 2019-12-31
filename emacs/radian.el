@@ -3106,14 +3106,19 @@ Return either a string or nil."
     (radian--with-silent-message "Python language server started"
       (apply func args)))
 
-  (radian-defadvice radian--lsp-python-ms-discover-virtualenvs (&rest _)
-    :before #'lsp-python-ms--extra-init-params
+  (radian-defadvice radian--lsp-python-ms-discover-virtualenvs
+      (func &rest args)
+    :around #'lsp-python-ms--extra-init-params
     "Automatically discover Pipenv and Poetry virtualenvs."
-    (when-let ((venv (radian--python-find-virtualenv)))
-      (setq-local lsp-python-ms-extra-paths
-                  (file-expand-wildcards
-                   (expand-file-name
-                    "lib/python*/site-packages" venv))))))
+    (let ((lsp-python-ms-extra-paths lsp-python-ms-extra-paths)
+          (exec-path exec-path))
+      (when-let ((venv (radian--python-find-virtualenv)))
+        (setq lsp-python-ms-extra-paths
+              (file-expand-wildcards
+               (expand-file-name
+                "lib/python*/site-packages" venv)))
+        (push (expand-file-name "bin" venv) exec-path))
+      (apply func args))))
 
 ;;;; ReST
 ;; http://docutils.sourceforge.net/rst.html
