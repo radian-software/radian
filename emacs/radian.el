@@ -245,22 +245,25 @@ element of REGEXPS, nothing happens. The REGEXPS need not match
 the entire message; include ^ and $ if necessary. REGEXPS may
 also be a single string."
   (declare (indent 1))
-  (when (stringp regexps)
-    (setq regexps (list regexps)))
-  `(radian-flet ((defun message (format &rest args)
-                   (let ((str (apply #'format format args)))
-                     ;; Can't use an unnamed block because during
-                     ;; byte-compilation, some idiot loads `cl', which
-                     ;; sticks an advice onto `dolist' that makes it
-                     ;; behave like `cl-dolist' (i.e., wrap it in
-                     ;; another unnamed block) and therefore breaks
-                     ;; this code.
-                     (cl-block done
-                       (dolist (regexp ',regexps)
-                         (when (or (null regexp) (string-match-p regexp str))
-                           (cl-return-from done)))
-                       (funcall message "%s" str)))))
-     ,@body))
+  (let ((regexps-sym (gensym "regexps")))
+    `(let ((,regexps-sym ,regexps))
+       (when (stringp ,regexps-sym)
+         (setq ,regexps-sym (list ,regexps-sym)))
+       (radian-flet ((defun message (format &rest args)
+                       (let ((str (apply #'format format args)))
+                         ;; Can't use an unnamed block because during
+                         ;; byte-compilation, some idiot loads `cl', which
+                         ;; sticks an advice onto `dolist' that makes it
+                         ;; behave like `cl-dolist' (i.e., wrap it in
+                         ;; another unnamed block) and therefore breaks
+                         ;; this code.
+                         (cl-block done
+                           (dolist (regexp ,regexps-sym)
+                             (when (or (null regexp)
+                                       (string-match-p regexp str))
+                               (cl-return-from done)))
+                           (funcall message "%s" str)))))
+         ,@body))))
 
 (defun radian--advice-silence-messages (func &rest args)
   "Invoke FUNC with ARGS, silencing all messages.
@@ -801,6 +804,18 @@ This is used to prevent duplicate entries in the kill ring.")
 ;; whatever was previously on the system clipboard is pushed into the
 ;; kill ring. This way, you can paste it with `yank-pop'.
 (setq save-interprogram-paste-before-kill t)
+
+(radian-defadvice radian--advice-gui-get-selection-quietly (func &rest args)
+  :around #'gui-selection-value
+  "Disable an annoying message emitted when Emacs can't yank something.
+In particular, if you have an image on your system clipboard and
+you either yank or kill (as `save-interprogram-paste-before-kill'
+means Emacs will try to put the system clipboard contents into
+the kill ring when you kill something new), you'll get the
+message 'gui-get-selection: (error \"Selection owner couldn't
+convert\" UTF8_STRING)'. Disable that."
+  (radian--with-silent-message "Selection owner couldn't convert"
+    (apply func args)))
 
 ;;;; Mouse integration
 
