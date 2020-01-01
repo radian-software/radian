@@ -245,7 +245,7 @@ element of REGEXPS, nothing happens. The REGEXPS need not match
 the entire message; include ^ and $ if necessary. REGEXPS may
 also be a single string."
   (declare (indent 1))
-  (let ((regexps-sym (gensym "regexps")))
+  (let ((regexps-sym (cl-gensym "regexps")))
     `(let ((,regexps-sym ,regexps))
        (when (stringp ,regexps-sym)
          (setq ,regexps-sym (list ,regexps-sym)))
