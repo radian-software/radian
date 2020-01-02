@@ -3532,7 +3532,22 @@ environment with point at the end of a non-empty line of text."
       ;; `comment-normalize-vars' will key off the syntax and think
       ;; that a single "/" starts a comment, which completely borks
       ;; auto-fill.
-      (setq-local comment-start-skip "// *"))))
+      (setq-local comment-start-skip "// *")))
+
+  (use-feature apheleia
+    :config
+
+    (radian-defhook radian--web-highlight-after-formatting ()
+      apheleia-post-format-hook
+      "Make sure syntax highlighting works with Apheleia.
+The problem is that `web-mode' doesn't do highlighting correctly
+in the face of arbitrary buffer modifications, and kind of hacks
+around the problem by hardcoding a special case for yanking based
+on the value of `this-command'. So, when buffer modifications
+happen in an unexpected (to `web-mode') way, we have to manually
+poke it. Otherwise the modified text remains unfontified."
+      (let ((this-command #'yank))
+        (web-mode-on-post-command)))))
 
 ;;; Configuration file formats
 
