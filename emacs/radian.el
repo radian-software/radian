@@ -2213,6 +2213,12 @@ killed (which happens during Emacs shutdown)."
 
 (bind-key* "C-M-q" #'radian-indent-defun)
 
+(radian-defadvice radian--advice-indent-region-quietly (func &rest args)
+  :around #'indent-region-line-by-line
+  "Make `indent-region' shut up about its progress."
+  (radian--with-silent-message "Indenting region"
+    (apply func args)))
+
 ;;;; Autocompletion
 
 ;; Package `company' provides an in-buffer autocompletion framework.
