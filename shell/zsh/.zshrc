@@ -241,8 +241,14 @@ setopt hist_verify
 
 # Recommended setup for zsh-history-substring-search, see
 # <https://github.com/zsh-users/zsh-history-substring-search#usage>.
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+
+if whence history-substring-search-up >/dev/null; then
+    bindkey '^[[A' history-substring-search-up
+fi
+
+if whence history-substring-search-down >/dev/null; then
+    bindkey '^[[B' history-substring-search-down
+fi
 
 ### Filesystem navigation
 
