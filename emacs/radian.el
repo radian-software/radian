@@ -2257,6 +2257,11 @@ backends will still be included.")
          ("<tab>" . #'company-complete-selection)
          ("TAB" . #'company-complete-selection)
 
+         ;; When was the last time you used the C-s binding for
+         ;; searching candidates? It conflicts with buffer search,
+         ;; anyway.
+         ("C-s" . nil)
+
          ;; The following are keybindings that only take effect if the
          ;; user has explicitly interacted with Company. Note that
          ;; `:map' from above is "sticky", and applies also below: see
