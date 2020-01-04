@@ -3502,15 +3502,17 @@ environment with point at the end of a non-empty line of text."
          ;; My additions.
          ("\\.ejs\\'" . web-mode)
          ("\\.jsx?\\'" . web-mode)
-         ("\\.tsx?\\'" . web-mode))
+         ("\\.tsx?\\'" . web-mode)
+         ("\\.css\\'" . web-mode))
   ;; Use `web-mode' rather than `js-mode' for scripts.
   :interpreter (("js" . web-mode)
                 ("node" . web-mode))
   :config
 
-  ;; Indent by two spaces by default.
+  ;; Indent by two spaces by default. Compatibility with Prettier.
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
 
   ;; Autocomplete </ instantly.
   (setq web-mode-enable-auto-closing t)
