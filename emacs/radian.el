@@ -3566,8 +3566,10 @@ around the problem by hardcoding a special case for yanking based
 on the value of `this-command'. So, when buffer modifications
 happen in an unexpected (to `web-mode') way, we have to manually
 poke it. Otherwise the modified text remains unfontified."
-      (let ((this-command #'yank))
-        (web-mode-on-post-command)))))
+      (setq web-mode-fontification-off nil)
+      (when (and web-mode-scan-beg web-mode-scan-end global-font-lock-mode)
+        (save-excursion
+          (font-lock-fontify-region web-mode-scan-beg web-mode-scan-end))))))
 
 ;;; Configuration file formats
 
