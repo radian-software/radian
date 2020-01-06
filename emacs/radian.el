@@ -3517,6 +3517,10 @@ environment with point at the end of a non-empty line of text."
   ;; Autocomplete </ instantly.
   (setq web-mode-enable-auto-closing t)
 
+  ;; Insert matching tags automatically. Why this is "mode 2", I have
+  ;; not the slightest idea.
+  (setq web-mode-auto-close-style 2)
+
   ;; When using `web-mode' to edit JavaScript files, support JSX tags.
   (add-to-list 'web-mode-content-types-alist
                '("jsx" . "\\.js[x]?\\'"))
