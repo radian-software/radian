@@ -689,7 +689,10 @@ Only do this once, unless AGAIN is non-nil."
   ;; No need to worry about race conditions because Elisp isn't
   ;; concurrent (yet).
   (unless (and radian--env-setup-p (not again))
-    (let ((profile-file "~/.profile")
+    (let (;; Current directory may not exist in certain horrifying
+          ;; circumstances (yes, this has happened in practice).
+          (default-directory "/")
+          (profile-file "~/.profile")
           (buf-name " *radian-env-output*"))
       (when (and profile-file
                  (file-exists-p profile-file)
