@@ -4700,25 +4700,30 @@ changes, which means that `git-gutter' needs to be re-run.")
   :after git-gutter
   :config
 
-  (fringe-helper-define 'radian--git-gutter-blank nil
-    "........"
-    "........"
-    "........"
-    "........"
-    "........"
-    "........"
-    "........"
-    "........")
+  ;; This function is only available when Emacs is built with X/Cocoa
+  ;; support, see e.g. <https://github.com/pft/mingus/issues/5>.
+  (when (fboundp 'define-fringe-bitmap)
 
-  (radian-defadvice radian--advice-git-gutter-remove-bitmaps (func &rest args)
-    :around #'git-gutter-fr:view-diff-infos
-    "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
+    (fringe-helper-define 'radian--git-gutter-blank nil
+      "........"
+      "........"
+      "........"
+      "........"
+      "........"
+      "........"
+      "........"
+      "........")
+
+    (radian-defadvice radian--advice-git-gutter-remove-bitmaps
+        (func &rest args)
+      :around #'git-gutter-fr:view-diff-infos
+      "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
 Instead, display simply a flat colored region in the fringe."
-    (radian-flet ((defun fringe-helper-insert-region
-                      (beg end _bitmap &rest args)
-                    (apply fringe-helper-insert-region
-                           beg end 'radian--git-gutter-blank args)))
-      (apply func args))))
+      (radian-flet ((defun fringe-helper-insert-region
+                        (beg end _bitmap &rest args)
+                      (apply fringe-helper-insert-region
+                             beg end 'radian--git-gutter-blank args)))
+        (apply func args)))))
 
 ;;;; External commands
 
