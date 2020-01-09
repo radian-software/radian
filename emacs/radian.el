@@ -2479,7 +2479,7 @@ order."
               (eldoc-message (funcall eldoc-documentation-function))))))))
 
   (radian-when-compiletime (version< emacs-version "27")
-    (defun eldoc-print-current-symbol-info ()
+    (el-patch-defun eldoc-print-current-symbol-info ()
       (el-patch-concat
         "Print the text produced by `eldoc-documentation-function'."
         (el-patch-add "\nDon't trample on existing messages."))
