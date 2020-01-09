@@ -4724,7 +4724,9 @@ changes, which means that `git-gutter' needs to be re-run.")
 (when (fboundp 'define-fringe-bitmap)
   (eval-when-compile
     (unless (fboundp 'define-fringe-bitmap)
-      (fset 'define-fringe-bitmap #'ignore)))
+      (fset 'define-fringe-bitmap #'ignore))
+    (unless (boundp 'overflow-newline-into-fringe)
+      (setq overflow-newline-into-fringe t)))
   (use-package git-gutter-fringe
     :demand t
     :after git-gutter
@@ -5203,7 +5205,8 @@ an effect for Emacs 26 or below."
 (when (display-graphic-p)
 
   ;; Disable unnecessary graphical elements.
-  (scroll-bar-mode -1)
+  (when (fboundp 'scroll-bar-mode)
+    (scroll-bar-mode -1))
   (tool-bar-mode -1)
 
   (radian-with-operating-system macOS
