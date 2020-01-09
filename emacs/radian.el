@@ -3524,6 +3524,9 @@ environment with point at the end of a non-empty line of text."
   ;; not the slightest idea.
   (setq web-mode-auto-close-style 2)
 
+  ;; Don't insert quotes automatically. It messes with JSX.
+  (setq web-mode-enable-auto-quoting nil)
+
   ;; When using `web-mode' to edit JavaScript files, support JSX tags.
   (add-to-list 'web-mode-content-types-alist
                '("jsx" . "\\.js[x]?\\'"))
