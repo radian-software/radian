@@ -2478,11 +2478,26 @@ order."
             (while-no-input
               (eldoc-message (funcall eldoc-documentation-function))))))))
 
-  (radian-when-compiletime (version< emacs-version "27")
+  (radian-when-compiletime (and (version< emacs-version "27")
+                                (version<= "26" emacs-version))
     (el-patch-defun eldoc-print-current-symbol-info ()
       (el-patch-concat
         "Print the text produced by `eldoc-documentation-function'."
         (el-patch-add "\nDon't trample on existing messages."))
+      ;; This is run from post-command-hook or some idle timer thing,
+      ;; so we need to be careful that errors aren't ignored.
+      (with-demoted-errors "eldoc error: %s"
+        (and (or (eldoc-display-message-p)
+                 ;; Erase the last message if we won't display a new one.
+                 (when eldoc-last-message
+                   (el-patch-swap
+                     (eldoc-message nil)
+                     (setq eldoc-last-message nil))
+                   nil))
+             (eldoc-message (funcall eldoc-documentation-function))))))
+
+  (radian-when-compiletime (version< emacs-version "26")
+    (el-patch-defun eldoc-print-current-symbol-info ()
       ;; This is run from post-command-hook or some idle timer thing,
       ;; so we need to be careful that errors aren't ignored.
       (with-demoted-errors "eldoc error: %s"
