@@ -4696,34 +4696,41 @@ changes, which means that `git-gutter' needs to be re-run.")
 ;; the gutter display use the window fringe rather than a column of
 ;; text.
 (use-package git-gutter-fringe
-  :demand t
-  :after git-gutter
+  :defer t
+  :init
+
+  (use-feature git-gutter
+    :config
+
+    ;; This function is only available when Emacs is built with
+    ;; X/Cocoa support, see e.g.
+    ;; <https://github.com/pft/mingus/issues/5>. If we try to
+    ;; load/configure `git-gutter-fringe' without it, we run into
+    ;; trouble.
+    (when (fboundp 'define-fringe-bitmap)
+      (require 'git-gutter-fringe)))
+
   :config
 
-  ;; This function is only available when Emacs is built with X/Cocoa
-  ;; support, see e.g. <https://github.com/pft/mingus/issues/5>.
-  (when (fboundp 'define-fringe-bitmap)
+  (fringe-helper-define 'radian--git-gutter-blank nil
+    "........"
+    "........"
+    "........"
+    "........"
+    "........"
+    "........"
+    "........"
+    "........")
 
-    (fringe-helper-define 'radian--git-gutter-blank nil
-      "........"
-      "........"
-      "........"
-      "........"
-      "........"
-      "........"
-      "........"
-      "........")
-
-    (radian-defadvice radian--advice-git-gutter-remove-bitmaps
-        (func &rest args)
-      :around #'git-gutter-fr:view-diff-infos
-      "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
+  (radian-defadvice radian--advice-git-gutter-remove-bitmaps (func &rest args)
+    :around #'git-gutter-fr:view-diff-infos
+    "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
 Instead, display simply a flat colored region in the fringe."
-      (radian-flet ((defun fringe-helper-insert-region
-                        (beg end _bitmap &rest args)
-                      (apply fringe-helper-insert-region
-                             beg end 'radian--git-gutter-blank args)))
-        (apply func args)))))
+    (radian-flet ((defun fringe-helper-insert-region
+                      (beg end _bitmap &rest args)
+                    (apply fringe-helper-insert-region
+                           beg end 'radian--git-gutter-blank args)))
+      (apply func args))))
 
 ;;;; External commands
 
