@@ -4755,7 +4755,8 @@ changes, which means that `git-gutter' needs to be re-run.")
       "........"
       "........")
 
-    (radian-defadvice radian--advice-git-gutter-remove-bitmaps (func &rest args)
+    (radian-defadvice radian--advice-git-gutter-remove-bitmaps
+        (func &rest args)
       :around #'git-gutter-fr:view-diff-infos
       "Disable the cutesy bitmap pluses and minuses from `git-gutter-fringe'.
 Instead, display simply a flat colored region in the fringe."
