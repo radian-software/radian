@@ -3953,11 +3953,11 @@ SYMBOL is as in `xref-find-definitions'."
       (let ((compilation-buffer-name-function
              (lambda (&rest _)
                "*clone-emacs-src*")))
-        (compile
-         (format
-          "git clone https://github.com/emacs-mirror/emacs.git %s"
-          (shell-quote-argument source-directory))))
-      (user-error "Please wait until Emacs source repository is cloned"))
+        (save-current-buffer
+          (compile
+           (format
+            "git clone https://github.com/emacs-mirror/emacs.git %s"
+            (shell-quote-argument source-directory))))))
     (let ((find-function-C-source-directory
            (expand-file-name "src" source-directory)))
       (apply func args))))
