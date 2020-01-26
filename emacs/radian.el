@@ -1037,7 +1037,7 @@ active minibuffer, even if the minibuffer is not selected."
 
   (def-projectile-commander-method ?\C-m
     "Find file in project."
-    (projectile-find-file))
+    (call-interactively #'find-file))
 
   ;; Enable the mode again now that we have all the supporting hooks
   ;; and stuff defined.
