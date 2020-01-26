@@ -3946,9 +3946,9 @@ SYMBOL is as in `xref-find-definitions'."
   (radian-defadvice radian--advice-find-func-clone-source (func &rest args)
     :around #'find-function-C-source
     "Prompt user to clone Emacs source repository when needed."
-    (unless (file-directory-p source-directory)
-      (unless (yes-or-no-p "Clone Emacs source repository? ")
-        (user-error "Emacs source repository is not available"))
+    (when (and (not (file-directory-p source-directory))
+               (not (get-buffer "*clone-emacs-src*"))
+               (yes-or-no-p "Clone Emacs source repository? "))
       (make-directory (file-name-directory source-directory) 'parents)
       (let ((compilation-buffer-name-function
              (lambda (&rest _)
