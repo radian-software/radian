@@ -3806,7 +3806,15 @@ unhelpful."
       (advice-remove
        #'helpful-key #'radian--advice-helpful-key-allow-keyboard-quit)))
 
-  (radian-universal-keyboard-quit-mode +1))
+  (radian-universal-keyboard-quit-mode +1)
+
+  (radian-defadvice radian--advice-helpful-clone-emacs-source (library-name)
+    :before #'helpful--library-path
+    "Prompt user to clone Emacs source code when looking up functions.
+Otherwise, it only happens when looking up variables, for some
+bizarre reason."
+    (when (member (file-name-extension library-name) '("c" "rs"))
+      (radian-clone-emacs-source-maybe))))
 
 ;;;; Custom
 
@@ -3938,29 +3946,35 @@ SYMBOL is as in `xref-find-definitions'."
 ;; Let's establish a standard location for the Emacs source code.
 (setq source-directory (expand-file-name "src" user-emacs-directory))
 
+;; This is initialized to nil by `find-func' if the source is not
+;; cloned when the library is loaded.
+(setq find-function-C-source-directory
+      (expand-file-name "src" source-directory))
+
+(defun radian-clone-emacs-source-maybe ()
+  "Prompt user to clone Emacs source repository if needed."
+  (when (and (not (file-directory-p source-directory))
+             (not (get-buffer "*clone-emacs-src*"))
+             (yes-or-no-p "Clone Emacs source repository? "))
+    (make-directory (file-name-directory source-directory) 'parents)
+    (let ((compilation-buffer-name-function
+           (lambda (&rest _)
+             "*clone-emacs-src*")))
+      (save-current-buffer
+        (compile
+         (format
+          "git clone https://github.com/emacs-mirror/emacs.git %s"
+          (shell-quote-argument source-directory)))))))
+
 ;; Feature `find-func' provides the ability for you to locate the
 ;; definitions of Emacs Lisp functions and variables.
 (use-feature find-func
   :config
 
-  (radian-defadvice radian--advice-find-func-clone-source (func &rest args)
-    :around #'find-function-C-source
-    "Prompt user to clone Emacs source repository when needed."
-    (when (and (not (file-directory-p source-directory))
-               (not (get-buffer "*clone-emacs-src*"))
-               (yes-or-no-p "Clone Emacs source repository? "))
-      (make-directory (file-name-directory source-directory) 'parents)
-      (let ((compilation-buffer-name-function
-             (lambda (&rest _)
-               "*clone-emacs-src*")))
-        (save-current-buffer
-          (compile
-           (format
-            "git clone https://github.com/emacs-mirror/emacs.git %s"
-            (shell-quote-argument source-directory))))))
-    (let ((find-function-C-source-directory
-           (expand-file-name "src" source-directory)))
-      (apply func args))))
+  (radian-defadvice radian--advice-find-func-clone-emacs-source (&rest _)
+    :before #'find-function-C-source
+    "Clone Emacs source if needed to view definition."
+    (radian-clone-emacs-source-maybe)))
 
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
