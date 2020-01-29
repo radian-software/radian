@@ -4585,7 +4585,18 @@ disable itself. Sad."
   ;; by straight.el. See
   ;; <https://github.com/raxod502/straight.el/issues/274> for not
   ;; having to use the internal function `straight--dir'.
-  (setq emacsql-sqlite-data-root (straight--repos-dir "emacsql")))
+  (setq emacsql-sqlite-data-root (straight--repos-dir "emacsql"))
+
+  :config
+
+  (radian-defadvice radian--advice-emacsql-no-compile-during-compile
+      (&rest _)
+    :before-until #'emacsql-sqlite-ensure-binary
+    "Prevent EmacSQL from trying to compile stuff during byte-compilation.
+This is a problem because Forge tries to get EmacSQL to compile
+its binary at load time, which is bad (you should never do
+anything significant at package load time) since it breaks CI."
+    byte-compile-current-file))
 
 ;; Package `forge' provides a GitHub/GitLab/etc. interface directly
 ;; within Magit.
