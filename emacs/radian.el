@@ -2940,24 +2940,11 @@ This works around an upstream bug; see
   ;; project.
   (setq haskell-process-type 'stack-ghci))
 
-;; Package `hindent' provides a way to invoke the Haskell code
-;; formatter of the same name as a `fill-paragraph' replacement. You
-;; need to install the hindent(1) utility for this to work.
-(use-package hindent
+;; Package `lsp-haskell' configures the HIE Haskell language server
+;; for use with `lsp-mode'.
+(use-package lsp-haskell
   :demand t
-  :after haskell-mode
-  :config
-
-  (radian-defhook radian--hindent-enable-maybe (&optional arg)
-    haskell-mode-hook
-    "Enable `hindent-mode' if not in `literate-haskell-mode'.
-ARG is passed to `hindent-mode' toggle function."
-    ;; Don't enable `hindent-mode' in `literate-haskell-mode'. See
-    ;; https://github.com/commercialhaskell/hindent/issues/496.
-    (unless (derived-mode-p 'literate-haskell-mode)
-      (hindent-mode arg)))
-
-  :blackout t)
+  :after (:all lsp-clients haskell-mode))
 
 ;;;; Lua
 ;; <http://www.lua.org/>

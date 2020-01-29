@@ -109,6 +109,7 @@ configuration, and optionally installing local configuration.
     * Flow: `brew install flow`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
+    * Haskell: (please help with documentation!)
     * JavaScript/TypeScript:
 
           $ git clone
@@ -153,6 +154,7 @@ you prefer something different, substitute to taste.
     * Flow: `yarn global add flow-bin`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
+    * Haskell: `yay -S haskell-ide-engine`
     * JavaScript/TypeScript: `pacman -S prettier`; `yay -S
       javascript-typescript-langserver`
     * LaTeX:
