@@ -55,7 +55,7 @@
  ("lsp-latex" . "d016440fe364a016935bd90ae07e22d9012bcf8f")
  ("lsp-mode" . "9ffbc9d0910d1622fbe1a40229c4d30b4a0981aa")
  ("lsp-python-ms" . "60b663c82a55613009632ee83aad8cdc1c410a84")
- ("lsp-ui" . "3ccc3e3386732c3ee22c151e6b5215a0e4c99173")
+ ("lsp-ui" . "71f66007a8388420ed416ab90e466773bfdb6dfd")
  ("lua-mode" . "52cc3e465a2d35dbcbad8a87fd5fe548840f5822")
  ("macrostep" . "424e3734a1ee526a1bd7b5c3cd1d3ef19d184267")
  ("magit" . "5503aa1857e78bb43502261956173a66c9b88c71")

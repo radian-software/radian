@@ -2599,6 +2599,8 @@ nor requires Flycheck to be loaded."
 ;; well as various other UI elements that integrate with `lsp-mode'.
 ;; It's configured automatically by `lsp-mode'.
 (use-package lsp-ui
+  ;; https://github.com/emacs-lsp/lsp-ui/pull/388
+  :straight (:fork (:repo "raxod502/lsp-ui" :branch "fork/1"))
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
