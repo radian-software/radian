@@ -4,7 +4,7 @@
  ("apache-mode" . "a66dc1f246cd4ce0960773989bc43188f0394948")
  ("apheleia" . "179219e619ebaa095760e2a92ef57bb3a28869bc")
  ("apples-mode" . "83a9ab0d6ba82496e2f7df386909b1a55701fccb")
- ("atomic-chrome" . "d8bff0b7db228b8a428f0db621702c665fb33570")
+ ("atomic-chrome" . "a505f638866f9e7b913784be0dc84f338e9ad449")
  ("auctex" . "d81f1a0a5b18ecc7668bb9d6469e3d882510a3d7")
  ("blackout" . "b80f09e73fd24435227369ce81e07b4491481d2b")
  ("buffer-move" . "cb517ecf8409b5fdcda472d7190c6021f0c49751")

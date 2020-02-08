@@ -4865,10 +4865,6 @@ argument, search only in files matching current type."
 ;; https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc
 ;; for the Chrome extension.
 (use-package atomic-chrome
-  ;; Use my fork until
-  ;; https://github.com/alpha22jp/atomic-chrome/issues/42 is fixed.
-  :straight (:host github :repo "alpha22jp/atomic-chrome"
-                   :fork (:repo "raxod502/atomic-chrome" :branch "fork/1"))
   :defer 5
   :config
 
