@@ -2117,9 +2117,6 @@ set LSP configuration (see `lsp-python-ms')."
 
   :config
 
-  ;; We use Flycheck, not Flymake.
-  (setq lsp-prefer-flymake nil)
-
   (defun radian--advice-lsp-mode-silence (format &rest args)
     "Silence needless diagnostic messages from `lsp-mode'.
 
@@ -2599,8 +2596,6 @@ nor requires Flycheck to be loaded."
 ;; well as various other UI elements that integrate with `lsp-mode'.
 ;; It's configured automatically by `lsp-mode'.
 (use-package lsp-ui
-  ;; https://github.com/emacs-lsp/lsp-ui/pull/388
-  :straight (:fork (:repo "raxod502/lsp-ui" :branch "fork/1"))
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
