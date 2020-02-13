@@ -39,7 +39,7 @@
  ("geiser" . "fbdfbee56a03a1a0396d61fdc8f0b0af87273fc9")
  ("ghub" . "f92e7f092e7fc45493b428f67f95c781bc50793f")
  ("git-link" . "1dbabfed4c5c3c5ac6ffa9035a9c3d4c6cc7f885")
- ("git-modes" . "33c6a116a5b298e20eb39ebb154a51c4dd37c06d")
+ ("git-modes" . "55468314a5f6b77d2c96be62c7005ac94545e217")
  ("gnu-elpa-mirror" . "abc8e638f0e846785c5633a97545015e0ed7fa12")
  ("go-mode.el" . "3ba198280bf8d5f2a4079618abfd3db2ebe04f58")
  ("haskell-mode" . "56d67ee282294c786a92e2d83c5bebf1a6d919c1")
