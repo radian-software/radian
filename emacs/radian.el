@@ -2137,7 +2137,10 @@ functions."
                       ,(concat
                         "Unable to calculate the languageId for current "
                         "buffer. Take a look at "
-                        "lsp-language-id-configuration.")))
+                        "lsp-language-id-configuration.")
+                      ,(concat
+                        "There are no language servers supporting current "
+                        "mode %s registered with `lsp-mode'.")))
      ;; Errors we get from gopls for no good reason (I can't figure
      ;; out why). They don't impair functionality.
      (and (stringp (car args))
