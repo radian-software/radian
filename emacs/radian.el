@@ -2093,6 +2093,12 @@ currently active.")
 (use-package lsp-mode
   :init
 
+  (defcustom radian-lsp-disable nil
+    "If non-nil, then LSP is not allowed to be enabled.
+For use in file-local variables."
+    :type 'boolean
+    :safe #'booleanp)
+
   (radian-defhook radian--lsp-enable ()
     after-change-major-mode-hook
     "Enable `lsp-mode' for most programming modes.
@@ -2101,7 +2107,8 @@ Do this on `after-change-major-mode-hook' instead of
 sure regular mode hooks get a chance to run first, for example to
 set LSP configuration (see `lsp-python-ms')."
     (when (derived-mode-p #'prog-mode #'text-mode)
-      (unless (or (null buffer-file-name)
+      (unless (or radian-lsp-disable
+                  (null buffer-file-name)
                   (derived-mode-p
                    ;; `lsp-mode' doesn't support Elisp, so let's avoid
                    ;; triggering the autoload just for checking that, yes,
@@ -2550,6 +2557,17 @@ was printed, and only have ElDoc display if one wasn't."
 (use-package flycheck
   :defer 4
   :init
+
+  (defcustom radian-flycheck-disable nil
+    "If non-nil, then Flycheck is not allowed to be enabled.
+For use in file-local variables."
+    :type 'boolean
+    :safe #'booleanp)
+
+  (radian-defadvice radian--advice-flycheck-force-disable-maybe (args)
+    :filter-args #'flycheck-mode
+    "Forcily disable Flycheck if `radian-flycheck-disable' is non-nil."
+    (list (if radian-flycheck-disable -1 (car args))))
 
   (defun radian--flycheck-disable-checkers (&rest checkers)
     "Disable the given Flycheck syntax CHECKERS, symbols.
