@@ -110,18 +110,9 @@ configuration, and optionally installing local configuration.
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
     * Haskell: (please help with documentation!)
-    * JavaScript/TypeScript:
-
-          $ git clone
-              git@github.com:sourcegraph/javascript-typescript-langserver.git
-          $ cd javascript-typescript-langserver
-          $ npm install
-          $ npm run build
-          $ chmod +x lib/language-server-stdio.js
-          $ ln -s $PWD/lib/language-server-stdio.js
-                  ~/.local/bin/javascript-typescript-stdio
-          $ brew install prettier
-
+    * HTML: `yarn global add vscode-html-languageserver-bin`
+    * JavaScript/TypeScript: `yarn global add typescript
+      typescript-language-server`; `brew install prettier`
     * LaTeX:
 
           $ wget -O ~/.local/bin/texlab.jar
@@ -155,8 +146,9 @@ you prefer something different, substitute to taste.
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
     * Haskell: `yay -S haskell-ide-engine`
+    * HTML: `yay -S vscode-html-languageserver-bin`
     * JavaScript/TypeScript: `pacman -S prettier`; `yay -S
-      javascript-typescript-langserver`
+      typescript-language-server-bin`
     * LaTeX:
 
           $ wget -O ~/.local/bin/texlab.jar
