@@ -2412,7 +2412,7 @@ order."
                     (when (thread-first w
                             (lsp--workspace-client)
                             (lsp--client-server-id)
-                            (memq '(jsts-ls mspyls bash-ls texlab))
+                            (memq '(jsts-ls mspyls bash-ls texlab ts-ls))
                             (not))
                       (cl-return t)))))))
 
