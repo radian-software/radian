@@ -426,7 +426,7 @@ hook directly into the init-file during byte-compilation."
 Otherwise, Emacs will just get slower and slower over time."
   (setq gc-cons-threshold radian--orig-gc-cons-threshold))
 
-(setq gc-cons-threshold (* 50 1000 1000))
+(setq gc-cons-threshold (* 500 1024 1024))
 
 ;; After we enabled `load-prefer-newer' in init.el, disable it again
 ;; for the duration of init. Presumably, it slows things down, and we
