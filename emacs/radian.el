@@ -2945,12 +2945,7 @@ This works around an upstream bug; see
 
   ;; Disable in-buffer underlining of errors and warnings, since we
   ;; already have them from Flycheck.
-  (setq haskell-process-show-overlays nil)
-
-  ;; Allow `haskell-mode' to use Stack with the global project instead
-  ;; of trying to invoke GHC directly, if not inside any sort of
-  ;; project.
-  (setq haskell-process-type 'stack-ghci))
+  (setq haskell-process-show-overlays nil))
 
 ;; Package `lsp-haskell' configures the HIE Haskell language server
 ;; for use with `lsp-mode'.
