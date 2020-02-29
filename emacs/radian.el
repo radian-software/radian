@@ -4817,7 +4817,8 @@ Instead, display simply a flat colored region in the fringe."
     :filter-return #'compilation-start
     "Pop to compilation buffer on \\[compile]."
     (prog1 buf
-      (select-window (get-buffer-window buf)))))
+      (when-let ((win (get-buffer-window buf)))
+        (select-window win)))))
 
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
