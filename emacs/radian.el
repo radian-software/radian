@@ -1904,12 +1904,6 @@ the reverse direction from \\[pop-global-mark]."
   (bind-key [remap kill-line] #'sp-kill-hybrid-sexp smartparens-mode-map
             (apply #'derived-mode-p sp-lisp-modes))
 
-  ;; Smartparens is broken in `cc-mode' as of Emacs 27. See
-  ;; <https://github.com/Fuco1/smartparens/issues/963>.
-  (when (version<= "27" emacs-version)
-    (dolist (fun '(c-electric-paren c-electric-brace))
-      (add-to-list 'sp--special-self-insert-commands fun)))
-
   (defun radian--smartparens-indent-new-pair (&rest _)
     "Insert an extra newline after point, and reindent."
     (newline)
