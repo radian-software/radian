@@ -2643,6 +2643,9 @@ nor requires Flycheck to be loaded."
 (use-feature lsp-ui-doc
   :config
 
+  ;; https://github.com/emacs-lsp/lsp-ui/issues/414
+  (setq lsp-ui-doc-use-childframe nil)
+
   (radian-defadvice radian--advice-lsp-ui-doc-allow-multiline (func &rest args)
     :around #'lsp-ui-doc--render-buffer
     "Prevent `lsp-ui-doc' from removing newlines from documentation."
