@@ -1834,19 +1834,27 @@ buffer."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
+  (defun radian-autorevert-inhibit-p (buffer)
+    "Return non-nil if autorevert should be inhibited for BUFFER."
+    (or (null (get-buffer-window))
+        (with-current-buffer buffer
+          (or (null buffer-file-name)
+              (file-remote-p buffer-file-name)))))
+
   (radian-if-compiletime (version< emacs-version "27")
       (radian-defadvice radian--autorevert-only-visible
           (auto-revert-buffers &rest args)
         :around #'auto-revert-buffers
         "Inhibit `autorevert' for buffers not displayed in any window."
         (radian-flet ((defun buffer-list (&rest args)
-                        (cl-remove-if-not
-                         #'get-buffer-window (apply buffer-list args))))
+                        (cl-remove-if
+                         #'radian-autorevert-inhibit-p
+                         (apply buffer-list args))))
           (apply auto-revert-buffers args)))
     (radian-defadvice radian--autorevert-only-visible (bufs)
       :filter-return #'auto-revert--polled-buffers
       "Inhibit `autorevert' for buffers not displayed in any window."
-      (cl-remove-if-not #'get-buffer-window bufs)))
+      (cl-remove-if #'radian-autorevert-inhibit-p bufs)))
 
   :blackout auto-revert-mode)
 
