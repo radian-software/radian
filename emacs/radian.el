@@ -413,20 +413,10 @@ hook directly into the init-file during byte-compilation."
 
 ;;; Startup optimizations
 
-;; Disabling GC (by setting `gc-cons-threshold' to a very large value,
-;; in this case 500MB) during startup is said to improve startup time
-;; by reducing the number of GC runs.
-
-(defvar radian--orig-gc-cons-threshold gc-cons-threshold
-  "Original value of `gc-cons-threshold'.")
-
-(radian-defhook radian--reenable-gc ()
-  radian--finalize-init-hook
-  "Reset `gc-cons-threshold' to its original value.
-Otherwise, Emacs will just get slower and slower over time."
-  (setq gc-cons-threshold radian--orig-gc-cons-threshold))
-
-(setq gc-cons-threshold (* 500 1024 1024))
+;; Disable frequency of GC. This helps performance both during init
+;; and after init. Value is in bytes so this is 100MB, as suggested in
+;; <https://github.com/emacs-lsp/lsp-mode#performance>.
+(setq gc-cons-threshold (* 100 1024 1024))
 
 ;; After we enabled `load-prefer-newer' in init.el, disable it again
 ;; for the duration of init. Presumably, it slows things down, and we
@@ -2117,6 +2107,9 @@ set LSP configuration (see `lsp-python-ms')."
         (lsp))))
 
   :config
+
+  ;; As per <https://github.com/emacs-lsp/lsp-mode#performance>.
+  (setq read-process-output-max (* 1024 1024))
 
   (defun radian--advice-lsp-mode-silence (format &rest args)
     "Silence needless diagnostic messages from `lsp-mode'.
