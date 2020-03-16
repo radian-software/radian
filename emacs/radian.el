@@ -1744,20 +1744,22 @@ the reverse direction from \\[pop-global-mark]."
 
 ;; Feature `fileloop' provides the underlying machinery used to do
 ;; operations on multiple files, such as find-and-replace.
-(use-feature fileloop
-  :config
+(radian-when-compiletime (version<= "27" emacs-version)
+  (use-feature fileloop
+    :config
 
-  (radian-defadvice radian--advice-fileloop-find-all-matches (func &rest args)
-    :around #'fileloop-initialize-replace
-    "Fix a bug in `fileloop' that causes it to miss matches.
+    (radian-defadvice radian--advice-fileloop-find-all-matches
+        (func &rest args)
+      :around #'fileloop-initialize-replace
+      "Fix a bug in `fileloop' that causes it to miss matches.
 In particular, without this advice, doing a find-and-replace in
 multiple files will miss any match that occurs earlier in a
 visited file than point happens to be currently in that
 buffer."
-    (radian-flet ((defun perform-replace (&rest args)
-                    (apply perform-replace
-                           (append args (list (point-min) (point-max))))))
-      (apply func args))))
+      (radian-flet ((defun perform-replace (&rest args)
+                      (apply perform-replace
+                             (append args (list (point-min) (point-max))))))
+        (apply func args)))))
 
 ;; Package `visual-regexp' provides an alternate version of
 ;; `query-replace' which highlights matches and replacements as you
