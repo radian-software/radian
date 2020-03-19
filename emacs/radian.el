@@ -267,7 +267,7 @@ also be a single string."
 
 (defun radian--advice-silence-messages (func &rest args)
   "Invoke FUNC with ARGS, silencing all messages.
-This is an `:override' advice for many different functions."
+This is an `:around' advice for many different functions."
   (cl-letf (((symbol-function #'message) #'ignore))
     (apply func args)))
 
