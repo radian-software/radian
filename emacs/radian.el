@@ -2664,7 +2664,7 @@ nor requires Flycheck to be loaded."
   :config
 
   ;; https://github.com/emacs-lsp/lsp-ui/issues/414
-  (setq lsp-ui-doc-use-childframe nil)
+  (add-to-list 'lsp-ui-doc-frame-parameters '(no-accept-focus . t))
 
   (radian-defadvice radian--advice-lsp-ui-doc-allow-multiline (func &rest args)
     :around #'lsp-ui-doc--render-buffer
