@@ -97,8 +97,6 @@ if (( $+commands[git] )); then
     # Print an asterisk if the working directory is dirty.
     function radian_prompt_git_dirty {
         emulate -LR zsh
-        local FLAGS
-        FLAGS=('--porcelain' '--ignore-submodules=dirty')
         if [[ $(command git status --porcelain 2>/dev/null | tail -n1) ]]; then
             echo "*"
         fi
