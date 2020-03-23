@@ -2959,6 +2959,12 @@ This works around an upstream bug; see
 ;; which includes many other features from the package, and also for
 ;; some reason is where `interactive-haskell-mode' is defined.
 (use-feature haskell
+  :config
+
+  ;; Prevent this binding from overriding the alternative binding from
+  ;; LSP that we actually want to use.
+  (unbind-key "M-." interactive-haskell-mode-map)
+
   :blackout interactive-haskell-mode)
 
 ;; Feature `haskell-customize' from package `haskell-mode' defines the
