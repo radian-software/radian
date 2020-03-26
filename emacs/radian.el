@@ -1742,6 +1742,16 @@ the reverse direction from \\[pop-global-mark]."
 
 (radian-bind-key "c" #'toggle-case-fold-search)
 
+;; Package `ctrlf' provides a replacement for `isearch' that is more
+;; similar to the tried-and-true text search interfaces in web
+;; browsers and other programs (think of what happens when you type
+;; ctrl+F).
+(use-package ctrlf
+  :straight (:host github :repo "raxod502/ctrlf")
+  :init
+
+  (ctrlf-mode +1))
+
 ;; Feature `fileloop' provides the underlying machinery used to do
 ;; operations on multiple files, such as find-and-replace.
 (radian-when-compiletime (version<= "27" emacs-version)
@@ -1785,16 +1795,6 @@ buffer."
     (interactive)
     (let ((vr/engine 'emacs-plain))
       (call-interactively #'vr/query-replace))))
-
-;; Feature `isearch' provides a basic and fast mechanism for jumping
-;; forward or backward to occurrences of a given search string.
-(use-feature isearch
-  :config
-
-  ;; Eliminate the 0.25s idle delay for isearch highlighting, as in my
-  ;; opinion it usually produces a rather disjointed and distracting
-  ;; UX.
-  (setq lazy-highlight-initial-delay 0))
 
 ;;; Electricity: automatic things
 ;;;; Autorevert

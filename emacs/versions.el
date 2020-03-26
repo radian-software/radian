@@ -14,6 +14,7 @@
  ("company-lsp" . "f921ffa0cdc542c21dc3dd85f2c93df4288e83bd")
  ("company-mode" . "d943198e26baccbbae7fa1cdebcd9fcb89c525d0")
  ("crontab-mode" . "090ed61e919df6391df45a7645a0d8d5b0dae1cb")
+ ("ctrlf" . "478e153f20c4c3632e4a97ccc81561330820e88c")
  ("dash.el" . "ea7adeb09c13de58336caa16243e192ea6ee88fb")
  ("dockerfile-mode" . "ed73e82dcc636dad00d1a8c3b32a49136d25ee60")
  ("dumb-jump" . "5e3e47fce8e24c42ad65fb9e6e5f92086834b3c6")
