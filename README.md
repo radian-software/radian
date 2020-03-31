@@ -13,28 +13,37 @@ These dotfiles attempt to achieve the following goals:
   repository (my local Emacs configuration is almost 750 lines of
   code)
 
+If you are a fan of my Emacs packages (such as
+[`straight.el`][straight.el], [Selectrum], [CTRLF],
+[`prescient.el`][prescient.el], [Apheleia], [Blackout]) then you will
+find all of them configured here.
+
 ## Software configured, features
 
 * [Emacs] (**minimum version supported: 25.2**)
   * Next-generation package manager, [`straight.el`][straight.el]
   * Clean and DRY package customizations using
     [`use-package`][use-package]
-  * Future-proof customizations using [`el-patch`][el-patch]
   * Simpler and less buggy (than [Ivy], [Counsel], [Helm]) file and
     command selection using [Selectrum]
+  * More robust and streamlined single-buffer text search (than
+    [Isearch], [Swiper]) using [CTRLF]
   * Sorting by frecency and usage on all commands using
     [`prescient.el`][prescient.el]
   * IDE features for expanding library of programming languages with
-    [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, [Flow], [Go],
-    [JavaScript], [TypeScript], [JSX]/[TSX], [LaTeX], [Python] with
-    [Poetry] and [Pipenv] virtualenvs autodetected)
+    [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, CSS, [Flow], [Go],
+    [Haskell], HTML, [JavaScript], [TypeScript], [JSX]/[TSX], [Flow],
+    [LaTeX], [Python] with [Poetry] and [Pipenv] virtualenvs
+    autodetected)
   * Automatic asynchronous code reformatting without moving point
-    using [Black], [Gofmt], and [Prettier] via [Apheleia]
+    using [Black], [Brittany], [Gofmt], and [Prettier] via [Apheleia]
   * Informative but minimal mode-line showing file modification
     status, buffer name, point position, and active modes (with
     optional right-alignment support)
   * Extremely clean mode lighters with prettier names thanks to
     [Blackout]
+  * *All* the needless messages have been suppressed; no errors mean
+    no messages
   * Aggressive startup optimization: as fast as 0.33s for a fully
     configured graphical frame (by aggressive lazy-loading of
     everything; using [`el-patch`][el-patch] to lazy-load packages
@@ -44,13 +53,15 @@ These dotfiles attempt to achieve the following goals:
     init, with the local init-file macroexpanded and embedded directly
     into Radian during compilation; and by running all customizations
     before the first graphical frame is initialized)
-  * Aggressively consistent coding style and documentation,
-    including heavy use of macros to automate and foolproof common
-    operations
+  * Aggressively consistent coding style and documentation (init-file
+    is 37% comments and docstrings), including heavy use of macros to
+    automate and foolproof common operations
+  * Future-proof customizations using [`el-patch`][el-patch]
   * Delightful color scheme that works in the terminal ([Zerodark])
-  * Clipboard, mouse, and PATH integration for macOS
+  * Clipboard, mouse, and PATH integration for macOS and Linux
   * Automatic creation and interactive removal of parent directories
-    when finding files
+    when finding and renaming files
+  * Automatically clone Emacs source when needed by `find-function`
   * Extensible system for defining mnemonic key sequences to jump to
     dotfiles
   * Choose to kill, restart, or spawn new Emacs on `C-x C-c`, based
@@ -65,7 +76,7 @@ These dotfiles attempt to achieve the following goals:
     [Flycheck], [Forge],
     [`git-gutter-fringe.el`][git-gutter-fringe.el], [git-link],
     [Helpful], [Macrostep], [Magit], [no-littering], [Org],
-    [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens], [Swiper],
+    [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens],
     [transpose-frame], [undo-tree], [use-package], [visual-regexp],
     [webpaste.el], and more
   * Major modes for editing many languages and configuration file
@@ -80,6 +91,8 @@ These dotfiles attempt to achieve the following goals:
   * GUI-like file/directory copy/paste functions on the command line
   * Extensive library of clean and consistent [Git] aliases
   * Colored man pages
+  * Configured plugins: [wdx], [zsh-autosuggestions],
+    [zsh-history-substring-search], [zsh-completions]
 * [Tmux]
   * Keybindings for inserting new windows and shifting them left and
     right
@@ -252,6 +265,7 @@ commented.
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
 [counsel]: https://github.com/abo-abo/swiper#counsel
+[ctrlf]: https://github.com/raxod502/ctrlf
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [docker]: https://www.docker.com/
@@ -265,6 +279,7 @@ commented.
 [exa]: https://the.exa.website/
 [firefox]: https://www.mozilla.org/en-US/firefox/
 [flow]: https://flow.org/
+[flow]: https://flow.org/
 [flx]: https://github.com/lewang/flx
 [flycheck]: http://www.flycheck.org/
 [forge]: https://github.com/magit/forge
@@ -273,9 +288,11 @@ commented.
 [git]: https://git-scm.com/
 [go]: https://golang.org/
 [gofmt]: https://golang.org/cmd/gofmt/
+[haskell]: https://www.haskell.org/
 [helm]: https://github.com/emacs-helm/helm
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
+[isearch]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html
 [issues]: https://github.com/raxod502/radian/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
@@ -312,8 +329,12 @@ commented.
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
 [visual-regexp]: https://github.com/benma/visual-regexp.el
+[wdx]: https://github.com/raxod502/wdx
 [webpaste.el]: https://github.com/etu/webpaste.el
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [zplugin]: https://github.com/zdharma/zplugin
+[zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
+[zsh-completions]: https://github.com/zsh-users/zsh-completions
+[zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
 [zsh]: http://zsh.sourceforge.net/
