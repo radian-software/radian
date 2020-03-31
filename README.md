@@ -18,6 +18,10 @@ If you are a fan of my Emacs packages (such as
 [`prescient.el`][prescient.el], [Apheleia], [Blackout]) then you will
 find all of them configured here.
 
+Note that there is a `master` branch which is not updated as
+frequently. You may be interested in running this branch if you desire
+more stability.
+
 ## Software configured, features
 
 * [Emacs] (**minimum version supported: 25.2**)
