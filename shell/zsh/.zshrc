@@ -44,8 +44,12 @@ if [[ -n $radian_zplugin ]]; then
     zplugin light raxod502/wdx
 
     # If a previous command starts with what you have typed, show it
-    # in dimmied color after the cursor, and allow completing it.
+    # in dimmed color after the cursor, and allow completing it.
     zplugin light zsh-users/zsh-autosuggestions
+
+    # Pressing <up> and <down> when you've already typed in part of a
+    # command will only show you history entries matching that text.
+    zplugin light zsh-users/zsh-history-substring-search
 
     # Configure tab-completions for many external commands.
     #
@@ -235,6 +239,17 @@ setopt hist_reduce_blanks
 # effect since history expansion is disabled.
 setopt hist_verify
 
+# Recommended setup for zsh-history-substring-search, see
+# <https://github.com/zsh-users/zsh-history-substring-search#usage>.
+
+if whence history-substring-search-up >/dev/null; then
+    bindkey '^[[A' history-substring-search-up
+fi
+
+if whence history-substring-search-down >/dev/null; then
+    bindkey '^[[B' history-substring-search-down
+fi
+
 ### Filesystem navigation
 
 # This makes it so that when you cd to a new directory, the old
@@ -314,12 +329,12 @@ if (( $+commands[exa] )); then
 
     function lt {
         emulate -LR zsh
-        l --tree --ignore-glob ".git|.svn" $@
+        l --tree --ignore-glob ".git|.svn|node_modules" $@
     }
 
     function lti {
         emulate -LR zsh
-        l --tree --ignore-glob ".git|.svn|$1" ${@:2}
+        l --tree --ignore-glob ".git|.svn|node_modules|$1" ${@:2}
     }
 
     function ltl {
@@ -328,7 +343,7 @@ if (( $+commands[exa] )); then
     }
 
     function ltli {
-        l --tree --level $1 --ignore-glob ".git|.svn|$2" ${@:3}
+        l --tree --level $1 --ignore-glob ".git|.svn|node_modules|$2" ${@:3}
     }
 
 else
@@ -509,34 +524,41 @@ if (( $+commands[git] )); then
     alias gsh='git show'
     alias gshs='git show --stat'
 
-    for all in "" a; do
-        local all_flags=
-        if [[ -n $all ]]; then
-            all_flags=" --all"
+    for nograph in "" n; do
+        local graph_flags=
+        if [[ -z $nograph ]]; then
+            graph_flags=" --graph"
         fi
-        for oneline in "" o; do
-            local oneline_flags=
-            if [[ -n $oneline ]]; then
-                oneline_flags=" --oneline"
+        for all in "" a; do
+            local all_flags=
+            if [[ -n $all ]]; then
+                all_flags=" --all"
             fi
-            for diff in "" s p ps sp; do
-                local diff_flags=
-                case $diff in
-                    s) diff_flags=" --stat";;
-                    p) diff_flags=" --patch";;
-                    ps|sp) diff_flags=" --patch --stat";;
-                esac
-                for search in "" g G S; do
-                    local search_flags=
-                    case $search in
-                        g) search_flags=" --grep";;
-                        G) search_flags=" -G";;
-                        S) search_flags=" -S";;
+            for oneline in "" o; do
+                local oneline_flags=
+                if [[ -n $oneline ]]; then
+                    oneline_flags=" --oneline"
+                fi
+                for diff in "" s p ps sp; do
+                    local diff_flags=
+                    case $diff in
+                        s) diff_flags=" --stat";;
+                        p) diff_flags=" --patch";;
+                        ps|sp) diff_flags=" --patch --stat";;
                     esac
-                    alias="gl${all}${oneline}${diff}${search}="
-                    alias+="git log --graph --decorate${all_flags}"
-                    alias+="${oneline_flags}${diff_flags}${search_flags}"
-                    alias $alias
+                    for search in "" g G S; do
+                        local search_flags=
+                        case $search in
+                            g) search_flags=" --grep";;
+                            G) search_flags=" -G";;
+                            S) search_flags=" -S";;
+                        esac
+                        alias="gl${nograph}${all}${oneline}${diff}${search}="
+                        alias+="git log --decorate"
+                        alias+="${graph_flags}${all_flags}"
+                        alias+="${oneline_flags}${diff_flags}${search_flags}"
+                        alias $alias
+                    done
                 done
             done
         done

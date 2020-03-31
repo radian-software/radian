@@ -20,6 +20,8 @@ These dotfiles attempt to achieve the following goals:
   * Clean and DRY package customizations using
     [`use-package`][use-package]
   * Future-proof customizations using [`el-patch`][el-patch]
+  * Simpler and less buggy (than [Ivy], [Counsel], [Helm]) file and
+    command selection using [Selectrum]
   * Sorting by frecency and usage on all commands using
     [`prescient.el`][prescient.el]
   * IDE features for expanding library of programming languages with
@@ -59,11 +61,11 @@ These dotfiles attempt to achieve the following goals:
     docstrings, and text
   * Configured packages: [Atomic Chrome][atomic-chrome] (with
     [Firefox] support), [Autorevert], [buffer-move], [Company],
-    [Counsel], [delete-selection-mode], [Dired], [dumb-jump],
-    [ElDoc], [ESUP], [Flycheck], [Forge],
-    [`git-gutter-fringe.el`][git-gutter-fringe.el] [git-link],
-    [Helpful], [Ivy], [Macrostep], [Magit], [no-littering], [Org],
-    [Projectile], [pyvenv], [Smartparens], [Swiper],
+    [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
+    [Flycheck], [Forge],
+    [`git-gutter-fringe.el`][git-gutter-fringe.el], [git-link],
+    [Helpful], [Macrostep], [Magit], [no-littering], [Org],
+    [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens], [Swiper],
     [transpose-frame], [undo-tree], [use-package], [visual-regexp],
     [webpaste.el], and more
   * Major modes for editing many languages and configuration file
@@ -107,18 +109,10 @@ configuration, and optionally installing local configuration.
     * Flow: `brew install flow`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
-    * JavaScript/TypeScript:
-
-          $ git clone
-              git@github.com:sourcegraph/javascript-typescript-langserver.git
-          $ cd javascript-typescript-langserver
-          $ npm install
-          $ npm run build
-          $ chmod +x lib/language-server-stdio.js
-          $ ln -s $PWD/lib/language-server-stdio.js
-                  ~/.local/bin/javascript-typescript-stdio
-          $ brew install prettier
-
+    * Haskell: (please help with documentation!)
+    * HTML: `yarn global add vscode-html-languageserver-bin`
+    * JavaScript/TypeScript: `yarn global add typescript
+      typescript-language-server`; `brew install prettier`
     * LaTeX:
 
           $ wget -O ~/.local/bin/texlab.jar
@@ -151,18 +145,10 @@ you prefer something different, substitute to taste.
     * Flow: `yarn global add flow-bin`
     * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
       to your `$PATH`
-    * JavaScript/TypeScript:
-
-          $ git clone
-              git@github.com:sourcegraph/javascript-typescript-langserver.git
-          $ cd javascript-typescript-langserver
-          $ npm install
-          $ npm run build
-          $ chmod +x lib/language-server-stdio.js
-          $ ln -s $PWD/lib/language-server-stdio.js
-                  ~/.local/bin/javascript-typescript-stdio
-          $ pacman -S prettier
-
+    * Haskell: `yay -S haskell-ide-engine`
+    * HTML: `yay -S vscode-html-languageserver-bin`
+    * JavaScript/TypeScript: `pacman -S prettier`; `yay -S
+      typescript-language-server-bin`
     * LaTeX:
 
           $ wget -O ~/.local/bin/texlab.jar
@@ -287,6 +273,7 @@ commented.
 [git]: https://git-scm.com/
 [go]: https://golang.org/
 [gofmt]: https://golang.org/cmd/gofmt/
+[helm]: https://github.com/emacs-helm/helm
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [issues]: https://github.com/raxod502/radian/issues
@@ -312,6 +299,8 @@ commented.
 [racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
+[rg.el]: https://github.com/dajva/rg.el
+[selectrum]: https://github.com/raxod502/selectrum
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el

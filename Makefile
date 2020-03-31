@@ -36,6 +36,9 @@ longlines: ## Check for long lines
 validate: ## Validate el-patches
 	@scripts/validate-patches.bash
 
+.PHONY: lint
+lint: build compile validate checkdoc longlines ## Run all linters
+
 .PHONY: clean
 clean: ## Remove build artifacts
 	@rm -f emacs/radian.elc

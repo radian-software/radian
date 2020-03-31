@@ -7,7 +7,7 @@ shared: &shared
     # This command will pick up $VERSION from the environment.
     - run: >-
         make docker
-        CMD="make -k link build compile validate checkdoc longlines"
+        CMD="make -k link lint"
 jobs:
   emacs-25.2:
     <<: *shared
