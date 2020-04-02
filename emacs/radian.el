@@ -617,10 +617,7 @@ nice.)"
 ;; internal function from another package by providing an s-expression
 ;; based diff which can later be validated to ensure that the upstream
 ;; definition has not changed.
-(use-package el-patch
-  :straight (:host github
-                   :repo "raxod502/el-patch"
-                   :branch "develop"))
+(use-package el-patch)
 
 ;; Only needed at compile time, thanks to Jon
 ;; <https://github.com/raxod502/el-patch/pull/11>.
