@@ -3490,12 +3490,6 @@ environment with point at the end of a non-empty line of text."
   ;; sizes.
   (setq font-latex-fontify-sectioning 1))
 
-;; Package `lsp-latex' provides an `lsp-mode' client for LaTeX.
-(use-package lsp-latex
-  :straight (:host github :repo "ROCKTAKEY/lsp-latex")
-  :demand t
-  :after (:all lsp-clients tex))
-
 ;;;; VimScript
 ;; http://vimdoc.sourceforge.net/htmldoc/usr_41.html
 

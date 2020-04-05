@@ -53,7 +53,6 @@
  ("let-alist" . "681570f2abec73ec6494d67f8a904ac9ea15063f")
  ("loop.el" . "e22807f83a0890dc8a904c51ee0742c34efccc6c")
  ("lsp-haskell" . "6d481f97e62b0fd2455e8f7a36429981277445b1")
- ("lsp-latex" . "d016440fe364a016935bd90ae07e22d9012bcf8f")
  ("lsp-mode" . "95be3b1aafbeb713efb6451c7d6c310868c61cec")
  ("lsp-python-ms" . "60b663c82a55613009632ee83aad8cdc1c410a84")
  ("lsp-ui" . "bf3966e87c91c5d825c483ce0883f30dd2272b62")
