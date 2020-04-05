@@ -666,6 +666,14 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
                   (apply insert-and-inherit args)))
     (apply quoted-insert args)))
 
+;; Package `which-key' displays the key bindings and associated
+;; commands following the currently-entered key prefix in a popup.
+
+(use-package which-key
+  :demand t
+  :config (which-key-mode +1)
+  :blackout t)
+
 ;;; Environment
 ;;;; Environment variables
 
