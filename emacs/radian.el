@@ -4661,7 +4661,11 @@ command."
 ;; window, showing which lines have been added, removed, or modified
 ;; since the last Git commit.
 (use-package git-gutter
-  :commands (radian-git-gutter:beginning-of-hunk)
+  :commands (git-gutter:previous-hunk
+             git-gutter:next-hunk
+             radian-git-gutter:beginning-of-hunk
+             git-gutter:end-of-hunk
+             git-gutter:revert-hunk)
   :init
 
   (radian-bind-key "v p" #'git-gutter:previous-hunk)
