@@ -665,10 +665,19 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
 
 ;; Package `which-key' displays the key bindings and associated
 ;; commands following the currently-entered key prefix in a popup.
-
 (use-package which-key
   :demand t
-  :config (which-key-mode +1)
+  :config
+
+  ;; We configure it so that `which-key' is triggered by typing C-h
+  ;; during a key sequence (the usual way to show bindings). See
+  ;; <https://github.com/justbur/emacs-which-key#manual-activation>.
+  (setq which-key-show-early-on-C-h t)
+  (setq which-key-idle-delay most-positive-fixnum)
+  (setq which-key-idle-secondary-delay 1e-100)
+
+  (which-key-mode +1)
+
   :blackout t)
 
 ;;; Environment
@@ -5225,6 +5234,15 @@ This is passed to `set-frame-font'."
 ;; would be a good idea to have that value suppress keystroke display
 ;; entirely.
 (setq echo-keystrokes 1e-6)
+
+;; Unfortunately, `which-key' sets an internal variable at load time
+;; based on the value of `echo-keystrokes', and then later overrides
+;; `echo-keystrokes' to the value of this internal variable,
+;; effectively overwriting our configuration here. Stop that behavior.
+(use-feature which-key
+  :config
+
+  (setq which-key-echo-keystrokes echo-keystrokes))
 
 ;; Don't suggest shorter ways to type commands in M-x, since they
 ;; don't apply when using Selectrum.
