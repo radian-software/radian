@@ -26,6 +26,7 @@
  ("emacs-racer" . "ea6a09c16f8ec646195f942c12fe3ed7d65cc971")
  ("emacs-request" . "f466ab1af578abd1942c3c70c101c585d9166bb0")
  ("emacs-websocket" . "d91a9aef5a3ec5af985e5185c3b237fdd24605e0")
+ ("emacs-which-key" . "8b49ae978cceca65967f3544c236f32964ddbed0")
  ("emacsmirror-mirror" . "b6fb3d92da03998c6b81655038b561d17af0189e")
  ("emacsql" . "a118b6c95af1306f0288a383d274b5dd93efbbda")
  ("epl" . "78ab7a85c08222cd15582a298a364774e3282ce6")
