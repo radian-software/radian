@@ -130,11 +130,7 @@ configuration, and optionally installing local configuration.
     * HTML: `yarn global add vscode-html-languageserver-bin`
     * JavaScript/TypeScript: `yarn global add typescript
       typescript-language-server`; `brew install prettier`
-    * LaTeX:
-
-          $ wget -O ~/.local/bin/texlab.jar
-              https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
-
+    * LaTeX: `yay -S digestif`
     * Python: the language server is downloaded automatically courtesy
       of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
 

@@ -617,10 +617,7 @@ nice.)"
 ;; internal function from another package by providing an s-expression
 ;; based diff which can later be validated to ensure that the upstream
 ;; definition has not changed.
-(use-package el-patch
-  :straight (:host github
-                   :repo "raxod502/el-patch"
-                   :branch "develop"))
+(use-package el-patch)
 
 ;; Only needed at compile time, thanks to Jon
 ;; <https://github.com/raxod502/el-patch/pull/11>.
@@ -2212,6 +2209,10 @@ killed (which happens during Emacs shutdown)."
              link))
          lsp-language-id-configuration))
 
+  ;; Disable LSP reformatting your code as you type. We use Apheleia
+  ;; for that instead.
+  (setq lsp-enable-on-type-formatting nil)
+
   :blackout " LSP")
 
 ;; Feature `lsp-clients' from package `lsp-mode' defines how to
@@ -3496,12 +3497,6 @@ environment with point at the end of a non-empty line of text."
   ;; Prevent section headers from being displayed in different font
   ;; sizes.
   (setq font-latex-fontify-sectioning 1))
-
-;; Package `lsp-latex' provides an `lsp-mode' client for LaTeX.
-(use-package lsp-latex
-  :straight (:host github :repo "ROCKTAKEY/lsp-latex")
-  :demand t
-  :after (:all lsp-clients tex))
 
 ;;;; VimScript
 ;; http://vimdoc.sourceforge.net/htmldoc/usr_41.html
