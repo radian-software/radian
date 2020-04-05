@@ -2201,6 +2201,10 @@ killed (which happens during Emacs shutdown)."
              link))
          lsp-language-id-configuration))
 
+  ;; Disable LSP reformatting your code as you type. We use Apheleia
+  ;; for that instead.
+  (setq lsp-enable-on-type-formatting nil)
+
   :blackout " LSP")
 
 ;; Feature `lsp-clients' from package `lsp-mode' defines how to
