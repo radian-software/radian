@@ -2407,7 +2407,10 @@ completions automatically when backspacing into a symbol."
         ;; Only trigger completion if previous counter value was
         ;; non-nil (i.e., don't trigger completion just as we're
         ;; jumping to a buffer for the first time).
-        (prog1 radian--company-buffer-modified-counter
+        (prog1 (and radian--company-buffer-modified-counter
+                    (not (and (symbolp this-command)
+                              (string-prefix-p
+                               "company-" (symbol-name this-command)))))
           (setq radian--company-buffer-modified-counter tick)))))
 
   (global-company-mode +1)
