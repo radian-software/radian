@@ -3934,7 +3934,8 @@ they default to `point-min' and `point-max' respectively.
 If evaluating a buffer visiting this file, then delegate instead
 to `radian-reload-init'."
   (interactive)
-  (if (and (member (file-truename buffer-file-name)
+  (if (and buffer-file-name
+           (member (file-truename buffer-file-name)
                    (list
                     (when (bound-and-true-p early-init-file)
                       (file-truename early-init-file))
