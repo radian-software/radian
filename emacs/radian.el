@@ -2413,6 +2413,19 @@ completions automatically when backspacing into a symbol."
                                "company-" (symbol-name this-command)))))
           (setq radian--company-buffer-modified-counter tick)))))
 
+  (radian-defadvice radian--advice-company-update-buffer-modified-counter ()
+    :after #'company--should-continue
+    "Make sure `radian--company-buffer-modified-counter' is up to date.
+If we don't do this on `company--should-continue' as well as
+`company--should-begin', then we may end up in a situation where
+autocomplete triggers when it shouldn't. Specifically suppose we
+delete a char from a symbol, triggering autocompletion, then type
+it back, but there is more than one candidate so the menu stays
+onscreen. Without this advice, saving the buffer will cause the
+menu to disappear and then come back after `company-idle-delay'."
+    (setq radian--company-buffer-modified-counter
+          (buffer-chars-modified-tick)))
+
   (global-company-mode +1)
 
   :blackout t)
