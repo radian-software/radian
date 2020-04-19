@@ -498,6 +498,8 @@ binding the variable dynamically over the entire init-file."
   (setq straight-check-for-modifications
         '(find-at-startup find-when-checking)))
 
+(setq straight-vc-git-default-clone-depth 1)
+
 ;; Clear out recipe overrides (in case of re-init).
 (setq straight-recipe-overrides nil)
 
