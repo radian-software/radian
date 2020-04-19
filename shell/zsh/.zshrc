@@ -472,6 +472,7 @@ if (( $+commands[emacs] )); then
     alias ew='emacs'
     alias eqw='emacs -Q'
     alias ue='USER_EMACS_DIRECTORY=$PWD e'
+    alias uew='USER_EMACS_DIRECTORY=$PWD ew'
 fi
 
 if (( $+commands[emacsclient] )); then
