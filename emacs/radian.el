@@ -902,7 +902,11 @@ ourselves."
   :config
 
   ;; Remember usage statistics across Emacs sessions.
-  (prescient-persist-mode +1))
+  (prescient-persist-mode +1)
+
+  ;; The default settings seem a little forgetful to me. Let's try
+  ;; this out.
+  (setq prescient-history-length 1000))
 
 ;; Package `selectrum-prescient' provides intelligent sorting and
 ;; filtering for candidates in Selectrum menus.
