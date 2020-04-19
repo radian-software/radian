@@ -863,6 +863,11 @@ convert\" UTF8_STRING)'. Disable that."
 
 ;;; Candidate selection
 
+;; Allow doing a command that requires candidate-selection when you
+;; are already in the middle of candidate-selection. Sometimes it's
+;; handy!
+(setq enable-recursive-minibuffers t)
+
 (radian-defadvice radian--advice-eval-expression-save-garbage
     (func prompt &optional initial-contents keymap read &rest args)
   :around #'read-from-minibuffer
