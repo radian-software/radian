@@ -4602,7 +4602,6 @@ as argument."
                     'magit-credential-hook
                     #'magit-maybe-start-credential-cache-daemon)))))))
 
-
   :config
 
   ;; The default location for git-credential-cache is in
