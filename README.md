@@ -14,9 +14,9 @@ These dotfiles attempt to achieve the following goals:
   code)
 
 If you are a fan of my Emacs packages (such as
-[`straight.el`][straight.el], [Selectrum], [CTRLF],
-[`prescient.el`][prescient.el], [Apheleia], [Blackout]) then you will
-find all of them configured here.
+[`straight.el`][straight.el], [`el-patch`][el-patch], [Selectrum],
+[CTRLF], [`prescient.el`][prescient.el], [Apheleia], [Blackout]) then
+you will find all of them configured here.
 
 Note that there is a `master` branch which is not updated as
 frequently. You may be interested in running this branch if you desire
