@@ -4559,25 +4559,6 @@ are probably not going to be installed."
   ;; magit-auto-revert-mode" when loading Magit.
   (setq magit-no-message '("Turning on magit-auto-revert-mode..."))
 
-  (radian-defadvice radian--advice-magit-ignore-version (&optional print-dest)
-    :override #'magit-version
-    "Don't bother trying to determine Magit's version.
-It fails in the case of a sparse clone, and we don't want to be
-annoyed by the error message. We have to do this before Magit is
-loaded because the function is called at that time (why??)."
-    (when print-dest
-      (princ (format "Magit (unknown), Git %s, Emacs %s, %s"
-                     (or (let ((magit-git-debug
-                                (lambda (err)
-                                  (display-warning '(magit git)
-                                                   err :error))))
-                           (magit-git-version t))
-                         "(unknown)")
-                     emacs-version
-                     system-type)
-             print-dest))
-    nil)
-
   :config/el-patch
 
   ;; Prevent Emacs asking if we're sure we want to exit, if a
@@ -4644,7 +4625,10 @@ as argument."
     '("-u" "Allow unrelated" "--allow-unrelated-histories"))
 
   (transient-append-suffix 'magit-pull "-r"
-    '("-a" "Autostash" "--autostash")))
+    '("-a" "Autostash" "--autostash"))
+
+  (transient-append-suffix 'magit-fetch "-t"
+    '("-u" "Unshallow" "--unshallow")))
 
 ;; Feature `magit-diff' from package `magit' handles all the stuff
 ;; related to interactive Git diffs.
