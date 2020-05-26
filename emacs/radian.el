@@ -3924,7 +3924,12 @@ bizarre reason."
 
   ;; The default mode lighter has a space instead of a hyphen.
   ;; Disgusting!
-  :blackout (lisp-interaction-mode . "Lisp-Interaction"))
+  :blackout ((lisp-interaction-mode . "Lisp-Interaction")
+             (emacs-lisp-mode . `("ELisp"
+                                  (lexical-binding
+                                   ""
+                                   (:propertize
+                                    "/d" face warning))))))
 
 (defun radian-reload-init ()
   "Reload the init-file."
