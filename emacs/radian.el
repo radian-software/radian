@@ -5484,6 +5484,19 @@ your local configuration."
 
     (enable-theme 'zerodark)))
 
+;; Make adjustments to color theme that was selected by Radian or
+;; user. See <https://github.com/raxod502/radian/issues/456>.
+(use-feature git-gutter
+  :config
+
+  (dolist (face '(git-gutter:added
+                  git-gutter:deleted
+                  git-gutter:modified
+                  git-gutter:unchanged
+                  git-gutter:separator))
+    (when (facep face)
+      (set-face-background face (face-foreground face)))))
+
 ;; Local Variables:
 ;; checkdoc-symbol-words: ("top-level")
 ;; indent-tabs-mode: nil
