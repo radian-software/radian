@@ -5006,10 +5006,6 @@ Also run `radian-atomic-chrome-setup-hook'."
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
 
-;; Package `webpaste' provides Emacs support for many different
-;; command-line pastebins.
-(use-package webpaste)
-
 ;; Package `sx' allows you to browse Stack Overflow from within Emacs.
 ;; First, run `sx-authenticate' in order to provide your username and
 ;; password. After that, you can use any of the autoloaded entry
