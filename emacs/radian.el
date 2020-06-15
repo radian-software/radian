@@ -2585,17 +2585,6 @@ order."
   ;; https://github.com/PythonNut/emacs-config/blob/1a92a1ff1d563fa6a9d7281bbcaf85059c0c40d4/modules/config-intel.el#L130-L137,
   ;; thanks!
 
-  (use-feature flycheck
-    :config
-
-    (radian-defadvice radian--advice-disable-eldoc-on-flycheck
-        (&rest _)
-      :after-while #'eldoc-display-message-no-interference-p
-      "Disable ElDoc when point is on a Flycheck overlay.
-This prevents ElDoc and Flycheck from fighting over the echo
-area."
-      (not (flycheck-overlay-errors-at (point)))))
-
   (radian-defadvice radian--advice-eldoc-better-display-message-p (&rest _)
     :override #'eldoc--message-command-p
     "Make ElDoc smarter about when to display its messages.
@@ -2613,68 +2602,17 @@ was printed, and only have ElDoc display if one wasn't."
 ;;;; Syntax checking and code linting
 
 ;; Package `flycheck' provides a framework for in-buffer error and
-;; warning highlighting, or more generally syntax checking. It comes
-;; with a large number of checkers pre-defined, and other packages
-;; define more.
-(use-package flycheck
-  :defer 4
-  :init
+;; warning highlighting. We kind of don't use it because we use
+;; `lsp-ui' instead, but internally `lsp-ui' actually hacks Flycheck
+;; to behave differently, so it is a dependency. We just don't enable
+;; Flycheck anywhere else and rely on `lsp-ui' to handle things when
+;; appropriate. However, interestingly, Flycheck is not marked as a
+;; dependency of `lsp-ui', hence this declaration.
+(use-package flycheck)
 
-  (defcustom radian-flycheck-disable nil
-    "If non-nil, then Flycheck is not allowed to be enabled.
-For use in file-local variables."
-    :type 'boolean
-    :safe #'booleanp)
-
-  (radian-defadvice radian--advice-flycheck-force-disable-maybe (args)
-    :filter-args #'flycheck-mode
-    "Forcily disable Flycheck if `radian-flycheck-disable' is non-nil."
-    (list (if radian-flycheck-disable -1 (car args))))
-
-  (defun radian--flycheck-disable-checkers (&rest checkers)
-    "Disable the given Flycheck syntax CHECKERS, symbols.
-This function affects only the current buffer, and neither causes
-nor requires Flycheck to be loaded."
-    (unless (boundp 'flycheck-disabled-checkers)
-      (setq flycheck-disabled-checkers nil))
-    (make-local-variable 'flycheck-disabled-checkers)
-    (dolist (checker checkers)
-      (cl-pushnew checker flycheck-disabled-checkers)))
-
-  :bind-keymap (("C-c !" . #'flycheck-command-map))
-
-  :config
-
-  (global-flycheck-mode +1)
-
-  (dolist (name '("python" "python2" "python3"))
-    (add-to-list 'safe-local-variable-values
-                 `(flycheck-python-pycompile-executable . ,name)))
-
-  ;; Run a syntax check when changing buffers, just in case you
-  ;; modified some other files that impact the current one. See
-  ;; https://github.com/flycheck/flycheck/pull/1308.
-  (add-to-list 'flycheck-check-syntax-automatically 'idle-buffer-switch)
-
-  ;; For the above functionality, check syntax in a buffer that you
-  ;; switched to only briefly. This allows "refreshing" the syntax
-  ;; check state for several buffers quickly after e.g. changing a
-  ;; config file.
-  (setq flycheck-buffer-switch-check-intermediate-buffers t)
-
-  ;; Display errors in the echo area after only 0.2 seconds, not 0.9.
-  (setq flycheck-display-errors-delay 0.2)
-
-  :config
-
-  (radian-bind-key "p" #'flycheck-previous-error)
-  (radian-bind-key "n" #'flycheck-next-error)
-
-  :blackout t)
-
-;; Package `lsp-ui' provides Flycheck integration for `lsp-mode', as
-;; well as various other UI elements that integrate with `lsp-mode'.
-;; It's configured automatically by `lsp-mode'.
+;; Package `lsp-ui' provides a pretty UI for showing diagnostic
+;; messages from LSP in the buffer using overlays. It's configured
+;; automatically by `lsp-mode'.
 (use-package lsp-ui
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
@@ -2688,12 +2626,6 @@ nor requires Flycheck to be loaded."
                         (car collection)
                       (apply completing-read prompt collection args))))
       (apply orig-fun args)))
-
-  ;; Don't show symbol definitions in the sideline. They are pretty
-  ;; noisy, and there appears to currently be a bug where they prevent
-  ;; Flycheck errors from being shown (the errors flash briefly and
-  ;; then disappear).
-  (setq lsp-ui-sideline-show-hover nil)
 
   (use-feature lsp-mode
     :config
@@ -2723,17 +2655,6 @@ nor requires Flycheck to be loaded."
       (apply func args))))
 
 ;;; Language support
-;;;; Text-based languages
-
-;; Feature `text-mode' provides a major mode for editing plain text.
-(use-feature text-mode
-  :config
-
-  (radian-defhook radian--flycheck-text-setup ()
-    text-mode-hook
-    "Disable some Flycheck checkers for plain text."
-    (radian--flycheck-disable-checkers 'proselint)))
-
 ;;;; Lisp languages
 
 ;; Feature `lisp-mode' provides a base major mode for Lisp languages,
@@ -3018,7 +2939,7 @@ This works around an upstream bug; see
   :config
 
   ;; Disable in-buffer underlining of errors and warnings, since we
-  ;; already have them from Flycheck.
+  ;; already have them from `lsp-ui'.
   (setq haskell-process-show-overlays nil))
 
 ;; Package `lsp-haskell' configures the HIE Haskell language server
@@ -3093,14 +3014,6 @@ item."
      ((markdown-list-item-at-point-p)
       (markdown-promote-list-item))))
 
-  (radian-defhook radian--flycheck-markdown-setup ()
-    markdown-mode-hook
-    "Disable some Flycheck checkers for Markdown."
-    (radian--flycheck-disable-checkers
-     'markdown-markdownlint-cli
-     'markdown-mdl
-     'proselint))
-
   (radian-defadvice radian--disable-markdown-metadata-fontification (&rest _)
     :override #'markdown-match-generic-metadata
     "Prevent fontification of YAML metadata blocks in `markdown-mode'.
@@ -3150,26 +3063,6 @@ See https://emacs.stackexchange.com/a/3338/12534."
    (t
     (setq python-shell-interpreter "python")))
 
-  (radian-defhook radian--python-use-correct-executables ()
-    python-mode-hook
-    "Use the correct Python executables for tooling."
-    (let ((executable python-shell-interpreter))
-      (save-excursion
-        (save-match-data
-          (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
-                    (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
-            (setq executable (substring-no-properties (match-string 1))))))
-      ;; Try to compile using the appropriate version of Python for
-      ;; the file.
-      (setq-local flycheck-python-pycompile-executable executable)
-      ;; We might be running inside a virtualenv, in which case the
-      ;; modules won't be available. But calling the executables
-      ;; directly will work.
-      (setq-local flycheck-python-pylint-executable "pylint")
-      (setq-local flycheck-python-flake8-executable "flake8")
-      ;; Use the correct executable for the language server.
-      (setq-local lsp-python-executable-cmd executable)))
-
   ;; I honestly don't understand why people like their packages to
   ;; spew so many messages.
   (setq python-indent-guess-indent-offset-verbose nil)
@@ -3197,12 +3090,7 @@ Return either a string or nil."
             (goto-char (point-min))
             (let ((venv (string-trim (buffer-string))))
               (when (file-directory-p venv)
-                (cl-return venv))))))))
-
-  (radian-defhook radian--flycheck-python-setup ()
-    python-mode-hook
-    "Disable some Flycheck checkers for Python."
-    (radian--flycheck-disable-checkers 'python-flake8)))
+                (cl-return venv)))))))))
 
 ;; Package `lsp-python-ms' downloads Microsoft's LSP server for Python
 ;; and configures it with `lsp-mode'. Microsoft's server behaves
@@ -3231,21 +3119,6 @@ Return either a string or nil."
                 "lib/python*/site-packages" venv)))
         (push (expand-file-name "bin" venv) exec-path))
       (apply func args))))
-
-;;;; ReST
-;; http://docutils.sourceforge.net/rst.html
-
-;; Feature `rst' provides a major mode for ReST.
-(use-feature rst
-  :config
-
-  (radian-defhook radian--flycheck-rst-setup ()
-    rst-mode-hook
-    "If inside Sphinx project, disable the `rst' Flycheck checker.
-This prevents it from signalling spurious errors. See also
-https://github.com/flycheck/flycheck/issues/953."
-    (when (locate-dominating-file default-directory "conf.py")
-      (radian--flycheck-disable-checkers 'rst))))
 
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
@@ -3460,11 +3333,6 @@ FORCE is not nil.")
     (let ((inhibit-message t))
       (funcall TeX-auto-list-information name)))
 
-  (radian-defhook radian--flycheck-tex-setup ()
-    TeX-mode-hook
-    "Disable some Flycheck checkers in TeX buffers."
-    (radian--flycheck-disable-checkers 'tex-chktex 'tex-lacheck))
-
   (radian-defadvice radian--advice-tex-simplify-mode-name (&rest _)
     :after #'TeX-set-mode-name
     "Remove frills from the `mode-name' in TeX modes.
@@ -3604,6 +3472,11 @@ environment with point at the end of a non-empty line of text."
   ;; Don't insert quotes automatically. It messes with JSX.
   (setq web-mode-enable-auto-quoting nil)
 
+  ;; Disable `web-mode' automatically reindenting a bunch of
+  ;; surrounding code when you paste anything. It's real annoying if
+  ;; it happens to not know how to indent your code correctly.
+  (setq web-mode-enable-auto-indentation nil)
+
   ;; When using `web-mode' to edit JavaScript files, support JSX tags.
   (add-to-list 'web-mode-content-types-alist
                '("jsx" . "\\.js[x]?\\'"))
@@ -3723,26 +3596,7 @@ This function calls `json-mode--update-auto-mode' to change the
   (radian-defhook radian--fix-json-indentation ()
     json-mode-hook
     "Set the tab width to 2 for JSON."
-    (setq-local tab-width 2))
-
-  (use-feature flycheck
-    :config
-
-    ;; Handle an error message that occurs when the buffer has only
-    ;; whitespace, and in some other circumstances, which for some
-    ;; bizarre reason still isn't handled correctly by Flycheck.
-    (radian-protect-macros
-      (cl-pushnew
-       (cons
-        (flycheck-rx-to-string
-         `(and
-           line-start
-           (message "No JSON object could be decoded")
-           line-end)
-         'no-group)
-        'error)
-       (flycheck-checker-get 'json-python-json 'error-patterns)
-       :test #'equal))))
+    (setq-local tab-width 2)))
 
 ;; Package `pip-requirements' provides a major mode for
 ;; requirements.txt files used by Pip.
@@ -3896,13 +3750,6 @@ bizarre reason."
 ;; important.
 (use-feature elisp-mode
   :config
-
-  (radian-defhook radian--flycheck-elisp-setup ()
-    emacs-lisp-mode-hook
-    "Disable some Flycheck checkers for Emacs Lisp."
-    ;; These checkers suck at reporting error locations, so they're
-    ;; actually quite distracting to work with.
-    (radian--flycheck-disable-checkers 'emacs-lisp 'emacs-lisp-checkdoc))
 
   ;; Note that this function is actually defined in `elisp-mode'
   ;; because screw modularity.

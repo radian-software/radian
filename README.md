@@ -77,10 +77,9 @@ more stability.
   * Configured packages: [Atomic Chrome][atomic-chrome] (with
     [Firefox] support), [Autorevert], [buffer-move], [Company],
     [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
-    [Flycheck], [Forge],
-    [`git-gutter-fringe.el`][git-gutter-fringe.el], [git-link],
-    [Helpful], [Macrostep], [Magit], [no-littering], [Org],
-    [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens],
+    [Forge], [`git-gutter-fringe.el`][git-gutter-fringe.el],
+    [git-link], [Helpful], [Macrostep], [Magit], [no-littering],
+    [Org], [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens],
     [transpose-frame], [undo-tree], [use-package], [visual-regexp],
     [webpaste.el], and more
   * Major modes for editing many languages and configuration file
@@ -281,7 +280,6 @@ commented.
 [flow]: https://flow.org/
 [flow]: https://flow.org/
 [flx]: https://github.com/lewang/flx
-[flycheck]: http://www.flycheck.org/
 [forge]: https://github.com/magit/forge
 [git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
 [git-link]: https://github.com/sshaw/git-link
