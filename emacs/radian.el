@@ -5279,7 +5279,8 @@ your local configuration."
 (straight-register-package
  '(zerodark-theme :host github :repo "NicolasPetton/zerodark-theme"))
 (when radian-color-theme-enable
-  (use-package zerodark-theme))
+  (use-package zerodark-theme
+    :no-require t))
 
 ;;; Closing
 
@@ -5307,8 +5308,15 @@ your local configuration."
 ;; frame flashing and other artifacts during startup.
 (when radian-color-theme-enable
   (use-feature zerodark-theme
+    :no-require t
+    :functions (true-color-p)
     :demand t
     :config
+
+    ;; Needed because `:no-require' for some reason disables the
+    ;; load-time `require' invocation, as well as the compile-time
+    ;; one.
+    (require 'zerodark-theme)
 
     (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
           (class '((class color) (min-colors 89)))
