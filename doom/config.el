@@ -32,6 +32,12 @@
 
 (ctrlf-mode +1)
 
+;;; emacs
+;;;; emacs/undo
+
+(map! ("M-/" #'redo)
+      (:n "U" #'redo))
+
 ;;; ui
 
 (setq doom-theme 'doom-vibrant)

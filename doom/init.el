@@ -5,11 +5,10 @@
        (ivy +prescient)
        :editor
        (evil +everywhere)
-       snippets
        :emacs
        dired
        electric
-       undo
+       (undo +tree)
        vc
        :lang
        cc
