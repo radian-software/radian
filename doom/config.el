@@ -35,23 +35,68 @@
 
 (ctrlf-mode +1)
 
+;;;; editor/save
+
+(map! (:map evil-insert-state-map "C-x C-s" nil))
+
 ;;;; editor/smartparens
 
 (sp-use-paredit-bindings)
 
 ;;; emacs
+;;;; emacs/buffers
+
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+
+;;;; emacs/commands
+
+(map! (:map evil-motion-state-map "C-u" nil))
+
+;;;; emacs/text
+
+(map! (:map evil-insert-state-map "C-SPC" nil))
+(map! (:map evil-insert-state-map "C-y" nil))
+
 ;;;; emacs/undo
 
 (map! ("M-/" #'redo)
       (:n "U" #'redo))
 
-;;; ui
+;;; tools
+;;;; tools/magit
 
-(setq doom-theme 'doom-vibrant)
-(setq display-line-numbers-type 'relative)
-(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+(after! magit
+
+  (transient-append-suffix
+    'magit-merge "-n"
+    '("-u" "Allow unrelated" "--allow-unrelated-histories"))
+
+  (transient-append-suffix 'magit-pull "-r"
+    '("-a" "Autostash" "--autostash"))
+
+  (transient-append-suffix 'magit-fetch "-t"
+    '("-u" "Unshallow" "--unshallow")))
+
+;;; ui
+;;;; ui/graphical
 
 (add-hook 'window-setup-hook #'toggle-frame-maximized)
+
+;;;; ui/line-numbers
+
+(setq display-line-numbers-type 'relative)
+
+;;;; ui/scroll
+
+(setq scroll-conservatively 0)
+
+;;;; ui/theme
+
+(setq doom-theme 'doom-vibrant)
+
+;;;; ui/windmove
+
+(windmove-default-keybindings)
 
 ;;;; ui/workspaces
 
