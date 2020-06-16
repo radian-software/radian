@@ -22,15 +22,22 @@
        "M-n" nil
        "M-p" nil
        "RET" nil
-       ))
+       "<tab>" #'company-complete-selection
+       "TAB" #'company-complete-selection))
 
 ;;; editor
 ;;;; editor/ctrlf
 
 (map! (:map minibuffer-local-map "C-s" nil))
 (map! (:map evil-normal-state-map "C-r" nil))
+(undefine-key! :keymaps +default-minibuffer-maps
+  "C-r" nil)
 
 (ctrlf-mode +1)
+
+;;;; editor/smartparens
+
+(sp-use-paredit-bindings)
 
 ;;; emacs
 ;;;; emacs/undo
