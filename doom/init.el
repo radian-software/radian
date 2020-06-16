@@ -1,44 +1,58 @@
 ;; -*- lexical-binding: t -*-
 
-(doom! :input
-       :completion
-       company           ; the ultimate code completion backend
-       ivy               ; a search engine for love and life
-       :ui
-       doom              ; what makes DOOM look the way it does
-       doom-dashboard    ; a nifty splash screen for Emacs
-       doom-quit         ; DOOM quit-message prompts when you quit Emacs
-       hl-todo           ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
-       modeline          ; snazzy, Atom-inspired modeline, plus API
-       ophints           ; highlight the region an operation acts on
-       (popup +defaults)   ; tame sudden yet inevitable temporary windows
-       vc-gutter         ; vcs diff in the fringe
-       vi-tilde-fringe   ; fringe tildes to mark beyond EOB
-       workspaces        ; tab emulation, persistence & separate workspaces
+(doom! :completion
+       company
+       ivy
        :editor
-       (evil +everywhere); come to the dark side, we have cookies
-       file-templates    ; auto-snippets for empty files
-       fold              ; (nigh) universal code folding
-       snippets          ; my elves. They type so I don't have to
+       (evil +everywhere)
+       snippets
        :emacs
-       dired             ; making dired pretty [functional]
-       electric          ; smarter, keyword-based electric-indent
-       undo              ; persistent, smarter undo for your inevitable mistakes
-       vc                ; version-control and Emacs, sitting in a tree
-
-       :term
-       :checkers
-       :tools
-       (eval +overlay)     ; run code, run (also, repls)
-       lookup              ; navigate your code and its documentation
-       magit             ; a git porcelain for Emacs
+       dired
+       electric
+       undo
+       vc
        :lang
-       emacs-lisp        ; drown in parentheses
-       markdown          ; writing docs for people to ignore
-       org               ; organize your plain life in plain text
-       sh                ; she sells {ba,z,fi}sh shells on the C xor
-       :email
-       :app
+       cc
+       data
+       emacs-lisp
+       go
+       haskell
+       java
+       javascript
+       json
+       latex
+       markdown
+       org
+       python
+       ruby
+       rust
+       sh
+       web
+       yaml
+       :tools
+       debugger
+       docker
+       editorconfig
+       (eval +overlay)
+       gist
+       lookup
+       lsp
+       macos
+       magit
+       make
+       terraform
+       tmux
+       :ui
+       doom
+       doom-dashboard
+       doom-quit
+       hl-todo
+       modeline
+       ophints
+       (popup +defaults)
+       vc-gutter
+       vi-tilde-fringe
+       workspaces
        :config
        (default +bindings +smartparens))
 
