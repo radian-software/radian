@@ -26,6 +26,8 @@
 
 (setq doom-theme 'doom-vibrant)
 (setq display-line-numbers-type 'relative)
+(setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+
 (add-hook 'window-setup-hook #'toggle-frame-maximized)
 
 ;;;; ui/workspaces
