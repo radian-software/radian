@@ -28,7 +28,6 @@
 
        :term
        :checkers
-       syntax              ; tasing you for every semicolon you forget
        :tools
        (eval +overlay)     ; run code, run (also, repls)
        lookup              ; navigate your code and its documentation
