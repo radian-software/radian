@@ -2,7 +2,7 @@
 
 ;;; help
 
-(map! (:map help-map "K" #'describe-keymap))
+(map! (:map help-map "M-k" #'describe-keymap))
 
 ;;; completions
 
@@ -29,15 +29,8 @@
 ;;;; editor/ctrlf
 
 (map! (:map minibuffer-local-map "C-s" nil))
-(map! (:map evil-normal-state-map "C-r" nil))
-(undefine-key! :keymaps +default-minibuffer-maps
-  "C-r" nil)
 
 (ctrlf-mode +1)
-
-;;;; editor/save
-
-(map! (:map evil-insert-state-map "C-x C-s" nil))
 
 ;;;; editor/smartparens
 
@@ -48,19 +41,9 @@
 
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 
-;;;; emacs/commands
-
-(map! (:map evil-motion-state-map "C-u" nil))
-
-;;;; emacs/text
-
-(map! (:map evil-insert-state-map "C-SPC" nil))
-(map! (:map evil-insert-state-map "C-y" nil))
-
 ;;;; emacs/undo
 
-(map! ("M-/" #'redo)
-      (:n "U" #'redo))
+(map! ("M-/" #'undo-tree-redo))
 
 ;;; tools
 ;;;; tools/magit

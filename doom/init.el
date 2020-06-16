@@ -3,8 +3,6 @@
 (doom! :completion
        company
        (ivy +prescient)
-       :editor
-       (evil +everywhere)
        :emacs
        dired
        electric
