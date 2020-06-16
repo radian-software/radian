@@ -1,7 +1,9 @@
 ;; -*- lexical-binding: t -*-
 
+;;; help
 (map! (:map help-map "K" #'describe-keymap))
 
+;;; completions
 (map! (:map company-active-map
        "<down>" nil
        "<return>" nil
@@ -20,8 +22,15 @@
        "RET" nil
        ))
 
+;;; ui
+
 (setq doom-theme 'doom-vibrant)
 (setq display-line-numbers-type 'relative)
 (add-hook 'window-setup-hook #'toggle-frame-maximized)
 
+;;;; ui/workspaces
+
+(setq +workspaces-on-switch-project-behavior nil)
+
+;;; local config
 (load (expand-file-name "config.local.el") 'noerror 'nomessage)
