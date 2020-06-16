@@ -2,7 +2,7 @@
 
 (doom! :completion
        company
-       ivy
+       (ivy +prescient)
        :editor
        (evil +everywhere)
        snippets
