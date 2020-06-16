@@ -1,9 +1,11 @@
 ;; -*- lexical-binding: t -*-
 
 ;;; help
+
 (map! (:map help-map "K" #'describe-keymap))
 
 ;;; completions
+
 (map! (:map company-active-map
        "<down>" nil
        "<return>" nil
@@ -22,6 +24,14 @@
        "RET" nil
        ))
 
+;;; editor
+;;;; editor/ctrlf
+
+(map! (:map minibuffer-local-map "C-s" nil))
+(map! (:map evil-normal-state-map "C-r" nil))
+
+(ctrlf-mode +1)
+
 ;;; ui
 
 (setq doom-theme 'doom-vibrant)
@@ -35,4 +45,5 @@
 (setq +workspaces-on-switch-project-behavior nil)
 
 ;;; local config
+
 (load (expand-file-name "config.local.el") 'noerror 'nomessage)
