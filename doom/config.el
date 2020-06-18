@@ -80,6 +80,20 @@ will kill the newline."
   (let ((show-trailing-whitespace t))
     (apply kill-line args)))
 
+;; No idea why copying a register to the kill ring doesn't have a
+;; built-in command. It seems extremely core to me.
+(defun radian-copy-register (register)
+  "Copy the contents of Emacs register named REGISTER to the kill ring."
+  (interactive (list (register-read-with-preview "Copy register: ")))
+  (unless (get-register register)
+    (user-error "Register does not contain text"))
+  (kill-new (get-register register))
+  (message "Copied %S chars to kill ring" (length (get-register register))))
+
+;; Not to worry, this sequence is originally bound to
+;; `insert-register' which also has C-x r i.
+(map! ("C-x r g" #'radian-copy-register))
+
 ;;;; Lines
 
 (map! ("RET" #'+default/newline
@@ -252,6 +266,36 @@ have to live with it :3"
 (advice-add #'recentf-load-list :around #'radian-quiet)
 (advice-add #'recentf-save-list :around #'radian-quiet)
 
+(defun radian-set-executable-bit (&optional unset)
+  "Set the executable bit on the current file.
+UNSET non-nil or prefix arg means to unset it instead."
+  (interactive "P")
+  (unless buffer-file-name
+    (user-error "This buffer is not visiting a file"))
+  (with-demoted-errors "Could not set permissions: %S"
+    (set-file-modes buffer-file-name (file-modes-symbolic-to-number
+                                      (if unset
+                                          "-x"
+                                        "+x")
+                                      (file-modes buffer-file-name)))
+    (message "Executable permission %s"
+             (if unset "disabled" "enabled"))))
+
+(defun radian-unset-executable-bit (&optional set)
+  "Set the executable bit on the current file.
+SET non-nil or prefix arg means to set it instead."
+  (interactive "P")
+  (radian-set-executable-bit (not set)))
+
+;; The only reasonable bindings for these commands are 'x' and 'X',
+;; but those are already bound, so we move the existing commands to
+;; 's' and 'S'.
+(map! (:leader :prefix "f"
+       :desc "Open scratch buffer" "s" #'doom/open-scratch-buffer
+       :desc "Switch to scratch buffer" "S" #'doom/switch-to-scratch-buffer
+       :desc "Set executable bit" "x" #'radian-set-executable-bit
+       :desc "Unset executable bit" "X" #'radian-unset-executable-bit))
+
 ;; Add an easy way to revert buffers, which is useful for changing
 ;; major mode, clearing up garbage, etc. In very rare cases it is
 ;; necessary to kill and re-create the buffer to get rid of something,
@@ -359,6 +403,12 @@ will find the file in a new window."
 ;; We have no need of line numbers.
 (setq display-line-numbers-type nil)
 
+;;;; Text appearance
+
+;; Long lines wrap instead of going off the right-hand side of the
+;; screen. No horizontal scroll.
+(setq-default truncate-lines nil)
+
 ;;;; Buffers
 
 ;; By default this is bound to `+ivy/switch-workspace-buffer'. We
@@ -379,6 +429,13 @@ will find the file in a new window."
        "M-S-<right>" #'buf-move-right
        "M-S-<up>" #'buf-move-up
        "M-S-<down>" #'buf-move-down))
+
+;; Bind a key for transposing the frame (horizontal to vertical and
+;; vice versa). We have to move an existing binding out of the way
+;; first.
+(map! (:leader :prefix "w"
+       "t" #'transpose-frame
+       "T" #'persp-temporarily-display-buffer))
 
 ;;;; Frames
 
@@ -451,7 +508,8 @@ will find the file in a new window."
 
 ;;; Local configuration
 
-(load (expand-file-name "config.local.el") 'noerror 'nomessage)
+(load (expand-file-name "config.local.el" doom-private-dir)
+      'noerror 'nomessage)
 
 ;; Local Variables:
 ;; fill-column: 70

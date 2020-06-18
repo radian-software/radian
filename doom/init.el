@@ -53,4 +53,5 @@
        :config
        (default +bindings +smartparens))
 
-(load (expand-file-name "init.local.el") 'noerror 'nomessage)
+(load (expand-file-name "init.local.el" doom-private-dir)
+      'noerror 'nomessage)
