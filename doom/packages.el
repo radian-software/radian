@@ -1,5 +1,9 @@
 ;; -*- lexical-binding: t; no-byte-compile: t -*-
 
+(package! apheleia
+  :recipe (:host github :repo "raxod502/apheleia")
+  :pin "6bd69671796c3d232ffae42df6eecba4eb1f7cd2")
+
 (package! buffer-move
   :recipe (:fork (:repo "raxod502/buffer-move"))
   :pin "25b7a989cf43414559717f87279654305b13e7c9")

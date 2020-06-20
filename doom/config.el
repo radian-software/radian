@@ -202,6 +202,22 @@ have to live with it :3"
        (:when (display-graphic-p)
         "M-[" #'sp-wrap-square)))
 
+(defun radian-kill-line-or-sexp (&optional arg)
+  "Act as `kill-line' or `sp-kill-hybrid-sexp' depending on mode."
+  (interactive "P")
+  (if (apply #'derived-mode-p sp-lisp-modes)
+      (sp-kill-hybrid-sexp arg)
+    (kill-line arg)))
+
+;; This means C-k will kill the sexp following point, rather than
+;; totally breaking everything, when in Lisp modes.
+(map! ([remap kill-line] #'radian-kill-line-or-sexp))
+
+(pushnew! sp-ignore-modes-list #'org-mode #'org-agenda-mode)
+
+;; https://github.com/hlissner/doom-emacs/issues/3268#issuecomment-646924555
+(advice-remove #'delete-backward-char #'+default--delete-backward-char-a)
+
 ;;;; Undo/redo
 
 ;; Undo-Tree rebinds C-/ automatically, but since Emacs' default undo
@@ -479,6 +495,16 @@ will find the file in a new window."
          "RET" nil
          "<tab>" #'company-complete-selection
          "TAB" #'company-complete-selection)))
+
+;;;; Automatic reformatting
+
+(apheleia-global-mode +1)
+
+(defadvice! radian--ad-save-buffer-reformat-maybe (func &optional arg)
+  "Make it so \\[save-buffer] with prefix arg inhibits reformatting."
+  :around #'save-buffer
+  (let ((apheleia-mode (and apheleia-mode (member arg '(nil 1)))))
+    (funcall func)))
 
 ;;; Introspection
 ;;;; Help
