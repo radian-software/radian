@@ -2154,8 +2154,7 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
                    #'clojure-mode
-                   #'ruby-mode
-                   #'rust-mode))
+                   #'ruby-mode))
         (lsp))))
 
   :config
@@ -3196,16 +3195,6 @@ Return either a string or nil."
 
 ;; Package `rust-mode' provides a major mode for Rust.
 (use-package rust-mode)
-
-;; Package `racer' provides a language server for Rust, and a Company
-;; backend which uses this server to display autocompletions. Racer
-;; also provides source code navigation support.
-(use-package racer
-  :init
-
-  (add-hook 'rust-mode #'racer-mode)
-
-  :blackout t)
 
 ;;;; Scheme
 
