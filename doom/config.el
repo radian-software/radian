@@ -31,8 +31,7 @@ lexically bound variable by the same name, for use with
 
 (defun radian-quiet (func &rest args)
   "Call FUNC with ARGS without printing any output.
-This can be added as an `:override' advice to any other
-function."
+This can be added as an `:around' advice to any other function."
   (quiet! (apply func args)))
 
 ;;; Commands
@@ -195,12 +194,16 @@ have to live with it :3"
 ;; Don't bind M-<left> or M-<right> since these are used by
 ;; `buf-move'. Bind M-[ as an analogue to M-(, but not in terminal
 ;; mode where such a binding would break escape sequences. We don't do
-;; M-{ because that is already bound to `backward-paragraph'.
+;; M-{ because that is already bound to `backward-paragraph'. Bind
+;; C-M-a and C-M-e back to their original values, after they were
+;; mapped to `sp-beginning-of-sexp' and `sp-end-of-sexp' by Doom.
 (map! (:map smartparens-mode-map
        "M-<left>" nil
        "M-<right>" nil
        (:when (display-graphic-p)
-        "M-[" #'sp-wrap-square)))
+        "M-[" #'sp-wrap-square)
+       "C-M-a" #'beginning-of-defun
+       "C-M-e" #'end-of-defun))
 
 (defun radian-kill-line-or-sexp (&optional arg)
   "Act as `kill-line' or `sp-kill-hybrid-sexp' depending on mode."
@@ -462,6 +465,11 @@ will find the file in a new window."
 (setq doom-theme 'doom-vibrant)
 
 ;;; Code intelligence
+;;;; Language servers
+
+;; As per <https://emacs-lsp.github.io/lsp-mode/page/performance/>.
+(setq read-process-output-max (* 1024 1024))
+
 ;;;; Autocompletion
 
 ;; By default, while a Company popup is active it steals most of your
@@ -496,6 +504,82 @@ will find the file in a new window."
          "<tab>" #'company-complete-selection
          "TAB" #'company-complete-selection)))
 
+;; Show quick-reference numbers in the tooltip. (Select a completion
+;; with M-1 through M-0.)
+(setq company-show-numbers t)
+
+;; Only display 10 candidates (so that any of them can be selected
+;; using the above keyboard shortcuts). Setting the second variable to
+;; the same value as the first one means that if there isn't enough
+;; room below point for 10 candidates to be displayed, then the
+;; candidates will be displayed above point instead of being cut off.
+(setq company-tooltip-limit 10)
+(setq company-tooltip-minimum 10)
+
+(defvar-local radian--company-buffer-modified-counter nil
+  "Last return value of `buffer-chars-modified-tick'.
+Used to ensure that Company only initiates a completion when the
+buffer is modified.")
+
+(defadvice! radian--ad-company-complete-on-change ()
+  "Make Company trigger a completion when the buffer is modified.
+This is in contrast to the default behavior, which is to trigger
+a completion when one of a whitelisted set of commands is used.
+One specific improvement this brings about is that you get
+completions automatically when backspacing into a symbol."
+  :override #'company--should-begin
+  (let ((tick (buffer-chars-modified-tick)))
+    (unless (equal tick radian--company-buffer-modified-counter)
+      ;; Only trigger completion if previous counter value was
+      ;; non-nil (i.e., don't trigger completion just as we're
+      ;; jumping to a buffer for the first time).
+      (prog1 (and radian--company-buffer-modified-counter
+                  (not (and (symbolp this-command)
+                            (string-prefix-p
+                             "company-" (symbol-name this-command)))))
+        (setq radian--company-buffer-modified-counter tick)))))
+
+(defadvice! radian--ad-company-update-buffer-modified-counter ()
+  "Make sure `radian--company-buffer-modified-counter' is up to date.
+If we don't do this on `company--should-continue' as well as
+`company--should-begin', then we may end up in a situation where
+autocomplete triggers when it shouldn't. Specifically suppose we
+delete a char from a symbol, triggering autocompletion, then type
+it back, but there is more than one candidate so the menu stays
+onscreen. Without this advice, saving the buffer will cause the
+menu to disappear and then come back after `company-idle-delay'."
+  :after #'company--should-continue
+  (setq radian--company-buffer-modified-counter
+        (buffer-chars-modified-tick)))
+
+;; Stop Company from echoing function metadata in the echo area, as
+;; this conflicts rather badly and nondeterministically with ElDoc.
+(after! company
+  (setq company-frontends
+        (delete #'company-echo-metadata-frontend company-frontends)))
+
+;; Here are two commands that are used to trigger a completion. They
+;; use the standard Emacs framework instead of Company, but that
+;; doesn't make much sense so we just make them use Company instead.
+(map! ([remap completion-at-point] #'company-manual-begin
+       [remap complete-symbol] #'company-manual-begin))
+
+(defadvice! radian--ad-company-lsp-setup (&rest _)
+  "Disable `company-prescient' sorting by length in some contexts.
+Specifically, disable sorting by length if the LSP Company
+backend returns fuzzy-matched candidates, which implies that the
+backend has already sorted the candidates into a reasonable
+order."
+  :after #'lsp
+  (setq-local company-prescient-sort-length-enable
+              (cl-dolist (w lsp--buffer-workspaces)
+                (when (thread-first w
+                        (lsp--workspace-client)
+                        (lsp--client-server-id)
+                        (memq '(jsts-ls mspyls bash-ls texlab ts-ls))
+                        (not))
+                  (cl-return t)))))
+
 ;;;; Automatic reformatting
 
 (apheleia-global-mode +1)
@@ -506,6 +590,39 @@ will find the file in a new window."
   (let ((apheleia-mode (and apheleia-mode (member arg '(nil 1)))))
     (funcall func)))
 
+;;;; Display contextual metadata
+
+(defadvice! radian--ad-eldoc-better-display-message-p (&rest _)
+  "Make ElDoc smarter about when to display its messages.
+By default ElDoc has a customizable whitelist of commands that it
+will display its messages after. The idea of this is to not
+trample on messages that other commands may have printed.
+However, this is a hopeless endeavour because there are a
+virtually unlimited number of commands that don't conflict with
+ElDoc. A better approach is to simply check to see if a message
+was printed, and only have ElDoc display if one wasn't."
+  :override #'eldoc--message-command-p
+  (member (current-message) (list nil eldoc-last-message)))
+
+;;;; Indentation
+
+(defun radian-indent-defun ()
+  "Indent the surrounding defun."
+  (interactive)
+  (save-excursion
+    (when (beginning-of-defun)
+      (let ((beginning (point)))
+        (end-of-defun)
+        (let ((end (point)))
+          (quiet! (indent-region beginning end)))))))
+
+;; By default C-M-q is bound to a strictly less useful "indent
+;; following sexp" command, `indent-pp-sexp'.
+(map! (:map (emacs-lisp-mode-map lisp-interaction-mode-map)
+       "C-M-q" #'radian-indent-defun))
+
+(advice-add #'indent-region :around #'radian-quiet)
+
 ;;; Introspection
 ;;;; Help
 
@@ -513,10 +630,64 @@ will find the file in a new window."
 ;; accessible.
 (map! (:map help-map "M-k" #'describe-keymap))
 
+(define-minor-mode radian-universal-keyboard-quit-mode
+  "Minor mode for making C-g work in `helpful-key'."
+  :global t
+  (if radian-universal-keyboard-quit-mode
+      (defadvice! radian--ad-helpful-key-allow-keyboard-quit (&rest _)
+        "Make C-g work in `helpful-key'."
+        :before #'helpful-key
+        ;; The docstring of `add-function' says that if we make our
+        ;; advice interactive and the interactive spec is *not* a
+        ;; function, then it overrides the original function's
+        ;; interactive spec.
+        (interactive
+         (list
+          (let ((ret (read-key-sequence "Press key: ")))
+            (when (equal ret "\^G")
+              (signal 'quit nil))
+            ret))))
+    (advice-remove
+     #'helpful-key #'radian--ad-helpful-key-allow-keyboard-quit)))
+
+(radian-universal-keyboard-quit-mode +1)
+
+(defun radian-clone-emacs-source-maybe ()
+  "Prompt user to clone Emacs source repository if needed."
+  (when (and (not (file-directory-p source-directory))
+             (not (get-buffer "*clone-emacs-src*"))
+             (yes-or-no-p "Clone Emacs source repository? "))
+    (make-directory (file-name-directory source-directory) 'parents)
+    (let ((compilation-buffer-name-function
+           (lambda (&rest _)
+             "*clone-emacs-src*")))
+      (save-current-buffer
+        (compile
+         (format
+          "git clone https://github.com/emacs-mirror/emacs.git %s"
+          (shell-quote-argument source-directory)))))))
+
+(defadvice! radian--ad-find-func-clone-emacs-source (&rest _)
+  "Clone Emacs source if needed to view definition."
+  :before #'find-function-C-source
+  (radian-clone-emacs-source-maybe))
+
+(defadvice! radian--ad-helpful-clone-emacs-source (library-name)
+  "Prompt user to clone Emacs source code when looking up functions.
+Otherwise, it only happens when looking up variables, for some
+bizarre reason."
+  :before #'helpful--library-path
+  (when (member (file-name-extension library-name) '("c" "rs"))
+    (radian-clone-emacs-source-maybe)))
+
+(autoload 'company-quickhelp-manual-begin "company-quickhelp" nil 'interactive)
+
+
+
 ;;; Applications
 ;;;; Browser
 
-(map! (:leader "o u" #'browse-url-at-point))
+(map! (:leader :desc "Open URL in browser" "o u" #'browse-url-at-point))
 
 ;;;; Version control
 
@@ -531,6 +702,243 @@ will find the file in a new window."
 
   (transient-append-suffix 'magit-pull "-r"
     '("-a" "Autostash" "--autostash")))
+
+;;; Language support
+;;;; Lisp languages
+
+(add-to-list 'safe-local-variable-values
+             '(lisp-indent-function . common-lisp-indent-function))
+
+;;;; C, C++, Objective-C, Java
+
+;; Instead of displaying "C++//l" or something similarly
+;; incomprehensible in the modeline, just show "C++".
+(advice-add #'c-update-modeline :override #'ignore)
+
+;;;; Go
+
+;; The following few forms work around
+;; <https://github.com/dominikh/go-mode.el/issues/232>.
+
+(defvar radian--go-defun-regexp
+  "^\\(const\\|func\\|import\\|interface\\|package\\|type\\|var\\)"
+  "Regexp matching top-level declarations in Go.")
+
+(defun radian--go-beginning-of-defun (&optional arg)
+  "Move to beginning of current or previous top-level declaration."
+  (cond
+   ((null arg)
+    (cl-block nil
+      (while t
+        (re-search-backward radian--go-defun-regexp nil 'noerror)
+        (when (or (bobp)
+                  (eq (get-text-property (point) 'face)
+                      'font-lock-keyword-face))
+          (cl-return)))))
+   ((> arg 0)
+    (dotimes (_ arg)
+      (radian--go-beginning-of-defun)))
+   ((< arg 0)
+    ;; Yuck -- but we need to implement this, otherwise
+    ;; `end-of-defun' just does the wrong thing :/
+    (dotimes (_ (- arg))
+      (radian--go-beginning-of-defun)
+      (radian--go-end-of-defun)
+      (radian--go-end-of-defun))
+    (radian--go-beginning-of-defun))))
+
+(defun radian--go-end-of-defun ()
+  "Move to end of current or previous top-level declaration.
+Only works if `radian--go-beginning-of-defun' was just called
+previously."
+  (dotimes (_ 2)
+    (cl-block nil
+      (while t
+        (re-search-forward radian--go-defun-regexp nil 'noerror)
+        (when (or (eobp)
+                  (save-excursion
+                    (beginning-of-line)
+                    (eq (get-text-property (point) 'face)
+                        'font-lock-keyword-face)))
+          (cl-return)))))
+  (beginning-of-line)
+  (go--backward-irrelevant 'stop-at-string)
+  (forward-line))
+
+(setq-hook! go-mode
+  beginning-of-defun-function #'radian--go-beginning-of-defun
+  end-of-defun-function #'radian--go-end-of-defun)
+
+;;;; Markdown
+
+(defun radian-markdown-tab ()
+  "Do something reasonable when the user presses TAB.
+This means moving forward a table cell, indenting a list item, or
+performing normal indentation."
+  (interactive)
+  (cond
+   ((markdown-table-at-point-p)
+    (markdown-table-forward-cell))
+   ((markdown-list-item-at-point-p)
+    (markdown-demote-list-item))
+   (t
+    ;; Ew. But `markdown-indent-line' checks to see if
+    ;; `this-command' is `markdown-cycle' before doing something
+    ;; useful, so we have to.
+    (let ((this-command 'markdown-cycle))
+      (indent-for-tab-command)))))
+
+(defun radian-markdown-shifttab ()
+  "Do something reasonable when the user presses S-TAB.
+This means moving backward a table cell or unindenting a list
+item."
+  (interactive)
+  (cond
+   ((markdown-table-at-point-p)
+    (markdown-table-backward-cell))
+   ((markdown-list-item-at-point-p)
+    (markdown-promote-list-item))))
+
+(map! (:map markdown-mode-map
+       "TAB" #'radian-markdown-tab
+       "<S-iso-lefttab>" #'radian-markdown-shifttab
+       "<S-tab>" #'radian-markdown-shifttab
+       "<backtab>" #'radian-markdown-shifttab))
+
+;;;; Python
+
+(defadvice! radian--ad-python-respect-outline-settings (func &rest args)
+  "Prevent `python-mode' from overriding `outline-minor-mode' settings.
+But only if they were already set by a file-local variable or
+something."
+  :around #'python-mode
+  (flet! ((defun set (symbol newval)
+            (unless (and (string-prefix-p
+                          "outline-" (symbol-name symbol))
+                         (local-variable-p symbol))
+              (funcall set symbol newval))))
+    (apply func args)))
+
+(add-hook!
+ python-mode
+ (defun radian--python-no-reindent-on-colon ()
+   "Don't reindent (usually wrongly) on typing a colon.
+See <https://emacs.stackexchange.com/a/3338/12534>."
+   (setq electric-indent-chars (delq ?: electric-indent-chars))))
+
+;;;; Shell
+
+(after! sh-script
+  (add-hook
+   'sh-mode-hook
+   (defun radian--sh-prettify-mode-line ()
+     "Instead of \"Shell[bash]\", display mode name as \"Bash\"."
+     ;; Only do this for `sh-mode', not derived modes such as
+     ;; `pkgbuild-mode'.
+     (setq mode-line-process nil)
+     (when (eq major-mode 'sh-mode)
+       (setq mode-name (capitalize (symbol-name sh-shell)))))
+   :append))
+
+;;;; TeX
+
+(advice-add #'TeX-update-style :around #'radian-quiet)
+(advice-add #'TeX-auto-list-information :around #'radian-quiet)
+
+;; Use TeXShop for previewing LaTeX, rather than Preview. This means
+;; we have to define the command to run TeXShop as a "viewer program",
+;; and then tell AUCTeX to use the TeXShop viewer when opening PDFs.
+(when (and IS-MAC
+           (or (file-directory-p "/Applications/TeXShop.app")
+               (file-directory-p "/Applications/TeX/TeXShop.app")))
+  (add-to-list 'TeX-view-program-list
+               '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+  (setf (map-elt TeX-view-program-selection 'output-pdf) '("TeXShop")))
+
+(defadvice! radian--ad-tex-simplify-mode-name (&rest _)
+  "Remove frills from the `mode-name' in TeX modes.
+In practice, this means removing the stuff that comes after the
+slash, e.g. \"LaTeX/P\" becomes just \"LaTeX\"."
+  :after #'TeX-set-mode-name
+  (setq mode-name TeX-base-mode-name))
+
+;; Save buffers automatically when compiling, instead of prompting.
+(setq TeX-save-query nil)
+
+(defadvice! radian--ad-hide-tex-compilation-buffers (name)
+  "Hide AUCTeX compilation buffers by prepending a space to their names.
+This prevents them from getting in the way of buffer selection."
+  :filter-return #'TeX-process-buffer-name
+  (concat " " name))
+
+(put 'LaTeX-using-Biber 'safe-local-variable #'booleanp)
+
+;;;; Web
+
+;; This is also used by `json-mode'. The default is 4, and nobody
+;; should indent JSON with four spaces.
+(setq js-indent-level 2)
+
+;; Missing `auto-mode-alist' entries for `web-mode'.
+(add-to-list 'auto-mode-alist '("\\.ejs\\'" . web-mode))
+
+;; Indent by two spaces by default. Compatibility with Prettier.
+(setq web-mode-markup-indent-offset 2)
+(setq web-mode-code-indent-offset 2)
+(setq web-mode-css-indent-offset 2)
+
+;; Insert matching tags automatically. Why this is "mode 2", I have
+;; not the slightest idea.
+(setq web-mode-auto-close-style 2)
+
+;; Disable `web-mode' automatically reindenting a bunch of surrounding
+;; code when you paste anything. It's real annoying if it happens to
+;; not know how to indent your code correctly.
+(setq web-mode-enable-auto-indentation nil)
+
+;; When using `web-mode' to edit JavaScript files, support JSX tags.
+(add-to-list 'web-mode-content-types-alist
+             '("jsx" . "\\.js[x]?\\'"))
+
+;; Create line comments instead of block comments by default in
+;; JavaScript. See <https://github.com/fxbois/web-mode/issues/619>.
+(let ((types '("javascript" "jsx")))
+  (setq web-mode-comment-formats
+        (cl-remove-if (lambda (item)
+                        (member (car item) types))
+                      web-mode-comment-formats))
+  (dolist (type types)
+    (push (cons type "//") web-mode-comment-formats)))
+
+(add-hook! web-mode
+  (defun radian--web-js-fix-comments ()
+    "Fix comment handling in `web-mode' for JavaScript."
+    (when (member web-mode-content-type '("javascript" "jsx"))
+
+      ;; For some reason the default is to insert HTML comments even
+      ;; in JavaScript.
+      (setq-local comment-start "//")
+      (setq-local comment-end "")
+
+      ;; Needed since otherwise the default value generated by
+      ;; `comment-normalize-vars' will key off the syntax and think
+      ;; that a single "/" starts a comment, which completely borks
+      ;; auto-fill.
+      (setq-local comment-start-skip "// *"))))
+
+(add-hook! apheleia-post-format
+  (defun radian--web-highlight-after-formatting ()
+    "Make sure syntax highlighting works with Apheleia.
+The problem is that `web-mode' doesn't do highlighting correctly
+in the face of arbitrary buffer modifications, and kind of hacks
+around the problem by hardcoding a special case for yanking based
+on the value of `this-command'. So, when buffer modifications
+happen in an unexpected (to `web-mode') way, we have to manually
+poke it. Otherwise the modified text remains unfontified."
+    (setq web-mode-fontification-off nil)
+    (when (and web-mode-scan-beg web-mode-scan-end global-font-lock-mode)
+      (save-excursion
+        (font-lock-fontify-region web-mode-scan-beg web-mode-scan-end)))))
 
 ;;; Local configuration
 

@@ -9,23 +9,23 @@
        (undo +tree)
        vc
        :lang
-       cc
+       (cc +lsp)
        data
        emacs-lisp
-       go
-       haskell
-       java
-       javascript
-       json
-       latex
-       markdown
+       (go +lsp)
+       (haskell +lsp)
+       (java +lsp)
+       (javascript +lsp)
+       (json +lsp)
+       (latex +lsp)
+       (markdown +grip)
        org
-       python
-       ruby
-       rust
-       sh
-       web
-       yaml
+       (python +lsp +poetry)
+       (ruby +lsp)
+       (rust +lsp)
+       (sh +lsp)
+       (web +css +html)
+       (yaml +lsp)
        :tools
        debugger
        docker
