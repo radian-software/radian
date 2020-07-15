@@ -37,7 +37,7 @@ if [[ -n $radian_zplugin ]]; then
 
     # Allow sourcing this file more than once without producing
     # warnings about the plugins being re-loaded.
-    ZPLGM[MUTE_WARNINGS]=1
+    ZINIT[MUTE_WARNINGS]=1
 
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
