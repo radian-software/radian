@@ -2607,7 +2607,14 @@ was printed, and only have ElDoc display if one wasn't."
 ;; Flycheck anywhere else and rely on `lsp-ui' to handle things when
 ;; appropriate. However, interestingly, Flycheck is not marked as a
 ;; dependency of `lsp-ui', hence this declaration.
-(use-package flycheck)
+(use-package flycheck
+  :config
+
+  ;; For use with `lsp-ui'.
+  (radian-bind-key "p" #'flycheck-previous-error)
+  (radian-bind-key "n" #'flycheck-next-error)
+
+  :blackout t)
 
 ;; Package `lsp-ui' provides a pretty UI for showing diagnostic
 ;; messages from LSP in the buffer using overlays. It's configured
