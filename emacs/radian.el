@@ -5134,7 +5134,7 @@ This is passed to `set-frame-font'."
 
 ;; Don't suggest shorter ways to type commands in M-x, since they
 ;; don't apply when using Selectrum.
-(setq suggest-key-bindings nil)
+(setq suggest-key-bindings 0)
 
 ;; Don't blink the cursor on the opening paren when you insert a
 ;; closing paren, as we already have superior handling of that from
