@@ -97,8 +97,6 @@ if (( $+commands[git] )); then
     # Print an asterisk if the working directory is dirty.
     function radian_prompt_git_dirty {
         emulate -LR zsh
-        local FLAGS
-        FLAGS=('--porcelain' '--ignore-submodules=dirty')
         if [[ $(command git status --porcelain 2>/dev/null | tail -n1) ]]; then
             echo "*"
         fi
@@ -474,6 +472,7 @@ if (( $+commands[emacs] )); then
     alias ew='emacs'
     alias eqw='emacs -Q'
     alias ue='USER_EMACS_DIRECTORY=$PWD e'
+    alias uew='USER_EMACS_DIRECTORY=$PWD ew'
 fi
 
 if (( $+commands[emacsclient] )); then
@@ -673,6 +672,7 @@ if (( $+commands[git] )); then
 
     alias gf='git fetch --prune'
     alias gfa='git fetch --all --prune'
+    alias gfu='git fetch --unshallow'
 
     alias gu='git pull'
     alias gur='git pull --rebase --autostash'

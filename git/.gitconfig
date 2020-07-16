@@ -48,6 +48,8 @@
 	stat = true
 [protocol "hg"]
 	allow = always
+[pull]
+	ff = only
 [push]
 	default = current
 [rebase]

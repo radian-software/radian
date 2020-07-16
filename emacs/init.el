@@ -73,7 +73,7 @@ loading the init-file twice if it were not for this variable.")
 This file is loaded by init.el.")
 
         (unless (file-exists-p radian-lib-file)
-          (error "Library file %S does not exist"))
+          (error "Library file %S does not exist" radian-lib-file))
 
         (defvar radian--finalize-init-hook nil
           "Hook run unconditionally after init, even if it fails.

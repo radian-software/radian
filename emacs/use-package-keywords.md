@@ -2,6 +2,9 @@ Use the following ordering for `use-package` keywords:
 
 * `:preface`
 * `:straight`
+* `:no-require`
+* `:defines`
+* `:functions`
 * `:demand`
 * `:defer`
 * `:after`
