@@ -2523,25 +2523,26 @@ order."
   :config
 
   (radian-when-compiletime (version<= "27" emacs-version)
-    (el-patch-defun eldoc-print-current-symbol-info ()
+    (el-patch-defun eldoc-print-current-symbol-info (&optional interactive)
       (el-patch-concat
-        "Print the text produced by `eldoc-documentation-function'."
+        "Document thing at point."
         (el-patch-add "\nDon't trample on existing messages."))
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (if (not (eldoc-display-message-p))
-            ;; Erase the last message if we won't display a new one.
-            (when eldoc-last-message
-              (el-patch-swap
-                (eldoc-message nil)
-                (setq eldoc-last-message nil)))
-          (let ((non-essential t))
-            ;; Only keep looking for the info as long as the user
-            ;; hasn't requested our attention.  This also locally
-            ;; disables inhibit-quit.
-            (while-no-input
-              (eldoc-message (funcall eldoc-documentation-function))))))))
+      (interactive '(t))
+      (cond (interactive
+             (eldoc--invoke-strategy))
+            (t
+             (if (not (eldoc-display-message-p))
+                 ;; Erase the last message if we won't display a new one.
+                 (when eldoc-last-message
+                   (el-patch-swap
+                     (eldoc--message nil)
+                     (setq eldoc-last-message nil)))
+               (let ((non-essential t))
+                 ;; Only keep looking for the info as long as the user hasn't
+                 ;; requested our attention.  This also locally disables
+                 ;; inhibit-quit.
+                 (while-no-input
+                   (eldoc--invoke-strategy))))))))
 
   (radian-when-compiletime (and (version< emacs-version "27")
                                 (version<= "26" emacs-version))
