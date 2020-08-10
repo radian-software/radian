@@ -2528,16 +2528,18 @@ order."
         "Document thing at point."
         (el-patch-add "\nDon't trample on existing messages."))
       (interactive '(t))
-      (cond (interactive
-             (eldoc--invoke-strategy))
-            (t
-             (if (not (eldoc-display-message-p))
-                 ;; Erase the last message if we won't display a new one.
-                 (when eldoc-last-message
-                   (el-patch-swap
-                     (eldoc--message nil)
-                     (setq eldoc-last-message nil)))
+      (let ((token (eldoc--request-state)))
+        (cond (interactive
+               (eldoc--invoke-strategy))
+              ((not (eldoc--request-docs-p token))
+               ;; Erase the last message if we won't display a new one.
+               (when eldoc-last-message
+                 (el-patch-swap
+                   (eldoc--message nil)
+                   (setq eldoc-last-message nil))))
+              (t
                (let ((non-essential t))
+                 (setq eldoc--last-request-state token)
                  ;; Only keep looking for the info as long as the user hasn't
                  ;; requested our attention.  This also locally disables
                  ;; inhibit-quit.
