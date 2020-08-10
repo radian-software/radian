@@ -710,6 +710,12 @@ if (( $+commands[tmux] )); then
     alias tl='tmux list-sessions'
 fi
 
+#### Trash
+
+if (( $+commands[trash] )); then
+    alias t='trash'
+fi
+
 #### Vi, Vim, Neovim
 
 if (( $+commands[nvim] )); then
