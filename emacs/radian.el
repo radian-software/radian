@@ -928,6 +928,9 @@ ourselves."
 
 ;;; Window management
 
+;; Prevent accidental usage of `list-buffers'.
+(bind-key "C-x C-b" #'switch-to-buffer)
+
 (radian-defadvice radian--advice-keyboard-quit-minibuffer-first
     (keyboard-quit)
   :around #'keyboard-quit
@@ -987,7 +990,8 @@ active minibuffer, even if the minibuffer is not selected."
 ;; rotate, and transpose Emacs windows: `flip-frame', `flop-frame',
 ;; `transpose-frame', `rotate-frame-clockwise',
 ;; `rotate-frame-anticlockwise', `rotate-frame'.
-(use-package transpose-frame)
+(use-package transpose-frame
+  :bind* (("s-t" . #'transpose-frame)))
 
 ;; Package `buffer-move' provides simple commands to swap Emacs
 ;; windows: `buf-move-up', `buf-move-down', `buf-move-left',
@@ -1420,8 +1424,32 @@ password that the user has decided not to save.")
 ;; Don't make lockfiles.
 (setq create-lockfiles nil)
 
+(defun radian-set-executable-permission (allowed)
+  "Enable or disable executable permission on the current file.
+If ALLOWED is non-nil, enable permission; otherwise, disable
+permission."
+  (interactive (list (not current-prefix-arg)))
+  (unless buffer-file-name
+    (user-error "This buffer is not visiting a file"))
+  (with-demoted-errors "Could not set permissions: %S"
+    (set-file-modes buffer-file-name (file-modes-symbolic-to-number
+                                      (if allowed
+                                          "+x"
+                                        "-x")
+                                      (file-modes buffer-file-name)))
+    (message "Executable permission %s"
+             (if allowed "enabled" "disabled"))))
+
+(bind-key* "s-x" #'radian-set-executable-permission)
+
 ;;; Editing
 ;;;; Text formatting
+
+(add-to-list 'safe-local-variable-values '(auto-fill-function . nil))
+
+(add-to-list 'safe-local-eval-forms '(visual-line-mode +1))
+
+(blackout 'visual-line-mode)
 
 ;; When region is active, make `capitalize-word' and friends act on
 ;; it.
@@ -4730,6 +4758,9 @@ Instead, display simply a flat colored region in the fringe."
 
   :config
 
+  ;; By default, run from root of current Git repository.
+  (setq compile-command "git exec make ")
+
   ;; Automatically scroll the Compilation buffer as output appears,
   ;; but stop at the first error.
   (setq compilation-scroll-output 'first-error)
@@ -5100,6 +5131,9 @@ with which Emacs should be "
 (setq ad-redefinition-action 'accept)
 
 ;;; Appearance
+
+;; Make the initial frame maximized.
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
 
 ;; Allow you to resize frames however you want, not just in whole
 ;; columns. "The 80s called, they want their user interface back"
