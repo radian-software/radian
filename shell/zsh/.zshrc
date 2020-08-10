@@ -464,6 +464,12 @@ alias rd='rmdir'
 alias help=run-help
 
 ### Utilities
+#### Docker
+
+if (( $+commands[docker] )); then
+    alias dr='docker run -it --rm'
+fi
+
 #### Emacs
 
 if (( $+commands[emacs] )); then
