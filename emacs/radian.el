@@ -3932,6 +3932,7 @@ messages."
       (ignore-errors
         (kill-buffer " *radian-byte-compile*"))
       (let ((default-directory radian-directory))
+        (radian-env-setup)
         (make-process
          :name "radian-byte-compile"
          :buffer " *radian-byte-compile*"
