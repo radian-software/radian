@@ -2447,8 +2447,9 @@ completions automatically when backspacing into a symbol."
         ;; jumping to a buffer for the first time).
         (prog1 (and radian--company-buffer-modified-counter
                     (not (and (symbolp this-command)
-                              (string-prefix-p
-                               "company-" (symbol-name this-command)))))
+                              (string-match-p
+                               "^\\(company-\\|undo-\\|undo$\\)"
+                               (symbol-name this-command)))))
           (setq radian--company-buffer-modified-counter tick)))))
 
   (radian-defadvice radian--advice-company-update-buffer-modified-counter ()
