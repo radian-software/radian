@@ -602,7 +602,7 @@ if (( $+commands[git] )); then
     alias grvm='git revert -m'
 
     alias gt='git tag'
-    alias gtd='git tag -d'
+    alias gtd='git tag --delete'
 
     alias gn='git notes'
     alias gna='git notes add'
@@ -691,6 +691,7 @@ if (( $+commands[git] )); then
     alias gpff='git push --force'
     alias gpu='git push --set-upstream'
     alias gpd='git push --delete'
+    alias gpt='git push --tags'
 fi
 
 #### Hub
