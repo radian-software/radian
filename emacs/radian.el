@@ -636,6 +636,24 @@ nice.)"
 (use-package bind-key
   :demand t)
 
+;; Normalize behavior for the Mac port (i.e. make it behave like
+;; normal Emacs on macOS does). By default alt does the default macOS
+;; alt thing, while command acts as meta instead of super. Also all
+;; the default bindings are gone for some reason :'(
+(when (radian-operating-system-p macOS)
+  (when (boundp 'mac-option-modifier)
+    (setq mac-option-modifier 'meta)
+    (setq mac-command-modifier 'super))
+
+  (bind-key "s-z" #'undo-tree-undo)
+  (bind-key "s-x" #'kill-region)
+  (bind-key "s-c" #'kill-ring-save)
+  (bind-key "s-v" #'yank)
+  (bind-key "s-n" #'make-frame)
+  (bind-key "s-s" #'save-buffer)
+  (bind-key "s-w" #'delete-frame)
+  (bind-key "s-q" #'save-buffers-kill-terminal))
+
 (defvar radian-keymap (make-sparse-keymap)
   "Keymap for Radian commands that should be put under a prefix.
 This keymap is bound under \\[radian-keymap].")
