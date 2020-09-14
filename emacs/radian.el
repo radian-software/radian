@@ -5150,8 +5150,11 @@ with which Emacs should be "
 
 ;;; Appearance
 
-;; Make the initial frame maximized.
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; Make the initial frame maximized, unless using the Mac port in
+;; which case this does horrifying things that prevent you from
+;; resizing the frame.
+(unless (boundp 'mac-option-modifier)
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
 
 ;; Allow you to resize frames however you want, not just in whole
 ;; columns. "The 80s called, they want their user interface back"
