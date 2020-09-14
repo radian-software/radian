@@ -641,7 +641,8 @@ nice.)"
 ;; alt thing, while command acts as meta instead of super. Also all
 ;; the default bindings are gone for some reason :'(
 (when (radian-operating-system-p macOS)
-  (when (boundp 'mac-option-modifier)
+  (when (and (boundp 'mac-option-modifier)
+             (boundp 'mac-command-modifier))
     (setq mac-option-modifier 'meta)
     (setq mac-command-modifier 'super))
 
@@ -2583,8 +2584,9 @@ order."
                 (eldoc-message nil)
                 (setq eldoc-last-message nil)))
           (let ((non-essential t))
-            ;; Only keep looking for the info as long as the user hasn't
-            ;; requested our attention.  This also locally disables inhibit-quit.
+            ;; Only keep looking for the info as long as the user
+            ;; hasn't requested our attention.  This also locally
+            ;; disables inhibit-quit.
             (while-no-input
               (eldoc-message (funcall eldoc-documentation-function))))))))
 
