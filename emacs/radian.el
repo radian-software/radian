@@ -2551,28 +2551,24 @@ order."
   :config
 
   (radian-when-compiletime (version<= "27" emacs-version)
-    (el-patch-defun eldoc-print-current-symbol-info (&optional interactive)
+    (el-patch-defun eldoc-print-current-symbol-info ()
       (el-patch-concat
-        "Document thing at point."
+        "Print the text produced by `eldoc-documentation-function'."
         (el-patch-add "\nDon't trample on existing messages."))
-      (interactive '(t))
-      (let ((token (eldoc--request-state)))
-        (cond (interactive
-               (eldoc--invoke-strategy))
-              ((not (eldoc--request-docs-p token))
-               ;; Erase the last message if we won't display a new one.
-               (when eldoc-last-message
-                 (el-patch-swap
-                   (eldoc--message nil)
-                   (setq eldoc-last-message nil))))
-              (t
-               (let ((non-essential t))
-                 (setq eldoc--last-request-state token)
-                 ;; Only keep looking for the info as long as the user hasn't
-                 ;; requested our attention.  This also locally disables
-                 ;; inhibit-quit.
-                 (while-no-input
-                   (eldoc--invoke-strategy))))))))
+      ;; This is run from post-command-hook or some idle timer thing,
+      ;; so we need to be careful that errors aren't ignored.
+      (with-demoted-errors "eldoc error: %s"
+        (if (not (eldoc-display-message-p))
+            ;; Erase the last message if we won't display a new one.
+            (when eldoc-last-message
+              (el-patch-swap
+                (eldoc-message nil)
+                (setq eldoc-last-message nil)))
+          (let ((non-essential t))
+            ;; Only keep looking for the info as long as the user hasn't
+            ;; requested our attention.  This also locally disables inhibit-quit.
+            (while-no-input
+              (eldoc-message (funcall eldoc-documentation-function))))))))
 
   (radian-when-compiletime (and (version< emacs-version "27")
                                 (version<= "26" emacs-version))
