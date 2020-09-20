@@ -2570,18 +2570,21 @@ order."
   :demand t
   :config
 
-  (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
-    :around #'eldoc-print-current-symbol-info
-    "Prevent `eldoc' from trampling on existing messages."
-    (radian-flet ((defun eldoc-message (&optional string)
-                    (if string
-                        (funcall eldoc-message string)
-                      (setq eldoc-last-message nil)))
-                  (defun eldoc--message (&optional string)
-                    (if string
-                        (funcall eldoc--message string)
-                      (setq eldoc-last-message nil))))
-      (apply func args)))
+  ;; For Emacs 26 and below, `eldoc--message' is not defined. For
+  ;; Emacs 27 and above, `eldoc-message' is obsolete.
+  (with-no-warnings
+    (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
+      :around #'eldoc-print-current-symbol-info
+      "Prevent `eldoc' from trampling on existing messages."
+      (radian-flet ((defun eldoc-message (&optional string)
+                      (if string
+                          (funcall eldoc-message string)
+                        (setq eldoc-last-message nil)))
+                    (defun eldoc--message (&optional string)
+                      (if string
+                          (funcall eldoc--message string)
+                        (setq eldoc-last-message nil))))
+        (apply func args))))
 
   ;; Always truncate ElDoc messages to one line. This prevents the
   ;; echo area from resizing itself unexpectedly when point is on a
