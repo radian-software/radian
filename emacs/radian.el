@@ -636,6 +636,25 @@ nice.)"
 (use-package bind-key
   :demand t)
 
+;; Normalize behavior for the Mac port (i.e. make it behave like
+;; normal Emacs on macOS does). By default alt does the default macOS
+;; alt thing, while command acts as meta instead of super. Also all
+;; the default bindings are gone for some reason :'(
+(when (radian-operating-system-p macOS)
+  (when (and (boundp 'mac-option-modifier)
+             (boundp 'mac-command-modifier))
+    (setq mac-option-modifier 'meta)
+    (setq mac-command-modifier 'super))
+
+  (bind-key "s-z" #'undo-tree-undo)
+  (bind-key "s-x" #'kill-region)
+  (bind-key "s-c" #'kill-ring-save)
+  (bind-key "s-v" #'yank)
+  (bind-key "s-n" #'make-frame)
+  (bind-key "s-s" #'save-buffer)
+  (bind-key "s-w" #'delete-frame)
+  (bind-key "s-q" #'save-buffers-kill-terminal))
+
 (defvar radian-keymap (make-sparse-keymap)
   "Keymap for Radian commands that should be put under a prefix.
 This keymap is bound under \\[radian-keymap].")
@@ -2552,28 +2571,25 @@ order."
   :config
 
   (radian-when-compiletime (version<= "27" emacs-version)
-    (el-patch-defun eldoc-print-current-symbol-info (&optional interactive)
+    (el-patch-defun eldoc-print-current-symbol-info ()
       (el-patch-concat
-        "Document thing at point."
+        "Print the text produced by `eldoc-documentation-function'."
         (el-patch-add "\nDon't trample on existing messages."))
-      (interactive '(t))
-      (let ((token (eldoc--request-state)))
-        (cond (interactive
-               (eldoc--invoke-strategy))
-              ((not (eldoc--request-docs-p token))
-               ;; Erase the last message if we won't display a new one.
-               (when eldoc-last-message
-                 (el-patch-swap
-                   (eldoc--message nil)
-                   (setq eldoc-last-message nil))))
-              (t
-               (let ((non-essential t))
-                 (setq eldoc--last-request-state token)
-                 ;; Only keep looking for the info as long as the user hasn't
-                 ;; requested our attention.  This also locally disables
-                 ;; inhibit-quit.
-                 (while-no-input
-                   (eldoc--invoke-strategy))))))))
+      ;; This is run from post-command-hook or some idle timer thing,
+      ;; so we need to be careful that errors aren't ignored.
+      (with-demoted-errors "eldoc error: %s"
+        (if (not (eldoc-display-message-p))
+            ;; Erase the last message if we won't display a new one.
+            (when eldoc-last-message
+              (el-patch-swap
+                (eldoc-message nil)
+                (setq eldoc-last-message nil)))
+          (let ((non-essential t))
+            ;; Only keep looking for the info as long as the user
+            ;; hasn't requested our attention.  This also locally
+            ;; disables inhibit-quit.
+            (while-no-input
+              (eldoc-message (funcall eldoc-documentation-function))))))))
 
   (radian-when-compiletime (and (version< emacs-version "27")
                                 (version<= "26" emacs-version))
@@ -3479,7 +3495,8 @@ environment with point at the end of a non-empty line of text."
          ("\\.ejs\\'" . web-mode)
          ("\\.jsx?\\'" . web-mode)
          ("\\.tsx?\\'" . web-mode)
-         ("\\.css\\'" . web-mode))
+         ("\\.css\\'" . web-mode)
+         ("\\.hbs\\'" . web-mode))
   ;; Use `web-mode' rather than `js-mode' for scripts.
   :interpreter (("js" . web-mode)
                 ("node" . web-mode))
@@ -4871,16 +4888,17 @@ Also run `radian-atomic-chrome-setup-hook'."
                   "Firefox")
                  ((eq conn atomic-chrome-server-atomic-chrome)
                   "Chromium")))
-               (alt-browser
-                (when (eq conn atomic-chrome-server-atomic-chrome)
-                  "Google Chrome")))
-      (cond
-       ((radian-operating-system-p macOS)
-        (call-process "open" nil nil nil "-a" browser))
-       ((executable-find "wmctrl")
-        (unless (or (zerop (call-process "wmctrl" nil nil nil "-a" browser))
-                    (not alt-browser))
-          (call-process "wmctrl" nil nil nil "-a" alt-browser))))))
+               (opener
+                (if (radian-operating-system-p macOS)
+                    "open"
+                  "wmctrl")))
+      (when (executable-find opener)
+        (let ((alt-browser
+               (when (eq conn atomic-chrome-server-atomic-chrome)
+                 "Google Chrome")))
+          (unless (or (zerop (call-process opener nil nil nil "-a" browser))
+                      (not alt-browser))
+            (call-process opener nil nil nil "-a" alt-browser))))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
@@ -5133,8 +5151,11 @@ with which Emacs should be "
 
 ;;; Appearance
 
-;; Make the initial frame maximized.
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; Make the initial frame maximized, unless using the Mac port in
+;; which case this does horrifying things that prevent you from
+;; resizing the frame.
+(unless (boundp 'mac-option-modifier)
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
 
 ;; Allow you to resize frames however you want, not just in whole
 ;; columns. "The 80s called, they want their user interface back"
