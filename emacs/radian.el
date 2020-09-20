@@ -2570,58 +2570,18 @@ order."
   :demand t
   :config
 
-  (radian-when-compiletime (version<= "27" emacs-version)
-    (el-patch-defun eldoc-print-current-symbol-info ()
-      (el-patch-concat
-        "Print the text produced by `eldoc-documentation-function'."
-        (el-patch-add "\nDon't trample on existing messages."))
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (if (not (eldoc-display-message-p))
-            ;; Erase the last message if we won't display a new one.
-            (when eldoc-last-message
-              (el-patch-swap
-                (eldoc-message nil)
-                (setq eldoc-last-message nil)))
-          (let ((non-essential t))
-            ;; Only keep looking for the info as long as the user
-            ;; hasn't requested our attention.  This also locally
-            ;; disables inhibit-quit.
-            (while-no-input
-              (eldoc-message (funcall eldoc-documentation-function))))))))
-
-  (radian-when-compiletime (and (version< emacs-version "27")
-                                (version<= "26" emacs-version))
-    (el-patch-defun eldoc-print-current-symbol-info ()
-      (el-patch-concat
-        "Print the text produced by `eldoc-documentation-function'."
-        (el-patch-add "\nDon't trample on existing messages."))
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (and (or (eldoc-display-message-p)
-                 ;; Erase the last message if we won't display a new one.
-                 (when eldoc-last-message
-                   (el-patch-swap
-                     (eldoc-message nil)
-                     (setq eldoc-last-message nil))
-                   nil))
-             (eldoc-message (funcall eldoc-documentation-function))))))
-
-  (radian-when-compiletime (version< emacs-version "26")
-    (el-patch-defun eldoc-print-current-symbol-info ()
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (and (or (eldoc-display-message-p)
-                 ;; Erase the last message if we won't display a new one.
-                 (when eldoc-last-message
-                   (el-patch-swap
-                     (eldoc-message nil)
-                     (setq eldoc-last-message nil))
-                   nil))
-             (eldoc-message (funcall eldoc-documentation-function))))))
+  (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
+    :around #'eldoc-print-current-symbol-info
+    "Prevent `eldoc' from trampling on existing messages."
+    (radian-flet ((defun eldoc-message (&optional string)
+                    (if string
+                        (funcall eldoc-message string)
+                      (setq eldoc-last-message nil)))
+                  (defun eldoc--message (&optional string)
+                    (if string
+                        (funcall eldoc--message string)
+                      (setq eldoc-last-message nil))))
+      (apply func args)))
 
   ;; Always truncate ElDoc messages to one line. This prevents the
   ;; echo area from resizing itself unexpectedly when point is on a
