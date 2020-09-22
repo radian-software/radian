@@ -2358,8 +2358,10 @@ backends will still be included.")
 
          ;; When was the last time you used the C-s binding for
          ;; searching candidates? It conflicts with buffer search,
-         ;; anyway.
+         ;; anyway. Same for the scroll commands.
          ("C-s" . nil)
+         ([remap scroll-down-command] . nil)
+         ([remap scroll-up-command] . nil)
 
          ;; The following are keybindings that only take effect if the
          ;; user has explicitly interacted with Company. Note that
