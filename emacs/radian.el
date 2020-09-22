@@ -2425,11 +2425,6 @@ backends will still be included.")
   ;; menu), but only if the user interacts explicitly with Company.
   (setq company-require-match #'company-explicit-action-p)
 
-  ;; Company appears to override our settings in `company-active-map'
-  ;; based on `company-auto-complete-chars'. Turning it off ensures we
-  ;; have full control.
-  (setq company-auto-complete-chars nil)
-
   ;; Only search the current buffer to get suggestions for
   ;; `company-dabbrev' (a backend that creates suggestions from text
   ;; found in your buffers). This prevents Company from causing lag
