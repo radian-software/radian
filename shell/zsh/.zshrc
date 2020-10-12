@@ -353,8 +353,8 @@ else
         alias l='ls -AlhF'
     fi
     if (( $+commands[tree] )); then
-        alias lt=tree
-        alias ltl='tree -L'
+        alias lt='tree -a'
+        alias ltl='tree -aL'
     fi
 fi
 
