@@ -3066,6 +3066,21 @@ See https://emacs.stackexchange.com/a/3338/12534."
    (t
     (setq python-shell-interpreter "python")))
 
+  (radian-defhook radian--python-use-correct-executable ()
+    python-mode-hook
+    "Use correct executables for Python tooling."
+    (save-excursion
+      (save-match-data
+        (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
+                  (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
+          (setq-local
+           python-shell-interpreter
+           (substring-no-properties (match-string 1))))))
+    (with-no-warnings
+      (setq-local
+       lsp-python-ms-python-executable-cmd
+       python-shell-interpreter)))
+
   ;; I honestly don't understand why people like their packages to
   ;; spew so many messages.
   (setq python-indent-guess-indent-offset-verbose nil)
