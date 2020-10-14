@@ -4764,7 +4764,6 @@ Instead, display simply a flat colored region in the fringe."
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
 (use-package rg
-  :straight (:host github :repo "dajva/rg.el" :branch "develop")
   :bind* (("C-c k" . #'radian-rg))
   :config
 
