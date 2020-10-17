@@ -498,8 +498,6 @@ binding the variable dynamically over the entire init-file."
   (setq straight-check-for-modifications
         '(find-at-startup find-when-checking)))
 
-(setq straight-vc-git-default-clone-depth 1)
-
 ;; Clear out recipe overrides (in case of re-init).
 (setq straight-recipe-overrides nil)
 
@@ -4766,7 +4764,6 @@ Instead, display simply a flat colored region in the fringe."
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
 (use-package rg
-  :straight (:host github :repo "dajva/rg.el" :branch "develop")
   :bind* (("C-c k" . #'radian-rg))
   :config
 
