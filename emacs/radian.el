@@ -636,6 +636,25 @@ nice.)"
 (use-package bind-key
   :demand t)
 
+;; Normalize behavior for the Mac port (i.e. make it behave like
+;; normal Emacs on macOS does). By default alt does the default macOS
+;; alt thing, while command acts as meta instead of super. Also all
+;; the default bindings are gone for some reason :'(
+(when (radian-operating-system-p macOS)
+  (when (and (boundp 'mac-option-modifier)
+             (boundp 'mac-command-modifier))
+    (setq mac-option-modifier 'meta)
+    (setq mac-command-modifier 'super))
+
+  (bind-key "s-z" #'undo-tree-undo)
+  (bind-key "s-x" #'kill-region)
+  (bind-key "s-c" #'kill-ring-save)
+  (bind-key "s-v" #'yank)
+  (bind-key "s-n" #'make-frame)
+  (bind-key "s-s" #'save-buffer)
+  (bind-key "s-w" #'delete-frame)
+  (bind-key "s-q" #'save-buffers-kill-terminal))
+
 (defvar radian-keymap (make-sparse-keymap)
   "Keymap for Radian commands that should be put under a prefix.
 This keymap is bound under \\[radian-keymap].")
@@ -928,6 +947,9 @@ ourselves."
 
 ;;; Window management
 
+;; Prevent accidental usage of `list-buffers'.
+(bind-key "C-x C-b" #'switch-to-buffer)
+
 (radian-defadvice radian--advice-keyboard-quit-minibuffer-first
     (keyboard-quit)
   :around #'keyboard-quit
@@ -987,7 +1009,8 @@ active minibuffer, even if the minibuffer is not selected."
 ;; rotate, and transpose Emacs windows: `flip-frame', `flop-frame',
 ;; `transpose-frame', `rotate-frame-clockwise',
 ;; `rotate-frame-anticlockwise', `rotate-frame'.
-(use-package transpose-frame)
+(use-package transpose-frame
+  :bind* (("s-t" . #'transpose-frame)))
 
 ;; Package `buffer-move' provides simple commands to swap Emacs
 ;; windows: `buf-move-up', `buf-move-down', `buf-move-left',
@@ -1420,8 +1443,32 @@ password that the user has decided not to save.")
 ;; Don't make lockfiles.
 (setq create-lockfiles nil)
 
+(defun radian-set-executable-permission (allowed)
+  "Enable or disable executable permission on the current file.
+If ALLOWED is non-nil, enable permission; otherwise, disable
+permission."
+  (interactive (list (not current-prefix-arg)))
+  (unless buffer-file-name
+    (user-error "This buffer is not visiting a file"))
+  (with-demoted-errors "Could not set permissions: %S"
+    (set-file-modes buffer-file-name (file-modes-symbolic-to-number
+                                      (if allowed
+                                          "+x"
+                                        "-x")
+                                      (file-modes buffer-file-name)))
+    (message "Executable permission %s"
+             (if allowed "enabled" "disabled"))))
+
+(bind-key* "s-x" #'radian-set-executable-permission)
+
 ;;; Editing
 ;;;; Text formatting
+
+(add-to-list 'safe-local-variable-values '(auto-fill-function . nil))
+
+(add-to-list 'safe-local-eval-forms '(visual-line-mode +1))
+
+(blackout 'visual-line-mode)
 
 ;; When region is active, make `capitalize-word' and friends act on
 ;; it.
@@ -2154,8 +2201,7 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
                    #'clojure-mode
-                   #'ruby-mode
-                   #'rust-mode))
+                   #'ruby-mode))
         (lsp))))
 
   :config
@@ -2312,8 +2358,10 @@ backends will still be included.")
 
          ;; When was the last time you used the C-s binding for
          ;; searching candidates? It conflicts with buffer search,
-         ;; anyway.
+         ;; anyway. Same for the scroll commands.
          ("C-s" . nil)
+         ([remap scroll-down-command] . nil)
+         ([remap scroll-up-command] . nil)
 
          ;; The following are keybindings that only take effect if the
          ;; user has explicitly interacted with Company. Note that
@@ -2379,11 +2427,6 @@ backends will still be included.")
   ;; menu), but only if the user interacts explicitly with Company.
   (setq company-require-match #'company-explicit-action-p)
 
-  ;; Company appears to override our settings in `company-active-map'
-  ;; based on `company-auto-complete-chars'. Turning it off ensures we
-  ;; have full control.
-  (setq company-auto-complete-chars nil)
-
   ;; Only search the current buffer to get suggestions for
   ;; `company-dabbrev' (a backend that creates suggestions from text
   ;; found in your buffers). This prevents Company from causing lag
@@ -2420,8 +2463,9 @@ completions automatically when backspacing into a symbol."
         ;; jumping to a buffer for the first time).
         (prog1 (and radian--company-buffer-modified-counter
                     (not (and (symbolp this-command)
-                              (string-prefix-p
-                               "company-" (symbol-name this-command)))))
+                              (string-match-p
+                               "^\\(company-\\|undo-\\|undo$\\)"
+                               (symbol-name this-command)))))
           (setq radian--company-buffer-modified-counter tick)))))
 
   (radian-defadvice radian--advice-company-update-buffer-modified-counter ()
@@ -2523,58 +2567,21 @@ order."
   :demand t
   :config
 
-  (radian-when-compiletime (version<= "27" emacs-version)
-    (el-patch-defun eldoc-print-current-symbol-info ()
-      (el-patch-concat
-        "Print the text produced by `eldoc-documentation-function'."
-        (el-patch-add "\nDon't trample on existing messages."))
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (if (not (eldoc-display-message-p))
-            ;; Erase the last message if we won't display a new one.
-            (when eldoc-last-message
-              (el-patch-swap
-                (eldoc-message nil)
-                (setq eldoc-last-message nil)))
-          (let ((non-essential t))
-            ;; Only keep looking for the info as long as the user
-            ;; hasn't requested our attention.  This also locally
-            ;; disables inhibit-quit.
-            (while-no-input
-              (eldoc-message (funcall eldoc-documentation-function))))))))
-
-  (radian-when-compiletime (and (version< emacs-version "27")
-                                (version<= "26" emacs-version))
-    (el-patch-defun eldoc-print-current-symbol-info ()
-      (el-patch-concat
-        "Print the text produced by `eldoc-documentation-function'."
-        (el-patch-add "\nDon't trample on existing messages."))
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (and (or (eldoc-display-message-p)
-                 ;; Erase the last message if we won't display a new one.
-                 (when eldoc-last-message
-                   (el-patch-swap
-                     (eldoc-message nil)
-                     (setq eldoc-last-message nil))
-                   nil))
-             (eldoc-message (funcall eldoc-documentation-function))))))
-
-  (radian-when-compiletime (version< emacs-version "26")
-    (el-patch-defun eldoc-print-current-symbol-info ()
-      ;; This is run from post-command-hook or some idle timer thing,
-      ;; so we need to be careful that errors aren't ignored.
-      (with-demoted-errors "eldoc error: %s"
-        (and (or (eldoc-display-message-p)
-                 ;; Erase the last message if we won't display a new one.
-                 (when eldoc-last-message
-                   (el-patch-swap
-                     (eldoc-message nil)
-                     (setq eldoc-last-message nil))
-                   nil))
-             (eldoc-message (funcall eldoc-documentation-function))))))
+  ;; For Emacs 26 and below, `eldoc--message' is not defined. For
+  ;; Emacs 27 and above, `eldoc-message' is obsolete.
+  (with-no-warnings
+    (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
+      :around #'eldoc-print-current-symbol-info
+      "Prevent `eldoc' from trampling on existing messages."
+      (radian-flet ((defun eldoc-message (&optional string)
+                      (if string
+                          (funcall eldoc-message string)
+                        (setq eldoc-last-message nil)))
+                    (defun eldoc--message (&optional string)
+                      (if string
+                          (funcall eldoc--message string)
+                        (setq eldoc-last-message nil))))
+        (apply func args))))
 
   ;; Always truncate ElDoc messages to one line. This prevents the
   ;; echo area from resizing itself unexpectedly when point is on a
@@ -3204,16 +3211,6 @@ Return either a string or nil."
 ;; Package `rust-mode' provides a major mode for Rust.
 (use-package rust-mode)
 
-;; Package `racer' provides a language server for Rust, and a Company
-;; backend which uses this server to display autocompletions. Racer
-;; also provides source code navigation support.
-(use-package racer
-  :init
-
-  (add-hook 'rust-mode #'racer-mode)
-
-  :blackout t)
-
 ;;;; Scheme
 
 ;; http://www.schemers.org/
@@ -3458,7 +3455,8 @@ environment with point at the end of a non-empty line of text."
          ("\\.ejs\\'" . web-mode)
          ("\\.jsx?\\'" . web-mode)
          ("\\.tsx?\\'" . web-mode)
-         ("\\.css\\'" . web-mode))
+         ("\\.css\\'" . web-mode)
+         ("\\.hbs\\'" . web-mode))
   ;; Use `web-mode' rather than `js-mode' for scripts.
   :interpreter (("js" . web-mode)
                 ("node" . web-mode))
@@ -3942,6 +3940,7 @@ messages."
       (ignore-errors
         (kill-buffer " *radian-byte-compile*"))
       (let ((default-directory radian-directory))
+        (radian-env-setup)
         (make-process
          :name "radian-byte-compile"
          :buffer " *radian-byte-compile*"
@@ -4737,6 +4736,9 @@ Instead, display simply a flat colored region in the fringe."
 
   :config
 
+  ;; By default, run from root of current Git repository.
+  (setq compile-command "git exec make ")
+
   ;; Automatically scroll the Compilation buffer as output appears,
   ;; but stop at the first error.
   (setq compilation-scroll-output 'first-error)
@@ -4846,16 +4848,17 @@ Also run `radian-atomic-chrome-setup-hook'."
                   "Firefox")
                  ((eq conn atomic-chrome-server-atomic-chrome)
                   "Chromium")))
-               (alt-browser
-                (when (eq conn atomic-chrome-server-atomic-chrome)
-                  "Google Chrome")))
-      (cond
-       ((radian-operating-system-p macOS)
-        (call-process "open" nil nil nil "-a" browser))
-       ((executable-find "wmctrl")
-        (unless (or (zerop (call-process "wmctrl" nil nil nil "-a" browser))
-                    (not alt-browser))
-          (call-process "wmctrl" nil nil nil "-a" alt-browser))))))
+               (opener
+                (if (radian-operating-system-p macOS)
+                    "open"
+                  "wmctrl")))
+      (when (executable-find opener)
+        (let ((alt-browser
+               (when (eq conn atomic-chrome-server-atomic-chrome)
+                 "Google Chrome")))
+          (unless (or (zerop (call-process opener nil nil nil "-a" browser))
+                      (not alt-browser))
+            (call-process opener nil nil nil "-a" alt-browser))))))
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
@@ -5108,6 +5111,12 @@ with which Emacs should be "
 
 ;;; Appearance
 
+;; Make the initial frame maximized, unless using the Mac port in
+;; which case this does horrifying things that prevent you from
+;; resizing the frame.
+(unless (boundp 'mac-option-modifier)
+  (add-to-list 'initial-frame-alist '(fullscreen . maximized)))
+
 ;; Allow you to resize frames however you want, not just in whole
 ;; columns. "The 80s called, they want their user interface back"
 (setq frame-resize-pixelwise t)
@@ -5141,7 +5150,7 @@ This is passed to `set-frame-font'."
 
 ;; Don't suggest shorter ways to type commands in M-x, since they
 ;; don't apply when using Selectrum.
-(setq suggest-key-bindings nil)
+(setq suggest-key-bindings 0)
 
 ;; Don't blink the cursor on the opening paren when you insert a
 ;; closing paren, as we already have superior handling of that from

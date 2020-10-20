@@ -1,3 +1,12 @@
+## PATH setup
+
+case "$OSTYPE" in
+    darwin*)
+        export PATH=
+        eval "$(/usr/libexec/path_helper -s)"
+        ;;
+esac
+
 ## External configuration
 ### ~/.profile.local
 
