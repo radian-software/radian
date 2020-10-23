@@ -32,7 +32,7 @@ more stability.
     command selection using [Selectrum]
   * More robust and streamlined single-buffer text search (than
     [Isearch], [Swiper]) using [CTRLF]
-  * Sorting by frecency and usage on all commands using
+  * Sorting by frequency and usage on all commands using
     [`prescient.el`][prescient.el]
   * IDE features for expanding library of programming languages with
     [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, CSS, [Flow], [Go],
