@@ -52,7 +52,7 @@
  ("json-snatcher" . "c4cecc0a5051bd364373aa499c47a1bb7a5ac51c")
  ("let-alist" . "b299c78897cc307f9d5521927376fbd06a26f123")
  ("loop.el" . "e22807f83a0890dc8a904c51ee0742c34efccc6c")
- ("lsp-haskell" . "f7d1f190ebacc96ddbc722e76730ca2db3c4ce38")
+ ("lsp-haskell" . "4d85cb3693d893ec34d8a0be9794d468a0a28b7b")
  ("lsp-mode" . "fb4c35c6978415c4cf52f85230b527d311989063")
  ("lsp-python-ms" . "83ef84d9a4a942f8882b00d07bb78b15f716e89d")
  ("lsp-ui" . "bf3966e87c91c5d825c483ce0883f30dd2272b62")
