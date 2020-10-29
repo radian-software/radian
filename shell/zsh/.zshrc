@@ -37,7 +37,7 @@ if [[ -n $radian_zplugin ]]; then
 
     # Allow sourcing this file more than once without producing
     # warnings about the plugins being re-loaded.
-    ZPLGM[MUTE_WARNINGS]=1
+    ZINIT[MUTE_WARNINGS]=1
 
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
@@ -353,8 +353,8 @@ else
         alias l='ls -AlhF'
     fi
     if (( $+commands[tree] )); then
-        alias lt=tree
-        alias ltl='tree -L'
+        alias lt='tree -a'
+        alias ltl='tree -aL'
     fi
 fi
 
@@ -464,6 +464,12 @@ alias rd='rmdir'
 alias help=run-help
 
 ### Utilities
+#### Docker
+
+if (( $+commands[docker] )); then
+    alias dr='docker run -it --rm'
+fi
+
 #### Emacs
 
 if (( $+commands[emacs] )); then
@@ -596,7 +602,7 @@ if (( $+commands[git] )); then
     alias grvm='git revert -m'
 
     alias gt='git tag'
-    alias gtd='git tag -d'
+    alias gtd='git tag --delete'
 
     alias gn='git notes'
     alias gna='git notes add'
@@ -665,6 +671,7 @@ if (( $+commands[git] )); then
     alias gsmy='git submodule sync'
 
     alias gcl='git clone --recursive'
+    alias gcls='git clone --depth=1 --single-branch --no-tags'
 
     alias gre='git remote'
     alias grel='git remote list'
@@ -684,6 +691,7 @@ if (( $+commands[git] )); then
     alias gpff='git push --force'
     alias gpu='git push --set-upstream'
     alias gpd='git push --delete'
+    alias gpt='git push --tags'
 fi
 
 #### Hub
@@ -707,6 +715,12 @@ if (( $+commands[tmux] )); then
         tmux new-session -s ${1:-tmux}
     }
     alias tl='tmux list-sessions'
+fi
+
+#### Trash
+
+if (( $+commands[trash] )); then
+    alias t='trash'
 fi
 
 #### Vi, Vim, Neovim

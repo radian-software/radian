@@ -32,7 +32,7 @@ more stability.
     command selection using [Selectrum]
   * More robust and streamlined single-buffer text search (than
     [Isearch], [Swiper]) using [CTRLF]
-  * Sorting by frecency and usage on all commands using
+  * Sorting by [frecency] and usage on all commands using
     [`prescient.el`][prescient.el]
   * IDE features for expanding library of programming languages with
     [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, CSS, [Flow], [Go],
@@ -81,7 +81,7 @@ more stability.
     [git-link], [Helpful], [Macrostep], [Magit], [no-littering],
     [Org], [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens],
     [transpose-frame], [undo-tree], [use-package], [visual-regexp],
-    [webpaste.el], and more
+    [`which-key`][which-key], and more
   * Major modes for editing many languages and configuration file
     types
   * [Tested on CircleCI](https://circleci.com/gh/raxod502/radian) with
@@ -129,11 +129,7 @@ configuration, and optionally installing local configuration.
     * HTML: `yarn global add vscode-html-languageserver-bin`
     * JavaScript/TypeScript: `yarn global add typescript
       typescript-language-server`; `brew install prettier`
-    * LaTeX:
-
-          $ wget -O ~/.local/bin/texlab.jar
-              https://github.com/latex-lsp/texlab/releases/download/v0.4.2/texlab.jar
-
+    * LaTeX: (please help with documentation!)
     * Python: the language server is downloaded automatically courtesy
       of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
 
@@ -281,6 +277,7 @@ commented.
 [flow]: https://flow.org/
 [flx]: https://github.com/lewang/flx
 [forge]: https://github.com/magit/forge
+[frecency]: https://en.wikipedia.org/wiki/Frecency
 [git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
 [git-link]: https://github.com/sshaw/git-link
 [git]: https://git-scm.com/
@@ -328,7 +325,7 @@ commented.
 [use-package]: https://github.com/jwiegley/use-package
 [visual-regexp]: https://github.com/benma/visual-regexp.el
 [wdx]: https://github.com/raxod502/wdx
-[webpaste.el]: https://github.com/etu/webpaste.el
+[which-key]: https://github.com/justbur/emacs-which-key
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [zplugin]: https://github.com/zdharma/zplugin
