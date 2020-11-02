@@ -93,16 +93,14 @@ will kill the newline."
 ;; `insert-register' which also has C-x r i.
 (map! ("C-x r g" #'radian-copy-register))
 
-;;;; Lines
-
-(map! ("RET" #'+default/newline
-       "C-j" #'newline-and-indent))
-
 ;;;; Text formatting
 
 (map! ("M-c" #'capitalize-dwim
        "M-l" #'downcase-dwim
        "M-u" #'upcase-dwim))
+
+(map! ("C-M-<up>" #'drag-stuff-up
+       "C-M-<down>" #'drag-stuff-down))
 
 ;;;; Text wrap
 
@@ -218,9 +216,6 @@ have to live with it :3"
 
 (pushnew! sp-ignore-modes-list #'org-mode #'org-agenda-mode)
 
-;; https://github.com/hlissner/doom-emacs/issues/3268#issuecomment-646924555
-(advice-remove #'delete-backward-char #'+default--delete-backward-char-a)
-
 ;;;; Undo/redo
 
 ;; Undo-Tree rebinds C-/ automatically, but since Emacs' default undo
@@ -246,6 +241,14 @@ have to live with it :3"
 (setq scroll-conservatively 0)
 
 ;;;; Motion
+
+;; Make `beginning-of-line' and `end-of-line' idempotent, instead of
+;; toggling back and forth between the true line beginning/end and
+;; some intermediate position dependent on indentation and line
+;; comments. This does not affect behavior in Org, where we actually
+;; do desire that behavior.
+(map! ([remap doom/backward-to-bol-or-indent] #'beginning-of-line
+       [remap doom/forward-to-last-non-comment-or-eol] #'end-of-line))
 
 ;; Make `forward-word' and `backward-word' stop at capitalization
 ;; changes within CamelCase symbols.
@@ -278,6 +281,10 @@ have to live with it :3"
 ;; window configuration to keep changing unexpectedly when we switch
 ;; projects.
 (setq +workspaces-on-switch-project-behavior nil)
+
+;;; Candidate selection
+
+;; FIXME
 
 ;;; Files
 
@@ -370,6 +377,11 @@ SET non-nil or prefix arg means to set it instead."
 ;; and such.
 (advice-add #'doom-auto-revert-buffer-h :override #'ignore)
 
+;; This function can be added onto various hooks such as in Dired.
+(defun radian--autorevert-silence ()
+  "Silence messages from `auto-revert-mode' in the current buffer."
+  (setq-local auto-revert-verbose nil))
+
 (defun radian-bookmark (keys filename &optional name)
   "Create a shortcut to find the given file (absolute path).
 The shortcut is bound under leader+e plus the given keys, in the
@@ -416,11 +428,77 @@ will find the file in a new window."
 (radian-bookmark "l t" "~/.tmux.local.conf")
 (radian-bookmark "l z" "~/.zshrc.local")
 
+;; This function should exist by default. It doesn't, for some reason.
+(defun radian-rename-current-file (newname)
+  "Rename file visited by current buffer to NEWNAME.
+Interactively, prompt the user for the target filename, with
+completion.
+
+If NEWNAME is a directory then extend it with the basename of
+`buffer-file-name'. Make parent directories automatically."
+  (interactive
+   (progn
+     (unless buffer-file-name
+       (user-error "Current buffer is not visiting a file"))
+     (let ((newname (read-file-name "Rename to: " nil buffer-file-name)))
+       (when (equal (file-truename newname)
+                    (file-truename buffer-file-name))
+         (user-error "%s" "Can't rename a file to itself"))
+       (list newname))))
+  (unless buffer-file-name
+    (error "Current buffer is not visiting a file"))
+  (when (equal (file-truename newname)
+               (file-truename buffer-file-name))
+    (error "%s: %s" "Can't rename a file to itself" newname))
+  (when (equal newname (file-name-as-directory newname))
+    (setq newname
+          (concat newname (file-name-nondirectory buffer-file-name))))
+  (make-directory (file-name-directory newname) 'parents)
+  ;; Passing integer as OK-IF-ALREADY-EXISTS means prompt for
+  ;; confirmation before overwriting. Why? Who can say...
+  (dired-rename-file buffer-file-name newname 0))
+
+(map! ("C-x w" #'radian-rename-current-file))
+
 ;;; Interface
 ;;;; Margins
 
 ;; We have no need of line numbers.
 (setq display-line-numbers-type nil)
+
+;;;; Minibuffer
+
+;; Reduce the keystroke echo area delay further from 0.02 to
+;; effectively instant. Async sucks.
+(setq echo-keystrokes 1e-6)
+
+;; Unfortunately, `which-key' sets an internal variable at load time
+;; based on the value of `echo-keystrokes', and then later overrides
+;; `echo-keystrokes' to the value of this internal variable,
+;; effectively overwriting our configuration here. Stop that behavior.
+(after! which-key
+  (setq which-key-echo-keystrokes echo-keystrokes))
+
+(defadvice! radian--ad-read-passwd-hide-char (func &rest args)
+  "Display passwords as **** rather than .... in the minibuffer.
+This is the default behavior is Emacs 27, so this advice only has
+an effect for Emacs 26 or below."
+  :around #'read-passwd
+  (let ((read-hide-char (or read-hide-char ?*)))
+    (apply func args)))
+
+;; Display minibuffer messages with the prompt color, rather than the
+;; default text color. This is for Emacs >26.
+(setq minibuffer-message-properties '(face minibuffer-prompt))
+
+;;;; Mode line
+
+;; Use ASCII in the mode line.
+(setq doom-modeline-icon nil)
+
+;; Don't show the size of the current selection in progress in the
+;; mode line.
+(advice-add #'doom-modeline-segment--selection-info :override #'ignore)
 
 ;;;; Text appearance
 
@@ -535,8 +613,9 @@ completions automatically when backspacing into a symbol."
       ;; jumping to a buffer for the first time).
       (prog1 (and radian--company-buffer-modified-counter
                   (not (and (symbolp this-command)
-                            (string-prefix-p
-                             "company-" (symbol-name this-command)))))
+                            (string-match-p
+                             "^\\(company-\\|undo-\\|undo$\\)"
+                             (symbol-name this-command)))))
         (setq radian--company-buffer-modified-counter tick)))))
 
 (defadvice! radian--ad-company-update-buffer-modified-counter ()
@@ -606,6 +685,12 @@ was printed, and only have ElDoc display if one wasn't."
 
 ;;;; Indentation
 
+;; Override misguided default from Doom. Under no circumstances do we
+;; want pressing the tab key to insert a literal tab (or bunch of
+;; spaces), if we are in a major mode that provides a way to indent
+;; the current line.
+(setq-default tab-always-indent t)
+
 (defun radian-indent-defun ()
   "Indent the surrounding defun."
   (interactive)
@@ -622,6 +707,13 @@ was printed, and only have ElDoc display if one wasn't."
        "C-M-q" #'radian-indent-defun))
 
 (advice-add #'indent-region :around #'radian-quiet)
+
+;;;; Comments
+
+;; Prevent `newline-and-indent' from continuing the current comment.
+;; We can use `indent-new-comment-line' for that when it's desired.
+(advice-remove #'newline-and-indent
+               #'+default--newline-indent-and-continue-comments-a)
 
 ;;; Introspection
 ;;;; Help
@@ -651,6 +743,14 @@ was printed, and only have ElDoc display if one wasn't."
      #'helpful-key #'radian--ad-helpful-key-allow-keyboard-quit)))
 
 (radian-universal-keyboard-quit-mode +1)
+
+;; Let's establish a standard location for the Emacs source code.
+(setq source-directory (expand-file-name "src" user-emacs-directory))
+
+;; This is initialized to nil by `find-func' if the source is not
+;; cloned when the library is loaded.
+(setq find-function-C-source-directory
+      (expand-file-name "src" source-directory))
 
 (defun radian-clone-emacs-source-maybe ()
   "Prompt user to clone Emacs source repository if needed."
@@ -682,12 +782,200 @@ bizarre reason."
 
 (autoload 'company-quickhelp-manual-begin "company-quickhelp" nil 'interactive)
 
-
+(after! company-quickhelp
+  (company-quickhelp-mode +1))
 
 ;;; Applications
+
+(map! (:leader :prefix ("a" . "applications")))
+
 ;;;; Browser
 
 (map! (:leader :desc "Open URL in browser" "o u" #'browse-url-at-point))
+
+;; For `git-link', link to a particular revision of a file rather than
+;; using the branch name in the URL.
+(setq git-link-use-commit t)
+
+(use-package! atomic-chrome
+  :defer-incrementally t
+  :config
+
+  (defvar-local radian-atomic-chrome-url nil
+    "The URL of the text area being edited.")
+
+  (defcustom radian-atomic-chrome-setup-hook nil
+    "Hook run while setting up an `atomic-chrome' buffer."
+    :type 'hook)
+
+  (defadvice! radian--ad-atomic-chrome-setup (url)
+    "Save the URL in `radian-atomic-chrome-url'.
+Also run `radian-atomic-chrome-setup-hook'."
+    :after #'atomic-chrome-set-major-mode
+    (setq radian-atomic-chrome-url url)
+    (run-hooks 'radian-atomic-chrome-setup-hook))
+
+  ;; Edit in Markdown by default, because many sites support it and
+  ;; it's not a big deal if the text area doesn't actually support
+  ;; Markdown.
+  (setq atomic-chrome-default-major-mode 'markdown-mode)
+
+  (add-hook
+   'atomic-chrome-edit-done-hook
+   (defun radian--atomic-chrome-switch-back ()
+     "Switch back to the browser after finishing with `atomic-chrome'."
+     (when-let ((conn (websocket-server-conn
+                       (atomic-chrome-get-websocket (current-buffer))))
+                (browser
+                 (cond
+                  ((eq conn atomic-chrome-server-ghost-text)
+                   "Firefox")
+                  ((eq conn atomic-chrome-server-atomic-chrome)
+                   "Chromium")))
+                (opener
+                 (if IS-MAC
+                     "open"
+                   "wmctrl")))
+       (when (executable-find opener)
+         (let ((alt-browser
+                (when (eq conn atomic-chrome-server-atomic-chrome)
+                  "Google Chrome")))
+           (unless (or (zerop (call-process opener nil nil nil "-a" browser))
+                       (not alt-browser))
+             (call-process opener nil nil nil "-a" alt-browser)))))))
+
+  ;; Listen for requests from the Chrome/Firefox extension.
+  (atomic-chrome-start-server))
+
+;;;; Compilation
+
+;; Don't bother saving buffers at all. That's unnecessary. We know to
+;; save our buffers if we want them to be updated on disk.
+(setq compilation-save-buffers-predicate #'ignore)
+
+(defadvice! radian--ad-compile-pop-to-buffer (buf)
+  "Pop to compilation buffer on \\[compile]."
+  :filter-return #'compilation-start
+  (prog1 buf
+    (when-let ((win (get-buffer-window buf)))
+      (select-window win))))
+
+;;;; Dired
+
+;; This binding is way nicer than ^. It's inspired by Sunrise
+;; Commander.
+(map! (:map dired-mode-map
+       "J" #'dired-up-directory))
+
+(defadvice! radian--ad-dired-check-for-ls-dired (&rest _)
+  "Check if ls --dired is supported ahead of time, and silently.
+
+This advice prevents Dired from printing a message if your ls
+does not support the --dired option. (We do this by performing
+the check ourselves, and refraining from printing a message in
+the problematic case.)"
+  :before #'dired-insert-directory
+  (when (eq dired-use-ls-dired 'unspecified)
+    (setq dired-use-ls-dired
+          (eq 0 (call-process insert-directory-program
+                              nil nil nil "--dired")))))
+
+(add-hook 'dired-mode-hook #'radian--autorevert-silence)
+
+;; Establish `dired-x' bindings immediately instead of only after
+;; Dired has been loaded the first time.
+(map! ("C-x C-j" #'dired-jump
+       "C-x 4 C-j" #'dired-jump-other-window))
+
+(when IS-MAC
+  (defadvice! radian--ad-dired-guess-open-on-macos
+    (&rest _)
+    :override #'dired-guess-default
+    "Cause Dired's '!' command to use open(1).
+This advice is only activated on macOS, where it is helpful since
+most of the Linux utilities in `dired-guess-shell-alist-default'
+are probably not going to be installed."
+    "open"))
+
+;;;; Org
+
+;; Prevent Org from overriding the bindings for windmove. By default,
+;; these keys are mapped to `org-shiftleft', etc.
+(map! (:map org-mode-map
+       "S-<left>" nil
+       "S-<right>" nil
+       "S-<up>" nil
+       "S-<down>" nil))
+
+;; Add replacements for the keybindings we just removed. C-<left> and
+;; C-<right> are unused by Org. C-<up> and C-<down> are bound to
+;; `org-backward-paragraph', etc. (but see below).
+(map! (:map org-mode-map
+       "C-<left>" #'org-shiftleft
+       "C-<right>" #'org-shiftright
+       "C-<up>" #'org-shiftup
+       "C-<down>" #'org-shiftdown))
+
+(map! (:leader :prefix "a"
+       "a" #'org-agenda
+       "c" #'org-capture))
+
+;; Show headlines but not content by default.
+(setq org-startup-folded 'content)
+
+;; Make C-k smarter with regard to headline tags.
+(setq org-special-ctrl-k t)
+
+;; When you create a sparse tree and `org-indent-mode' is enabled, the
+;; highlighting destroys the invisibility added by `org-indent-mode'.
+;; Therefore, don't highlight when creating a sparse tree.
+(setq org-highlight-sparse-tree-matches nil)
+
+;; Prevent Org Agenda from overriding the bindings for
+;; windmove.
+(map! (:map org-agenda-mode-map
+       "S-<up>" nil
+       "S-<down>" nil
+       "S-<left>" nil
+       "S-<right>" nil))
+
+;; Same routine as above. Now for Org Agenda, we could use
+;; C-up and C-down because M-{ and M-} are bound to the same
+;; commands. But I think it's best to take the same approach
+;; as before, for consistency.
+(map! (:map org-agenda-mode-map
+       "C-<left>" #'org-agenda-do-date-earlier
+       "C-<right>" #'org-agenda-do-date-later))
+
+(defadvice! radian--ad-org-agenda-set-default-directory
+  (func &rest args)
+  "If `org-directory' exists, set `default-directory' to it in the agenda.
+This makes the behavior of `find-file' more reasonable."
+  :around #'org-agenda
+  (let ((default-directory (if (file-exists-p org-directory)
+                               org-directory
+                             default-directory)))
+    (apply func args)))
+
+(defadvice! radian--ad-org-agenda-mode-lighter-simplify (&rest _)
+  "Override the `org-agenda' mode lighter to just \"Org-Agenda\"."
+  :override #'org-agenda-set-mode-name
+  "Org-Agenda")
+
+;; Hide blocked tasks in the agenda view.
+(setq org-agenda-dim-blocked-tasks 'invisible)
+
+;; Override customization from Doom. It's unclear to me why we would
+;; want the agenda to display three days ago by default. This results
+;; in our being unable to see any tasks SCHEDULED for the current day.
+(setq org-agenda-start-day nil)
+
+;;;; Terminal emulator
+
+;; Allow usage of C-h and C-x prefixes from within `term'.
+(map! (:map term-raw-map
+       "C-h" #'help-command
+       "C-x" #'Control-X-prefix))
 
 ;;;; Version control
 
@@ -703,11 +991,137 @@ bizarre reason."
   (transient-append-suffix 'magit-pull "-r"
     '("-a" "Autostash" "--autostash")))
 
+;; Allow using `q' to quit out of popups, in addition to `C-g'. See
+;; <https://magit.vc/manual/transient.html#Why-does-q-not-quit-popups-anymore_003f>
+;; for discussion.
+(after! transient
+  (transient-bind-q-to-quit))
+
+;; Don't prompt when reverting hunk from `git-gutter'.
+(setq git-gutter:ask-p nil)
+
+;;; Shutdown
+
+(defun radian-really-kill-emacs ()
+  "Kill Emacs immediately, bypassing `kill-emacs-hook'."
+  (interactive)
+  (let ((kill-emacs-hook nil))
+    (kill-emacs)))
+
+(defun radian-new-emacs (&optional arg)
+  "Spawn a new instance of Emacs. See `restart-emacs'."
+  (interactive "P")
+  (let ((restart-emacs-inhibit-kill-p t))
+    (funcall-interactively #'restart-emacs arg)))
+
+(autoload #'restart-emacs--translate-prefix-to-args "restart-emacs")
+
+(defvar radian--restart-in-progress nil
+  "Used to prevent infinite recursion.
+This is non-nil if `radian--advice-kill-emacs-dispatch' has called
+`restart-emacs'.")
+
+(defadvice! radian--ad-kill-emacs-dispatch
+  (func &optional arg)
+  "Allow restarting Emacs or starting a new session on shutdown."
+  :around #'save-buffers-kill-emacs
+  (if radian--restart-in-progress
+      (funcall func arg)
+    (let ((radian--restart-in-progress t)
+          ;; Don't mutate the global value.
+          (radian--restart-emacs-eager-hook-functions-run nil)
+          (prompt (concat "Really exit (or restart, or start new, or kill) "
+                          "Emacs? (y/n/r/e/k) "))
+          (key nil))
+      (while (null key)
+        (let ((cursor-in-echo-area t))
+          (when minibuffer-auto-raise
+            (raise-frame (window-frame (minibuffer-window))))
+          (setq key
+                (read-key (propertize prompt
+                                      'face 'minibuffer-prompt)))
+          (pcase key
+            ((or ?y ?Y) (funcall func arg))
+            ((or ?n ?N))
+            ((or ?r ?R)
+             (funcall-interactively #'restart-emacs arg))
+            ((or ?e ?E)
+             (funcall-interactively #'radian-new-emacs arg))
+            ((or ?k ?K) (radian-really-kill-emacs))
+            (?\C-g (signal 'quit nil))
+            (_ (setq key nil)))))
+      (message "%s%c" prompt key))))
+
+;; We have our own confirmation function, disable Doom's.
+(setq confirm-kill-emacs nil)
+
+;;; Miscellaneous
+
+;; Enable all disabled commands. See
+;; <https://www.gnu.org/software/emacs/manual/html_node/elisp/Disabling-Commands.html>.
+(setq disabled-command-function nil)
+
 ;;; Language support
 ;;;; Lisp languages
 
 (add-to-list 'safe-local-variable-values
              '(lisp-indent-function . common-lisp-indent-function))
+
+;;;;; Emacs Lisp
+
+(defadvice! radian--ad-elisp-auto-fill-docstrings-correctly (&rest _)
+  "Prevent `auto-fill-mode' from adding indentation to Elisp docstrings."
+  :before-until #'fill-context-prefix
+  (when (and (derived-mode-p #'emacs-lisp-mode)
+             (eq (get-text-property (point) 'face) 'font-lock-doc-face))
+    ""))
+
+(defadvice! radian--ad-elisp-eval-buffer-maybe-reload (func &rest args)
+  "When evaluating Doom config file, reload Doom instead.
+This is typically what I want."
+  :around #'+eval/buffer
+  (if (and buffer-file-name
+           (member (file-truename buffer-file-name)
+                   (list
+                    (when (bound-and-true-p early-init-file)
+                      (file-truename early-init-file))
+                    (file-truename user-init-file)
+                    (file-truename "~/.doom.d/config.el")
+                    (file-truename "~/.doom.d/init.el")
+                    (file-truename "~/.doom.d/packages.el")
+                    (file-truename "~/.doom.d/config.local.el")
+                    (file-truename "~/.doom.d/init.local.el")
+                    (file-truename "~/.doom.d/packages.local.el"))))
+      (doom/reload)
+    (apply func args)))
+
+(map! (:map (emacs-lisp-mode-map lisp-interaction-mode-map)
+       "C-c C-k" #'+eval/buffer-or-region))
+
+(defun radian-find-symbol (&optional symbol)
+  "Same as `xref-find-definitions' but only for Elisp symbols.
+SYMBOL is as in `xref-find-definitions'."
+  (interactive)
+  (let ((xref-backend-functions '(elisp--xref-backend))
+        ;; Make this command behave the same as `find-function' and
+        ;; `find-variable', i.e. always prompt for an identifier,
+        ;; defaulting to the one at point.
+        (xref-prompt-for-identifier t))
+    (if symbol
+        (xref-find-definitions symbol)
+      (call-interactively 'xref-find-definitions))))
+
+;; By default, C-h f, C-h v, and C-h o are bound to
+;; `describe-function', `describe-variable', and `describe-symbol'
+;; respectively. By analogy, C-h C-f, C-h C-v, and C-h C-o should be
+;; bound as follows. (There's no `find-symbol' function by default for
+;; some reason; note that `xref-find-definitions' is not a replacement
+;; because it is major-mode dependent.) By further analogy, we should
+;; bind `find-library'.
+(map! "C-h C-f" #'find-function
+      "C-h C-v" #'find-variable
+      "C-h C-o" #'radian-find-symbol
+      "C-h C-l" #'find-library)
 
 ;;;; C, C++, Objective-C, Java
 
@@ -819,8 +1233,8 @@ something."
               (funcall set symbol newval))))
     (apply func args)))
 
-(add-hook!
- python-mode
+(add-hook
+ 'python-mode-hook
  (defun radian--python-no-reindent-on-colon ()
    "Don't reindent (usually wrongly) on typing a colon.
 See <https://emacs.stackexchange.com/a/3338/12534>."
@@ -848,12 +1262,13 @@ See <https://emacs.stackexchange.com/a/3338/12534>."
 ;; Use TeXShop for previewing LaTeX, rather than Preview. This means
 ;; we have to define the command to run TeXShop as a "viewer program",
 ;; and then tell AUCTeX to use the TeXShop viewer when opening PDFs.
-(when (and IS-MAC
-           (or (file-directory-p "/Applications/TeXShop.app")
-               (file-directory-p "/Applications/TeX/TeXShop.app")))
-  (add-to-list 'TeX-view-program-list
-               '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
-  (setf (map-elt TeX-view-program-selection 'output-pdf) '("TeXShop")))
+(after! tex
+  (when (and IS-MAC
+             (or (file-directory-p "/Applications/TeXShop.app")
+                 (file-directory-p "/Applications/TeX/TeXShop.app")))
+    (add-to-list 'TeX-view-program-list
+                 '("TeXShop" "/usr/bin/open -a TeXShop.app %s.pdf"))
+    (setf (map-elt TeX-view-program-selection 'output-pdf) '("TeXShop"))))
 
 (defadvice! radian--ad-tex-simplify-mode-name (&rest _)
   "Remove frills from the `mode-name' in TeX modes.
@@ -897,20 +1312,22 @@ This prevents them from getting in the way of buffer selection."
 (setq web-mode-enable-auto-indentation nil)
 
 ;; When using `web-mode' to edit JavaScript files, support JSX tags.
-(add-to-list 'web-mode-content-types-alist
-             '("jsx" . "\\.js[x]?\\'"))
+(after! web-mode
+  (add-to-list 'web-mode-content-types-alist
+               '("jsx" . "\\.js[x]?\\'")))
 
 ;; Create line comments instead of block comments by default in
 ;; JavaScript. See <https://github.com/fxbois/web-mode/issues/619>.
-(let ((types '("javascript" "jsx")))
-  (setq web-mode-comment-formats
-        (cl-remove-if (lambda (item)
-                        (member (car item) types))
-                      web-mode-comment-formats))
-  (dolist (type types)
-    (push (cons type "//") web-mode-comment-formats)))
+(after! web-mode
+  (let ((types '("javascript" "jsx")))
+    (setq web-mode-comment-formats
+          (cl-remove-if (lambda (item)
+                          (member (car item) types))
+                        web-mode-comment-formats))
+    (dolist (type types)
+      (push (cons type "//") web-mode-comment-formats))))
 
-(add-hook! web-mode
+(add-hook 'web-mode-hook
   (defun radian--web-js-fix-comments ()
     "Fix comment handling in `web-mode' for JavaScript."
     (when (member web-mode-content-type '("javascript" "jsx"))
@@ -926,7 +1343,7 @@ This prevents them from getting in the way of buffer selection."
       ;; auto-fill.
       (setq-local comment-start-skip "// *"))))
 
-(add-hook! apheleia-post-format
+(add-hook 'apheleia-post-format-hook
   (defun radian--web-highlight-after-formatting ()
     "Make sure syntax highlighting works with Apheleia.
 The problem is that `web-mode' doesn't do highlighting correctly

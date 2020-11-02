@@ -26,6 +26,8 @@
        (sh +lsp)
        (web +css +html)
        (yaml +lsp)
+       :os
+       macos
        :tools
        debugger
        docker
@@ -34,8 +36,7 @@
        gist
        lookup
        lsp
-       macos
-       magit
+       (magit +forge)
        make
        terraform
        tmux
