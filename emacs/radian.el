@@ -3470,6 +3470,11 @@ environment with point at the end of a non-empty line of text."
   (setq web-mode-code-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
 
+  ;; Not sure why anyone would want 1 space indent for inline scripts
+  ;; and CSS. Set it to 2 for consistency.
+  (setq web-mode-script-padding 2)
+  (setq web-mode-style-padding 2)
+
   ;; Autocomplete </ instantly.
   (setq web-mode-enable-auto-closing t)
 
