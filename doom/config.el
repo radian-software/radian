@@ -968,7 +968,12 @@ This makes the behavior of `find-file' more reasonable."
 ;; Override customization from Doom. It's unclear to me why we would
 ;; want the agenda to display three days ago by default. This results
 ;; in our being unable to see any tasks SCHEDULED for the current day.
-(setq org-agenda-start-day nil)
+(add-hook
+ 'org-load-hook
+ (defun radian--org-agenda-override-doom ()
+   "Override `org-agenda' configuration from Doom."
+   (setq org-agenda-start-day nil))
+ 'append)
 
 ;;;; Terminal emulator
 
