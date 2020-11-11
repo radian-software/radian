@@ -2018,6 +2018,7 @@ buffer."
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'latex-mode "\\[")
   (radian--smartparens-pair-setup #'markdown-mode "```")
+  (radian--smartparens-pair-setup #'css-mode "{")
 
   ;; It's unclear to me why any of this is needed.
   (radian--smartparens-pair-setup #'json-mode "[")
