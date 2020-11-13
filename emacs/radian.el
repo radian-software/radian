@@ -1567,6 +1567,25 @@ have to live with it :3"
 ;; https://www.gnu.org/software/emacs/manual/html_node/efaq/Turning-on-auto_002dfill-by-default.html
 (setq-default auto-fill-function #'radian--do-auto-fill)
 
+;; Determine text fill prefix from major mode indentation rules,
+;; except in text modes. This shouldn't be necessary, but sometimes
+;; the adaptive fill heuristics can mess up major modes (e.g. I've run
+;; into trouble with `svelte-mode').
+
+(setq-default adaptive-fill-mode nil)
+
+(radian-defhook radian--adaptive-fill-enable ()
+  text-mode-hook
+  "Re-enable `adaptive-fill-mode' in `text-mode' and derived."
+  (setq-local adaptive-fill-mode t))
+
+(radian-defhook radian--adaptive-fill-disable ()
+  sgml-mode-hook
+  "Re-disable `adaptive-fill-mode' for `sgml-mode' and derived.
+Apparently, such modes are derived from `text-mode', even though
+they are definitely programming-oriented."
+  (setq-local adaptive-fill-mode nil))
+
 (define-minor-mode radian-fix-whitespace-mode
   "Minor mode to automatically fix whitespace on save.
 If enabled, then saving the buffer deletes all trailing
