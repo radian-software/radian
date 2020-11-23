@@ -185,7 +185,6 @@ Use symbolic links:
     ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
     ./git/.gitconfig => ~/.gitconfig
     ./git/.gitexclude => ~/.gitexclude
-    ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
     ./shell/zsh/.zprofile => ~/.zprofile
