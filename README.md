@@ -255,6 +255,7 @@ commented.
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [black]: https://github.com/python/black
 [blackout]: https://github.com/raxod502/blackout
+[brittany]: https://hackage.haskell.org/package/brittany
 [buffer-move]: https://github.com/lukhas/buffer-move
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
