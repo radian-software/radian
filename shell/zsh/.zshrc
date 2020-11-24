@@ -18,7 +18,9 @@ fi
 
 radian_zplugin=
 
-if [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
+if [[ -f /usr/share/zinit/zplugin.zsh ]]; then
+    radian_zplugin="/usr/share/zinit/zplugin.zsh"
+elif [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
     radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
 elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
     radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
