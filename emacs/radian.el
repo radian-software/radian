@@ -2522,7 +2522,7 @@ order."
                     (when (thread-first w
                             (lsp--workspace-client)
                             (lsp--client-server-id)
-                            (memq '(jsts-ls mspyls bash-ls texlab ts-ls))
+                            (memq '(jsts-ls mspyls bash-ls texlab ts-ls svelte-ls))
                             (not))
                       (cl-return t)))))))
 
