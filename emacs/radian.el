@@ -2568,7 +2568,12 @@ order."
     "Like `dumb-jump-go-prompt' but use a different window."
     (interactive)
     (let ((dumb-jump-window 'other))
-      (dumb-jump-go-prompt))))
+      (dumb-jump-go-prompt)))
+
+  (radian-defhook radian--dumb-jump-enable-xref-backend ()
+    xref-backend-functions
+    "Add `dumb-jump-xref-activate' hook to `xref-backend-functions'."
+    #'dumb-jump-xref-activate)))
 
 ;;;; Display contextual metadata
 
