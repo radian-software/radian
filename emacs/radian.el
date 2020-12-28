@@ -2219,9 +2219,7 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
                    #'clojure-mode
-                   #'ruby-mode
-                   ;; https://github.com/rcjsuen/dockerfile-language-server-nodejs/issues/247
-                   #'dockerfile-mode))
+                   #'ruby-mode))
         (lsp))))
 
   :config
