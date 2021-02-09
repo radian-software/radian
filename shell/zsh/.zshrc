@@ -60,6 +60,10 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
+    if typeset -f radian_zplugin_hook > /dev/null; then
+        radian_zplugin_hook
+    fi
+
     autoload -Uz compinit
     compinit
 fi
