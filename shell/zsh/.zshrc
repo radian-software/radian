@@ -601,6 +601,7 @@ if (( $+commands[git] )); then
     alias gcpa='git cherry-pick --abort'
 
     alias grv='git revert'
+    alias grva='git revert --abort'
     alias grvm='git revert -m'
 
     alias gt='git tag'
