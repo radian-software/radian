@@ -60,6 +60,10 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
+    if typeset -f radian_zplugin_hook > /dev/null; then
+        radian_zplugin_hook
+    fi
+
     autoload -Uz compinit
     compinit
 fi
@@ -601,6 +605,7 @@ if (( $+commands[git] )); then
     alias gcpa='git cherry-pick --abort'
 
     alias grv='git revert'
+    alias grva='git revert --abort'
     alias grvm='git revert -m'
 
     alias gt='git tag'
