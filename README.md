@@ -32,7 +32,7 @@ more stability.
     command selection using [Selectrum]
   * More robust and streamlined single-buffer text search (than
     [Isearch], [Swiper]) using [CTRLF]
-  * Sorting by frecency and usage on all commands using
+  * Sorting by [frecency] and usage on all commands using
     [`prescient.el`][prescient.el]
   * IDE features for expanding library of programming languages with
     [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, CSS, [Flow], [Go],
@@ -185,7 +185,6 @@ Use symbolic links:
     ./emacs/versions.el => ~/.emacs.d/straight/versions/radian.el
     ./git/.gitconfig => ~/.gitconfig
     ./git/.gitexclude => ~/.gitexclude
-    ./shell/bash/.bashrc => ~/.bashrc
     ./shell/shared/.profile => ~/.profile
     ./shell/zsh/.zshrc => ~/.zshrc
     ./shell/zsh/.zprofile => ~/.zprofile
@@ -256,6 +255,7 @@ commented.
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [black]: https://github.com/python/black
 [blackout]: https://github.com/raxod502/blackout
+[brittany]: https://hackage.haskell.org/package/brittany
 [buffer-move]: https://github.com/lukhas/buffer-move
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
@@ -277,6 +277,7 @@ commented.
 [flow]: https://flow.org/
 [flx]: https://github.com/lewang/flx
 [forge]: https://github.com/magit/forge
+[frecency]: https://en.wikipedia.org/wiki/Frecency
 [git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
 [git-link]: https://github.com/sshaw/git-link
 [git]: https://git-scm.com/

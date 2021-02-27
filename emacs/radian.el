@@ -498,8 +498,6 @@ binding the variable dynamically over the entire init-file."
   (setq straight-check-for-modifications
         '(find-at-startup find-when-checking)))
 
-(setq straight-vc-git-default-clone-depth 1)
-
 ;; Clear out recipe overrides (in case of re-init).
 (setq straight-recipe-overrides nil)
 
@@ -721,7 +719,7 @@ Only do this once, unless AGAIN is non-nil."
           (buf-name " *radian-env-output*"))
       (when (and profile-file
                  (file-exists-p profile-file)
-                 (executable-find "python"))
+                 (executable-find "python3"))
         (ignore-errors (kill-buffer buf-name))
         (with-current-buffer (get-buffer-create buf-name)
           (let* ((python-script
@@ -1569,6 +1567,25 @@ have to live with it :3"
 ;; https://www.gnu.org/software/emacs/manual/html_node/efaq/Turning-on-auto_002dfill-by-default.html
 (setq-default auto-fill-function #'radian--do-auto-fill)
 
+;; Determine text fill prefix from major mode indentation rules,
+;; except in text modes. This shouldn't be necessary, but sometimes
+;; the adaptive fill heuristics can mess up major modes (e.g. I've run
+;; into trouble with `svelte-mode').
+
+(setq-default adaptive-fill-mode nil)
+
+(radian-defhook radian--adaptive-fill-enable ()
+  text-mode-hook
+  "Re-enable `adaptive-fill-mode' in `text-mode' and derived."
+  (setq-local adaptive-fill-mode t))
+
+(radian-defhook radian--adaptive-fill-disable ()
+  sgml-mode-hook
+  "Re-disable `adaptive-fill-mode' for `sgml-mode' and derived.
+Apparently, such modes are derived from `text-mode', even though
+they are definitely programming-oriented."
+  (setq-local adaptive-fill-mode nil))
+
 (define-minor-mode radian-fix-whitespace-mode
   "Minor mode to automatically fix whitespace on save.
 If enabled, then saving the buffer deletes all trailing
@@ -2020,6 +2037,7 @@ buffer."
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'latex-mode "\\[")
   (radian--smartparens-pair-setup #'markdown-mode "```")
+  (radian--smartparens-pair-setup #'css-mode "{")
 
   ;; It's unclear to me why any of this is needed.
   (radian--smartparens-pair-setup #'json-mode "[")
@@ -2058,9 +2076,9 @@ buffer."
   ;; We need to do this both before and after Apheleia is loaded
   ;; because the autoloading is set up such that the minor mode
   ;; definition is evaluated twice.
-  (blackout 'apheleia-mode)
+  (blackout 'apheleia-mode " Aph")
 
-  :blackout t)
+  :blackout " Aph")
 
 ;;;; Snippet expansion
 
@@ -2206,6 +2224,10 @@ set LSP configuration (see `lsp-python-ms')."
 
   :config
 
+  ;; We want to make sure the PATH is set up correctly by now, since
+  ;; otherwise we might not be able to find the LSP server binaries.
+  (radian-env-setup)
+
   ;; As per <https://github.com/emacs-lsp/lsp-mode#performance>.
   (setq read-process-output-max (* 1024 1024))
 
@@ -2215,17 +2237,11 @@ set LSP configuration (see `lsp-python-ms')."
 This is a `:before-until' advice for several `lsp-mode' logging
 functions."
     (or
-     ;; Messages we get when trying to start LSP (happens every time
-     ;; we open a buffer).
-     (member format `("No LSP server for %s(check *lsp-log*)."
-                      "Connected to %s."
-                      ,(concat
-                        "Unable to calculate the languageId for current "
-                        "buffer. Take a look at "
-                        "lsp-language-id-configuration.")
-                      ,(concat
-                        "There are no language servers supporting current "
-                        "mode %s registered with `lsp-mode'.")))
+     (string-match-p "No LSP server for %s" format)
+     (string-match-p "Connected to %s" format)
+     (string-match-p "Unable to calculate the languageId" format)
+     (string-match-p
+      "There are no language servers supporting current mode" format)
      ;; Errors we get from gopls for no good reason (I can't figure
      ;; out why). They don't impair functionality.
      (and (stringp (car args))
@@ -2280,15 +2296,6 @@ killed (which happens during Emacs shutdown)."
   (setq lsp-enable-on-type-formatting nil)
 
   :blackout " LSP")
-
-;; Feature `lsp-clients' from package `lsp-mode' defines how to
-;; interface with the various popular LSP servers.
-(use-feature lsp-clients
-  :config
-
-  ;; We want to make sure the PATH is set up correctly by now, since
-  ;; otherwise we might not be able to find the LSP server binaries.
-  (radian-env-setup))
 
 ;;;; Indentation
 
@@ -2515,7 +2522,12 @@ order."
                     (when (thread-first w
                             (lsp--workspace-client)
                             (lsp--client-server-id)
-                            (memq '(jsts-ls mspyls bash-ls texlab ts-ls))
+                            (memq '(jsts-ls
+                                    mspyls
+                                    bash-ls
+                                    texlab
+                                    ts-ls
+                                    svelte-ls))
                             (not))
                       (cl-return t)))))))
 
@@ -2960,7 +2972,7 @@ This works around an upstream bug; see
 ;; for use with `lsp-mode'.
 (use-package lsp-haskell
   :demand t
-  :after (:all lsp-clients haskell-mode))
+  :after (:all lsp-mode haskell-mode))
 
 ;;;; Lua
 ;; <http://www.lua.org/>
@@ -3077,6 +3089,21 @@ See https://emacs.stackexchange.com/a/3338/12534."
    (t
     (setq python-shell-interpreter "python")))
 
+  (radian-defhook radian--python-use-correct-executable ()
+    python-mode-hook
+    "Use correct executables for Python tooling."
+    (save-excursion
+      (save-match-data
+        (when (or (looking-at "#!/usr/bin/env \\(python[^ \n]+\\)")
+                  (looking-at "#!\\([^ \n]+/python[^ \n]+\\)"))
+          (setq-local
+           python-shell-interpreter
+           (substring-no-properties (match-string 1))))))
+    (with-no-warnings
+      (setq-local
+       lsp-python-ms-python-executable-cmd
+       python-shell-interpreter)))
+
   ;; I honestly don't understand why people like their packages to
   ;; spew so many messages.
   (setq python-indent-guess-indent-offset-verbose nil)
@@ -3111,7 +3138,7 @@ Return either a string or nil."
 ;; better than Palantir's in my opinion.
 (use-package lsp-python-ms
   :demand t
-  :after (:all lsp-clients python)
+  :after (:all lsp-mode python)
   :config
 
   (radian-defadvice radian--lsp-python-ms-silence (func &rest args)
@@ -3239,7 +3266,7 @@ Return either a string or nil."
     (when (eq major-mode 'sh-mode)
       (setq mode-name (capitalize (symbol-name sh-shell)))))
 
-  (use-feature lsp-clients
+  (use-feature lsp-bash
     :config
 
     ;; Only activate the Bash LSP server in Bash code, not all shell
@@ -3453,7 +3480,7 @@ environment with point at the end of a non-empty line of text."
          ("\\.html?\\'" . web-mode)
          ;; My additions.
          ("\\.ejs\\'" . web-mode)
-         ("\\.jsx?\\'" . web-mode)
+         ("\\.[cm]?jsx?\\'" . web-mode)
          ("\\.tsx?\\'" . web-mode)
          ("\\.css\\'" . web-mode)
          ("\\.hbs\\'" . web-mode))
@@ -3466,6 +3493,11 @@ environment with point at the end of a non-empty line of text."
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
   (setq web-mode-css-indent-offset 2)
+
+  ;; Not sure why anyone would want 1 space indent for inline scripts
+  ;; and CSS. Set it to 2 for consistency.
+  (setq web-mode-script-padding 2)
+  (setq web-mode-style-padding 2)
 
   ;; Autocomplete </ instantly.
   (setq web-mode-enable-auto-closing t)
@@ -3484,7 +3516,7 @@ environment with point at the end of a non-empty line of text."
 
   ;; When using `web-mode' to edit JavaScript files, support JSX tags.
   (add-to-list 'web-mode-content-types-alist
-               '("jsx" . "\\.js[x]?\\'"))
+               '("jsx" . "\\.[cm]?js[x]?\\'"))
 
   ;; Create line comments instead of block comments by default in
   ;; JavaScript. See <https://github.com/fxbois/web-mode/issues/619>.
@@ -3498,19 +3530,20 @@ environment with point at the end of a non-empty line of text."
 
   (radian-defhook radian--web-js-fix-comments ()
     web-mode-hook
-    "Fix comment handling in `web-mode' for JavaScript."
-    (when (member web-mode-content-type '("javascript" "jsx"))
+    "Fix comment handling in `web-mode' for JavaScript.
+Note that this somewhat breaks HTML comments, but it's good
+enough for the moment."
 
-      ;; For some reason the default is to insert HTML comments even
-      ;; in JavaScript.
-      (setq-local comment-start "//")
-      (setq-local comment-end "")
+    ;; For some reason the default is to insert HTML comments even
+    ;; in JavaScript.
+    (setq-local comment-start "//")
+    (setq-local comment-end "")
 
-      ;; Needed since otherwise the default value generated by
-      ;; `comment-normalize-vars' will key off the syntax and think
-      ;; that a single "/" starts a comment, which completely borks
-      ;; auto-fill.
-      (setq-local comment-start-skip "// *")))
+    ;; Needed since otherwise the default value generated by
+    ;; `comment-normalize-vars' will key off the syntax and think
+    ;; that a single "/" starts a comment, which completely borks
+    ;; auto-fill.
+    (setq-local comment-start-skip "// *"))
 
   (use-feature apheleia
     :config
@@ -4762,7 +4795,6 @@ Instead, display simply a flat colored region in the fringe."
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
 (use-package rg
-  :straight (:host github :repo "dajva/rg.el" :branch "develop")
   :bind* (("C-c k" . #'radian-rg))
   :config
 
