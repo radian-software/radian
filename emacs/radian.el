@@ -3264,18 +3264,7 @@ Return either a string or nil."
     ;; `pkgbuild-mode'.
     (setq mode-line-process nil)
     (when (eq major-mode 'sh-mode)
-      (setq mode-name (capitalize (symbol-name sh-shell)))))
-
-  (use-feature lsp-bash
-    :config
-
-    ;; Only activate the Bash LSP server in Bash code, not all shell
-    ;; script code. It's not very helpful to get Bash syntax errors
-    ;; while editing Zsh code.
-    (radian-protect-macros
-      (setf (lsp--client-activation-fn (gethash 'bash-ls lsp-clients))
-            (lambda (&rest _)
-              (memq sh-shell '(sh bash)))))))
+      (setq mode-name (capitalize (symbol-name sh-shell))))))
 
 ;;;; Swift
 ;; https://developer.apple.com/swift/
