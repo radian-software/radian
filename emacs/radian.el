@@ -1686,8 +1686,11 @@ invocation will kill the newline."
 (radian-defadvice radian--advice-disallow-password-copying (func &rest args)
   :around #'read-passwd
   "Don't allow copying a password to the kill ring."
-  (cl-letf (((symbol-function #'kill-new) #'ignore)
-            ((symbol-function #'kill-append) #'ignore))
+  (cl-letf (((symbol-function #'kill-region)
+             (lambda (beg end &optional region)
+               (if region
+                   (delete-region (region-beginning) (region-end))
+                 (delete-region beg end)))))
     (apply func args)))
 
 ;; Feature `delsel' provides an alternative behavior for certain
