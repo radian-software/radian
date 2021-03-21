@@ -2348,7 +2348,9 @@ killed (which happens during Emacs shutdown)."
 If `company-backends' is overridden by Radian, then these
 backends will still be included.")
 
-  :bind (;; Remap the standard Emacs keybindings for invoking
+  :bind (:filter company-mode
+
+         ;; Remap the standard Emacs keybindings for invoking
          ;; completion to instead use Company. You might think this
          ;; could be put in the `:bind*' declaration below, but it
          ;; seems that `bind-key*' does not work with remappings.
@@ -2403,7 +2405,9 @@ backends will still be included.")
          ("<up>" . #'company-select-previous)
          ("<down>" . #'company-select-next))
 
-  :bind* (;; The default keybinding for `completion-at-point' and
+  :bind* (:filter company-mode
+
+          ;; The default keybinding for `completion-at-point' and
           ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
           ;; already remapped those bindings to `company-manual-begin'
           ;; above. Here we make sure that they definitely invoke
