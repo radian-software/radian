@@ -605,13 +605,19 @@ nice.)"
 ;; depend on Org, they will not accidentally cause the Emacs-provided
 ;; (outdated and duplicated) version of Org to be loaded before the
 ;; real one is registered.
-;;
-;; Use my mirror of Org because the upstream has *shockingly*
-;; atrocious uptime (namely, the entire service will just go down for
-;; more than a day at a time on a regular basis). Unacceptable because
-;; it keeps breaking Radian CI.
-(straight-use-package
- '(org :host github :repo "emacs-straight/org-mode" :local-repo "org"))
+
+(straight-register-package 'org)
+(straight-register-package 'org-plus-contrib)
+
+(defcustom radian-org-enable-contrib nil
+  "Non-nil means to make Org contrib modules available.
+This has to be set at the beginning of init, i.e. in the top
+level of init.local.el."
+  :type 'boolean)
+
+(if radian-org-enable-contrib
+    (straight-use-package 'org-plus-contrib)
+  (straight-use-package 'org))
 
 ;;; el-patch
 
