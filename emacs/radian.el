@@ -43,11 +43,50 @@
 
 ;;; Define utility functions and variables
 
+
+(defcustom radian-org-enable-contrib nil
+  "Non-nil means to make Org contrib modules available.
+This has to be set at the beginning of init, i.e. in the top
+level of init.local.el."
+  :type 'boolean)
+
+(defcustom radian-color-theme-enable t
+  "Non-nil means to load the default Radian color theme.
+Set this to nil if you wish to load a different color theme in
+your local configuration."
+  :type 'boolean)
+
+(make-obsolete-variable 'radian-org-enable-contrib
+                        'radian-disabled-packages
+                        nil)
+(make-obsolete-variable 'radian-color-theme-enable
+                        'radian-disabled-packages
+                        nil)
+
+
+(defvar radian-disabled-packages nil
+  "List of packages that Radian should not load.
+
+Radian always loads the packages `use-package', `straight',
+`blackout', `bind-key' and `el-patch' even if they are members of
+this list.")
+
+(unless radian-color-theme-enable
+  (add-to-list 'radian-disabled-packages
+               'zerodark-theme))
+(unless radian-org-enable-contrib
+  (add-to-list 'radian-disabled-packages
+               'org-plus-contrib))
+
 (defvar radian-directory (file-name-directory
                           (directory-file-name
                            (file-name-directory
                             radian-lib-file)))
   "Path to the Radian Git repository.")
+
+(defmacro radian-enabled-p (package)
+  "Return nil if PACKAGE should not be loaded by Radian."
+  `(not (memq ',package radian-disabled-packages)))
 
 (defmacro radian-protect-macros (&rest body)
   "Eval BODY, protecting macros from incorrect expansion.
@@ -539,13 +578,31 @@ binding the variable dynamically over the entire init-file."
 ;; https://github.com/jwiegley/use-package#notes-about-lazy-loading.
 (setq use-package-always-defer t)
 
+(defmacro radian-use-package (name &rest args)
+  "Like `use-package', but enabled only if the package is not in
+`radian-exclude-packages'. NAME and ARGS are as in `use-package'."
+  (declare (indent 1))
+  `(if (radian-enabled-p ,name)
+       (use-package ,name ,@args)
+     (let* ((melpa-recipe (plist-get ',args ':straight))
+            (non-nil-straight (not (and (plist-member ',args ':straight)
+                                        (null melpa-recipe)))))
+       (when (or (and straight-use-package-by-default
+                      non-nil-straight)
+                 non-nil-straight)
+         (straight-register-package
+          (if melpa-recipe
+              ',name
+            (cons ',name melpa-recipe)))))))
+
 (defmacro use-feature (name &rest args)
-  "Like `use-package', but with `straight-use-package-by-default' disabled.
+  "Like `radian-use-package', but with `straight-use-package-by-default' disabled.
 NAME and ARGS are as in `use-package'."
   (declare (indent defun))
-  `(use-package ,name
-     :straight nil
-     ,@args))
+  `(when (radian-enabled-p ,name)
+     (use-package ,name
+                  :straight nil
+                  ,@args)))
 
 (defun radian--remove-sharp-quotes (form)
   "Remove sharp quotes in all sub-forms of FORM."
@@ -595,7 +652,7 @@ nice.)"
 ;; Package `no-littering' changes the default paths for lots of
 ;; different packages, with the net result that the ~/.emacs.d folder
 ;; is much more clean and organized.
-(use-package no-littering
+(radian-use-package no-littering
   :demand t)
 
 ;;; Prevent Emacs-provided Org from being loaded
@@ -609,15 +666,9 @@ nice.)"
 (straight-register-package 'org)
 (straight-register-package 'org-contrib)
 
-(defcustom radian-org-enable-contrib nil
-  "Non-nil means to make Org contrib modules available.
-This has to be set at the beginning of init, i.e. in the top
-level of init.local.el."
-  :type 'boolean)
-
-(if radian-org-enable-contrib
-    (straight-use-package 'org-contrib)
-  (straight-use-package 'org))
+(if (radian-enabled-p org-plus-contrib)
+    (radian-use-package org-plus-contrib)
+  (radian-use-package org))
 
 ;;; el-patch
 
@@ -651,8 +702,7 @@ level of init.local.el."
              (boundp 'mac-command-modifier))
     (setq mac-option-modifier 'meta)
     (setq mac-command-modifier 'super))
-
-  (bind-key "s-z" #'undo-tree-undo)
+  (bind-key "s-z" #'undo)
   (bind-key "s-x" #'kill-region)
   (bind-key "s-c" #'kill-ring-save)
   (bind-key "s-v" #'yank)
@@ -692,7 +742,7 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
 
 ;; Package `which-key' displays the key bindings and associated
 ;; commands following the currently-entered key prefix in a popup.
-(use-package which-key
+(radian-use-package which-key
   :demand t
   :config
 
@@ -920,7 +970,7 @@ ourselves."
 ;; typing a query to narrow the list, and then selecting one of the
 ;; remaining candidates. This offers a significant improvement over
 ;; the default Emacs interface for candidate selection.
-(use-package selectrum
+(radian-use-package selectrum
   :straight (:host github :repo "raxod502/selectrum")
   :defer t
   :init
@@ -930,7 +980,7 @@ ourselves."
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
-(use-package prescient
+(radian-use-package prescient
   :config
 
   ;; Remember usage statistics across Emacs sessions.
@@ -942,7 +992,7 @@ ourselves."
 
 ;; Package `selectrum-prescient' provides intelligent sorting and
 ;; filtering for candidates in Selectrum menus.
-(use-package selectrum-prescient
+(radian-use-package selectrum-prescient
   :straight (:host github :repo "raxod502/prescient.el"
                    :files ("selectrum-prescient.el"))
   :demand t
@@ -1011,13 +1061,13 @@ active minibuffer, even if the minibuffer is not selected."
 ;; rotate, and transpose Emacs windows: `flip-frame', `flop-frame',
 ;; `transpose-frame', `rotate-frame-clockwise',
 ;; `rotate-frame-anticlockwise', `rotate-frame'.
-(use-package transpose-frame
+(radian-use-package transpose-frame
   :bind* (("s-t" . #'transpose-frame)))
 
 ;; Package `buffer-move' provides simple commands to swap Emacs
 ;; windows: `buf-move-up', `buf-move-down', `buf-move-left',
 ;; `buf-move-right'.
-(use-package buffer-move)
+(radian-use-package buffer-move)
 
 ;; Feature `ibuffer' provides a more modern replacement for the
 ;; `list-buffers' command.
@@ -1059,7 +1109,7 @@ active minibuffer, even if the minibuffer is not selected."
 ;; automatically added to as you visit Git repositories, Node.js
 ;; projects, etc. It then provides commands for quickly navigating
 ;; between and within these projects.
-(use-package projectile
+(radian-use-package projectile
   :defer 1
   :bind-keymap* (("C-c p" . projectile-command-map))
   :config
@@ -1725,7 +1775,7 @@ invocation will kill the newline."
 ;; tree-based system. In basic usage, you don't even have to think
 ;; about the tree, because it acts like a conventional undo/redo
 ;; system. Bindings are C-/, M-/, and C-x u.
-(use-package undo-tree
+(radian-use-package undo-tree
   :demand t
   :bind (;; By default, `undo' (and by extension `undo-tree-undo') is
          ;; bound to C-_ and C-/, and `undo-tree-redo' is bound to
@@ -1842,7 +1892,7 @@ the reverse direction from \\[pop-global-mark]."
 ;; similar to the tried-and-true text search interfaces in web
 ;; browsers and other programs (think of what happens when you type
 ;; ctrl+F).
-(use-package ctrlf
+(radian-use-package ctrlf
   :straight (:host github :repo "raxod502/ctrlf")
   :init
 
@@ -1870,13 +1920,13 @@ buffer."
 ;; Package `visual-regexp' provides an alternate version of
 ;; `query-replace' which highlights matches and replacements as you
 ;; type.
-(use-package visual-regexp
+(radian-use-package visual-regexp
   :bind (([remap query-replace] . #'vr/query-replace)))
 
 ;; Package `visual-regexp-steroids' allows `visual-regexp' to use
 ;; regexp engines other than Emacs'; for example, Python or Perl
 ;; regexps.
-(use-package visual-regexp-steroids
+(radian-use-package visual-regexp-steroids
   :demand t
   :after visual-regexp
   :bind (([remap query-replace-regexp] . #'radian-query-replace-literal))
@@ -1962,7 +2012,7 @@ buffer."
 ;; delimiters of many different types, as well as interactive commands
 ;; and keybindings for operating on paired delimiters at the
 ;; s-expression level. It provides a Paredit compatibility layer.
-(use-package smartparens
+(radian-use-package smartparens
   :demand t
   :config
 
@@ -2079,7 +2129,7 @@ buffer."
 ;; Package `apheleia' implements a sophisticated algorithm for
 ;; applying code formatters asynchronously on save without moving
 ;; point or modifying the scroll position.
-(use-package apheleia
+(radian-use-package apheleia
   :straight (:host github :repo "raxod502/apheleia")
   :init
 
@@ -2109,7 +2159,7 @@ buffer."
 ;; abbreviations into fillable templates. The only reason we have it
 ;; here is because it gets pulled in by LSP, and we need to unbreak
 ;; some stuff.
-(use-package yasnippet
+(radian-use-package yasnippet
   :bind (:map yas-minor-mode-map
 
               ;; Disable TAB from expanding snippets, as I don't use it and
@@ -2201,7 +2251,7 @@ currently active.")
 ;; that `lsp-python-ms' is configured to discover the appropriate
 ;; Pipenv or Poetry virtualenv, but maybe it will come in handy
 ;; someday.
-(use-package pyvenv)
+(radian-use-package pyvenv)
 
 ;;;; Language servers
 
@@ -2209,7 +2259,7 @@ currently active.")
 ;; Protocol <https://langserver.org/>. It is where we get all of our
 ;; information for completions, definition location, documentation,
 ;; and so on.
-(use-package lsp-mode
+(radian-use-package lsp-mode
   :init
 
   (defcustom radian-lsp-disable nil
@@ -2350,7 +2400,7 @@ killed (which happens during Emacs shutdown)."
 ;; candidates, as well as optional documentation and source code. Then
 ;; Company allows for multiple frontends to display the candidates,
 ;; such as a tooltip menu. Company stands for "Complete Anything".
-(use-package company
+(radian-use-package company
   :defer 0.5
   :init
 
@@ -2516,7 +2566,7 @@ menu to disappear and then come back after `company-idle-delay'."
 
 ;; Package `company-prescient' provides intelligent sorting and
 ;; filtering for candidates in Company completions.
-(use-package company-prescient
+(radian-use-package company-prescient
   :demand t
   :after company
   :config
@@ -2526,7 +2576,7 @@ menu to disappear and then come back after `company-idle-delay'."
 
 ;; Package `company-lsp' provides a Company backend for `lsp-mode'.
 ;; It's configured automatically by `lsp-mode'.
-(use-package company-lsp
+(radian-use-package company-lsp
   :init
 
   (use-feature lsp
@@ -2575,7 +2625,30 @@ order."
 ;; languages. The advantage of `dumb-jump' is that it doesn't try to
 ;; be clever, so it "just works" instantly for dozens of languages
 ;; with zero configuration.
-(use-package dumb-jump
+(radian-use-package dumb-jump
+  :init/el-patch
+
+  (defvar dumb-jump-mode-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map (kbd "C-M-g") 'dumb-jump-go)
+      (define-key map (kbd "C-M-p") 'dumb-jump-back)
+      (define-key map (kbd "C-M-q") 'dumb-jump-quick-look)
+      map))
+
+  (define-minor-mode dumb-jump-mode
+    "Minor mode for jumping to variable and function definitions"
+    :global t
+    :keymap dumb-jump-mode-map)
+
+  :init
+
+  (dumb-jump-mode +1)
+
+  :bind (:map dumb-jump-mode-map
+              ("M-Q" . #'dumb-jump-quick-look))
+  :bind* (("C-M-d" . #'dumb-jump-go-prompt)
+          ("C-x 4 g" . #'dumb-jump-go-other-window)
+          ("C-x 4 d" . #'radian-dumb-jump-go-prompt-other-window))
   :config
 
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate 100))
@@ -2637,7 +2710,7 @@ was printed, and only have ElDoc display if one wasn't."
 ;; Flycheck anywhere else and rely on `lsp-ui' to handle things when
 ;; appropriate. However, interestingly, Flycheck is not marked as a
 ;; dependency of `lsp-ui', hence this declaration.
-(use-package flycheck
+(radian-use-package flycheck
   :config
 
   ;; For use with `lsp-ui'.
@@ -2649,7 +2722,7 @@ was printed, and only have ElDoc display if one wasn't."
 ;; Package `lsp-ui' provides a pretty UI for showing diagnostic
 ;; messages from LSP in the buffer using overlays. It's configured
 ;; automatically by `lsp-mode'.
-(use-package lsp-ui
+(radian-use-package lsp-ui
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
@@ -2705,7 +2778,7 @@ was printed, and only have ElDoc display if one wasn't."
 ;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
 
 ;; Package `apples-mode' provides a major mode for AppleScript.
-(use-package apples-mode
+(radian-use-package apples-mode
   :mode "\\.\\(applescri\\|sc\\)pt\\'")
 
 ;;;; C, C++, Objective-C, Java
@@ -2753,13 +2826,13 @@ was printed, and only have ElDoc display if one wasn't."
 ;; https://clojure.org/
 
 ;; Package `clojure-mode' provides a major mode for Clojure.
-(use-package clojure-mode)
+(radian-use-package clojure-mode)
 
 ;; Package `cider' provides integrated Clojure and ClojureScript REPLs
 ;; directly in Emacs, a Company backend that uses a live REPL
 ;; connection to retrieve completion candidates, and documentation and
 ;; source lookups for Clojure code.
-(use-package cider
+(radian-use-package cider
   :config
 
   ;; By default, any error messages that occur when CIDER is starting
@@ -2845,7 +2918,7 @@ which is a problem)."
 ;; https://golang.org/
 
 ;; Package `go-mode' provides a major mode for Go.
-(use-package go-mode
+(radian-use-package go-mode
   :config
 
   (defvar radian--go-defun-regexp
@@ -2933,7 +3006,7 @@ thing as far as I can tell)."
 
 ;; Package `haskell-mode' provides a major mode and REPL integration
 ;; for Haskell.
-(use-package haskell-mode
+(radian-use-package haskell-mode
   :config
 
   ;; Enable REPL integration.
@@ -2980,7 +3053,7 @@ This works around an upstream bug; see
 
 ;; Package `lsp-haskell' configures the HIE Haskell language server
 ;; for use with `lsp-mode'.
-(use-package lsp-haskell
+(radian-use-package lsp-haskell
   :demand t
   :after (:all lsp-mode haskell-mode))
 
@@ -2988,7 +3061,7 @@ This works around an upstream bug; see
 ;; <http://www.lua.org/>
 
 ;; Package `lua-mode' provides a major mode for Lua code.
-(use-package lua-mode)
+(radian-use-package lua-mode)
 
 ;;;; Makefile
 
@@ -3004,7 +3077,7 @@ This works around an upstream bug; see
 ;; https://daringfireball.net/projects/markdown/
 
 ;; Package `markdown-mode' provides a major mode for Markdown.
-(use-package markdown-mode
+(radian-use-package markdown-mode
   :mode (;; Extension used by Hugo.
          ("\\.mmark\\'" . markdown-mode))
 
@@ -3062,7 +3135,7 @@ https://github.com/jrblevin/markdown-mode/issues/328."
 ;;;; Protobuf
 
 ;; Package `protobuf-mode' provides a major mode for Protobuf.
-(use-package protobuf-mode)
+(radian-use-package protobuf-mode)
 
 ;;;; Python
 ;; https://www.python.org/
@@ -3146,7 +3219,7 @@ Return either a string or nil."
 ;; Package `lsp-python-ms' downloads Microsoft's LSP server for Python
 ;; and configures it with `lsp-mode'. Microsoft's server behaves
 ;; better than Palantir's in my opinion.
-(use-package lsp-python-ms
+(radian-use-package lsp-python-ms
   :demand t
   :after (:all lsp-mode python)
   :config
@@ -3177,7 +3250,7 @@ Return either a string or nil."
 ;; Package `robe' provides a language server for Ruby which draws
 ;; information for autocompletions and source code navigation from a
 ;; live REPL in the project context. Start it with `robe-start'.
-(use-package robe
+(radian-use-package robe
   :init
 
   (add-hook 'ruby-mode-hook #'robe-mode)
@@ -3187,7 +3260,7 @@ Return either a string or nil."
 ;; Package `ruby-electric' allows you to have Emacs insert a paired
 ;; "end" when you type "do", and analogously for other paired
 ;; keywords.
-(use-package ruby-electric
+(radian-use-package ruby-electric
   :init/el-patch
 
   ;; We already have paired delimiter support from Smartparens.
@@ -3246,7 +3319,7 @@ Return either a string or nil."
 ;; https://www.rust-lang.org/
 
 ;; Package `rust-mode' provides a major mode for Rust.
-(use-package rust-mode)
+(radian-use-package rust-mode)
 
 ;;;; Scheme
 
@@ -3254,7 +3327,7 @@ Return either a string or nil."
 
 ;; Package `geiser' provides REPL integration for several
 ;; implementations of Scheme.
-(use-package geiser)
+(radian-use-package geiser)
 
 ;;;; Shell
 ;; http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
@@ -3280,14 +3353,14 @@ Return either a string or nil."
 ;; https://developer.apple.com/swift/
 
 ;; Package `swift-mode' provides a major mode for Swift code.
-(use-package swift-mode)
+(radian-use-package swift-mode)
 
 ;;;; TeX
 ;; https://www.tug.org/begin.html
 
 ;; Package `auctex' provides major modes for TeX code, including
 ;; compiler and viewer integration.
-(straight-use-package 'auctex)
+(radian-use-package auctex)
 
 ;; Feature `tex' from package `auctex' provides the base major mode
 ;; for TeX.
@@ -3300,7 +3373,6 @@ Return either a string or nil."
     "Silence silly messages from `TeX-update-style'."
     (radian--with-silent-message "Applying style hooks"
       (apply func args)))
-
   :config
 
   ;; The following configuration is recommended in the manual at
@@ -3412,7 +3484,7 @@ environment with point at the end of a non-empty line of text."
 
 ;; Package `vimrc-mode' provides a major mode for VimScript.
 ;; Provides syntax highlighting for VimScript files.
-(use-package vimrc-mode
+(radian-use-package vimrc-mode
   :config
 
   (radian-defhook radian--fix-vimrc-indentation ()
@@ -3439,7 +3511,7 @@ environment with point at the end of a non-empty line of text."
 ;; Package `web-mode' provides a major mode for HTML, CSS, JavaScript,
 ;; and every conceivable thing adjacent (TypeScript, JSX, TSX, PSP,
 ;; ASP, Handlebars, etc.) all at once.
-(use-package web-mode
+(radian-use-package web-mode
   ;; Unfortunately `web-mode' does not come with `auto-mode-alist'
   ;; autoloads. We have to establish them manually. This list comes
   ;; from the official website at <http://web-mode.org/> as of
@@ -3523,24 +3595,24 @@ enough for the moment."
 
 ;; Package `apache-mode' provides a major mode for .htaccess and
 ;; similar files.
-(use-package apache-mode)
+(radian-use-package apache-mode)
 
 ;; Package `crontab-mode' provides a major mode for crontab files.
-(use-package crontab-mode)
+(radian-use-package crontab-mode)
 
 ;; Package `dockerfile-mode' provides a major mode for Dockerfiles.
-(use-package dockerfile-mode)
+(radian-use-package dockerfile-mode)
 
 ;; Package `gitconfig-mode' provides a major mode for .gitconfig and
 ;; .gitmodules files.
-(use-package gitconfig-mode)
+(radian-use-package gitconfig-mode)
 
 ;; Package `gitignore-mode' provides a major mode for .gitignore
 ;; files.
-(use-package gitignore-mode)
+(radian-use-package gitignore-mode)
 
 ;; Package `json-mode' provides a major mode for JSON.
-(use-package json-mode
+(radian-use-package json-mode
   :init/el-patch
 
   (defconst json-mode-standard-file-ext '(".json" ".jsonld")
@@ -3595,31 +3667,31 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; Package `pip-requirements' provides a major mode for
 ;; requirements.txt files used by Pip.
-(use-package pip-requirements
+(radian-use-package pip-requirements
 
   ;; The default mode lighter is "pip-require". Ew.
   :blackout "Requirements")
 
 ;; Package `pkgbuild-mode' provides a major mode for PKGBUILD files
 ;; used by Arch Linux and derivatives.
-(use-package pkgbuild-mode)
+(radian-use-package pkgbuild-mode)
 
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
-(use-package ssh-config-mode
+(radian-use-package ssh-config-mode
   :blackout "SSH-Config")
 
 ;; Package `terraform-mode' provides major modes for Terraform
 ;; configuration files.
-(use-package terraform-mode)
+(radian-use-package terraform-mode)
 
 ;; Package `toml-mode' provides a major mode for TOML.
-(use-package toml-mode
+(radian-use-package toml-mode
   :mode "Pipfile\\'"
   ;; Correct the capitalization from "Toml" to "TOML".
   :blackout "TOML")
 
 ;; Package `yaml-mode' provides a major mode for YAML.
-(use-package yaml-mode)
+(radian-use-package yaml-mode)
 
 ;;; Introspection
 ;;;; Help
@@ -3673,7 +3745,7 @@ unhelpful."
 ;; Package `helpful' provides a complete replacement for the built-in
 ;; Emacs help facility which provides much more contextual information
 ;; in a better format.
-(use-package helpful
+(radian-use-package helpful
   :bind (;; Remap standard commands.
          ([remap describe-function] . #'helpful-callable)
          ([remap describe-variable] . #'helpful-variable)
@@ -3894,7 +3966,7 @@ SYMBOL is as in `xref-find-definitions'."
 
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
-(use-package macrostep
+(radian-use-package macrostep
   :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
@@ -3984,7 +4056,7 @@ messages."
 
 ;; Package `package-lint' provides a command that lets you check for
 ;; common package.el packaging problems in your packages.
-(use-package package-lint)
+(radian-use-package package-lint)
 
 ;;; Applications
 ;;;; Organization
@@ -4197,7 +4269,7 @@ be invoked before `org-mode-hook' is run."
 
 ;; Package `osx-trash' provides functionality that allows Emacs to
 ;; place files in the trash on macOS.
-(use-package osx-trash
+(radian-use-package osx-trash
   :commands (osx-trash-move-file-to-trash)
   :init/el-patch
 
@@ -4347,7 +4419,7 @@ are probably not going to be installed."
 
 ;; Package `with-editor' provides infrastructure for using Emacs as an
 ;; external editor for programs like Git. It is used by Magit.
-(use-package with-editor
+(radian-use-package with-editor
   :config/el-patch
 
   ;; Make sure that `with-editor' always starts a server with a
@@ -4390,7 +4462,7 @@ are probably not going to be installed."
 
 ;; Package `transient' is the interface used by Magit to display
 ;; popups.
-(use-package transient
+(radian-use-package transient
   :config
 
   ;; Allow using `q' to quit out of popups, in addition to `C-g'. See
@@ -4400,7 +4472,7 @@ are probably not going to be installed."
 
 ;; Package `magit' provides a full graphical interface for Git within
 ;; Emacs.
-(use-package magit
+(radian-use-package magit
   :bind (;; This is the primary entry point for Magit. Binding to C-x
          ;; g is recommended in the manual:
          ;; https://magit.vc/manual/magit.html#Getting-Started
@@ -4542,7 +4614,7 @@ anything significant at package load time) since it breaks CI."
 
 ;; Package `forge' provides a GitHub/GitLab/etc. interface directly
 ;; within Magit.
-(use-package forge)
+(radian-use-package forge)
 
 ;; Feature `forge-core' from package `forge' implements the core
 ;; functionality.
@@ -4571,7 +4643,7 @@ command."
 ;; Package `git-gutter' adds a column to the left-hand side of each
 ;; window, showing which lines have been added, removed, or modified
 ;; since the last Git commit.
-(use-package git-gutter
+(radian-use-package git-gutter
   :commands (git-gutter:previous-hunk
              git-gutter:next-hunk
              radian-git-gutter:beginning-of-hunk
@@ -4685,7 +4757,7 @@ changes, which means that `git-gutter' needs to be re-run.")
       (fset 'define-fringe-bitmap #'ignore))
     (unless (boundp 'overflow-newline-into-fringe)
       (setq overflow-newline-into-fringe t)))
-  (use-package git-gutter-fringe
+  (radian-use-package git-gutter-fringe
     :demand t
     :after git-gutter
     :init
@@ -4761,7 +4833,7 @@ Instead, display simply a flat colored region in the fringe."
 
 ;; Package `rg' just provides an interactive command `rg' to run the
 ;; search tool of the same name.
-(use-package rg
+(radian-use-package rg
   :bind* (("C-c k" . #'radian-rg))
   :config
 
@@ -4802,7 +4874,7 @@ argument, search only in files matching current type."
 ;; Package `git-link' provides a simple function M-x git-link which
 ;; copies to the kill ring a link to the current line of code or
 ;; selection on GitHub, GitLab, etc.
-(use-package git-link
+(radian-use-package git-link
   :config
 
   ;; Link to a particular revision of a file rather than using the
@@ -4813,7 +4885,7 @@ argument, search only in files matching current type."
 ;; Chrome or Firefox using Emacs. See
 ;; https://chrome.google.com/webstore/detail/atomic-chrome/lhaoghhllmiaaagaffababmkdllgfcmc
 ;; for the Chrome extension.
-(use-package atomic-chrome
+(radian-use-package atomic-chrome
   :defer 5
   :config
 
@@ -4866,14 +4938,14 @@ Also run `radian-atomic-chrome-setup-hook'."
 ;; First, run `sx-authenticate' in order to provide your username and
 ;; password. After that, you can use any of the autoloaded entry
 ;; points. Navigation is keyboard-centric.
-(use-package sx)
+(radian-use-package sx)
 
 ;;;; Emacs profiling
 
 ;; Package `esup' allows you to run a child Emacs process with special
 ;; profiling functionality, and to collect timing results for each
 ;; form in your init-file.
-(use-package esup
+(radian-use-package esup
   :config
 
   ;; Work around a bug where esup tries to step into the byte-compiled
@@ -4956,9 +5028,9 @@ spam. This advice, however, inhibits the message for everyone.")
 
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
 ;; inside of Emacs, both in the terminal and in windowed mode.
-(use-package restart-emacs
+(radian-use-package restart-emacs
+  :commands (radian-new-emacs)
   :init
-
   (defvar radian--restart-in-progress nil
     "Used to prevent infinite recursion.
 This is non-nil if `radian--advice-kill-emacs-dispatch' has called
@@ -5228,19 +5300,11 @@ spaces."
 
 ;;;; Color theme
 
-(defcustom radian-color-theme-enable t
-  "Non-nil means to load the default Radian color theme.
-Set this to nil if you wish to load a different color theme in
-your local configuration."
-  :type 'boolean)
-
 ;; Package `zerodark-theme' provides a good-looking color theme that
 ;; works in both windowed and tty Emacs.
-(straight-register-package
- '(zerodark-theme :host github :repo "NicolasPetton/zerodark-theme"))
-(when radian-color-theme-enable
-  (use-package zerodark-theme
-    :no-require t))
+(radian-use-package zerodark-theme
+  :straight (:host github :repo "NicolasPetton/zerodark-theme")
+  :no-require t)
 
 ;;; Closing
 
@@ -5260,40 +5324,40 @@ your local configuration."
 ;; We should only get here if init was successful. If we do,
 ;; byte-compile this file asynchronously in a subprocess using the
 ;; Radian Makefile. That way, the next startup will be fast(er).
-(run-with-idle-timer
- 1 nil
- #'radian-byte-compile)
+(when (radian-enabled-p bytecomp)
+  (run-with-idle-timer
+   1 nil
+   #'radian-byte-compile))
 
 ;; Enable color theme as late as is humanly possible. This reduces
 ;; frame flashing and other artifacts during startup.
-(when radian-color-theme-enable
-  (use-feature zerodark-theme
-    :no-require t
-    :functions (true-color-p)
-    :demand t
-    :config
+(use-feature zerodark-theme
+  :no-require t
+  :functions (true-color-p)
+  :demand t
+  :config
 
-    ;; Needed because `:no-require' for some reason disables the
-    ;; load-time `require' invocation, as well as the compile-time
-    ;; one.
-    (require 'zerodark-theme)
+  ;; Needed because `:no-require' for some reason disables the
+  ;; load-time `require' invocation, as well as the compile-time
+  ;; one.
+  (require 'zerodark-theme)
 
-    (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
-          (class '((class color) (min-colors 89)))
-          (green (if (true-color-p) "#98be65" "#87af5f"))
-          (orange (if (true-color-p) "#da8548" "#d7875f"))
-          (purple (if (true-color-p) "#c678dd" "#d787d7")))
-      (custom-theme-set-faces
-       'zerodark
-       `(selectrum-current-candidate
-         ((,class (:background
-                   ,background-purple
-                   :weight bold
-                   :foreground ,purple))))
-       `(selectrum-primary-highlight ((,class (:foreground ,orange))))
-       `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
+  (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
+        (class '((class color) (min-colors 89)))
+        (green (if (true-color-p) "#98be65" "#87af5f"))
+        (orange (if (true-color-p) "#da8548" "#d7875f"))
+        (purple (if (true-color-p) "#c678dd" "#d787d7")))
+    (custom-theme-set-faces
+     'zerodark
+     `(selectrum-current-candidate
+       ((,class (:background
+                 ,background-purple
+                 :weight bold
+                 :foreground ,purple))))
+     `(selectrum-primary-highlight ((,class (:foreground ,orange))))
+     `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
 
-    (enable-theme 'zerodark)))
+  (enable-theme 'zerodark))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/raxod502/radian/issues/456>.
