@@ -1598,10 +1598,14 @@ they are definitely programming-oriented."
   "Minor mode to automatically fix whitespace on save.
 If enabled, then saving the buffer deletes all trailing
 whitespace and ensures that the file ends with exactly one
-newline."
+newline.
+
+This mode has no effect if `buffer-file-coding-system' is
+`binary'. When changing `buffer-file-coding-system', you need to
+disable and re-enable the mode for the change to have an effect."
   nil nil nil
   (if radian-fix-whitespace-mode
-      (progn
+      (unless (eq buffer-file-coding-system 'binary)
         (setq require-final-newline t)
         (add-hook 'before-save-hook #'delete-trailing-whitespace nil 'local))
     (setq require-final-newline nil)
