@@ -4995,6 +4995,7 @@ spam. This advice, however, inhibits the message for everyone.")
 ;; inside of Emacs, both in the terminal and in windowed mode.
 (use-package restart-emacs
   :init
+
   (defvar radian--restart-in-progress nil
     "Used to prevent infinite recursion.
 This is non-nil if `radian--advice-kill-emacs-dispatch' has called
