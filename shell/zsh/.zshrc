@@ -428,7 +428,7 @@ function pasteln {
 function delink {
     emulate -LR zsh
     if [[ -z $1 ]]; then
-        echo "usage: delink <symlinks>"
+        echo >&2 "usage: delink <symlinks>"
         return 1
     fi
     for link; do
@@ -437,16 +437,16 @@ function delink {
                 target=${link:A}
                 if rm $link; then
                     if cp -R $target $link; then
-                        echo "Copied $target to $link"
+                        echo >&2 "Copied $target to $link"
                     else
                         ln -s $target $link
                     fi
                 fi
             else
-                echo "Broken symlink: $link"
+                echo >&2 "Broken symlink: $link"
             fi
         else
-            echo "Not a symlink: $link"
+            echo >&2 "Not a symlink: $link"
         fi
     done
 }
