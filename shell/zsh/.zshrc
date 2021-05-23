@@ -492,6 +492,12 @@ if (( $+commands[emacsclient] )); then
     alias ecw='emacsclient --alternate-editor='
 fi
 
+#### fd
+
+if (( $+commands[fdfind] )); then
+    alias fd='fdfind'
+fi
+
 #### Git
 
 if (( $+commands[git] )); then
