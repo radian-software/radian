@@ -2570,7 +2570,8 @@ order."
   ;; defined, use the default `completing-read' mechanism to decide
   ;; between them (i.e., delegate to Selectrum) rather than using the
   ;; janky built-in `xref' thingie.
-  (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
+  (setq xref-show-definitions-function
+        #'xref-show-definitions-completing-read))
 
 ;; Package `dumb-jump' provides a mechanism to jump to the definitions
 ;; of functions, variables, etc. in a variety of programming
