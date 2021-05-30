@@ -4138,6 +4138,16 @@ This makes the behavior of `find-file' more reasonable."
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
 
+;; Feature `org-capture' from package `org' provides commands for
+;; quickly adding an entry to an Org file from anywhere in Emacs.
+(use-feature org-capture
+  :config
+
+  ;; Don't set bookmarks when using `org-capture', since
+  ;; `bookmark-face' may be set to a distracting color by the color
+  ;; theme, which makes everything look really ugly.
+  (setq org-capture-bookmark nil))
+
 ;; Feature `org-clock' from package `org' provides the task clocking
 ;; functionality.
 (use-feature org-clock
