@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
+(setq debug-on-error t)
+
 ;; This file wraps the primary Radian configuration (which lives in
 ;; radian.el) so that we don't have to wrap the entire file in various
 ;; `let' forms, etc. We put as much as possible in radian.el.
@@ -30,7 +32,7 @@ loading the init-file twice if it were not for this variable.")
    (t
     (setq radian--init-file-loaded-p t)
 
-    (defvar radian-minimum-emacs-version "25.2"
+    (defvar radian-minimum-emacs-version "26.1"
       "Radian Emacs does not support any Emacs version below this.")
 
     (defvar radian-local-init-file

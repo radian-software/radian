@@ -9,10 +9,6 @@ shared: &shared
         make docker
         CMD="make -k link lint"
 jobs:
-  emacs-25:
-    <<: *shared
-    environment:
-      VERSION: "25"
   emacs-26:
     <<: *shared
     environment:
@@ -29,7 +25,6 @@ workflows:
   version: 2
   ci:
     jobs:
-      - emacs-25
       - emacs-26
       - emacs-27
       - emacs-master

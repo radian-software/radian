@@ -2589,9 +2589,9 @@ order."
 
 ;;;; Display contextual metadata
 
-;; Feature `eldoc' provides a minor mode (enabled by default in Emacs
-;; 25) which allows function signatures or other metadata to be
-;; displayed in the echo area.
+;; Feature `eldoc' provides a minor mode (enabled by default) which
+;; allows function signatures or other metadata to be displayed in the
+;; echo area.
 (use-feature eldoc
   :demand t
   :config
