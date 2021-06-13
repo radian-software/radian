@@ -964,7 +964,8 @@ Normally, \\[keyboard-quit] will just act in the current buffer.
 This advice modifies the behavior so that it will instead exit an
 active minibuffer, even if the minibuffer is not selected."
   (if-let ((minibuffer (active-minibuffer-window)))
-      (with-current-buffer (window-buffer minibuffer)
+      (progn
+        (switch-to-buffer (window-buffer minibuffer))
         (minibuffer-keyboard-quit))
     (funcall keyboard-quit)))
 
