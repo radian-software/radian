@@ -2046,6 +2046,7 @@ buffer."
   (radian--smartparens-pair-setup #'prog-mode "(")
   (radian--smartparens-pair-setup #'prog-mode "[")
   (radian--smartparens-pair-setup #'prog-mode "{")
+  (radian--smartparens-pair-setup #'go-mode "{")
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'latex-mode "\\[")
   (radian--smartparens-pair-setup #'markdown-mode "```")
