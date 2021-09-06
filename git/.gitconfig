@@ -43,6 +43,8 @@
 	process = git-lfs filter-process
 [include]
 	path = ~/.gitconfig.local
+[init]
+	defaultBranch = main
 [merge]
 	conflictstyle = diff3
 	stat = true
