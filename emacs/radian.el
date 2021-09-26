@@ -988,17 +988,12 @@ active minibuffer, even if the minibuffer is not selected."
 ;; all of them in an essentially unpredictable order.
 (use-feature windmove
   :demand t
-  :config
-
-  (windmove-default-keybindings)
-
-  ;; Introduced in Emacs 27:
-
-  (when (fboundp 'windmove-display-default-keybindings)
-    (windmove-display-default-keybindings))
-
-  (when (fboundp 'windmove-delete-default-keybindings)
-    (windmove-delete-default-keybindings)))
+  ;; Avoid using `windmove-default-keybindings' due to
+  ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=50430.
+  :bind (("S-<left>" . #'windmove-left)
+         ("S-<right>" . #'windmove-right)
+         ("S-<up>" . #'windmove-up)
+         ("S-<down>" . #'windmove-down)))
 
 ;; Feature `winner' provides an undo/redo stack for window
 ;; configurations, with undo and redo being C-c left and C-c right,
