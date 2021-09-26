@@ -113,3 +113,7 @@ init-file is loaded, not just once.")
                   (delete-file (concat radian-lib-file "c")))
                 (load radian-lib-file nil 'nomessage 'nosuffix)))
           (run-hooks 'radian--finalize-init-hook)))))))
+
+;; Local Variables:
+;; no-native-compile: t
+;; End:
