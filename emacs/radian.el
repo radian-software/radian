@@ -2043,22 +2043,18 @@ buffer."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (radian--smartparens-pair-setup #'prog-mode "(")
-  (radian--smartparens-pair-setup #'prog-mode "[")
-  (radian--smartparens-pair-setup #'prog-mode "{")
-  (radian--smartparens-pair-setup #'go-mode "{")
+  (dolist (delim '("(" "[" "{"))
+    (dolist (mode '(
+                    fundamental-mode
+                    javascript-mode
+                    protobuf-mode
+                    text-mode
+                    web-mode
+                    ))
+      (radian--smartparens-pair-setup mode delim)))
+
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
-  (radian--smartparens-pair-setup #'latex-mode "\\[")
   (radian--smartparens-pair-setup #'markdown-mode "```")
-  (radian--smartparens-pair-setup #'css-mode "{")
-
-  ;; It's unclear to me why any of this is needed.
-  (radian--smartparens-pair-setup #'json-mode "[")
-  (radian--smartparens-pair-setup #'json-mode "{")
-  (radian--smartparens-pair-setup #'tex-mode "{")
-
-  ;; Deal with `protobuf-mode' not using `define-minor-mode'.
-  (radian--smartparens-pair-setup #'protobuf-mode "{")
 
   ;; Work around https://github.com/Fuco1/smartparens/issues/1036.
   (when (fboundp 'minibuffer-mode)
