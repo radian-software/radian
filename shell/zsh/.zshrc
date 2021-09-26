@@ -88,8 +88,8 @@ autoload -U colors && colors
 
 # Display the user@hostname. Then change the color and display the
 # working directory.
-radian_prompt_prefix='%{${RADIAN_PROMPT_PREFIX:-}%}%{$fg[yellow]%}{%n@%m}'
-radian_prompt_prefix="${radian_prompt_prefix}"' %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
+rpp='%{${RADIAN_PROMPT_PREFIX:-}%}%{$fg[yellow]%}{%n@%m}'
+radian_prompt_prefix="${rpp}"' %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 
 # Change the color and then display a '%' or '#', then reset the color
 # for the user's input.
