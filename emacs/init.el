@@ -1,7 +1,5 @@
 ;; -*- lexical-binding: t -*-
 
-(setq debug-on-error t)
-
 ;; This file wraps the primary Radian configuration (which lives in
 ;; radian.el) so that we don't have to wrap the entire file in various
 ;; `let' forms, etc. We put as much as possible in radian.el.
