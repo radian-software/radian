@@ -2459,7 +2459,7 @@ backends will still be included.")
 
   ;; Show quick-reference numbers in the tooltip. (Select a completion
   ;; with M-1 through M-0.)
-  (setq company-show-numbers t)
+  (setq company-show-quick-access t)
 
   ;; Prevent non-matching input (which will dismiss the completions
   ;; menu), but only if the user interacts explicitly with Company.
