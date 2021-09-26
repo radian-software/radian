@@ -4456,7 +4456,7 @@ as argument."
                                        (el-patch-swap
                                          " *git-credential-cache--daemon*"
                                          (current-buffer))
-                                       magit-git-executable
+                                       (magit-git-executable)
                                        "credential-cache--daemon"
                                        magit-credential-cache-daemon-socket)
                         (el-patch-add
