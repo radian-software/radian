@@ -123,7 +123,7 @@ DOCSTRING and BODY are as in `defun'."
        ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
                            "an"
                          "a")))
-          (format "%s\n\nThis is %s `%S' advice for `%S'."
+          (format "%s\n\nThis is %s `%S' advice for\n`%S'."
                   docstring article where
                   (if (and (listp place)
                            (memq (car place) ''function))
@@ -1311,10 +1311,10 @@ unquote it using a comma."
             (concat (symbol-name defun-name)
                     "-other-window")))
          (docstring (format "Edit file %s."
-                            full-filename))
+                            bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
-                  full-filename))
+                  bare-filename))
          (defun-form `(defun ,defun-name ()
                         ,docstring
                         (interactive)
