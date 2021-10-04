@@ -682,8 +682,8 @@ if (( $+commands[git] )); then
     alias grel='git remote list'
     alias gres='git remote show'
 
-    alias gf='git fetch --prune'
-    alias gfa='git fetch --all --prune'
+    alias gf='git fetch --prune --prune-tags'
+    alias gfa='git fetch --all --prune --prune-tags'
     alias gfu='git fetch --unshallow'
 
     alias gu='git pull'
