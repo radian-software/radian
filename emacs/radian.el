@@ -5,6 +5,19 @@
 ;; variable declarations in each section, run M-x occur with the
 ;; following query: ^;;;;* \|^(
 
+;; Redefine this variable in case it was not defined properly by
+;; init.el, this appears to happen in certain byte-compilation
+;; contexts and I don't really want to track down why to fix it
+;; properly.
+(defvar radian-lib-file
+  (expand-file-name
+   "radian.el"
+   (file-name-directory
+    (file-truename
+     (or user-init-file "~/.emacs.d/init.el"))))
+  "File containing main Radian configuration.
+This file is loaded by init.el.")
+
 ;;; Detect stale bytecode
 
 ;; If Emacs version changed, the bytecode is no longer valid and we
@@ -3249,7 +3262,6 @@ Return either a string or nil."
 (use-package rust-mode)
 
 ;;;; Scheme
-
 ;; http://www.schemers.org/
 
 ;; Package `geiser' provides REPL integration for several
