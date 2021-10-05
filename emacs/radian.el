@@ -4636,8 +4636,8 @@ command."
   ;; and after Apheleia runs).
 
   (remove-hook 'post-command-hook #'git-gutter:post-command-hook)
-  (ad-deactivate #'quit-window)
-  (ad-deactivate #'switch-to-buffer)
+  (advice-remove #'quit-window #'git-gutter:quit-window)
+  (advice-remove #'switch-to-buffer #'git-gutter:switch-to-buffer)
 
   (defvar radian--git-gutter-last-buffer-and-window nil
     "Cons of current buffer and selected window before last command.
