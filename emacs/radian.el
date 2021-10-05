@@ -5,20 +5,6 @@
 ;; variable declarations in each section, run M-x occur with the
 ;; following query: ^;;;;* \|^(
 
-;; Redefine this variable in case it was not defined properly by
-;; init.el, this appears to happen in certain byte-compilation
-;; contexts and I don't really want to track down why to fix it
-;; properly.
-(eval-and-compile
-  (defvar radian-lib-file
-    (expand-file-name
-     "radian.el"
-     (file-name-directory
-      (file-truename
-       (or user-init-file "~/.emacs.d/init.el"))))
-    "File containing main Radian configuration.
-This file is loaded by init.el."))
-
 ;;; Detect stale bytecode
 
 ;; If Emacs version changed, the bytecode is no longer valid and we
@@ -41,6 +27,12 @@ This file is loaded by init.el."))
 (require 'cl-lib)
 (require 'map)
 (require 'subr-x)
+
+;;; Set early configuration
+
+;; Disable byte-compilation warnings from native-compiled packages
+;; from being reported asynchronously into the UI.
+(setq native-comp-async-report-warnings-errors nil)
 
 ;;; Define Radian customization groups
 
