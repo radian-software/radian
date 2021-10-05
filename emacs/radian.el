@@ -9,14 +9,15 @@
 ;; init.el, this appears to happen in certain byte-compilation
 ;; contexts and I don't really want to track down why to fix it
 ;; properly.
-(defvar radian-lib-file
-  (expand-file-name
-   "radian.el"
-   (file-name-directory
-    (file-truename
-     (or user-init-file "~/.emacs.d/init.el"))))
-  "File containing main Radian configuration.
-This file is loaded by init.el.")
+(eval-and-compile
+  (defvar radian-lib-file
+    (expand-file-name
+     "radian.el"
+     (file-name-directory
+      (file-truename
+       (or user-init-file "~/.emacs.d/init.el"))))
+    "File containing main Radian configuration.
+This file is loaded by init.el."))
 
 ;;; Detect stale bytecode
 
