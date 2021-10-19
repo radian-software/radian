@@ -28,6 +28,12 @@
 (require 'map)
 (require 'subr-x)
 
+;;; Set early configuration
+
+;; Disable byte-compilation warnings from native-compiled packages
+;; from being reported asynchronously into the UI.
+(setq native-comp-async-report-warnings-errors nil)
+
 ;;; Define Radian customization groups
 
 (defgroup radian-hooks nil
@@ -123,7 +129,7 @@ DOCSTRING and BODY are as in `defun'."
        ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
                            "an"
                          "a")))
-          (format "%s\n\nThis is %s `%S' advice for `%S'."
+          (format "%s\n\nThis is %s `%S' advice for\n`%S'."
                   docstring article where
                   (if (and (listp place)
                            (memq (car place) ''function))
@@ -1311,10 +1317,10 @@ unquote it using a comma."
             (concat (symbol-name defun-name)
                     "-other-window")))
          (docstring (format "Edit file %s."
-                            full-filename))
+                            bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
-                  full-filename))
+                  bare-filename))
          (defun-form `(defun ,defun-name ()
                         ,docstring
                         (interactive)
@@ -3249,7 +3255,6 @@ Return either a string or nil."
 (use-package rust-mode)
 
 ;;;; Scheme
-
 ;; http://www.schemers.org/
 
 ;; Package `geiser' provides REPL integration for several
@@ -4623,8 +4628,8 @@ command."
   ;; and after Apheleia runs).
 
   (remove-hook 'post-command-hook #'git-gutter:post-command-hook)
-  (ad-deactivate #'quit-window)
-  (ad-deactivate #'switch-to-buffer)
+  (advice-remove #'quit-window #'git-gutter:quit-window)
+  (advice-remove #'switch-to-buffer #'git-gutter:switch-to-buffer)
 
   (defvar radian--git-gutter-last-buffer-and-window nil
     "Cons of current buffer and selected window before last command.
@@ -5292,6 +5297,11 @@ your local configuration."
                    :foreground ,purple))))
        `(selectrum-primary-highlight ((,class (:foreground ,orange))))
        `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
+
+    (dolist (face '(outline-1
+                    outline-2
+                    outline-3))
+      (set-face-attribute face nil :height 1.0))
 
     (enable-theme 'zerodark)))
 

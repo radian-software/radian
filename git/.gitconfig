@@ -32,10 +32,6 @@
 	mnemonicprefix = true
 	renames = copies
 	submodule = log
-[fetch]
-	# Automatically prune stale branches from the remote on every
-	# fetch.
-	prune = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	required = true
