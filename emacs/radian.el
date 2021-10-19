@@ -2243,7 +2243,10 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
                    #'clojure-mode
-                   #'ruby-mode))
+                   #'ruby-mode
+                   ;; Disable for modes with insufficiently mature
+                   ;; language servers.
+                   #'terraform-mode))
         (lsp))))
 
   :config
