@@ -2049,8 +2049,8 @@ buffer."
                     fundamental-mode
                     javascript-mode
                     protobuf-mode
+                    prog-mode
                     text-mode
-                    web-mode
                     ))
       (radian--smartparens-pair-setup mode delim)))
 
