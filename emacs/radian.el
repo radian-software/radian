@@ -4845,6 +4845,7 @@ argument, search only in files matching current type."
 ;; Feature `browse-url' provides commands for opening URLs in
 ;; browsers.
 (use-feature browse-url
+  :functions (markdown-mode magit-mode org-mode org-agenda-mode)
   :init
 
   (defun radian--browse-url-predicate ()
