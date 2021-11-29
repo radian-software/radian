@@ -90,9 +90,9 @@ this list.")
                             radian-lib-file)))
   "Path to the Radian Git repository.")
 
-(defmacro radian-enabled-p (package)
+(defun radian-enabled-p (package)
   "Return nil if PACKAGE should not be loaded by Radian."
-  `(not (memq ',package radian-disabled-packages)))
+  (not (memq package radian-disabled-packages)))
 
 (defmacro radian-protect-macros (&rest body)
   "Eval BODY, protecting macros from incorrect expansion.
@@ -594,7 +594,7 @@ NAME and ARGS are as in `use-package'."
          (package (cond
                    (straight (car straight))
                    (straight-use-package-by-default name))))
-    `(if (radian-enabled-p ,name)
+    `(if (radian-enabled-p ',name)
          (use-package ,name ,@args)
        ,@(when package
            (list `(straight-register-package ',package))))))
@@ -603,7 +603,7 @@ NAME and ARGS are as in `use-package'."
   "Like `radian-use-package', but without straight.el integration.
 NAME and ARGS are as in `use-package'."
   (declare (indent defun))
-  `(when (radian-enabled-p ,name)
+  `(when (radian-enabled-p ',name)
      (use-package ,name
                   :straight nil
                   ,@args)))
@@ -5300,7 +5300,7 @@ spaces."
 ;; We should only get here if init was successful. If we do,
 ;; byte-compile this file asynchronously in a subprocess using the
 ;; Radian Makefile. That way, the next startup will be fast(er).
-(when (radian-enabled-p bytecomp)
+(when (radian-enabled-p 'bytecomp)
   (run-with-idle-timer
    1 nil
    #'radian-byte-compile))
