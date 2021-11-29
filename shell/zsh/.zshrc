@@ -88,7 +88,7 @@ autoload -U colors && colors
 
 # Display the user@hostname. Then change the color and display the
 # working directory.
-rpp='%{${RADIAN_PROMPT_PREFIX:-}%}%{$fg[yellow]%}{%n@%m}'
+rpp='%{${RADIAN_PROMPT_PREFIX:-}%}%{$fg[yellow]%}{%n@${RADIAN_HOSTNAME:-%m}}'
 radian_prompt_prefix="${rpp}"' %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 
 # Change the color and then display a '%' or '#', then reset the color
@@ -682,8 +682,8 @@ if (( $+commands[git] )); then
     alias grel='git remote list'
     alias gres='git remote show'
 
-    alias gf='git fetch --prune'
-    alias gfa='git fetch --all --prune'
+    alias gf='git fetch --prune --prune-tags'
+    alias gfa='git fetch --all --prune --prune-tags'
     alias gfu='git fetch --unshallow'
 
     alias gu='git pull'

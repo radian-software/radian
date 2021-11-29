@@ -28,6 +28,12 @@
 (require 'map)
 (require 'subr-x)
 
+;;; Set early configuration
+
+;; Disable byte-compilation warnings from native-compiled packages
+;; from being reported asynchronously into the UI.
+(setq native-comp-async-report-warnings-errors nil)
+
 ;;; Define Radian customization groups
 
 (defgroup radian-hooks nil
@@ -162,7 +168,7 @@ DOCSTRING and BODY are as in `defun'."
        ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
                            "an"
                          "a")))
-          (format "%s\n\nThis is %s `%S' advice for `%S'."
+          (format "%s\n\nThis is %s `%S' advice for\n`%S'."
                   docstring article where
                   (if (and (listp place)
                            (memq (car place) ''function))
@@ -1361,10 +1367,10 @@ unquote it using a comma."
             (concat (symbol-name defun-name)
                     "-other-window")))
          (docstring (format "Edit file %s."
-                            full-filename))
+                            bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
-                  full-filename))
+                  bare-filename))
          (defun-form `(defun ,defun-name ()
                         ,docstring
                         (interactive)
@@ -2093,8 +2099,8 @@ buffer."
                     fundamental-mode
                     javascript-mode
                     protobuf-mode
+                    prog-mode
                     text-mode
-                    web-mode
                     ))
       (radian--smartparens-pair-setup mode delim)))
 
@@ -3322,7 +3328,6 @@ Return either a string or nil."
 (radian-use-package rust-mode)
 
 ;;;; Scheme
-
 ;; http://www.schemers.org/
 
 ;; Package `geiser' provides REPL integration for several
@@ -4695,8 +4700,8 @@ command."
   ;; and after Apheleia runs).
 
   (remove-hook 'post-command-hook #'git-gutter:post-command-hook)
-  (ad-deactivate #'quit-window)
-  (ad-deactivate #'switch-to-buffer)
+  (advice-remove #'quit-window #'git-gutter:quit-window)
+  (advice-remove #'switch-to-buffer #'git-gutter:switch-to-buffer)
 
   (defvar radian--git-gutter-last-buffer-and-window nil
     "Cons of current buffer and selected window before last command.
@@ -5337,27 +5342,32 @@ spaces."
   :demand t
   :config
 
-  ;; Needed because `:no-require' for some reason disables the
-  ;; load-time `require' invocation, as well as the compile-time
-  ;; one.
-  (require 'zerodark-theme)
+    ;; Needed because `:no-require' for some reason disables the
+    ;; load-time `require' invocation, as well as the compile-time
+    ;; one.
+    (require 'zerodark-theme)
 
-  (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
-        (class '((class color) (min-colors 89)))
-        (green (if (true-color-p) "#98be65" "#87af5f"))
-        (orange (if (true-color-p) "#da8548" "#d7875f"))
-        (purple (if (true-color-p) "#c678dd" "#d787d7")))
-    (custom-theme-set-faces
-     'zerodark
-     `(selectrum-current-candidate
-       ((,class (:background
-                 ,background-purple
-                 :weight bold
-                 :foreground ,purple))))
-     `(selectrum-primary-highlight ((,class (:foreground ,orange))))
-     `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
+    (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
+          (class '((class color) (min-colors 89)))
+          (green (if (true-color-p) "#98be65" "#87af5f"))
+          (orange (if (true-color-p) "#da8548" "#d7875f"))
+          (purple (if (true-color-p) "#c678dd" "#d787d7")))
+      (custom-theme-set-faces
+       'zerodark
+       `(selectrum-current-candidate
+         ((,class (:background
+                   ,background-purple
+                   :weight bold
+                   :foreground ,purple))))
+       `(selectrum-primary-highlight ((,class (:foreground ,orange))))
+       `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
 
-  (enable-theme 'zerodark))
+    (dolist (face '(outline-1
+                    outline-2
+                    outline-3))
+      (set-face-attribute face nil :height 1.0))
+
+    (enable-theme 'zerodark))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/raxod502/radian/issues/456>.
