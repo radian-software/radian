@@ -4063,6 +4063,7 @@ messages."
 ;; interacting with this data, including an agenda view, a time
 ;; clocker, etc. There are *many* extensions.
 (use-feature org
+  :functions (org-bookmark-jump-unhide) ; some issue with Emacs 26
   :bind (:map org-mode-map
 
               ;; Prevent Org from overriding the bindings for
