@@ -49,7 +49,6 @@
 
 ;;; Define utility functions and variables
 
-
 (defcustom radian-org-enable-contrib nil
   "Non-nil means to make Org contrib modules available.
 This has to be set at the beginning of init, i.e. in the top
@@ -64,11 +63,11 @@ your local configuration."
 
 (make-obsolete-variable 'radian-org-enable-contrib
                         'radian-disabled-packages
-                        nil)
+                        "2021-11-28")
+
 (make-obsolete-variable 'radian-color-theme-enable
                         'radian-disabled-packages
-                        nil)
-
+                        "2021-11-28")
 
 (defvar radian-disabled-packages nil
   "List of packages that Radian should not load.
@@ -77,12 +76,13 @@ Radian always loads the packages `use-package', `straight',
 `blackout', `bind-key' and `el-patch' even if they are members of
 this list.")
 
+(unless radian-org-enable-contrib
+  (add-to-list 'radian-disabled-packages
+               'org-contrib))
+
 (unless radian-color-theme-enable
   (add-to-list 'radian-disabled-packages
                'zerodark-theme))
-(unless radian-org-enable-contrib
-  (add-to-list 'radian-disabled-packages
-               'org-plus-contrib))
 
 (defvar radian-directory (file-name-directory
                           (directory-file-name
@@ -585,24 +585,22 @@ binding the variable dynamically over the entire init-file."
 (setq use-package-always-defer t)
 
 (defmacro radian-use-package (name &rest args)
-  "Like `use-package', but enabled only if the package is not in
-`radian-exclude-packages'. NAME and ARGS are as in `use-package'."
+  "Like `use-package', but handles `radian-exclude-packages' properly.
+NAME and ARGS are as in `use-package'."
   (declare (indent 1))
-  `(if (radian-enabled-p ,name)
-       (use-package ,name ,@args)
-     (let* ((melpa-recipe (plist-get ',args ':straight))
-            (non-nil-straight (not (and (plist-member ',args ':straight)
-                                        (null melpa-recipe)))))
-       (when (or (and straight-use-package-by-default
-                      non-nil-straight)
-                 non-nil-straight)
-         (straight-register-package
-          (if melpa-recipe
-              ',name
-            (cons ',name melpa-recipe)))))))
+  (let* ((straight (cl-loop for cur on ',args by #'cdr
+                            when (eq (car cur) :straight)
+                            collect (cadr cur)))
+         (package (cond
+                   (straight (car straight))
+                   (straight-use-package-by-default name))))
+    `(if (radian-enabled-p ,name)
+         (use-package ,name ,@args)
+       ,@(when package
+           (list `(straight-register-package ',package))))))
 
 (defmacro use-feature (name &rest args)
-  "Like `radian-use-package', but with `straight-use-package-by-default' disabled.
+  "Like `radian-use-package', but without straight.el integration.
 NAME and ARGS are as in `use-package'."
   (declare (indent defun))
   `(when (radian-enabled-p ,name)
@@ -671,10 +669,6 @@ nice.)"
 
 (straight-register-package 'org)
 (straight-register-package 'org-contrib)
-
-(if (radian-enabled-p org-plus-contrib)
-    (radian-use-package org-plus-contrib)
-  (radian-use-package org))
 
 ;;; el-patch
 
@@ -2632,29 +2626,6 @@ order."
 ;; be clever, so it "just works" instantly for dozens of languages
 ;; with zero configuration.
 (radian-use-package dumb-jump
-  :init/el-patch
-
-  (defvar dumb-jump-mode-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map (kbd "C-M-g") 'dumb-jump-go)
-      (define-key map (kbd "C-M-p") 'dumb-jump-back)
-      (define-key map (kbd "C-M-q") 'dumb-jump-quick-look)
-      map))
-
-  (define-minor-mode dumb-jump-mode
-    "Minor mode for jumping to variable and function definitions"
-    :global t
-    :keymap dumb-jump-mode-map)
-
-  :init
-
-  (dumb-jump-mode +1)
-
-  :bind (:map dumb-jump-mode-map
-              ("M-Q" . #'dumb-jump-quick-look))
-  :bind* (("C-M-d" . #'dumb-jump-go-prompt)
-          ("C-x 4 g" . #'dumb-jump-go-other-window)
-          ("C-x 4 d" . #'radian-dumb-jump-go-prompt-other-window))
   :config
 
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate 100))
