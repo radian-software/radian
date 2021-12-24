@@ -672,7 +672,10 @@ nice.)"
 ;; different packages, with the net result that the ~/.emacs.d folder
 ;; is much more clean and organized.
 (radian-use-package no-littering
-  :demand t)
+  :demand t
+  :config
+  (setq radian--auth-source-blacklist-file
+        (no-littering-expand-var-file-name "auth-source/blacklist.el")))
 
 ;;; Prevent Emacs-provided Org from being loaded
 
@@ -1465,7 +1468,7 @@ unquote it using a comma."
   :config
 
   (defvar radian--auth-source-blacklist-file
-    (no-littering-expand-var-file-name "auth-source/blacklist.el")
+    (expand-file-name "auth-source/blacklist.el" user-emacs-directory)
     "File to store `auth-source' user blacklist.
 The contents are a list of MD5 hashes, one for each potential
 password that the user has decided not to save.")
@@ -1721,6 +1724,9 @@ two inserted lines are the same."
 ;; Feature `outline' provides major and minor modes for collapsing
 ;; sections of a buffer into an outline-like format.
 (use-feature outline
+  :functions (global-outline-minor-mode
+              global-outline-minor-mode-enable-in-buffers)
+  :defines (global-outline-minor-mode)
   :demand t
   :config
 
@@ -1971,6 +1977,7 @@ buffer."
 ;; unsaved changes).
 (use-feature autorevert
   :defer 2
+  :functions (radian-autorevert-inhibit-p radian--autorevert-silence)
   :init
 
   (defun radian--autorevert-silence ()
@@ -4214,6 +4221,7 @@ This makes the behavior of `find-file' more reasonable."
   ;; that enables clock persistence without slowing down startup to
   ;; work.
   :commands (org-clock-load org-clock-save)
+  :functions (radian--advice-org-clock-load-automatically)
   :init
 
   ;; Allow clock data to be saved persistently.
@@ -4301,6 +4309,7 @@ non-nil value to enable trashing for file operations."
 
 ;; Feature `dired' provides a simplistic filesystem manager in Emacs.
 (use-feature dired
+  :defines (dired-clean-confirm-killing-deleted-buffers)
   :bind (:map dired-mode-map
               ;; This binding is way nicer than ^. It's inspired by
               ;; Sunrise Commander.
