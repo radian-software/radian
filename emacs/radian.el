@@ -4638,6 +4638,7 @@ command."
 ;; window, showing which lines have been added, removed, or modified
 ;; since the last Git commit.
 (radian-use-package git-gutter
+  :functions (radian--git-gutter-load)
   :commands (git-gutter:previous-hunk
              git-gutter:next-hunk
              radian-git-gutter:beginning-of-hunk
