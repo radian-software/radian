@@ -37,7 +37,7 @@
  ("git-gutter" . "c7fd6010ae223a1acde42260302b0be1ec11bdc3")
  ("git-gutter-fringe" . "648cb5b57faec55711803cdc9434e55a733c3eba")
  ("git-link" . "c4cb0edc92013ae4e3660f94c0c0d4d13fca6ee6")
- ("git-modes" . "433e1c57a63c88855fc41a942e29d7bc8c9c16c7")
+ ("git-modes" . "62fbf2e5b84ca789e7bc2f87939386023b5ba3df")
  ("gnu-elpa-mirror" . "f3bde27359e524a8af953e4acef644421d7720f4")
  ("go-mode.el" . "34974346d1f74fa835d745514c9fe9afccce8dae")
  ("haskell-mode" . "8402caa341d90b4236f5c0a802751f9023ccfbe7")

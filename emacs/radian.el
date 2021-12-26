@@ -3536,13 +3536,9 @@ enough for the moment."
 ;; Package `dockerfile-mode' provides a major mode for Dockerfiles.
 (use-package dockerfile-mode)
 
-;; Package `gitconfig-mode' provides a major mode for .gitconfig and
-;; .gitmodules files.
-(use-package gitconfig-mode)
-
-;; Package `gitignore-mode' provides a major mode for .gitignore
-;; files.
-(use-package gitignore-mode)
+;; Package `git-modes' provides major modes for .gitconfig,
+;; .gitmodules, and .gitignore files.
+(use-package git-modes)
 
 ;; Package `json-mode' provides a major mode for JSON.
 (use-package json-mode
