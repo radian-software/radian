@@ -3603,13 +3603,9 @@ enough for the moment."
 ;; Package `dockerfile-mode' provides a major mode for Dockerfiles.
 (radian-use-package dockerfile-mode)
 
-;; Package `gitconfig-mode' provides a major mode for .gitconfig and
-;; .gitmodules files.
-(radian-use-package gitconfig-mode)
-
-;; Package `gitignore-mode' provides a major mode for .gitignore
-;; files.
-(radian-use-package gitignore-mode)
+;; Package `git-modes' provides major modes for .gitconfig,
+;; .gitmodules, and .gitignore files.
+(radian-use-package git-modes)
 
 ;; Package `json-mode' provides a major mode for JSON.
 (radian-use-package json-mode
