@@ -3815,6 +3815,7 @@ bizarre reason."
 ;; buffer, which is very similar but slightly different. Not as
 ;; important.
 (use-feature elisp-mode
+  :functions (helpful-function helpful-variable)
   :config
 
   ;; Note that this function is actually defined in `elisp-mode'
