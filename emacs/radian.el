@@ -673,8 +673,10 @@ nice.)"
 ;; different packages, with the net result that the ~/.emacs.d folder
 ;; is much more clean and organized.
 (radian-use-package no-littering
+  :defines (radian--auth-source-blacklist-file)
   :demand t
   :config
+
   (setq radian--auth-source-blacklist-file
         (no-littering-expand-var-file-name "auth-source/blacklist.el")))
 
