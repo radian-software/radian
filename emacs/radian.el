@@ -1037,12 +1037,18 @@ active minibuffer, even if the minibuffer is not selected."
   (if-let ((minibuffer (active-minibuffer-window)))
       (progn
         (switch-to-buffer (window-buffer minibuffer))
-        (if (featurep 'delsel)
-            (progn
-              (eval-when-compile
-                (require 'delsel))
-              (minibuffer-keyboard-quit))
-          (abort-minibuffers)))
+        (cond
+         ((featurep 'delsel)
+          (progn
+            (eval-when-compile
+              (require 'delsel))
+            (minibuffer-keyboard-quit)))
+         ;; Emacs 28 and later
+         ((fboundp 'abort-minibuffers)
+          (abort-minibuffers))
+         ;; Emacs 27 and earlier
+         (t
+          (abort-recursive-edit))))
     (funcall keyboard-quit)))
 
 (radian-defadvice radian--advice-kill-buffer-maybe-kill-window
