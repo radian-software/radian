@@ -30,7 +30,7 @@ loading the init-file twice if it were not for this variable.")
    (t
     (setq radian--init-file-loaded-p t)
 
-    (defvar radian-minimum-emacs-version "25.2"
+    (defvar radian-minimum-emacs-version "26.1"
       "Radian Emacs does not support any Emacs version below this.")
 
     (defvar radian-local-init-file
@@ -51,16 +51,15 @@ loading the init-file twice if it were not for this variable.")
                        "but you are running Emacs %s")
                radian-minimum-emacs-version emacs-version)
 
-      (let ((link-target
-             ;; This function returns the target of the link. If the
-             ;; init-file is not a symlink, then we abort.
-             ;;
-             ;; We may be loading init.el in batch mode, in which case
-             ;; `user-init-file' is nil. In that case, we should have
-             ;; some backup options to try.
-             (file-symlink-p (or user-init-file
-                                 load-file-name
-                                 buffer-file-name))))
+      (let* ((this-file (or user-init-file "~/.emacs.d/init.el"))
+             (link-target
+              ;; This function returns the target of the link. If the
+              ;; init-file is not a symlink, then we abort.
+              ;;
+              ;; We may be loading init.el in batch mode, in which case
+              ;; `user-init-file' is nil. In that case, we should have
+              ;; some backup options to try.
+              (file-symlink-p this-file)))
 
         (unless link-target
           (error "Init-file %S is not a symlink" this-file))
@@ -113,3 +112,7 @@ init-file is loaded, not just once.")
                   (delete-file (concat radian-lib-file "c")))
                 (load radian-lib-file nil 'nomessage 'nosuffix)))
           (run-hooks 'radian--finalize-init-hook)))))))
+
+;; Local Variables:
+;; no-native-compile: t
+;; End:

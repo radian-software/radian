@@ -28,6 +28,12 @@
 (require 'map)
 (require 'subr-x)
 
+;;; Set early configuration
+
+;; Disable byte-compilation warnings from native-compiled packages
+;; from being reported asynchronously into the UI.
+(setq native-comp-async-report-warnings-errors nil)
+
 ;;; Define Radian customization groups
 
 (defgroup radian-hooks nil
@@ -123,7 +129,7 @@ DOCSTRING and BODY are as in `defun'."
        ,(let ((article (if (string-match-p "^:[aeiou]" (symbol-name where))
                            "an"
                          "a")))
-          (format "%s\n\nThis is %s `%S' advice for `%S'."
+          (format "%s\n\nThis is %s `%S' advice for\n`%S'."
                   docstring article where
                   (if (and (listp place)
                            (memq (car place) ''function))
@@ -507,7 +513,9 @@ binding the variable dynamically over the entire init-file."
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
-        "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -603,13 +611,19 @@ nice.)"
 ;; depend on Org, they will not accidentally cause the Emacs-provided
 ;; (outdated and duplicated) version of Org to be loaded before the
 ;; real one is registered.
-;;
-;; Use my mirror of Org because the upstream has *shockingly*
-;; atrocious uptime (namely, the entire service will just go down for
-;; more than a day at a time on a regular basis). Unacceptable because
-;; it keeps breaking Radian CI.
-(straight-use-package
- '(org :host github :repo "emacs-straight/org-mode" :local-repo "org"))
+
+(straight-register-package 'org)
+(straight-register-package 'org-contrib)
+
+(defcustom radian-org-enable-contrib nil
+  "Non-nil means to make Org contrib modules available.
+This has to be set at the beginning of init, i.e. in the top
+level of init.local.el."
+  :type 'boolean)
+
+(if radian-org-enable-contrib
+    (straight-use-package 'org-contrib)
+  (straight-use-package 'org))
 
 ;;; el-patch
 
@@ -956,7 +970,8 @@ Normally, \\[keyboard-quit] will just act in the current buffer.
 This advice modifies the behavior so that it will instead exit an
 active minibuffer, even if the minibuffer is not selected."
   (if-let ((minibuffer (active-minibuffer-window)))
-      (with-current-buffer (window-buffer minibuffer)
+      (progn
+        (switch-to-buffer (window-buffer minibuffer))
         (minibuffer-keyboard-quit))
     (funcall keyboard-quit)))
 
@@ -979,17 +994,12 @@ active minibuffer, even if the minibuffer is not selected."
 ;; all of them in an essentially unpredictable order.
 (use-feature windmove
   :demand t
-  :config
-
-  (windmove-default-keybindings)
-
-  ;; Introduced in Emacs 27:
-
-  (when (fboundp 'windmove-display-default-keybindings)
-    (windmove-display-default-keybindings))
-
-  (when (fboundp 'windmove-delete-default-keybindings)
-    (windmove-delete-default-keybindings)))
+  ;; Avoid using `windmove-default-keybindings' due to
+  ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=50430.
+  :bind (("S-<left>" . #'windmove-left)
+         ("S-<right>" . #'windmove-right)
+         ("S-<up>" . #'windmove-up)
+         ("S-<down>" . #'windmove-down)))
 
 ;; Feature `winner' provides an undo/redo stack for window
 ;; configurations, with undo and redo being C-c left and C-c right,
@@ -1307,10 +1317,10 @@ unquote it using a comma."
             (concat (symbol-name defun-name)
                     "-other-window")))
          (docstring (format "Edit file %s."
-                            full-filename))
+                            bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
-                  full-filename))
+                  bare-filename))
          (defun-form `(defun ,defun-name ()
                         ,docstring
                         (interactive)
@@ -1591,7 +1601,7 @@ they are definitely programming-oriented."
 If enabled, then saving the buffer deletes all trailing
 whitespace and ensures that the file ends with exactly one
 newline."
-  nil nil nil
+  :after-hook
   (if radian-fix-whitespace-mode
       (progn
         (setq require-final-newline t)
@@ -1637,7 +1647,7 @@ two inserted lines are the same."
 
   (define-minor-mode radian-highlight-long-lines-mode
     "Minor mode for highlighting long lines."
-    nil nil nil
+    :after-hook
     (if radian-highlight-long-lines-mode
         (progn
           (setq-local whitespace-style '(face lines-tail))
@@ -1686,8 +1696,11 @@ invocation will kill the newline."
 (radian-defadvice radian--advice-disallow-password-copying (func &rest args)
   :around #'read-passwd
   "Don't allow copying a password to the kill ring."
-  (cl-letf (((symbol-function #'kill-new) #'ignore)
-            ((symbol-function #'kill-append) #'ignore))
+  (cl-letf (((symbol-function #'kill-region)
+             (lambda (beg end &optional region)
+               (if region
+                   (delete-region (region-beginning) (region-end))
+                 (delete-region beg end)))))
     (apply func args)))
 
 ;; Feature `delsel' provides an alternative behavior for certain
@@ -2031,24 +2044,35 @@ buffer."
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (radian--smartparens-pair-setup #'prog-mode "(")
-  (radian--smartparens-pair-setup #'prog-mode "[")
-  (radian--smartparens-pair-setup #'prog-mode "{")
+  (dolist (delim '("(" "[" "{"))
+    (dolist (mode '(
+                    fundamental-mode
+                    javascript-mode
+                    protobuf-mode
+                    prog-mode
+                    text-mode
+                    ))
+      (radian--smartparens-pair-setup mode delim)))
+
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
-  (radian--smartparens-pair-setup #'latex-mode "\\[")
   (radian--smartparens-pair-setup #'markdown-mode "```")
-  (radian--smartparens-pair-setup #'css-mode "{")
 
-  ;; It's unclear to me why any of this is needed.
-  (radian--smartparens-pair-setup #'json-mode "[")
-  (radian--smartparens-pair-setup #'json-mode "{")
-  (radian--smartparens-pair-setup #'tex-mode "{")
-
-  ;; Deal with `protobuf-mode' not using `define-minor-mode'.
-  (radian--smartparens-pair-setup #'protobuf-mode "{")
+  ;; Work around https://github.com/Fuco1/smartparens/issues/1036.
+  (when (fboundp 'minibuffer-mode)
+    (sp-local-pair #'minibuffer-mode "`" nil :actions nil)
+    (sp-local-pair #'minibuffer-mode "'" nil :actions nil))
 
   ;; Work around https://github.com/Fuco1/smartparens/issues/783.
   (setq sp-escape-quotes-after-insert nil)
+
+  ;; For some reason two C-g's are required to exit out of the
+  ;; minibuffer if you've just typed a parenthesis pair. This appears
+  ;; to be intentional, but doesn't make a lot of intuitive sense
+  ;; since we've disabled highlighting. Kill the problematic
+  ;; keybinding. See also
+  ;; https://github.com/Fuco1/smartparens/pull/890 which was about a
+  ;; similar problem.
+  (define-key sp-pair-overlay-keymap (kbd "C-g") nil)
 
   ;; Quiet some silly messages.
   (dolist (key '(:unmatched-expression :no-matching-tag))
@@ -2345,7 +2369,9 @@ killed (which happens during Emacs shutdown)."
 If `company-backends' is overridden by Radian, then these
 backends will still be included.")
 
-  :bind (;; Remap the standard Emacs keybindings for invoking
+  :bind (:filter company-mode
+
+         ;; Remap the standard Emacs keybindings for invoking
          ;; completion to instead use Company. You might think this
          ;; could be put in the `:bind*' declaration below, but it
          ;; seems that `bind-key*' does not work with remappings.
@@ -2400,7 +2426,9 @@ backends will still be included.")
          ("<up>" . #'company-select-previous)
          ("<down>" . #'company-select-next))
 
-  :bind* (;; The default keybinding for `completion-at-point' and
+  :bind* (:filter company-mode
+
+          ;; The default keybinding for `completion-at-point' and
           ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
           ;; already remapped those bindings to `company-manual-begin'
           ;; above. Here we make sure that they definitely invoke
@@ -2428,7 +2456,7 @@ backends will still be included.")
 
   ;; Show quick-reference numbers in the tooltip. (Select a completion
   ;; with M-1 through M-0.)
-  (setq company-show-numbers t)
+  (setq company-show-quick-access t)
 
   ;; Prevent non-matching input (which will dismiss the completions
   ;; menu), but only if the user interacts explicitly with Company.
@@ -2533,48 +2561,36 @@ order."
 
 ;;;; Definition location
 
+;; Feature `xref' provides the built-in Emacs interface for source
+;; navigation, which various packages can plug into.
+(use-feature xref
+  :config
+
+  ;; When there are multiple options for where a symbol might be
+  ;; defined, use the default `completing-read' mechanism to decide
+  ;; between them (i.e., delegate to Selectrum) rather than using the
+  ;; janky built-in `xref' thingie.
+  (when (and
+         (boundp 'xref-show-definitions-function)
+         (fboundp 'xref-show-definitions-completing-read))
+    (setq xref-show-definitions-function
+          #'xref-show-definitions-completing-read)))
+
 ;; Package `dumb-jump' provides a mechanism to jump to the definitions
 ;; of functions, variables, etc. in a variety of programming
 ;; languages. The advantage of `dumb-jump' is that it doesn't try to
 ;; be clever, so it "just works" instantly for dozens of languages
 ;; with zero configuration.
 (use-package dumb-jump
-  :init/el-patch
-
-  (defvar dumb-jump-mode-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map (kbd "C-M-g") 'dumb-jump-go)
-      (define-key map (kbd "C-M-p") 'dumb-jump-back)
-      (define-key map (kbd "C-M-q") 'dumb-jump-quick-look)
-      map))
-
-  (define-minor-mode dumb-jump-mode
-    "Minor mode for jumping to variable and function definitions"
-    :global t
-    :keymap dumb-jump-mode-map)
-
-  :init
-
-  (dumb-jump-mode +1)
-
-  :bind (:map dumb-jump-mode-map
-              ("M-Q" . #'dumb-jump-quick-look))
-  :bind* (("C-M-d" . #'dumb-jump-go-prompt)
-          ("C-x 4 g" . #'dumb-jump-go-other-window)
-          ("C-x 4 d" . #'radian-dumb-jump-go-prompt-other-window))
   :config
 
-  (defun radian-dumb-jump-go-prompt-other-window ()
-    "Like `dumb-jump-go-prompt' but use a different window."
-    (interactive)
-    (let ((dumb-jump-window 'other))
-      (dumb-jump-go-prompt))))
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate 100))
 
 ;;;; Display contextual metadata
 
-;; Feature `eldoc' provides a minor mode (enabled by default in Emacs
-;; 25) which allows function signatures or other metadata to be
-;; displayed in the echo area.
+;; Feature `eldoc' provides a minor mode (enabled by default) which
+;; allows function signatures or other metadata to be displayed in the
+;; echo area.
 (use-feature eldoc
   :demand t
   :config
@@ -3239,7 +3255,6 @@ Return either a string or nil."
 (use-package rust-mode)
 
 ;;;; Scheme
-
 ;; http://www.schemers.org/
 
 ;; Package `geiser' provides REPL integration for several
@@ -3264,18 +3279,7 @@ Return either a string or nil."
     ;; `pkgbuild-mode'.
     (setq mode-line-process nil)
     (when (eq major-mode 'sh-mode)
-      (setq mode-name (capitalize (symbol-name sh-shell)))))
-
-  (use-feature lsp-bash
-    :config
-
-    ;; Only activate the Bash LSP server in Bash code, not all shell
-    ;; script code. It's not very helpful to get Bash syntax errors
-    ;; while editing Zsh code.
-    (radian-protect-macros
-      (setf (lsp--client-activation-fn (gethash 'bash-ls lsp-clients))
-            (lambda (&rest _)
-              (memq sh-shell '(sh bash)))))))
+      (setq mode-name (capitalize (symbol-name sh-shell))))))
 
 ;;;; Swift
 ;; https://developer.apple.com/swift/
@@ -3293,39 +3297,14 @@ Return either a string or nil."
 ;; Feature `tex' from package `auctex' provides the base major mode
 ;; for TeX.
 (use-feature tex
-  :config/el-patch
+  :config
 
   ;; Remove annoying messages when opening *.tex files.
-  (defun TeX-update-style (&optional force)
-    (el-patch-concat
-      "Run style specific hooks"
-      (el-patch-add
-        ", silently,")
-      " for the current document.
-
-Only do this if it has not been done before, or if optional argument
-FORCE is not nil.")
-    (unless (or (and (boundp 'TeX-auto-update)
-                     (eq TeX-auto-update 'BibTeX)) ; Not a real TeX buffer
-                (and (not force)
-                     TeX-style-hook-applied-p))
-      (setq TeX-style-hook-applied-p t)
-      (el-patch-remove
-        (message "Applying style hooks..."))
-      (TeX-run-style-hooks (TeX-strip-extension nil nil t))
-      ;; Run parent style hooks if it has a single parent that isn't itself.
-      (if (or (not (memq TeX-master '(nil t)))
-              (and (buffer-file-name)
-                   (string-match TeX-one-master
-                                 (file-name-nondirectory (buffer-file-name)))))
-          (TeX-run-style-hooks (TeX-master-file)))
-      (if (and TeX-parse-self
-               (null (cdr-safe (assoc (TeX-strip-extension nil nil t)
-                                      TeX-style-hook-list))))
-          (TeX-auto-apply))
-      (run-hooks 'TeX-update-style-hook)
-      (el-patch-remove
-        (message "Applying style hooks...done"))))
+  (radian-defadvice radian--tex-update-style-silently (func &rest args)
+    :around #'TeX-update-style
+    "Silence silly messages from `TeX-update-style'."
+    (radian--with-silent-message "Applying style hooks"
+      (apply func args)))
 
   :config
 
@@ -3543,24 +3522,7 @@ enough for the moment."
     ;; `comment-normalize-vars' will key off the syntax and think
     ;; that a single "/" starts a comment, which completely borks
     ;; auto-fill.
-    (setq-local comment-start-skip "// *"))
-
-  (use-feature apheleia
-    :config
-
-    (radian-defhook radian--web-highlight-after-formatting ()
-      apheleia-post-format-hook
-      "Make sure syntax highlighting works with Apheleia.
-The problem is that `web-mode' doesn't do highlighting correctly
-in the face of arbitrary buffer modifications, and kind of hacks
-around the problem by hardcoding a special case for yanking based
-on the value of `this-command'. So, when buffer modifications
-happen in an unexpected (to `web-mode') way, we have to manually
-poke it. Otherwise the modified text remains unfontified."
-      (setq web-mode-fontification-off nil)
-      (when (and web-mode-scan-beg web-mode-scan-end global-font-lock-mode)
-        (save-excursion
-          (font-lock-fontify-region web-mode-scan-beg web-mode-scan-end))))))
+    (setq-local comment-start-skip "// *")))
 
 ;;; Configuration file formats
 
@@ -4174,6 +4136,16 @@ This makes the behavior of `find-file' more reasonable."
   ;; Hide blocked tasks in the agenda view.
   (setq org-agenda-dim-blocked-tasks 'invisible))
 
+;; Feature `org-capture' from package `org' provides commands for
+;; quickly adding an entry to an Org file from anywhere in Emacs.
+(use-feature org-capture
+  :config
+
+  ;; Don't set bookmarks when using `org-capture', since
+  ;; `bookmark-face' may be set to a distracting color by the color
+  ;; theme, which makes everything look really ugly.
+  (setq org-capture-bookmark nil))
+
 ;; Feature `org-clock' from package `org' provides the task clocking
 ;; functionality.
 (use-feature org-clock
@@ -4480,7 +4452,7 @@ as argument."
                                        (el-patch-swap
                                          " *git-credential-cache--daemon*"
                                          (current-buffer))
-                                       magit-git-executable
+                                       (magit-git-executable)
                                        "credential-cache--daemon"
                                        magit-credential-cache-daemon-socket)
                         (el-patch-add
@@ -4656,8 +4628,8 @@ command."
   ;; and after Apheleia runs).
 
   (remove-hook 'post-command-hook #'git-gutter:post-command-hook)
-  (ad-deactivate #'quit-window)
-  (ad-deactivate #'switch-to-buffer)
+  (advice-remove #'quit-window #'git-gutter:quit-window)
+  (advice-remove #'switch-to-buffer #'git-gutter:switch-to-buffer)
 
   (defvar radian--git-gutter-last-buffer-and-window nil
     "Cons of current buffer and selected window before last command.
@@ -4990,7 +4962,6 @@ spam. This advice, however, inhibits the message for everyone.")
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
 ;; inside of Emacs, both in the terminal and in windowed mode.
 (use-package restart-emacs
-  :commands (radian-new-emacs)
   :init
 
   (defvar radian--restart-in-progress nil
@@ -5070,66 +5041,12 @@ bound dynamically before being used.")
                 ((or ?r ?R)
                  (restart-emacs arg))
                 ((or ?e ?E)
-                 (radian-new-emacs
+                 (restart-emacs-start-new-emacs
                   (restart-emacs--translate-prefix-to-args arg)))
                 ((or ?k ?K) (radian-really-kill-emacs))
                 (?\C-g (signal 'quit nil))
                 (_ (setq key nil))))))
-        (message "%s%c" prompt key))))
-
-  :config/el-patch
-
-  (defun (el-patch-swap restart-emacs radian-new-emacs)
-      (&optional args)
-    (el-patch-concat
-      (el-patch-swap
-        "Restart Emacs."
-        "Start a new Emacs session without killing the current one.")
-      "
-
-When called interactively ARGS is interpreted as follows
-
-- with a single `universal-argument' (`C-u') Emacs is "
-      (el-patch-swap "restarted" "started")
-      "
-  with `--debug-init' flag
-- with two `universal-argument' (`C-u') Emacs is "
-      (el-patch-swap "restarted" "started")
-      " with
-  `-Q' flag
-- with three `universal-argument' (`C-u') the user prompted for
-  the arguments
-
-When called non-interactively ARGS should be a list of arguments
-with which Emacs should be "
-      (el-patch-swap "restarted" "started")
-      ".")
-    (interactive "P")
-    ;; Do not trigger a restart unless we are sure, we can restart emacs
-    (restart-emacs--ensure-can-restart)
-    ;; We need the new emacs to be spawned after all kill-emacs-hooks
-    ;; have been processed and there is nothing interesting left
-    (let* ((default-directory (restart-emacs--guess-startup-directory))
-           (translated-args (if (called-interactively-p 'any)
-                                (restart-emacs--translate-prefix-to-args args)
-                              args))
-           (restart-args (append translated-args
-                                 ;; When Emacs is started with a -Q
-                                 ;; restart-emacs's autoloads would
-                                 ;; not be present causing the the
-                                 ;; --restart-emacs-desktop argument
-                                 ;; to be unhandled
-                                 (unless (member "-Q" translated-args)
-                                   (restart-emacs--frame-restore-args))))
-           (el-patch-remove
-             (kill-emacs-hook
-              (append kill-emacs-hook
-                      (list (apply-partially
-                             #'restart-emacs--launch-other-emacs
-                             restart-args))))))
-      (el-patch-swap
-        (save-buffers-kill-emacs)
-        (restart-emacs--launch-other-emacs restart-args)))))
+        (message "%s%c" prompt key)))))
 
 ;;; Miscellaneous
 
@@ -5381,6 +5298,11 @@ your local configuration."
        `(selectrum-primary-highlight ((,class (:foreground ,orange))))
        `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
 
+    (dolist (face '(outline-1
+                    outline-2
+                    outline-3))
+      (set-face-attribute face nil :height 1.0))
+
     (enable-theme 'zerodark)))
 
 ;; Make adjustments to color theme that was selected by Radian or
@@ -5399,6 +5321,7 @@ your local configuration."
 ;; Local Variables:
 ;; checkdoc-symbol-words: ("top-level")
 ;; indent-tabs-mode: nil
+;; no-native-compile: t
 ;; outline-regexp: ";;;+ "
 ;; sentence-end-double-space: nil
 ;; End:

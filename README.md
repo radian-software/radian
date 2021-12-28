@@ -24,7 +24,7 @@ more stability.
 
 ## Software configured, features
 
-* [Emacs] (**minimum version supported: 25.2**)
+* [Emacs] (**minimum version supported: 26.1**)
   * Next-generation package manager, [`straight.el`][straight.el]
   * Clean and DRY package customizations using
     [`use-package`][use-package]
@@ -237,6 +237,10 @@ byte-compiled Radian init-file. Using the macro `radian-local-on-hook`
 instead of defining functions and adding them to Radian's hooks
 manually enables some magic that makes this actually work properly.
 
+## Documentation
+
+There is some very incomplete documentation [here][docs].
+
 ## Contributing
 
 Please feel free to contribute in any way that you would like. If you
@@ -264,6 +268,7 @@ commented.
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [docker]: https://www.docker.com/
+[docs]: doc
 [dotman]: https://github.com/raxod502/dotman
 [dumb-jump]: https://github.com/jacktasia/dumb-jump
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html

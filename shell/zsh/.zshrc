@@ -60,6 +60,10 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
+    if typeset -f radian_zplugin_hook > /dev/null; then
+        radian_zplugin_hook
+    fi
+
     autoload -Uz compinit
     compinit
 fi
@@ -84,7 +88,8 @@ autoload -U colors && colors
 
 # Display the user@hostname. Then change the color and display the
 # working directory.
-radian_prompt_prefix='%{$fg[yellow]%}{%n@%m} %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
+rpp='%{${RADIAN_PROMPT_PREFIX:-}%}%{$fg[yellow]%}{%n@${RADIAN_HOSTNAME:-%m}}'
+radian_prompt_prefix="${rpp}"' %(?.%{$fg[blue]%}.%{$fg[red]%})%c'
 
 # Change the color and then display a '%' or '#', then reset the color
 # for the user's input.
@@ -159,15 +164,6 @@ setopt rc_quotes
 # Turn off flow control (which makes it so that ctrl+s and ctrl+q
 # freeze and unfreeze command output, respectively).
 unsetopt flow_control
-
-# Make bracketed paste slightly smarter. This causes url-quote-magic
-# below to work correctly.
-autoload -Uz bracketed-paste-magic
-zle -N bracketed-paste bracketed-paste-magic
-
-# Automatically escape URLs.
-autoload -Uz url-quote-magic
-zle -N self-insert url-quote-magic
 
 #### Completion
 
@@ -424,7 +420,7 @@ function pasteln {
 function delink {
     emulate -LR zsh
     if [[ -z $1 ]]; then
-        echo "usage: delink <symlinks>"
+        echo >&2 "usage: delink <symlinks>"
         return 1
     fi
     for link; do
@@ -433,16 +429,16 @@ function delink {
                 target=${link:A}
                 if rm $link; then
                     if cp -R $target $link; then
-                        echo "Copied $target to $link"
+                        echo >&2 "Copied $target to $link"
                     else
                         ln -s $target $link
                     fi
                 fi
             else
-                echo "Broken symlink: $link"
+                echo >&2 "Broken symlink: $link"
             fi
         else
-            echo "Not a symlink: $link"
+            echo >&2 "Not a symlink: $link"
         fi
     done
 }
@@ -486,6 +482,12 @@ fi
 if (( $+commands[emacsclient] )); then
     alias ec='emacsclient --alternate-editor= -nw'
     alias ecw='emacsclient --alternate-editor='
+fi
+
+#### fd
+
+if (( $+commands[fdfind] )); then
+    alias fd='fdfind'
 fi
 
 #### Git
@@ -601,6 +603,7 @@ if (( $+commands[git] )); then
     alias gcpa='git cherry-pick --abort'
 
     alias grv='git revert'
+    alias grva='git revert --abort'
     alias grvm='git revert -m'
 
     alias gt='git tag'
@@ -679,8 +682,8 @@ if (( $+commands[git] )); then
     alias grel='git remote list'
     alias gres='git remote show'
 
-    alias gf='git fetch --prune'
-    alias gfa='git fetch --all --prune'
+    alias gf='git fetch --prune --prune-tags'
+    alias gfa='git fetch --all --prune --prune-tags'
     alias gfu='git fetch --unshallow'
 
     alias gu='git pull'
