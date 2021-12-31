@@ -3830,14 +3830,16 @@ bizarre reason."
 
   ;; Note that this function is actually defined in `elisp-mode'
   ;; because screw modularity.
-  (radian-defadvice radian--advice-company-elisp-use-helpful
-      (func &rest args)
-    :around #'elisp--company-doc-buffer
-    "Cause `company' to use Helpful to show Elisp documentation."
-    (cl-letf (((symbol-function #'describe-function) #'helpful-function)
-              ((symbol-function #'describe-variable) #'helpful-variable)
-              ((symbol-function #'help-buffer) #'current-buffer))
-      (apply func args)))
+
+  (with-eval-after-load 'helpful
+    (radian-defadvice radian--advice-company-elisp-use-helpful
+        (func &rest args)
+      :around #'elisp--company-doc-buffer
+      "Cause `company' to use Helpful to show Elisp documentation."
+      (cl-letf (((symbol-function #'describe-function) #'helpful-function)
+                ((symbol-function #'describe-variable) #'helpful-variable)
+                ((symbol-function #'help-buffer) #'current-buffer))
+        (apply func args))))
 
   (radian-defadvice radian--advice-fill-elisp-docstrings-correctly (&rest _)
     :before-until #'fill-context-prefix
