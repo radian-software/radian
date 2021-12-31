@@ -113,8 +113,7 @@ never happen, but you'd be wrong, unfortunately. In such a
 situation, you must wrap at least the outer macro in this form,
 but can wrap at any higher level up to the top-level form."
   (declare (indent 0))
-  `(eval '(let ((lexical-binding t))
-            ,@body)))
+  `(eval '(progn ,@body) lexical-binding))
 
 (defmacro radian-protect-macros-maybe (feature &rest body)
   "Same as `radian-protect-macros', but only if FEATURE is unavailable.
