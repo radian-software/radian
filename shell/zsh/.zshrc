@@ -495,7 +495,7 @@ fi
 if (( $+commands[git] )); then
     alias g=git
 
-    alias gh='git help'
+    alias ge='git help'
     alias ghi='git help init'
     alias ghst='git help status'
     alias ghsh='git help show'
