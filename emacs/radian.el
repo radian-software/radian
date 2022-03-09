@@ -3352,14 +3352,16 @@ Return either a string or nil."
   (dolist (func '(sh-set-shell sh-make-vars-local))
     (advice-add func :around #'radian--advice-silence-messages))
 
-  (radian-defhook radian--sh-prettify-mode-line ()
+  (radian-defhook radian--sh-prettify-mode-line (&rest _)
     sh-mode-hook
     "Instead of \"Shell[bash]\", display mode name as \"Bash\"."
     ;; Only do this for `sh-mode', not derived modes such as
     ;; `pkgbuild-mode'.
     (setq mode-line-process nil)
     (when (eq major-mode 'sh-mode)
-      (setq mode-name (capitalize (symbol-name sh-shell))))))
+      (setq mode-name (capitalize (symbol-name sh-shell)))))
+
+  (advice-add 'sh-set-shell :after #'radian--sh-prettify-mode-line))
 
 ;;;; Swift
 ;; https://developer.apple.com/swift/
