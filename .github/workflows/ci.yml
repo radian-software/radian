@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
     strategy:
       matrix:
