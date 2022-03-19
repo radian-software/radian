@@ -84,8 +84,8 @@ more stability.
     [`which-key`][which-key], and more
   * Major modes for editing many languages and configuration file
     types
-  * [Tested on CircleCI](https://circleci.com/gh/raxod502/radian) with
-    [Docker] configuration included for all supported Emacs versions
+  * Tested on GitHub Actions with [Docker] configuration included for
+    all supported Emacs versions
 * [Zsh]
   * Extremely fast and flexible package manager, [zplugin]
   * No-nonsense prompt showing username, hostname, working
