@@ -3252,6 +3252,22 @@ Return either a string or nil."
     "Automatically discover Pipenv and Poetry virtualenvs."
     (radian--python-find-virtualenv)))
 
+(radian-use-package lsp-pyright
+  :after lsp
+  :hook ((python-mode . radian--lsp-pyright-discover-virtualenvs)
+         (python-mode . (lambda () (require 'lsp-pyright))))
+  :config
+  (defun radian--lsp-pyright-discover-virtualenvs ()
+    "Discover virtualenvs and add them to `lsp-pyright-extra-paths' and `exec-path'."
+    (let ((exec-path exec-path))
+      (when-let ((venv (radian--python-find-virtualenv)))
+        (setq lsp-pyright-extra-paths
+              (file-expand-wildcards
+               (expand-file-name
+                "lib/python*/site-packages" venv)))
+        (push (expand-file-name "bin" venv) exec-path))
+      )))
+
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
 
