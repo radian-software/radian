@@ -2916,8 +2916,10 @@ was printed, and only have ElDoc display if one wasn't."
 
   ;; Wherein we hope nobody else is relying on sticking obsolete
   ;; advices onto these functions.
-  (ad-deactivate 'enable-theme)
-  (ad-deactivate 'disable-theme)
+  (when (ad-is-advised #'enable-theme)
+    (ad-deactivate 'enable-theme))
+  (when (ad-is-advised #'disable-theme)
+    (ad-deactivate 'disable-theme))
 
   (radian-defadvice radian--advice-cider-hack-color-calculation (&rest _)
     :before #'cider-docview-fontify-code-blocks
