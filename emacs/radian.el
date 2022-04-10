@@ -1816,7 +1816,7 @@ invocation will kill the newline."
          ;; M-_. It's logical to also bind M-/ to `undo-tree-redo'.
          ;; This overrides the default binding of M-/, which is to
          ;; `dabbrev-expand'.
-         :map undo-tree-map
+         :map undo-tree-mode-map
          ("M-/" . #'undo-tree-redo))
   :config
 
@@ -1835,6 +1835,10 @@ loaded since the file was changed outside of Emacs."
   ;; unfortunately the implementation is very buggy and usually causes
   ;; you to lose your undo history if you use it by accident.
   (setq undo-tree-enable-undo-in-region nil)
+
+  ;; Disable persistent undo history. It has caused bugs in my
+  ;; experience, and is noisy.
+  (setq undo-tree-auto-save-history nil)
 
   :blackout t)
 
@@ -2914,11 +2918,6 @@ was printed, and only have ElDoc display if one wasn't."
 
   :config
 
-  ;; Wherein we hope nobody else is relying on sticking obsolete
-  ;; advices onto these functions.
-  (ad-deactivate 'enable-theme)
-  (ad-deactivate 'disable-theme)
-
   (radian-defadvice radian--advice-cider-hack-color-calculation (&rest _)
     :before #'cider-docview-fontify-code-blocks
     "Set `cider-docview-code-background-color'.
@@ -3649,8 +3648,7 @@ Return the new `auto-mode-alist' entry"
       new-entry))
 
   (defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
-    "List of filename as string to pass for the JSON entry of
-`auto-mode-alist'.
+    "List of filenames for the JSON entry of `auto-mode-alist'.
 
 Note however that custom `json-mode' entries in `auto-mode-alist'
 won’t be affected."
