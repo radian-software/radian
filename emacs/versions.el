@@ -70,7 +70,7 @@
  ("pkgbuild-mode" . "3cbf38c22d783ac77d5dbc69a38afa04e0aa4803")
  ("popup-el" . "2d288d3ee39e428c7751a41e2e88f0e3e308036a")
  ("prescient.el" . "c5295a9eecbd2935bb57684a4422638e03bf738c")
- ("project" . "76ccdcf2ea6b349a67c5aee166c16a7dc162f2e0")
+ ("project" . "4fe1eec8035969d59ab461eb1674343378182a0b")
  ("projectile" . "defce6e6bb504bdfab1e091550e2f709310327b9")
  ("protobuf" . "d08bc71c96d3dfcea12de3d4efacfbad5d473e44")
  ("pyvenv" . "31ea715f2164dd611e7fc77b26390ef3ca93509b")
