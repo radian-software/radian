@@ -14,13 +14,15 @@ if [[ -f ~/.zshrc.local ]]; then
     . ~/.zshrc.local
 fi
 
-### Added by Zinit's installer
-if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+## Set up plugin manager
+
+if [[ ! -f ~/.local/share/zinit/zinit.git/zinit.zsh ]] \
+       && (( $+commands[git] )); then
     print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
-    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
-    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
+    mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX ~/.local/share/zinit
+    git clone https://github.com/zdharma-continuum/zinit ~/.local/share/zinit/zinit.git && \
         print -P "%F{33} %F{34}Installation successful.%f%b" || \
-        print -P "%F{160} The clone has failed.%f%b"
+            print -P "%F{160} The clone has failed.%f%b"
 fi
 
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
@@ -35,30 +37,25 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
-### End of Zinit's installer chunk
+### zplugin
 
-## zplugin
+radian_zinit=
 
-radian_zplugin=
-
-if [[ -f /usr/share/zinit/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zinit/zplugin.zsh"
-elif [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
-elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
-    radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
-elif [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
-    radian_zplugin="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+if [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+    radian_zinit="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 fi
 
-if [[ -n $radian_zplugin ]]; then
+# backwards compatibility
+radian_zplugin="${radian_zinit}"
+
+if [[ -n $radian_zinit ]]; then
     # zplugin will happily keep adding the same entry to PATH every
     # time you run it. Get rid of stale PATH entries. Thanks to
     # <https://stackoverflow.com/a/41876600/3538165>.
     path=(${path:#*/.zplugin/*})
 
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . $radian_zplugin
+    . $radian_zinit
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
@@ -85,8 +82,8 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
-    if typeset -f radian_zplugin_hook > /dev/null; then
-        radian_zplugin_hook
+    if typeset -f radian_zinit_hook > /dev/null; then
+        radian_zinit_hook
     fi
 
     autoload -Uz compinit
