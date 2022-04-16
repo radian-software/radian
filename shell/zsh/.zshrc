@@ -19,7 +19,8 @@ fi
 if [[ ! -f ~/.local/share/zinit/zinit.git/zinit.zsh ]] \
        && (( $+commands[git] )); then
     print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} "\
-          "Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
+          "Initiative Plugin Manager "\
+          "(%F{33}zdharma-continuum/zinit%F{220})…%f"
     mkdir -p "$HOME/.local/share/zinit" && \
         command chmod g-rwX ~/.local/share/zinit
     git clone https://github.com/zdharma-continuum/zinit \
