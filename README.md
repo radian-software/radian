@@ -84,10 +84,10 @@ more stability.
     [`which-key`][which-key], and more
   * Major modes for editing many languages and configuration file
     types
-  * [Tested on CircleCI](https://circleci.com/gh/raxod502/radian) with
-    [Docker] configuration included for all supported Emacs versions
+  * Tested on GitHub Actions with [Docker] configuration included for
+    all supported Emacs versions
 * [Zsh]
-  * Extremely fast and flexible package manager, [zplugin]
+  * Extremely fast and flexible package manager, [zinit]
   * No-nonsense prompt showing username, hostname, working
     directory, and Git status, colored by exit code
   * Substring completion everywhere
@@ -138,8 +138,8 @@ configuration, and optionally installing local configuration.
 * Zsh:
 
       $ brew install zsh
-      $ mkdir ~/.zplugin
-      $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
+      $ echo $(which zsh) | sudo tee -a /etc/shells
+      $ chfn -s $(which zsh)
 
 * Tmux: `brew install tmux`
 * Git: `brew install git`
@@ -170,8 +170,6 @@ you prefer something different, substitute to taste.
 * Zsh:
 
       $ pacman -S zsh
-      $ mkdir ~/.zplugin
-      $ git clone git@github.com:zdharma/zplugin.git ~/.zplugin/bin
 
 * Tmux: `pacman -S tmux`
 * Git: `pacman -S git`
@@ -237,6 +235,10 @@ byte-compiled Radian init-file. Using the macro `radian-local-on-hook`
 instead of defining functions and adding them to Radian's hooks
 manually enables some magic that makes this actually work properly.
 
+## Documentation
+
+There is some very incomplete documentation [here][docs].
+
 ## Contributing
 
 Please feel free to contribute in any way that you would like. If you
@@ -264,6 +266,7 @@ commented.
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [docker]: https://www.docker.com/
+[docs]: doc
 [dotman]: https://github.com/raxod502/dotman
 [dumb-jump]: https://github.com/jacktasia/dumb-jump
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html
@@ -328,7 +331,7 @@ commented.
 [which-key]: https://github.com/justbur/emacs-which-key
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
-[zplugin]: https://github.com/zdharma/zplugin
+[zinit]: https://github.com/zdharma-continuum/zinit
 [zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
 [zsh-completions]: https://github.com/zsh-users/zsh-completions
 [zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search

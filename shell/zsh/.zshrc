@@ -14,26 +14,52 @@ if [[ -f ~/.zshrc.local ]]; then
     . ~/.zshrc.local
 fi
 
-## zplugin
+## Set up plugin manager
 
-radian_zplugin=
-
-if [[ -f /usr/share/zinit/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zinit/zplugin.zsh"
-elif [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
-elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
-    radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
+if [[ ! -f ~/.local/share/zinit/zinit.git/zinit.zsh ]] \
+       && (( $+commands[git] )); then
+    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} "\
+          "Initiative Plugin Manager "\
+          "(%F{33}zdharma-continuum/zinit%F{220})…%f"
+    mkdir -p "$HOME/.local/share/zinit" && \
+        command chmod g-rwX ~/.local/share/zinit
+    git clone https://github.com/zdharma-continuum/zinit \
+        ~/.local/share/zinit/zinit.git && \
+        print -P "%F{33} %F{34}Installation successful.%f%b" || \
+            print -P "%F{160} The clone has failed.%f%b"
 fi
 
-if [[ -n $radian_zplugin ]]; then
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+# Load a few important annexes, without Turbo
+# (this is currently required for annexes)
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
+### zplugin
+
+radian_zinit=
+
+if [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+    radian_zinit="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+fi
+
+# backwards compatibility
+radian_zplugin="${radian_zinit}"
+
+if [[ -n $radian_zinit ]]; then
     # zplugin will happily keep adding the same entry to PATH every
     # time you run it. Get rid of stale PATH entries. Thanks to
     # <https://stackoverflow.com/a/41876600/3538165>.
     path=(${path:#*/.zplugin/*})
 
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . $radian_zplugin
+    . $radian_zinit
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
@@ -60,8 +86,8 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
-    if typeset -f radian_zplugin_hook > /dev/null; then
-        radian_zplugin_hook
+    if typeset -f radian_zinit_hook > /dev/null; then
+        radian_zinit_hook
     fi
 
     autoload -Uz compinit
@@ -495,7 +521,7 @@ fi
 if (( $+commands[git] )); then
     alias g=git
 
-    alias gh='git help'
+    alias ge='git help'
     alias ghi='git help init'
     alias ghst='git help status'
     alias ghsh='git help show'
