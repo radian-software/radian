@@ -624,6 +624,18 @@ if (( $+commands[git] )); then
     alias gcama='git commit --amend --all -m'
     alias gcem='git commit --allow-empty -m'
 
+    alias gcn='git commit --no-verify --verbose'
+    alias gcna='git commit --no-verify --verbose --amend'
+    alias gcnaa='git commit --no-verify --verbose --amend --all'
+    alias gcnf='git commit --no-verify -C HEAD --amend'
+    alias gcnfa='git commit --no-verify -C HEAD --amend --all'
+    alias gcne='git commit --no-verify --verbose --allow-empty'
+    alias gcnm='git commit --no-verify -m'
+    alias gcnma='git commit --no-verify --all -m'
+    alias gcnam='git commit --no-verify --amend -m'
+    alias gcnama='git commit --no-verify --amend --all -m'
+    alias gcnem='git commit --no-verify --allow-empty -m'
+
     alias gcp='git cherry-pick'
     alias gcpc='git cherry-pick --continue'
     alias gcpa='git cherry-pick --abort'
@@ -708,8 +720,8 @@ if (( $+commands[git] )); then
     alias grel='git remote list'
     alias gres='git remote show'
 
-    alias gf='git fetch --prune --prune-tags'
-    alias gfa='git fetch --all --prune --prune-tags'
+    alias gf='git fetch'
+    alias gfa='git fetch --all'
     alias gfu='git fetch --unshallow'
 
     alias gu='git pull'
