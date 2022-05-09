@@ -2638,7 +2638,6 @@ order."
                             (lsp--workspace-client)
                             (lsp--client-server-id)
                             (memq '(jsts-ls
-                                    mspyls
                                     bash-ls
                                     texlab
                                     ts-ls
@@ -3199,7 +3198,7 @@ See https://emacs.stackexchange.com/a/3338/12534."
            (substring-no-properties (match-string 1))))))
     (with-no-warnings
       (setq-local
-       lsp-python-ms-python-executable-cmd
+       lsp-pyright-python-executable-cmd
        python-shell-interpreter)))
 
   ;; I honestly don't understand why people like their packages to
@@ -3231,33 +3230,22 @@ Return either a string or nil."
               (when (file-directory-p venv)
                 (cl-return venv)))))))))
 
-;; Package `lsp-python-ms' downloads Microsoft's LSP server for Python
-;; and configures it with `lsp-mode'. Microsoft's server behaves
-;; better than Palantir's in my opinion.
-(radian-use-package lsp-python-ms
+;; Package `lsp-pyright' downloads Microsoft's LSP server for Python.
+;; We hate Microsoft and think they are going to try to kill off
+;; open-source projects in the Python/LSP ecosystem, but there does
+;; not appear to be a workable alternative to Pyright at present. See
+;; https://github.com/microsoft/pylance-release/issues/4 for more
+;; discussion.
+(radian-use-package lsp-pyright
   :demand t
   :after (:all lsp-mode python)
   :config
 
-  (radian-defadvice radian--lsp-python-ms-silence (func &rest args)
-    :around #'lsp-python-ms--language-server-started-callback
-    "Inhibit a silly message."
-    (radian--with-silent-message "Python language server started"
-      (apply func args)))
-
-  (radian-defadvice radian--lsp-python-ms-discover-virtualenvs
-      (func &rest args)
-    :around #'lsp-python-ms--extra-init-params
+  (radian-defadvice radian--lsp-pyright-discover-virtualenvs
+      (&rest _)
+    :before-until #'lsp-pyright-locate-venv
     "Automatically discover Pipenv and Poetry virtualenvs."
-    (let ((lsp-python-ms-extra-paths lsp-python-ms-extra-paths)
-          (exec-path exec-path))
-      (when-let ((venv (radian--python-find-virtualenv)))
-        (setq lsp-python-ms-extra-paths
-              (file-expand-wildcards
-               (expand-file-name
-                "lib/python*/site-packages" venv)))
-        (push (expand-file-name "bin" venv) exec-path))
-      (apply func args))))
+    (radian--python-find-virtualenv)))
 
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
