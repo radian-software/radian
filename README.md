@@ -252,17 +252,17 @@ Please do! It will probably be informative in one way or another. The
 goal is that *absolutely everything* should be either obvious or
 commented.
 
-[apheleia]: https://github.com/raxod502/apheleia
+[apheleia]: https://github.com/radian-software/apheleia
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
 [black]: https://github.com/python/black
-[blackout]: https://github.com/raxod502/blackout
+[blackout]: https://github.com/radian-software/blackout
 [brittany]: https://hackage.haskell.org/package/brittany
 [buffer-move]: https://github.com/lukhas/buffer-move
 [company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
 [counsel]: https://github.com/abo-abo/swiper#counsel
-[ctrlf]: https://github.com/raxod502/ctrlf
+[ctrlf]: https://github.com/radian-software/ctrlf
 [delete-selection-mode]: https://www.emacswiki.org/emacs/DeleteSelectionMode
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [docker]: https://www.docker.com/
@@ -270,7 +270,7 @@ commented.
 [dotman]: https://github.com/raxod502/dotman
 [dumb-jump]: https://github.com/jacktasia/dumb-jump
 [easypg]: https://www.gnu.org/software/emacs/manual/epa.html
-[el-patch]: https://github.com/raxod502/el-patch
+[el-patch]: https://github.com/radian-software/el-patch
 [eldoc]: https://www.emacswiki.org/emacs/ElDoc
 [emacs]: https://www.gnu.org/software/emacs/
 [esup]: https://github.com/jschaf/esup
@@ -291,7 +291,7 @@ commented.
 [helpful]: https://github.com/Wilfred/helpful
 [historian]: https://github.com/PythonNut/historian.el
 [isearch]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html
-[issues]: https://github.com/raxod502/radian/issues
+[issues]: https://github.com/radian-software/radian/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [jsx]: https://reactjs.org/docs/introducing-jsx.html
@@ -305,10 +305,10 @@ commented.
 [pipenv]: https://docs.pipenv.org/en/latest/
 [poetry]: https://poetry.eustace.io/
 [powerline]: https://github.com/powerline/powerline
-[prescient.el]: https://github.com/raxod502/prescient.el
+[prescient.el]: https://github.com/radian-software/prescient.el
 [prettier]: https://github.com/prettier/prettier
 [projectile]: http://batsov.com/projectile/
-[prs]: https://github.com/raxod502/radian/pulls
+[prs]: https://github.com/radian-software/radian/pulls
 [python]: https://www.python.org/
 [pyvenv]: https://github.com/jorgenschaefer/pyvenv
 [racket]: https://racket-lang.org/
@@ -327,7 +327,7 @@ commented.
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
 [visual-regexp]: https://github.com/benma/visual-regexp.el
-[wdx]: https://github.com/raxod502/wdx
+[wdx]: https://github.com/radian-software/wdx
 [which-key]: https://github.com/justbur/emacs-which-key
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme

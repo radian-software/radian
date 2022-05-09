@@ -39,13 +39,13 @@
 (defgroup radian-hooks nil
   "Startup hooks for Radian Emacs."
   :group 'radian
-  :link '(url-link :tag "GitHub" "https://github.com/raxod502/radian"))
+  :link '(url-link :tag "GitHub" "https://github.com/radian-software/radian"))
 
 (defgroup radian nil
   "Customize your Radian Emacs experience."
   :prefix "radian-"
   :group 'emacs
-  :link '(url-link :tag "GitHub" "https://github.com/raxod502/radian"))
+  :link '(url-link :tag "GitHub" "https://github.com/radian-software/radian"))
 
 ;;; Define utility functions and variables
 
@@ -654,7 +654,7 @@ nice.)"
 ;; a strict superset of those provided by similar packages `diminish',
 ;; `delight', and `dim'.
 (use-package blackout
-  :straight (:host github :repo "raxod502/blackout")
+  :straight (:host github :repo "radian-software/blackout")
   :demand t)
 
 ;;;; straight.el configuration
@@ -699,7 +699,7 @@ nice.)"
 (use-package el-patch)
 
 ;; Only needed at compile time, thanks to Jon
-;; <https://github.com/raxod502/el-patch/pull/11>.
+;; <https://github.com/radian-software/el-patch/pull/11>.
 (eval-when-compile
   (require 'el-patch))
 
@@ -1013,7 +1013,7 @@ ourselves."
 ;; Package `selectrum-prescient' provides intelligent sorting and
 ;; filtering for candidates in Selectrum menus.
 (radian-use-package selectrum-prescient
-  :straight (:host github :repo "raxod502/prescient.el"
+  :straight (:host github :repo "radian-software/prescient.el"
                    :files ("selectrum-prescient.el"))
   :demand t
   :after selectrum
@@ -1931,7 +1931,7 @@ the reverse direction from \\[pop-global-mark]."
 ;; browsers and other programs (think of what happens when you type
 ;; ctrl+F).
 (radian-use-package ctrlf
-  :straight (:host github :repo "raxod502/ctrlf")
+  :straight (:host github :repo "radian-software/ctrlf")
   :init
 
   (ctrlf-mode +1))
@@ -2170,7 +2170,7 @@ buffer."
 ;; applying code formatters asynchronously on save without moving
 ;; point or modifying the scroll position.
 (radian-use-package apheleia
-  :straight (:host github :repo "raxod502/apheleia")
+  :straight (:host github :repo "radian-software/apheleia")
   :init
 
   (apheleia-global-mode +1)
@@ -2911,10 +2911,10 @@ was printed, and only have ElDoc display if one wasn't."
   :init
 
   ;; Here we deal with a really weird and dumb bug
-  ;; <https://github.com/raxod502/radian/issues/446>. The problem is
-  ;; fundamentally that CIDER wants to do some color calculations when
-  ;; it's loaded, whereas in fact there's no reason to do this until
-  ;; something is actually rendered.
+  ;; <https://github.com/radian-software/radian/issues/446>. The
+  ;; problem is fundamentally that CIDER wants to do some color
+  ;; calculations when it's loaded, whereas in fact there's no reason
+  ;; to do this until something is actually rendered.
 
   (setq cider-docview-code-background-color nil)
 
@@ -5373,7 +5373,7 @@ spaces."
     (enable-theme 'zerodark))
 
 ;; Make adjustments to color theme that was selected by Radian or
-;; user. See <https://github.com/raxod502/radian/issues/456>.
+;; user. See <https://github.com/radian-software/radian/issues/456>.
 (use-feature git-gutter
   :config
 
