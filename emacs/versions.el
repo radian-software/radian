@@ -4,7 +4,7 @@
  ("apheleia" . "50da8cd1a94fbcd6456b2528a9db20a5cfc8ff5f")
  ("apples-mode" . "83a9ab0d6ba82496e2f7df386909b1a55701fccb")
  ("atomic-chrome" . "c73367d8aa660f2b3c3f70ef5c39f5b502d60404")
- ("auctex" . "830e40a0639aedc6c362a3a01e160aaa8246bb99")
+ ("auctex" . "53b82804c9dd9dbea306876f3be84ebacbeb7e74")
  ("blackout" . "c221fa2c8a204b4aff2e09c606f59be58b960b97")
  ("buffer-move" . "cb517ecf8409b5fdcda472d7190c6021f0c49751")
  ("cider" . "db972bbdfbe777272529ec848c9f1991ae94dbda")

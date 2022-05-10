@@ -3422,9 +3422,9 @@ In practice, this means removing the stuff that comes after the
 slash, e.g. \"LaTeX/P\" becomes just \"LaTeX\"."
     (setq mode-name TeX-base-mode-name)))
 
-;; Feature `tex-buf' from package `auctex' provides support for
+;; Feature `tex' from package `auctex' provides support for
 ;; running TeX commands and displaying their output.
-(use-feature tex-buf
+(use-feature tex
   :config
 
   ;; Save buffers automatically when compiling, instead of prompting.
