@@ -654,7 +654,6 @@ nice.)"
 ;; a strict superset of those provided by similar packages `diminish',
 ;; `delight', and `dim'.
 (use-package blackout
-  :straight (:host github :repo "radian-software/blackout")
   :demand t)
 
 ;;;; straight.el configuration
@@ -1013,8 +1012,6 @@ ourselves."
 ;; Package `selectrum-prescient' provides intelligent sorting and
 ;; filtering for candidates in Selectrum menus.
 (radian-use-package selectrum-prescient
-  :straight (:host github :repo "radian-software/prescient.el"
-                   :files ("selectrum-prescient.el"))
   :demand t
   :after selectrum
   :config
@@ -1931,7 +1928,6 @@ the reverse direction from \\[pop-global-mark]."
 ;; browsers and other programs (think of what happens when you type
 ;; ctrl+F).
 (radian-use-package ctrlf
-  :straight (:host github :repo "radian-software/ctrlf")
   :init
 
   (ctrlf-mode +1))
@@ -2170,7 +2166,6 @@ buffer."
 ;; applying code formatters asynchronously on save without moving
 ;; point or modifying the scroll position.
 (radian-use-package apheleia
-  :straight (:host github :repo "radian-software/apheleia")
   :init
 
   (apheleia-global-mode +1)
