@@ -57,7 +57,7 @@
  ("magit" . "0bbf31a2efd769ac2a4734358b4da08a596e9514")
  ("map" . "3d80a6d7cdc7d9e5760290fa95db4da992612837")
  ("markdown-mode" . "d2a3d5b8625a7c6be21f19f9146745cd5c791a6a")
- ("melpa" . "6d4fb56833636a71c6fedc352c4fd1bf84600637")
+ ("melpa" . "118ec831528f718f0dc4bc331a708ecb4a0eefd5")
  ("no-littering" . "2d7237a49ad6a9b6425e68fa4d3245cbe5a7169d")
  ("org" . "f6813dbea9ef0c6be19bf68b4d9227ceb64c9449")
  ("org-contrib" . "8c138dc5375dc13a0d1952e61c638ef4d57df368")
