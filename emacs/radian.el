@@ -2401,6 +2401,16 @@ killed (which happens during Emacs shutdown)."
   ;; for that instead.
   (setq lsp-enable-on-type-formatting nil)
 
+  ;; Multi-root LSP servers are broken by default, the docs suggest
+  ;; adding this advice, although I am not sure why it is not just the
+  ;; default behavior.
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/1775
+  ;; https://emacs-lsp.github.io/lsp-mode/page/faq/#how-do-i-force-lsp-mode-to-forget-the-workspace-folders-for-multi-root
+  (radian-defadvice radian--lsp-multi-root-fix (&rest _)
+    :before #'lsp
+    "Fix multi-root servers for `lsp-mode'."
+    (setf (lsp-session-server-id->folders (lsp-session)) (ht)))
+
   :blackout " LSP")
 
 ;;;; Indentation

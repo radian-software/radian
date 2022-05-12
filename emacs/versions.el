@@ -49,7 +49,7 @@
  ("json-snatcher" . "b28d1c0670636da6db508d03872d96ffddbc10f2")
  ("let-alist" . "592553db5929b54db40af0df90c5add0aaca045b")
  ("lsp-haskell" . "7cf64944ab3a25ea5d6f8d5e0cd33124182df991")
- ("lsp-mode" . "e1e2a49bb2d11490d20bd73ea0d886b775cb26ad")
+ ("lsp-mode" . "465bcc5fbeb6293446a3241f5f2c1b872337958c")
  ("lsp-pyright" . "ab7369d96f4d7d058d0e06e743f86fda8ecc191c")
  ("lsp-ui" . "96b1ecbfbf87a775f05b5f0b55253376a3bd61e7")
  ("lua-mode" . "5a9bee8d5fc978dc64fcb677167417010321ba65")
