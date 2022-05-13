@@ -80,12 +80,12 @@
  ("robe" . "11207bd549a5a78e3a4d70265c3715990dcdab71")
  ("rust-mode" . "26ecc903c50b2ffd289bbe981f9ad03626fc0057")
  ("s.el" . "08661efb075d1c6b4fa812184c1e5e90c08795a9")
- ("selectrum" . "7da932eeb89f1aa8060a73ddd040f95bbb127343")
+ ("selectrum" . "23e0f2c549084c70428431c452ffdb0dca7d5e2e")
  ("sesman" . "e0f555f963c9f02f8e4a50e06fc353eb4c15ee77")
  ("smartparens" . "37f77bf2e2199be9fe27e981317b02cfd0e8c70e")
  ("spinner" . "34905eae12a236753fa88abc831eff1e41e8576e")
  ("ssh-config-mode-el" . "d560a0876a93ad4130baf33dae1b9405ad37a405")
- ("straight.el" . "e2de88ea0e7ccf9f4846e9e756f86e0dcf469c44")
+ ("straight.el" . "99ba608ed85e8814d89f00e09f3d99d76ee4f3d3")
  ("swift-mode" . "0d1ef0ef183398143b13fb8c76c1284df0d5e616")
  ("sx.el" . "e9d1093c97507a6d7b4f4710ef65200dae725e5f")
  ("terraform-mode" . "e560caaa9d9a11b0868adf6d9dcae5ebb5055730")
@@ -105,4 +105,4 @@
  ("yaml.el" . "34c300b08579b72c7c92aefee1f4b500913f0c85")
  ("yasnippet" . "5cbdbf0d2015540c59ed8ee0fcf4788effdf75b6")
  ("zerodark-theme" . "b463528704f6eb00684c0ee003fbd8e42901cde0"))
-:beta
+:gamma
