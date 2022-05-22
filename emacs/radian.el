@@ -990,7 +990,10 @@ ourselves."
 ;; remaining candidates. This offers a significant improvement over
 ;; the default Emacs interface for candidate selection.
 (radian-use-package vertico
-  :demand t)
+  :demand t
+  :config
+
+  (vertico-mode +1))
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
