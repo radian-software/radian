@@ -14,26 +14,52 @@ if [[ -f ~/.zshrc.local ]]; then
     . ~/.zshrc.local
 fi
 
-## zplugin
+## Set up plugin manager
 
-radian_zplugin=
-
-if [[ -f /usr/share/zinit/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zinit/zplugin.zsh"
-elif [[ -f /usr/share/zsh/plugin-managers/zplugin/zplugin.zsh ]]; then
-    radian_zplugin="/usr/share/zsh/plugin-managers/zplugin/zplugin.zsh"
-elif [[ -f ~/.zplugin/bin/zplugin.zsh ]]; then
-    radian_zplugin="$HOME/.zplugin/bin/zplugin.zsh"
+if [[ ! -f ~/.local/share/zinit/zinit.git/zinit.zsh ]] \
+       && (( $+commands[git] )); then
+    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} "\
+          "Initiative Plugin Manager "\
+          "(%F{33}zdharma-continuum/zinit%F{220})…%f"
+    mkdir -p "$HOME/.local/share/zinit" && \
+        command chmod g-rwX ~/.local/share/zinit
+    git clone https://github.com/zdharma-continuum/zinit \
+        ~/.local/share/zinit/zinit.git && \
+        print -P "%F{33} %F{34}Installation successful.%f%b" || \
+            print -P "%F{160} The clone has failed.%f%b"
 fi
 
-if [[ -n $radian_zplugin ]]; then
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+# Load a few important annexes, without Turbo
+# (this is currently required for annexes)
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
+### zplugin
+
+radian_zinit=
+
+if [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+    radian_zinit="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+fi
+
+# backwards compatibility
+radian_zplugin="${radian_zinit}"
+
+if [[ -n $radian_zinit ]]; then
     # zplugin will happily keep adding the same entry to PATH every
     # time you run it. Get rid of stale PATH entries. Thanks to
     # <https://stackoverflow.com/a/41876600/3538165>.
     path=(${path:#*/.zplugin/*})
 
     # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . $radian_zplugin
+    . $radian_zinit
     autoload -Uz _zplugin
     (( ${+_comps} )) && _comps[zplugin]=_zplugin
 
@@ -43,7 +69,7 @@ if [[ -n $radian_zplugin ]]; then
 
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
-    zplugin light raxod502/wdx
+    zplugin light radian-software/wdx
 
     # If a previous command starts with what you have typed, show it
     # in dimmed color after the cursor, and allow completing it.
@@ -60,8 +86,8 @@ if [[ -n $radian_zplugin ]]; then
     zplugin ice blockf
     zplugin light zsh-users/zsh-completions
 
-    if typeset -f radian_zplugin_hook > /dev/null; then
-        radian_zplugin_hook
+    if typeset -f radian_zinit_hook > /dev/null; then
+        radian_zinit_hook
     fi
 
     autoload -Uz compinit
@@ -495,7 +521,7 @@ fi
 if (( $+commands[git] )); then
     alias g=git
 
-    alias gh='git help'
+    alias ge='git help'
     alias ghi='git help init'
     alias ghst='git help status'
     alias ghsh='git help show'
@@ -598,6 +624,18 @@ if (( $+commands[git] )); then
     alias gcama='git commit --amend --all -m'
     alias gcem='git commit --allow-empty -m'
 
+    alias gcn='git commit --no-verify --verbose'
+    alias gcna='git commit --no-verify --verbose --amend'
+    alias gcnaa='git commit --no-verify --verbose --amend --all'
+    alias gcnf='git commit --no-verify -C HEAD --amend'
+    alias gcnfa='git commit --no-verify -C HEAD --amend --all'
+    alias gcne='git commit --no-verify --verbose --allow-empty'
+    alias gcnm='git commit --no-verify -m'
+    alias gcnma='git commit --no-verify --all -m'
+    alias gcnam='git commit --no-verify --amend -m'
+    alias gcnama='git commit --no-verify --amend --all -m'
+    alias gcnem='git commit --no-verify --allow-empty -m'
+
     alias gcp='git cherry-pick'
     alias gcpc='git cherry-pick --continue'
     alias gcpa='git cherry-pick --abort'
@@ -682,8 +720,8 @@ if (( $+commands[git] )); then
     alias grel='git remote list'
     alias gres='git remote show'
 
-    alias gf='git fetch --prune --prune-tags'
-    alias gfa='git fetch --all --prune --prune-tags'
+    alias gf='git fetch'
+    alias gfa='git fetch --all'
     alias gfu='git fetch --unshallow'
 
     alias gu='git pull'
