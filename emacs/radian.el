@@ -3949,7 +3949,8 @@ SYMBOL is as in `xref-find-definitions'."
 
 (defun radian-clone-emacs-source-maybe ()
   "Prompt user to clone Emacs source repository if needed."
-  (when (and (not (file-directory-p source-directory))
+  (when (and (not (file-directory-p
+                   (expand-file-name ".git" source-directory)))
              (not (get-buffer "*clone-emacs-src*"))
              (yes-or-no-p "Clone Emacs source repository? "))
     (make-directory (file-name-directory source-directory) 'parents)
