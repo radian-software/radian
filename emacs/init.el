@@ -78,6 +78,10 @@ This file is loaded by init.el.")
 Unlike `after-init-hook', this hook is run every time the
 init-file is loaded, not just once.")
 
+        (defvar radian-original-file-name-handler-alist nil
+          "The value of `file-name-handler-alist' during load time.
+`file-name-handler-alist' is set to nil while Radian is loading.")
+
         (unwind-protect
             ;; Load the main Radian configuration code. Disable
             ;; `file-name-handler-alist' to improve load time.
@@ -85,9 +89,11 @@ init-file is loaded, not just once.")
             ;; Make sure not to load an out-of-date .elc file. Since
             ;; we byte-compile asynchronously in the background after
             ;; init succeeds, this case will happen often.
-            (let ((file-name-handler-alist nil)
-                  (load-prefer-newer t)
-                  (stale-bytecode t))
+            (let* ((radian-original-file-name-handler-alist
+                    file-name-handler-alist)
+                   (file-name-handler-alist nil)
+                   (load-prefer-newer t)
+                   (stale-bytecode t))
               (catch 'stale-bytecode
                 ;; We actually embed the contents of the local
                 ;; init-file directly into the compiled radian.elc, so
