@@ -4070,15 +4070,13 @@ messages."
 ;;; Applications
 ;;;; Organization
 
-;; Use `use-feature' here because we already installed Org earlier.
-
 ;; Package `org' provides too many features to describe in any
 ;; reasonable amount of space. It is built fundamentally on
 ;; `outline-mode', and adds TODO states, deadlines, properties,
 ;; priorities, etc. to headings. Then it provides tools for
 ;; interacting with this data, including an agenda view, a time
 ;; clocker, etc. There are *many* extensions.
-(use-feature org
+(use-package org
   :functions (org-bookmark-jump-unhide) ; some issue with Emacs 26
   :bind (:map org-mode-map
 
