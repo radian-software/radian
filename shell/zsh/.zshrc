@@ -708,7 +708,7 @@ if (( $+commands[git] )); then
     alias gsms='git submodule status'
     alias gsmi='git submodule init'
     alias gsmd='git submodule deinit'
-    alias gsmu='git submodule update'
+    alias gsmu='git submodule update --recursive'
     alias gsmui='git submodule update --init --recursive'
     alias gsmf='git submodule foreach'
     alias gsmy='git submodule sync'
