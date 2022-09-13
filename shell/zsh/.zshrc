@@ -662,11 +662,11 @@ if (( $+commands[git] )); then
     alias gstp='git stash pop'
     alias gstd='git stash drop'
 
-    alias gd='git diff'
-    alias gds='git diff --stat'
-    alias gdc='git diff --cached'
-    alias gdcs='git diff --cached --stat'
-    alias gdn='git diff --no-index'
+    alias gd='git diff --minimal'
+    alias gds='git diff --minimal --stat'
+    alias gdc='git diff --minimal --cached'
+    alias gdcs='git diff --minimal --cached --stat'
+    alias gdn='git diff --minimal --no-index'
 
     alias gbl='git blame'
 
