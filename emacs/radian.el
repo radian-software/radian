@@ -5359,7 +5359,8 @@ spaces."
                  :weight bold
                  :foreground ,purple))))
      `(prescient-primary-highlight ((,class (:foreground ,orange))))
-     `(prescient-secondary-highlight ((,class (:foreground ,green)))))
+     `(prescient-secondary-highlight ((,class (:foreground ,green))))
+     `(completions-common-part nil))
 
     (dolist (face '(outline-1
                     outline-2
