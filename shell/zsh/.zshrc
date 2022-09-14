@@ -662,11 +662,11 @@ if (( $+commands[git] )); then
     alias gstp='git stash pop'
     alias gstd='git stash drop'
 
-    alias gd='git diff'
-    alias gds='git diff --stat'
-    alias gdc='git diff --cached'
-    alias gdcs='git diff --cached --stat'
-    alias gdn='git diff --no-index'
+    alias gd='git diff --minimal'
+    alias gds='git diff --minimal --stat'
+    alias gdc='git diff --minimal --cached'
+    alias gdcs='git diff --minimal --cached --stat'
+    alias gdn='git diff --minimal --no-index'
 
     alias gbl='git blame'
 
@@ -708,7 +708,7 @@ if (( $+commands[git] )); then
     alias gsms='git submodule status'
     alias gsmi='git submodule init'
     alias gsmd='git submodule deinit'
-    alias gsmu='git submodule update'
+    alias gsmu='git submodule update --recursive'
     alias gsmui='git submodule update --init --recursive'
     alias gsmf='git submodule foreach'
     alias gsmy='git submodule sync'
