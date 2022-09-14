@@ -990,6 +990,7 @@ ourselves."
 ;; remaining candidates. This offers a significant improvement over
 ;; the default Emacs interface for candidate selection.
 (radian-use-package vertico
+  :straight (:host github :repo "minad/vertico")
   :demand t
   :config
 
