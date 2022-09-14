@@ -5342,17 +5342,31 @@ spaces."
   :demand t
   :config
 
-    ;; Needed because `:no-require' for some reason disables the
-    ;; load-time `require' invocation, as well as the compile-time
-    ;; one.
-    (require 'zerodark-theme)
+  ;; Needed because `:no-require' for some reason disables the
+  ;; load-time `require' invocation, as well as the compile-time one.
+  (require 'zerodark-theme)
+
+  (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
+        (class '((class color) (min-colors 89)))
+        (green (if (true-color-p) "#98be65" "#87af5f"))
+        (orange (if (true-color-p) "#da8548" "#d7875f"))
+        (purple (if (true-color-p) "#c678dd" "#d787d7")))
+    (custom-theme-set-faces
+     'zerodark
+     `(vertico-current
+       ((,class (:background
+                 ,background-purple
+                 :weight bold
+                 :foreground ,purple))))
+     `(prescient-primary-highlight ((,class (:foreground ,orange))))
+     `(prescient-secondary-highlight ((,class (:foreground ,green)))))
 
     (dolist (face '(outline-1
                     outline-2
                     outline-3))
       (set-face-attribute face nil :height 1.0))
 
-    (enable-theme 'zerodark))
+    (enable-theme 'zerodark)))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/radian-software/radian/issues/456>.
