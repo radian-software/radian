@@ -1006,7 +1006,10 @@ ourselves."
 
   ;; The default settings seem a little forgetful to me. Let's try
   ;; this out.
-  (setq prescient-history-length 1000))
+  (setq prescient-history-length 1000)
+
+  ;; Use prescient.el everywhere.
+  (setq completion-styles '(prescient)))
 
 ;;; Window management
 
