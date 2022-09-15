@@ -1009,7 +1009,14 @@ ourselves."
   (setq prescient-history-length 1000)
 
   ;; Use prescient.el everywhere.
-  (setq completion-styles '(prescient)))
+  (setq completion-styles '(prescient))
+
+  ;; Common sense.
+  (setq prescient-sort-full-matches-first t)
+
+  ;; If we don't do this then prescient.el sorting is not used in most
+  ;; places.
+  (setq prescient-completion-enable-sort t))
 
 ;;; Window management
 
