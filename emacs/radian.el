@@ -999,7 +999,11 @@ ourselves."
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
 (radian-use-package prescient
+  :demand t
+  :after vertico
   :config
+
+  ;; https://github.com/minad/vertico/wiki#using-prescientel-filtering-and-sorting
 
   ;; Remember usage statistics across Emacs sessions.
   (prescient-persist-mode +1)
@@ -1008,15 +1012,22 @@ ourselves."
   ;; this out.
   (setq prescient-history-length 1000)
 
-  ;; Use prescient.el everywhere.
-  (setq completion-styles '(prescient))
+  ;; Use prescient.el for filtering (`completion-styles') and sorting
+  ;; (`vertico-sort-function').
+  (setq completion-styles '(prescient basic))
+  (setq vertico-sort-function #'prescient-completion-sort)
 
   ;; Common sense.
   (setq prescient-sort-full-matches-first t)
 
-  ;; If we don't do this then prescient.el sorting is not used in most
-  ;; places.
-  (setq prescient-completion-enable-sort t))
+  (defun vertico-prescient-remember ()
+    "Remember the chosen candidate with Prescient."
+    (when (>= vertico--index 0)
+      (prescient-remember
+       (substring-no-properties
+        (nth vertico--index vertico--candidates)))))
+
+  (advice-add #'vertico-insert :after #'vertico-prescient-remember))
 
 ;;; Window management
 
