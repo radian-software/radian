@@ -44,5 +44,5 @@ clean: ## Remove build artifacts
 	@rm -f emacs/radian.elc
 
 .PHONY: docker
-docker: ## Start a Docker shell; e.g. make docker VERSION=26
+docker: ## Start a Docker shell; e.g. make docker VERSION=27
 	@scripts/docker.bash "$(VERSION)" "$(CMD)"
