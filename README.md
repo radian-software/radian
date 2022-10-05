@@ -24,7 +24,7 @@ more stability.
 
 ## Software configured, features
 
-* [Emacs] (**minimum version supported: 26.1**)
+* [Emacs] (**minimum version supported: 27.1**)
   * Next-generation package manager, [`straight.el`][straight.el]
   * Clean and DRY package customizations using
     [`use-package`][use-package]
