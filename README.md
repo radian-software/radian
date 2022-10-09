@@ -14,7 +14,7 @@ These dotfiles attempt to achieve the following goals:
   code)
 
 If you are a fan of my Emacs packages (such as
-[`straight.el`][straight.el], [`el-patch`][el-patch], [Selectrum],
+[`straight.el`][straight.el], [`el-patch`][el-patch], [Vertico],
 [CTRLF], [`prescient.el`][prescient.el], [Apheleia], [Blackout]) then
 you will find all of them configured here.
 
@@ -29,7 +29,7 @@ more stability.
   * Clean and DRY package customizations using
     [`use-package`][use-package]
   * Simpler and less buggy (than [Ivy], [Counsel], [Helm]) file and
-    command selection using [Selectrum]
+    command selection using [Vertico]
   * More robust and streamlined single-buffer text search (than
     [Isearch], [Swiper]) using [CTRLF]
   * Sorting by [frecency] and usage on all commands using
@@ -293,7 +293,6 @@ commented.
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
 [rg.el]: https://github.com/dajva/rg.el
-[selectrum]: https://github.com/raxod502/selectrum
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
@@ -304,6 +303,7 @@ commented.
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
+[vertico]: https://github.com/minad/vertico
 [visual-regexp]: https://github.com/benma/visual-regexp.el
 [wdx]: https://github.com/radian-software/wdx
 [which-key]: https://github.com/justbur/emacs-which-key
