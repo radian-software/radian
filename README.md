@@ -14,9 +14,10 @@ These dotfiles attempt to achieve the following goals:
   code)
 
 If you are a fan of my Emacs packages (such as
-[`straight.el`][straight.el], [`el-patch`][el-patch], [Vertico],
-[CTRLF], [`prescient.el`][prescient.el], [Apheleia], [Blackout]) then
-you will find all of them configured here.
+[`straight.el`][straight.el], [`el-patch`][el-patch], ~[Selectrum]~
+(replaced by [Vertico]), [CTRLF], [`prescient.el`][prescient.el],
+[Apheleia], [Blackout]) then you will find all of them configured
+here.
 
 Note that there is a `master` branch which is not updated as
 frequently. You may be interested in running this branch if you desire
@@ -293,6 +294,7 @@ commented.
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
 [rg.el]: https://github.com/dajva/rg.el
+[selectrum]: https://github.com/raxod502/selectrum
 [smartparens]: https://github.com/Fuco1/smartparens
 [smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
