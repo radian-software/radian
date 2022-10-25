@@ -2354,7 +2354,10 @@ set LSP configuration (see `lsp-python-ms')."
                    #'ruby-mode
                    ;; Disable for modes with insufficiently mature
                    ;; language servers.
-                   #'terraform-mode))
+                   #'terraform-mode
+                   ;; Weird error relating to toml lsp for some
+                   ;; reason.
+                   #'makefile-mode))
         (lsp))))
 
   :config
