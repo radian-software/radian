@@ -1005,6 +1005,19 @@ ourselves."
 
   (vertico-mode +1)
 
+  ;; Enable `vertico-directory'. Commands for Ido-like directory navigation.
+  ;; About Vertico extensions: https://github.com/minad/vertico#extensions
+  (require 'vertico-directory)
+
+  (define-key vertico-map (kbd "RET")
+    #'vertico-directory-enter)
+  (define-key vertico-map (kbd "DEL")
+    #'vertico-directory-delete-char)
+  (define-key vertico-map (kbd "M-DEL")
+    #'vertico-directory-delete-word)
+
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
+
   (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
     :after #'vertico--update-candidates
     "Select first candidate rather than prompt by default.
