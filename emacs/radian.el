@@ -1001,20 +1001,13 @@ ourselves."
                         vertico-repeat
                         vertico-reverse))
   :demand t
+  :bind (:map vertico-map
+              ("RET" . #'vertico-directory-enter)
+              ("DEL" . #'vertico-directory-delete-char)
+              ("M-DEL" . #'vertico-directory-delete-word))
   :config
 
   (vertico-mode +1)
-
-  ;; Enable `vertico-directory'. Commands for Ido-like directory navigation.
-  ;; About Vertico extensions: https://github.com/minad/vertico#extensions
-  (require 'vertico-directory)
-
-  (define-key vertico-map (kbd "RET")
-    #'vertico-directory-enter)
-  (define-key vertico-map (kbd "DEL")
-    #'vertico-directory-delete-char)
-  (define-key vertico-map (kbd "M-DEL")
-    #'vertico-directory-delete-word)
 
   (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
