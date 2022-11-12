@@ -983,40 +983,70 @@ ourselves."
         (setq input (car result))))
     input))
 
-;; Package `selectrum' is an incremental completion and narrowing
-;; framework. Like Ivy and Helm, which it improves on, Selectrum
+;; Package `vertico' is an incremental completion and narrowing
+;; framework. Like Ivy and Helm, which it improves on, Vertico
 ;; provides a user interface for choosing from a list of options by
 ;; typing a query to narrow the list, and then selecting one of the
 ;; remaining candidates. This offers a significant improvement over
 ;; the default Emacs interface for candidate selection.
-(radian-use-package selectrum
-  :straight (:host github :repo "raxod502/selectrum")
-  :defer t
-  :init
+(radian-use-package vertico
+  :straight (:host github :repo "minad/vertico"
+             :files (:defaults "extensions/*")
+             :includes (vertico-buffer
+                        vertico-directory
+                        vertico-flat
+                        vertico-indexed
+                        vertico-mouse
+                        vertico-quick
+                        vertico-repeat
+                        vertico-reverse))
+  :demand t
+  :config
 
-  ;; This doesn't actually load Selectrum.
-  (selectrum-mode +1))
+  (vertico-mode +1)
+
+  (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
+    :after #'vertico--update-candidates
+    "Select first candidate rather than prompt by default.
+Suggestion from https://github.com/minad/vertico/issues/272 about
+how to recover previous Selectrum behavior, so that repeated TAB
+navigates down a directory tree. Submit the prompt using M-TAB or
+<up> RET."
+    (when (> vertico--total 0)
+      (setq vertico--index 0))))
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
 (radian-use-package prescient
+  :demand t
+  :after vertico
   :config
+
+  ;; https://github.com/minad/vertico/wiki#using-prescientel-filtering-and-sorting
 
   ;; Remember usage statistics across Emacs sessions.
   (prescient-persist-mode +1)
 
   ;; The default settings seem a little forgetful to me. Let's try
   ;; this out.
-  (setq prescient-history-length 1000))
+  (setq prescient-history-length 1000)
 
-;; Package `selectrum-prescient' provides intelligent sorting and
-;; filtering for candidates in Selectrum menus.
-(radian-use-package selectrum-prescient
-  :demand t
-  :after selectrum
-  :config
+  ;; Use prescient.el for filtering (`completion-styles') and sorting
+  ;; (`vertico-sort-function').
+  (setq completion-styles '(prescient basic))
+  (setq vertico-sort-function #'prescient-completion-sort)
 
-  (selectrum-prescient-mode +1))
+  ;; Common sense.
+  (setq prescient-sort-full-matches-first t)
+
+  (defun vertico-prescient-remember ()
+    "Remember the chosen candidate with Prescient."
+    (when (>= vertico--index 0)
+      (prescient-remember
+       (substring-no-properties
+        (nth vertico--index vertico--candidates)))))
+
+  (advice-add #'vertico-insert :after #'vertico-prescient-remember))
 
 ;;; Window management
 
@@ -1142,7 +1172,7 @@ active minibuffer, even if the minibuffer is not selected."
   :bind-keymap* (("C-c p" . projectile-command-map))
   :config
 
-  ;; Use Selectrum (via `completing-read') for Projectile instead of
+  ;; Use Vertico (via `completing-read') for Projectile instead of
   ;; IDO.
   (setq projectile-completion-system 'default)
 
@@ -1580,49 +1610,48 @@ Interactively, reverse the characters in the current region."
 ;; for this, but I wrote this code before I knew about it. Also, I'm
 ;; not sure how well it handles the edge cases for docstrings and
 ;; such.
-(radian-when-compiletime (version<= "26" emacs-version)
-  (radian-defadvice radian--advice-auto-fill-only-text (func &rest args)
-    :around #'internal-auto-fill
-    "Only perform auto-fill in text, comments, or docstrings."
-    (cl-block nil
-      ;; Don't auto-fill on the first line of a docstring, since it
-      ;; shouldn't be wrapped into the body.
-      (when (and (derived-mode-p #'emacs-lisp-mode)
-                 (eq (get-text-property (point) 'face) 'font-lock-doc-face)
-                 (save-excursion
-                   (beginning-of-line)
-                   (looking-at-p "[[:space:]]*\"")))
-        (cl-return))
-      (when (and (derived-mode-p 'text-mode)
-                 (not (derived-mode-p 'yaml-mode)))
-        (apply func args)
-        (cl-return))
-      ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
-      (when-let ((faces (save-excursion
-                          ;; In `web-mode', the end of the line isn't
-                          ;; fontified, so we have to step backwards
-                          ;; by one character before checking the
-                          ;; properties.
-                          (ignore-errors
-                            (backward-char))
-                          (get-text-property (point) 'face))))
-        (unless (listp faces)
-          (setq faces (list faces)))
-        (when (cl-some
-               (lambda (face)
-                 (memq face '(font-lock-comment-face
-                              font-lock-comment-delimiter-face
-                              font-lock-doc-face
-                              web-mode-javascript-comment-face)))
-               faces)
-          ;; Fill Elisp docstrings to the appropriate column. Why
-          ;; docstrings are filled to a different column, I don't know.
-          (let ((fill-column (if (and
-                                  (derived-mode-p #'emacs-lisp-mode)
-                                  (memq 'font-lock-doc-face faces))
-                                 emacs-lisp-docstring-fill-column
-                               fill-column)))
-            (apply func args)))))))
+(radian-defadvice radian--advice-auto-fill-only-text (func &rest args)
+  :around #'internal-auto-fill
+  "Only perform auto-fill in text, comments, or docstrings."
+  (cl-block nil
+    ;; Don't auto-fill on the first line of a docstring, since it
+    ;; shouldn't be wrapped into the body.
+    (when (and (derived-mode-p #'emacs-lisp-mode)
+               (eq (get-text-property (point) 'face) 'font-lock-doc-face)
+               (save-excursion
+                 (beginning-of-line)
+                 (looking-at-p "[[:space:]]*\"")))
+      (cl-return))
+    (when (and (derived-mode-p 'text-mode)
+               (not (derived-mode-p 'yaml-mode)))
+      (apply func args)
+      (cl-return))
+    ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
+    (when-let ((faces (save-excursion
+                        ;; In `web-mode', the end of the line isn't
+                        ;; fontified, so we have to step backwards
+                        ;; by one character before checking the
+                        ;; properties.
+                        (ignore-errors
+                          (backward-char))
+                        (get-text-property (point) 'face))))
+      (unless (listp faces)
+        (setq faces (list faces)))
+      (when (cl-some
+             (lambda (face)
+               (memq face '(font-lock-comment-face
+                            font-lock-comment-delimiter-face
+                            font-lock-doc-face
+                            web-mode-javascript-comment-face)))
+             faces)
+        ;; Fill Elisp docstrings to the appropriate column. Why
+        ;; docstrings are filled to a different column, I don't know.
+        (let ((fill-column (if (and
+                                (derived-mode-p #'emacs-lisp-mode)
+                                (memq 'font-lock-doc-face faces))
+                               emacs-lisp-docstring-fill-column
+                             fill-column)))
+          (apply func args))))))
 
 (blackout 'auto-fill-mode)
 
@@ -2659,7 +2688,7 @@ order."
 
   ;; When there are multiple options for where a symbol might be
   ;; defined, use the default `completing-read' mechanism to decide
-  ;; between them (i.e., delegate to Selectrum) rather than using the
+  ;; between them (i.e., delegate to Vertico) rather than using the
   ;; janky built-in `xref' thingie.
   (when (and
          (boundp 'xref-show-definitions-function)
@@ -3949,7 +3978,8 @@ SYMBOL is as in `xref-find-definitions'."
 
 (defun radian-clone-emacs-source-maybe ()
   "Prompt user to clone Emacs source repository if needed."
-  (when (and (not (file-directory-p source-directory))
+  (when (and (not (file-directory-p
+                   (expand-file-name ".git" source-directory)))
              (not (get-buffer "*clone-emacs-src*"))
              (yes-or-no-p "Clone Emacs source repository? "))
     (make-directory (file-name-directory source-directory) 'parents)
@@ -4069,16 +4099,13 @@ messages."
 ;;; Applications
 ;;;; Organization
 
-;; Use `use-feature' here because we already installed Org earlier.
-
 ;; Package `org' provides too many features to describe in any
 ;; reasonable amount of space. It is built fundamentally on
 ;; `outline-mode', and adds TODO states, deadlines, properties,
 ;; priorities, etc. to headings. Then it provides tools for
 ;; interacting with this data, including an agenda view, a time
 ;; clocker, etc. There are *many* extensions.
-(use-feature org
-  :functions (org-bookmark-jump-unhide) ; some issue with Emacs 26
+(use-package org
   :bind (:map org-mode-map
 
               ;; Prevent Org from overriding the bindings for
@@ -4994,7 +5021,7 @@ Also run `radian-atomic-chrome-setup-hook'."
               (defvar radian--currently-profiling-p t)
 
               ;; Abbreviated (and flattened) version of init.el.
-              (defvar radian-minimum-emacs-version "26.1")
+              (defvar radian-minimum-emacs-version "27.1")
               (defvar radian-local-init-file
                 (expand-file-name "init.local.el" user-emacs-directory))
               (setq package-enable-at-startup nil)
@@ -5178,21 +5205,13 @@ This is passed to `set-frame-font'."
   (setq which-key-echo-keystrokes echo-keystrokes))
 
 ;; Don't suggest shorter ways to type commands in M-x, since they
-;; don't apply when using Selectrum.
+;; don't apply when using Vertico.
 (setq suggest-key-bindings 0)
 
 ;; Don't blink the cursor on the opening paren when you insert a
 ;; closing paren, as we already have superior handling of that from
 ;; Smartparens.
 (setq blink-matching-paren nil)
-
-(radian-defadvice radian--advice-read-passwd-hide-char (func &rest args)
-  :around #'read-passwd
-  "Display passwords as **** rather than .... in the minibuffer.
-This is the default behavior is Emacs 27, so this advice only has
-an effect for Emacs 26 or below."
-  (let ((read-hide-char (or read-hide-char ?*)))
-    (apply func args)))
 
 (setq minibuffer-message-properties '(face minibuffer-prompt))
 
@@ -5350,32 +5369,32 @@ spaces."
   :demand t
   :config
 
-    ;; Needed because `:no-require' for some reason disables the
-    ;; load-time `require' invocation, as well as the compile-time
-    ;; one.
-    (require 'zerodark-theme)
+  ;; Needed because `:no-require' for some reason disables the
+  ;; load-time `require' invocation, as well as the compile-time one.
+  (require 'zerodark-theme)
 
-    (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
-          (class '((class color) (min-colors 89)))
-          (green (if (true-color-p) "#98be65" "#87af5f"))
-          (orange (if (true-color-p) "#da8548" "#d7875f"))
-          (purple (if (true-color-p) "#c678dd" "#d787d7")))
-      (custom-theme-set-faces
-       'zerodark
-       `(selectrum-current-candidate
-         ((,class (:background
-                   ,background-purple
-                   :weight bold
-                   :foreground ,purple))))
-       `(selectrum-primary-highlight ((,class (:foreground ,orange))))
-       `(selectrum-secondary-highlight ((,class (:foreground ,green))))))
+  (let ((background-purple (if (true-color-p) "#48384c" "#5f5f5f"))
+        (class '((class color) (min-colors 89)))
+        (green (if (true-color-p) "#98be65" "#87af5f"))
+        (orange (if (true-color-p) "#da8548" "#d7875f"))
+        (purple (if (true-color-p) "#c678dd" "#d787d7")))
+    (custom-theme-set-faces
+     'zerodark
+     `(vertico-current
+       ((,class (:background
+                 ,background-purple
+                 :weight bold
+                 :foreground ,purple))))
+     `(prescient-primary-highlight ((,class (:foreground ,orange))))
+     `(prescient-secondary-highlight ((,class (:foreground ,green))))
+     `(completions-common-part nil))
 
     (dolist (face '(outline-1
                     outline-2
                     outline-3))
       (set-face-attribute face nil :height 1.0))
 
-    (enable-theme 'zerodark))
+    (enable-theme 'zerodark)))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/radian-software/radian/issues/456>.
@@ -5391,6 +5410,7 @@ spaces."
       (set-face-background face (face-foreground face)))))
 
 ;; Local Variables:
+;; byte-compile-warnings: (not make-local noruntime unresolved)
 ;; checkdoc-symbol-words: ("top-level")
 ;; indent-tabs-mode: nil
 ;; no-native-compile: t

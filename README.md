@@ -14,9 +14,10 @@ These dotfiles attempt to achieve the following goals:
   code)
 
 If you are a fan of my Emacs packages (such as
-[`straight.el`][straight.el], [`el-patch`][el-patch], [Selectrum],
-[CTRLF], [`prescient.el`][prescient.el], [Apheleia], [Blackout]) then
-you will find all of them configured here.
+[`straight.el`][straight.el], [`el-patch`][el-patch], ~[Selectrum]~
+(replaced by [Vertico]), [CTRLF], [`prescient.el`][prescient.el],
+[Apheleia], [Blackout]) then you will find all of them configured
+here.
 
 Note that there is a `master` branch which is not updated as
 frequently. You may be interested in running this branch if you desire
@@ -24,12 +25,12 @@ more stability.
 
 ## Software configured, features
 
-* [Emacs] (**minimum version supported: 26.1**)
+* [Emacs] (**minimum version supported: 27.1**)
   * Next-generation package manager, [`straight.el`][straight.el]
   * Clean and DRY package customizations using
     [`use-package`][use-package]
   * Simpler and less buggy (than [Ivy], [Counsel], [Helm]) file and
-    command selection using [Selectrum]
+    command selection using [Vertico]
   * More robust and streamlined single-buffer text search (than
     [Isearch], [Swiper]) using [CTRLF]
   * Sorting by [frecency] and usage on all commands using
@@ -118,23 +119,8 @@ configuration, and optionally installing local configuration.
 
 * Emacs: `brew install bash python`; `brew cask install emacs`;
   (optional for improved startup time) `brew install watchexec`
-  * Code intelligence
-    * Bash: `yarn global add bash-language-server`, but see [this
-      issue](https://github.com/mads-hartmann/bash-language-server/issues/131).
-    * C/C++: `brew install llvm`
-    * Flow: `brew install flow`
-    * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
-      to your `$PATH`
-    * Haskell: (please help with documentation!)
-    * HTML: `yarn global add vscode-html-languageserver-bin`
-    * JavaScript/TypeScript: `yarn global add typescript
-      typescript-language-server`; `brew install prettier`
-    * LaTeX: (please help with documentation!)
-    * Python: the language server is downloaded automatically courtesy
-      of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
-
-          $ brew install black
-
+  * For LSP servers, refer to [`lsp-mode`
+    documentation](https://emacs-lsp.github.io/lsp-mode/page/languages/)
 * Zsh:
 
       $ brew install zsh
@@ -144,6 +130,16 @@ configuration, and optionally installing local configuration.
 * Tmux: `brew install tmux`
 * Git: `brew install git`
 
+#### Ubuntu/Debian
+
+* Emacs: `apt install emacs python3`; (optional for improved startup
+  time) `apt install watchexec-cli`
+  * For LSP servers, refer to [`lsp-mode`
+    documentation](https://emacs-lsp.github.io/lsp-mode/page/languages/)
+* Zsh: `apt install zsh`
+* Tmux: `apt install tmux`
+* Git: `apt install git`
+
 #### Arch/Manjaro Linux
 
 I use [Yay](https://github.com/Jguer/yay) to install AUR packages. If
@@ -151,26 +147,9 @@ you prefer something different, substitute to taste.
 
 * Emacs: `pacman -S emacs python`; (optional for improved startup
   time) `yay -S watchexec`
-  * Code intelligence
-    * Bash: `yarn global add bash-language-server`
-    * C/C++: `pacman -S clang`
-    * Flow: `yarn global add flow-bin`
-    * Go: `go get -u golang.org/x/tools/gopls` and add `$GOPATH/bin`
-      to your `$PATH`
-    * Haskell: `yay -S haskell-ide-engine`
-    * HTML: `yay -S vscode-html-languageserver-bin`
-    * JavaScript/TypeScript: `pacman -S prettier`; `yay -S
-      typescript-language-server-bin`
-    * LaTeX: `yay -S digestif`
-    * Python: the language server is downloaded automatically courtesy
-      of [`lsp-python-ms`](https://github.com/emacs-lsp/lsp-python-ms).
-
-          $ pacman -S python-black
-
-* Zsh:
-
-      $ pacman -S zsh
-
+  * For LSP servers, refer to [`lsp-mode`
+    documentation](https://emacs-lsp.github.io/lsp-mode/page/languages/)
+* Zsh: `pacman -S zsh`
 * Tmux: `pacman -S tmux`
 * Git: `pacman -S git`
 
@@ -326,6 +305,7 @@ commented.
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
+[vertico]: https://github.com/minad/vertico
 [visual-regexp]: https://github.com/benma/visual-regexp.el
 [wdx]: https://github.com/radian-software/wdx
 [which-key]: https://github.com/justbur/emacs-which-key
