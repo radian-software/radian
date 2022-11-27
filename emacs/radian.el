@@ -1001,9 +1001,15 @@ ourselves."
                         vertico-repeat
                         vertico-reverse))
   :demand t
+  :bind (:map vertico-map
+              ("RET" . #'vertico-directory-enter)
+              ("DEL" . #'vertico-directory-delete-char)
+              ("M-DEL" . #'vertico-directory-delete-word))
   :config
 
   (vertico-mode +1)
+
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
   (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
     :after #'vertico--update-candidates
