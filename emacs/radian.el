@@ -1018,8 +1018,6 @@ navigates down a directory tree. Submit the prompt using M-TAB or
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
 (radian-use-package prescient
-  :demand t
-  :after vertico
   :config
 
   ;; https://github.com/minad/vertico/wiki#using-prescientel-filtering-and-sorting
@@ -1031,22 +1029,17 @@ navigates down a directory tree. Submit the prompt using M-TAB or
   ;; this out.
   (setq prescient-history-length 1000)
 
-  ;; Use prescient.el for filtering (`completion-styles') and sorting
-  ;; (`vertico-sort-function').
-  (setq completion-styles '(prescient basic))
-  (setq vertico-sort-function #'prescient-completion-sort)
-
   ;; Common sense.
-  (setq prescient-sort-full-matches-first t)
+  (setq prescient-sort-full-matches-first t))
 
-  (defun vertico-prescient-remember ()
-    "Remember the chosen candidate with Prescient."
-    (when (>= vertico--index 0)
-      (prescient-remember
-       (substring-no-properties
-        (nth vertico--index vertico--candidates)))))
+;; Package `vertico-prescient' enables prescient.el sorting and
+;; filtering when using Vertico.
+(radian-use-package vertico-prescient
+  :demand t
+  :after vertico
+  :config
 
-  (advice-add #'vertico-insert :after #'vertico-prescient-remember))
+  (vertico-prescient-mode +1))
 
 ;;; Window management
 
