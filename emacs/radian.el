@@ -1019,7 +1019,11 @@ how to recover previous Selectrum behavior, so that repeated TAB
 navigates down a directory tree. Submit the prompt using M-TAB or
 <up> RET."
     (when (> vertico--total 0)
-      (setq vertico--index 0))))
+      (setq vertico--index 0)))
+
+  ;; Ignore case... otherwise the behavior is really weird and
+  ;; confusing.
+  (setq completion-ignore-case t))
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
