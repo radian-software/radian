@@ -76,6 +76,9 @@ Radian always loads the packages `use-package', `straight',
 `blackout', `bind-key' and `el-patch' even if they are members of
 this list.")
 
+(defvar radian-compiling nil
+  "Non-nil when Radian's make is being called.")
+
 (unless radian-org-enable-contrib
   (add-to-list 'radian-disabled-packages
                'org-contrib))
