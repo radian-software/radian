@@ -918,7 +918,7 @@ In particular, if you have an image on your system clipboard and
 you either yank or kill (as `save-interprogram-paste-before-kill'
 means Emacs will try to put the system clipboard contents into
 the kill ring when you kill something new), you'll get the
-message 'gui-get-selection: (error \"Selection owner couldn't
+message \\='gui-get-selection: (error \"Selection owner couldn't
 convert\" UTF8_STRING)'. Disable that."
   (radian--with-silent-message "Selection owner couldn't convert"
     (apply func args)))
@@ -2352,18 +2352,18 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; `lsp-mode' doesn't support Elisp, so let's avoid
                    ;; triggering the autoload just for checking that, yes,
                    ;; there's nothing to do for the *scratch* buffer.
-                   #'emacs-lisp-mode
+                   'emacs-lisp-mode
                    ;; Disable for modes that we currently use a specialized
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
-                   #'clojure-mode
-                   #'ruby-mode
+                   'clojure-mode
+                   'ruby-mode
                    ;; Disable for modes with insufficiently mature
                    ;; language servers.
-                   #'terraform-mode
+                   'terraform-mode
                    ;; Weird error relating to toml lsp for some
                    ;; reason.
-                   #'makefile-mode))
+                   'makefile-mode))
         (lsp))))
 
   :config
