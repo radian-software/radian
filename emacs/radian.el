@@ -4022,6 +4022,9 @@ SYMBOL is as in `xref-find-definitions'."
   ;; warning gets triggered basically all the time for everything.
   (setq byte-compile-warnings '(not make-local noruntime))
 
+  (defvar radian-byte-compile--process nil
+    "Last `radian-byte-compile' process object.")
+
   (defun radian-batch-byte-compile ()
     "Byte-compile radian.el. For usage in batch mode."
     (byte-compile-file radian-lib-file))
@@ -4040,37 +4043,43 @@ messages."
         (cl-return))
       (when report-progress
         (message "Byte-compiling updated configuration..."))
+      (when (process-live-p radian-byte-compile--process)
+        (kill-process radian-byte-compile--process))
       (ignore-errors
         (kill-buffer " *radian-byte-compile*"))
       (let ((default-directory radian-directory))
         (radian-env-setup)
-        (make-process
-         :name "radian-byte-compile"
-         :buffer " *radian-byte-compile*"
-         :command '("make" "compile")
-         :noquery t
-         :sentinel
-         (lambda (proc _event)
-           (unless (process-live-p proc)
-             (with-current-buffer (process-buffer proc)
-               (if (= 0 (process-exit-status proc))
-                   (progn
-                     (insert "Byte-compilation completed successfully!\n")
-                     (message
-                      (if report-progress
-                          "Byte-compiling updated configuration...done"
-                        "Byte-compiled updated configuration")))
-                 (save-match-data
-                   (save-excursion
-                     (goto-char (point-min))
-                     (when (looking-at "In toplevel form:")
-                       (forward-line))
-                     (when (looking-at "radian\\.el:[0-9]+:[0-9]+:Warning: ")
-                       (goto-char (match-end 0)))
-                     (message "Failed to byte-compile%s"
-                              (if (looking-at ".+")
-                                  (format ": %s" (match-string 0))
-                                " (no output)"))))))))))))
+        (setq
+         radian-byte-compile--process
+         (make-process
+          :name "radian-byte-compile"
+          :buffer " *radian-byte-compile*"
+          :command '("make" "compile")
+          :noquery t
+          :sentinel
+          (lambda (proc _event)
+            (unless (process-live-p proc)
+              (when (buffer-live-p (process-buffer proc))
+                (with-current-buffer (process-buffer proc)
+                  (if (= 0 (process-exit-status proc))
+                      (progn
+                        (insert "Byte-compilation completed successfully!\n")
+                        (message
+                         (if report-progress
+                             "Byte-compiling updated configuration...done"
+                           "Byte-compiled updated configuration")))
+                    (save-match-data
+                      (save-excursion
+                        (goto-char (point-min))
+                        (when (looking-at "In toplevel form:")
+                          (forward-line))
+                        (when (looking-at
+                               "radian\\.el:[0-9]+:[0-9]+:Warning: ")
+                          (goto-char (match-end 0)))
+                        (message "Failed to byte-compile%s"
+                                 (if (looking-at ".+")
+                                     (format ": %s" (match-string 0))
+                                   " (no output)"))))))))))))))
 
   :blackout (emacs-lisp-compilation-mode . "Byte-Compile"))
 
