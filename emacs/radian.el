@@ -1376,6 +1376,7 @@ This is a function for `after-save-hook'. Remove
 (dolist (fun '(find-file           ; C-x C-f
                find-alternate-file ; C-x C-v
                write-file          ; C-x C-w
+               find-file-noselect  ; open from cmdline argument
                ))
   (advice-add fun :around #'radian--advice-find-file-create-directories))
 
