@@ -3368,13 +3368,6 @@ Return either a string or nil."
 ;; Package `rust-mode' provides a major mode for Rust.
 (radian-use-package rust-mode)
 
-;;;; Scheme
-;; http://www.schemers.org/
-
-;; Package `geiser' provides REPL integration for several
-;; implementations of Scheme.
-(radian-use-package geiser)
-
 ;;;; Shell
 ;; http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
 ;; https://www.gnu.org/software/bash/

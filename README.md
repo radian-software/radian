@@ -290,7 +290,6 @@ commented.
 [prs]: https://github.com/radian-software/radian/pulls
 [python]: https://www.python.org/
 [pyvenv]: https://github.com/jorgenschaefer/pyvenv
-[racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
 [rg.el]: https://github.com/dajva/rg.el
