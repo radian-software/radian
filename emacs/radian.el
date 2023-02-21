@@ -782,6 +782,16 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
 ;;; Environment
 ;;;; Environment variables
 
+(defcustom radian-env-setup t
+  "Non-nil means ~/.profile is sourced after startup.
+Environment variables will be copied into the current Emacs
+process. This works around issues caused by desktop environments
+not providing the proper env vars to graphical applications.
+
+You may want to disable this if your ~/.profile is not safe to
+run multiple times."
+  :type 'boolean)
+
 (defvar radian--env-setup-p nil
   "Non-nil if `radian-env-setup' has completed at least once.")
 
@@ -791,7 +801,8 @@ Only do this once, unless AGAIN is non-nil."
   (interactive (list 'again))
   ;; No need to worry about race conditions because Elisp isn't
   ;; concurrent (yet).
-  (unless (and radian--env-setup-p (not again))
+  (unless (or (not radian-env-setup)
+              (and radian--env-setup-p (not again)))
     (let (;; Current directory may not exist in certain horrifying
           ;; circumstances (yes, this has happened in practice).
           (default-directory "/")
