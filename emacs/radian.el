@@ -1169,6 +1169,30 @@ active minibuffer, even if the minibuffer is not selected."
       (cl-letf (((symbol-function #'pp) #'prin1))
         (apply func args)))))
 
+;; Feature `recentf' is for keeping a list of recent files. We don't
+;; enable it by default but we do silence its operation in case
+;; something else does.
+(use-feature recentf
+  :config
+
+  (radian-defadvice radian-local--recentf-silence-load (func &rest args)
+    :around #'recentf-load-list
+    "Silence loading of the recentf save file."
+    (radian--with-silent-load
+      (apply func args)))
+
+  (radian-defadvice radian-local--recentf-silence-cleanup (func &rest args)
+    :around #'recentf-cleanup
+    "Silence recentf file list cleanup."
+    (radian--with-silent-message "recentf"
+      (apply func args)))
+
+  (radian-defadvice radian-local--recentf-silence-save (func &rest args)
+    :around #'recentf-save-list
+    "Silence saving of the recentf save file."
+    (radian--with-silent-write
+      (apply func args))))
+
 ;; Package `projectile' keeps track of a "project" list, which is
 ;; automatically added to as you visit Git repositories, Node.js
 ;; projects, etc. It then provides commands for quickly navigating
@@ -2314,16 +2338,6 @@ currently active.")
   :blackout yas-minor-mode)
 
 ;;; IDE features
-;;;; Virtual environments
-;;;;; Python
-
-;; Package `pyvenv' provides functions for activating and deactivating
-;; Python virtualenvs within Emacs. It's mostly not needed anymore now
-;; that `lsp-python-ms' is configured to discover the appropriate
-;; Pipenv or Poetry virtualenv, but maybe it will come in handy
-;; someday.
-(radian-use-package pyvenv)
-
 ;;;; Language servers
 
 ;; Package `lsp-mode' is an Emacs client for the Language Server
@@ -2837,13 +2851,6 @@ was printed, and only have ElDoc display if one wasn't."
   (add-to-list 'safe-local-variable-values
                '(lisp-indent-function . common-lisp-indent-function)))
 
-;;;; AppleScript
-;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
-
-;; Package `apples-mode' provides a major mode for AppleScript.
-(radian-use-package apples-mode
-  :mode "\\.\\(applescri\\|sc\\)pt\\'")
-
 ;;;; C, C++, Objective-C, Java
 ;; https://en.wikipedia.org/wiki/C_(programming_language)
 ;; https://en.wikipedia.org/wiki/C%2B%2B
@@ -3293,16 +3300,6 @@ Return either a string or nil."
 
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
-
-;; Package `robe' provides a language server for Ruby which draws
-;; information for autocompletions and source code navigation from a
-;; live REPL in the project context. Start it with `robe-start'.
-(radian-use-package robe
-  :init
-
-  (add-hook 'ruby-mode-hook #'robe-mode)
-
-  :blackout t)
 
 ;; Package `ruby-electric' allows you to have Emacs insert a paired
 ;; "end" when you type "do", and analogously for other paired
@@ -4419,7 +4416,10 @@ the problematic case.)"
   ;; message. (A message is shown if insta-revert is either disabled
   ;; or determined dynamically by setting this variable to a
   ;; function.)
-  (setq dired-auto-revert-buffer t))
+  (setq dired-auto-revert-buffer t)
+
+  ;; Showing free space is a sigificant performance hit.
+  (setq dired-free-space nil))
 
 (use-feature dired-x
   :bind (;; Bindings for jumping to the current directory in Dired.
@@ -4985,12 +4985,6 @@ Also run `radian-atomic-chrome-setup-hook'."
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
-
-;; Package `sx' allows you to browse Stack Overflow from within Emacs.
-;; First, run `sx-authenticate' in order to provide your username and
-;; password. After that, you can use any of the autoloaded entry
-;; points. Navigation is keyboard-centric.
-(radian-use-package sx)
 
 ;;;; Emacs profiling
 
