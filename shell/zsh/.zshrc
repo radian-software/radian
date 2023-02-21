@@ -469,6 +469,32 @@ function delink {
     done
 }
 
+# Usage: transpose <path1> <path2>
+#
+# Swap the files or directories at the two provided paths. Not atomic.
+# Both paths must exist.
+function transpose {
+    emulate -LR zsh
+    if (( $# != 2 )); then
+        echo >&2 "usage: transpose <path1> <path2>"
+        return 1
+    fi
+    for arg in $1 $2; do
+        if [[ ! -e $arg && ! -L $arg ]]; then
+            echo >&2 "no such file or directory: $arg"
+            return 1
+        fi
+        if [[ -e $path.tmp || -L $path.tmp ]]; then
+            echo >&2 "already exists: $path.tmp"
+            return 1
+        fi
+    done
+    mv $1 $1.tmp
+    mv $2 $2.tmp
+    mv $1.tmp $2
+    mv $2.tmp $1
+}
+
 #### mkdir
 
 alias md='mkdir -p'
