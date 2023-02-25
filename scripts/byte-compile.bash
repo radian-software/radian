@@ -5,6 +5,7 @@ set -o pipefail
 
 (emacs --batch \
        --eval "(setq straight-safe-mode t)"                  \
+       --eval "(setq radian-compiling t)"                    \
        --load "$HOME/.emacs.d/init.el"                       \
        --funcall radian-batch-byte-compile 2>&1              \
      | (grep -v "In toplevel form"                  || true) \

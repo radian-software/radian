@@ -76,6 +76,9 @@ Radian always loads the packages `use-package', `straight',
 `blackout', `bind-key' and `el-patch' even if they are members of
 this list.")
 
+(defvar radian-compiling nil
+  "Non-nil when Radian's make is being called.")
+
 (unless radian-org-enable-contrib
   (add-to-list 'radian-disabled-packages
                'org-contrib))
@@ -915,7 +918,7 @@ In particular, if you have an image on your system clipboard and
 you either yank or kill (as `save-interprogram-paste-before-kill'
 means Emacs will try to put the system clipboard contents into
 the kill ring when you kill something new), you'll get the
-message 'gui-get-selection: (error \"Selection owner couldn't
+message \\='gui-get-selection: (error \"Selection owner couldn't
 convert\" UTF8_STRING)'. Disable that."
   (radian--with-silent-message "Selection owner couldn't convert"
     (apply func args)))
@@ -1001,9 +1004,15 @@ ourselves."
                         vertico-repeat
                         vertico-reverse))
   :demand t
+  :bind (:map vertico-map
+              ("RET" . #'vertico-directory-enter)
+              ("DEL" . #'vertico-directory-delete-char)
+              ("M-DEL" . #'vertico-directory-delete-word))
   :config
 
   (vertico-mode +1)
+
+  (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
   (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
     :after #'vertico--update-candidates
@@ -1013,13 +1022,15 @@ how to recover previous Selectrum behavior, so that repeated TAB
 navigates down a directory tree. Submit the prompt using M-TAB or
 <up> RET."
     (when (> vertico--total 0)
-      (setq vertico--index 0))))
+      (setq vertico--index 0)))
+
+  ;; Ignore case... otherwise the behavior is really weird and
+  ;; confusing.
+  (setq completion-ignore-case t))
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
 (radian-use-package prescient
-  :demand t
-  :after vertico
   :config
 
   ;; https://github.com/minad/vertico/wiki#using-prescientel-filtering-and-sorting
@@ -1031,22 +1042,17 @@ navigates down a directory tree. Submit the prompt using M-TAB or
   ;; this out.
   (setq prescient-history-length 1000)
 
-  ;; Use prescient.el for filtering (`completion-styles') and sorting
-  ;; (`vertico-sort-function').
-  (setq completion-styles '(prescient basic))
-  (setq vertico-sort-function #'prescient-completion-sort)
-
   ;; Common sense.
-  (setq prescient-sort-full-matches-first t)
+  (setq prescient-sort-full-matches-first t))
 
-  (defun vertico-prescient-remember ()
-    "Remember the chosen candidate with Prescient."
-    (when (>= vertico--index 0)
-      (prescient-remember
-       (substring-no-properties
-        (nth vertico--index vertico--candidates)))))
+;; Package `vertico-prescient' enables prescient.el sorting and
+;; filtering when using Vertico.
+(radian-use-package vertico-prescient
+  :demand t
+  :after vertico
+  :config
 
-  (advice-add #'vertico-insert :after #'vertico-prescient-remember))
+  (vertico-prescient-mode +1))
 
 ;;; Window management
 
@@ -2346,15 +2352,18 @@ set LSP configuration (see `lsp-python-ms')."
                    ;; `lsp-mode' doesn't support Elisp, so let's avoid
                    ;; triggering the autoload just for checking that, yes,
                    ;; there's nothing to do for the *scratch* buffer.
-                   #'emacs-lisp-mode
+                   'emacs-lisp-mode
                    ;; Disable for modes that we currently use a specialized
                    ;; framework for, until they are phased out in favor of
                    ;; LSP.
-                   #'clojure-mode
-                   #'ruby-mode
+                   'clojure-mode
+                   'ruby-mode
                    ;; Disable for modes with insufficiently mature
                    ;; language servers.
-                   #'terraform-mode))
+                   'terraform-mode
+                   ;; Weird error relating to toml lsp for some
+                   ;; reason.
+                   'makefile-mode))
         (lsp))))
 
   :config
