@@ -1183,7 +1183,8 @@ active minibuffer, even if the minibuffer is not selected."
 
   ;; Workaround <https://github.com/bbatsov/projectile/issues/1148>
   (when (executable-find "fdfind")
-    (setq projectile-git-command "fdfind -H -0 -E .git -tf --strip-cwd-prefix"))
+    (setq projectile-git-command
+          "fdfind -H -0 -E .git -tf --strip-cwd-prefix"))
 
   ;; Use Vertico (via `completing-read') for Projectile instead of
   ;; IDO.
