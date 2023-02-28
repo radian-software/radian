@@ -739,11 +739,6 @@ This keymap is bound under \\[radian-keymap].")
 
 (bind-key* "M-P" radian-keymap)
 
-(defmacro radian-bind-key (key-name command &optional predicate)
-  "Bind a key in `radian-keymap'.
-KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
-  `(bind-key ,key-name ,command radian-keymap ,predicate))
-
 (defun radian-join-keys (&rest keys)
   "Join key sequences KEYS. Empty strings and nils are discarded.
 \(radian--join-keys \"\\[radian-keymap] e\" \"e i\")
@@ -1492,11 +1487,11 @@ unquote it using a comma."
        ,defun-form
        ,defun-other-window-form
        ,@(when full-keybinding
-           `((radian-bind-key ,full-keybinding #',defun-name)))
+           `((bind-key ,full-keybinding #',defun-name radian-keymap)))
        ,@(when full-other-window-keybinding
-           `((radian-bind-key
-              ,full-other-window-keybinding
-              #',defun-other-window-name)))
+           `((bind-key ,full-other-window-keybinding
+                       #',defun-other-window-name
+                       radian-keymap)))
        ;; Return the symbols for the two functions defined.
        (list ',defun-name ',defun-other-window-name))))
 
@@ -1989,7 +1984,7 @@ the reverse direction from \\[pop-global-mark]."
 
 ;;;; Find and replace
 
-(radian-bind-key "c" #'toggle-case-fold-search)
+(bind-key "c" #'toggle-case-fold-search radian-keymap)
 
 ;; Package `ctrlf' provides a replacement for `isearch' that is more
 ;; similar to the tried-and-true text search interfaces in web
@@ -2799,8 +2794,8 @@ was printed, and only have ElDoc display if one wasn't."
   :config
 
   ;; For use with `lsp-ui'.
-  (radian-bind-key "p" #'flycheck-previous-error)
-  (radian-bind-key "n" #'flycheck-next-error)
+  (bind-key "p" #'flycheck-previous-error radian-keymap)
+  (bind-key "n" #'flycheck-next-error radian-keymap)
 
   :blackout t)
 
@@ -3912,7 +3907,7 @@ bizarre reason."
   (load user-init-file nil 'nomessage)
   (message "Reloading init-file...done"))
 
-(radian-bind-key "r" #'radian-reload-init)
+(bind-key "r" #'radian-reload-init radian-keymap)
 
 (defun radian-eval-buffer-or-region (&optional start end)
   "Evaluate the current region, or the whole buffer if no region is active.
@@ -4710,11 +4705,11 @@ command."
              git-gutter:revert-hunk)
   :init
 
-  (radian-bind-key "v p" #'git-gutter:previous-hunk)
-  (radian-bind-key "v n" #'git-gutter:next-hunk)
-  (radian-bind-key "v a" #'radian-git-gutter:beginning-of-hunk)
-  (radian-bind-key "v e" #'git-gutter:end-of-hunk)
-  (radian-bind-key "v k" #'git-gutter:revert-hunk)
+  (bind-key "v p" #'git-gutter:previous-hunk radian-keymap)
+  (bind-key "v n" #'git-gutter:next-hunk radian-keymap)
+  (bind-key "v a" #'radian-git-gutter:beginning-of-hunk radian-keymap)
+  (bind-key "v e" #'git-gutter:end-of-hunk radian-keymap)
+  (bind-key "v k" #'git-gutter:revert-hunk radian-keymap)
 
   ;; Disable in Org mode, as per
   ;; <https://github.com/syl20bnr/spacemacs/issues/10555> and
@@ -4863,7 +4858,7 @@ Instead, display simply a flat colored region in the fringe."
 (use-feature compile
   :init
 
-  (radian-bind-key "m" #'compile)
+  (bind-key "m" #'compile radian-keymap)
 
   :config
 
