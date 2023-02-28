@@ -3754,7 +3754,9 @@ keymaps."
     "Make xref look up Elisp symbols in help buffers.
 Otherwise, it will try to find a TAGS file using etags, which is
 unhelpful."
-    (add-hook 'xref-backend-functions #'elisp--xref-backend nil 'local)))
+    (add-hook 'xref-backend-functions #'elisp--xref-backend nil 'local))
+
+  (setq help-enable-symbol-autoload t))
 
 ;; Package `helpful' provides a complete replacement for the built-in
 ;; Emacs help facility which provides much more contextual information
