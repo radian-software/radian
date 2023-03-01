@@ -582,11 +582,10 @@ NAME and ARGS are as in `use-package'."
          (package (cond
                    (straight (car straight))
                    (straight-use-package-by-default name))))
-    `(if (radian-enabled-p ',name)
-         (radian-protect-macros-maybe ,name
-           (use-package ,name ,@args))
-       ,@(when package
-           (list `(straight-register-package ',package))))))
+    (if (radian-enabled-p name)
+        `(use-package ,name ,@args)
+      (when package
+        `(straight-register-package ',package)))))
 
 (defmacro use-feature (name &rest args)
   "Like `radian-use-package', but without straight.el integration.
