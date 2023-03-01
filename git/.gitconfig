@@ -3,18 +3,12 @@
 	pushNonFastForward = false
 	statusHints = false
 [alias]
-	alias = "!_() { git config --global alias.$1 \"$2\"; }; _"
-	aliases = config --get-regexp ^alias\\.
-	checkup = !git log -1 && (git fetch --all 2>/dev/null || true) && git status
 # Run a command with the repository root as cwd. See
 # https://stackoverflow.com/questions/957928#comment9747528_957978.
 	exec = "!exec "
-	msg = log --format=%B -1
 	root = rev-list --max-parents=0 HEAD
-	setup = !git init && git commit --allow-empty -m \"Initial commit\"
-	unalias = "!_() { git config --global --unset alias.$1; }; _"
 [branch]
-	autosetupmerge = true
+	autoSetupMerge = true
 [color]
 	ui = auto
 [core]
@@ -42,13 +36,10 @@
 [pull]
 	ff = only
 [push]
+	autoSetupRemote = true
 	default = current
 [rebase]
 	autosquash = true
-[receive]
-	denyCurrentBranch = updateInstead
-[rerere]
-	enabled = true
 [status]
 	submodulesummary = true
 # .gitconfig.local should be included last.
