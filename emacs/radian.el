@@ -59,6 +59,11 @@ this list.")
 (defvar radian-compiling nil
   "Non-nil when Radian's make is being called.")
 
+(defvar radian-prune-straight-cache
+  (not (or radian-compiling
+           (member "--no-local" command-line-args)))
+  "Non-nil when Radian should prune straight's cache.")
+
 (defvar radian-directory (file-name-directory
                           (directory-file-name
                            (file-name-directory
@@ -445,7 +450,6 @@ hook directly into the init-file during byte-compilation."
 ;; Allow to disable local customizations with a
 ;; command-line argument.
 (if (member "--no-local" command-line-args)
-
     ;; Make sure to delete --no-local from the list, because
     ;; otherwise Emacs will issue a warning about the unknown
     ;; argument.
@@ -651,6 +655,10 @@ nice.)"
   :commands (straight-x-fetch-all))
 
 ;;; Configure ~/.emacs.d paths
+
+;;  Package `compat' contains useful functions that are implemented in
+;; future emacsen.
+(radian-use-package compat)
 
 ;; Package `no-littering' changes the default paths for lots of
 ;; different packages, with the net result that the ~/.emacs.d folder
@@ -3483,7 +3491,7 @@ environment with point at the end of a non-empty line of text."
     (let ((needs-fixup (save-excursion
                          (beginning-of-line)
                          (re-search-forward
-                          "[^[:space:]]" (point-at-eol) 'noerror))))
+                          "[^[:space:]]" (compat-call pos-eol) 'noerror))))
       (prog1 (apply func args)
         (when needs-fixup
           (save-excursion
@@ -5358,19 +5366,19 @@ spaces."
   :no-require t)
 
 ;;; Closing
-
 (radian--run-hook after-init)
 
-;; Prune the build cache for straight.el; this will prevent it from
-;; growing too large. Do this after the final hook to prevent packages
-;; installed there from being pruned.
-(straight-prune-build-cache)
+(when radian-prune-straight-cache
+  ;; Prune the build cache for straight.el; this will prevent it from
+  ;; growing too large. Do this after the final hook to prevent packages
+  ;; installed there from being pruned.
+  (straight-prune-build-cache)
 
-;; Occasionally prune the build directory as well. For similar reasons
-;; as above, we need to do this after local configuration.
-(unless (bound-and-true-p radian--currently-profiling-p)
-  (when (= 0 (random 100))
-    (straight-prune-build-directory)))
+  ;; Occasionally prune the build directory as well. For similar reasons
+  ;; as above, we need to do this after local configuration.
+  (unless (bound-and-true-p radian--currently-profiling-p)
+    (when (= 0 (random 100))
+      (straight-prune-build-directory))))
 
 ;; We should only get here if init was successful. If we do,
 ;; byte-compile this file asynchronously in a subprocess using the
