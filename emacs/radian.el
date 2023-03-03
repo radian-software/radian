@@ -991,7 +991,7 @@ ourselves."
   (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
   (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
-    :after #'vertico--update-candidates
+    :after #'vertico--update
     "Select first candidate rather than prompt by default.
 Suggestion from https://github.com/minad/vertico/issues/272 about
 how to recover previous Selectrum behavior, so that repeated TAB
