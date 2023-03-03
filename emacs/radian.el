@@ -990,15 +990,11 @@ ourselves."
 
   (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
-  (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
-    :after #'vertico--update
-    "Select first candidate rather than prompt by default.
-Suggestion from https://github.com/minad/vertico/issues/272 about
-how to recover previous Selectrum behavior, so that repeated TAB
-navigates down a directory tree. Submit the prompt using M-TAB or
-<up> RET."
-    (when (> vertico--total 0)
-      (setq vertico--index 0)))
+  ;; Select first candidate rather than prompt by default.
+  ;;
+  ;; https://github.com/minad/vertico/issues/272
+  ;; https://github.com/minad/vertico/issues/306
+  (setq vertico-preselect 'first)
 
   ;; Ignore case... otherwise the behavior is really weird and
   ;; confusing.
