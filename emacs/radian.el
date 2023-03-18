@@ -1176,11 +1176,6 @@ active minibuffer, even if the minibuffer is not selected."
   :bind-keymap* (("C-c p" . projectile-command-map))
   :config
 
-  ;; Workaround <https://github.com/bbatsov/projectile/issues/1148>
-  (when (executable-find "fdfind")
-    (setq projectile-git-command
-          "fdfind -H -0 -E .git -tf --strip-cwd-prefix"))
-
   ;; Use Vertico (via `completing-read') for Projectile instead of
   ;; IDO.
   (setq projectile-completion-system 'default)
