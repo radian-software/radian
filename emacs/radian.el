@@ -971,15 +971,7 @@ ourselves."
 ;; the default Emacs interface for candidate selection.
 (radian-use-package vertico
   :straight (:host github :repo "minad/vertico"
-             :files (:defaults "extensions/*")
-             :includes (vertico-buffer
-                        vertico-directory
-                        vertico-flat
-                        vertico-indexed
-                        vertico-mouse
-                        vertico-quick
-                        vertico-repeat
-                        vertico-reverse))
+             :files (:defaults "extensions/*"))
   :demand t
   :bind (:map vertico-map
               ("RET" . #'vertico-directory-enter)
@@ -1000,7 +992,15 @@ ourselves."
   ;; confusing.
   (setq read-file-name-completion-ignore-case t
         read-buffer-completion-ignore-case t
-        completion-ignore-case t))
+        completion-ignore-case t)
+
+  ;; Enable mouse support for clicking on candidates.
+  (vertico-mouse-mode +1)
+
+  ;; Don't re-sort buffer candidates. The recency order is correct.
+  (vertico-multiform-mode +1)
+  (setq vertico-multiform-categories
+        '((buffer (vertico-sort-function . copy-sequence)))))
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
