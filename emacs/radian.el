@@ -4667,7 +4667,8 @@ This prevents having EmacSQL try to build its binary (which may
 be annoying, inconvenient, or impossible depending on the
 situation) just because you tried to do literally anything with
 Magit."
-    (file-executable-p emacsql-sqlite-executable))
+    (and (featurep 'emacsql-sqlite)
+         (file-executable-p emacsql-sqlite-executable)))
 
   (radian-defadvice radian--forge-build-binary-lazily (&rest _)
     :before #'forge-dispatch
@@ -4676,6 +4677,7 @@ Normally, the binary gets built as soon as Forge is loaded, which
 is terrible UX. We disable that above, so we now have to manually
 make sure it does get built when we actually issue a Forge
 command."
+    (require 'emacsql-sqlite)
     (unless (file-executable-p emacsql-sqlite-executable)
       (emacsql-sqlite-compile 2))))
 
