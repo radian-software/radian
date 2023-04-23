@@ -41,7 +41,7 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
-### zplugin
+### zinit
 
 radian_zinit=
 
@@ -49,42 +49,32 @@ if [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
     radian_zinit="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 fi
 
-# backwards compatibility
-radian_zplugin="${radian_zinit}"
-
 if [[ -n $radian_zinit ]]; then
-    # zplugin will happily keep adding the same entry to PATH every
+    # zinit will happily keep adding the same entry to PATH every
     # time you run it. Get rid of stale PATH entries. Thanks to
     # <https://stackoverflow.com/a/41876600/3538165>.
-    path=(${path:#*/.zplugin/*})
+    path=(${path:#*/.local/share/zinit/plugins/*})
 
-    # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
     . $radian_zinit
-    autoload -Uz _zplugin
-    (( ${+_comps} )) && _comps[zplugin]=_zplugin
-
-    # Allow sourcing this file more than once without producing
-    # warnings about the plugins being re-loaded.
-    ZINIT[MUTE_WARNINGS]=1
 
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
-    zplugin light radian-software/wdx
+    zinit light radian-software/wdx
 
     # If a previous command starts with what you have typed, show it
     # in dimmed color after the cursor, and allow completing it.
-    zplugin light zsh-users/zsh-autosuggestions
+    zinit light zsh-users/zsh-autosuggestions
 
     # Pressing <up> and <down> when you've already typed in part of a
     # command will only show you history entries matching that text.
-    zplugin light zsh-users/zsh-history-substring-search
+    zinit light zsh-users/zsh-history-substring-search
 
     # Configure tab-completions for many external commands.
     #
     # Not sure exactly what the blockf does here, but it's used in the
-    # docs for zplugin so...
-    zplugin ice blockf
-    zplugin light zsh-users/zsh-completions
+    # docs for zinit so...
+    zinit ice blockf
+    zinit light zsh-users/zsh-completions
 
     if typeset -f radian_zinit_hook > /dev/null; then
         radian_zinit_hook
@@ -763,19 +753,6 @@ if (( $+commands[git] )); then
     alias gpt='git push --tags'
 fi
 
-#### Hub
-
-if (( $+commands[hub] )); then
-    alias hcl='hub clone --recursive'
-    alias hc='hub create --copy'
-    alias hcp='hub create -p --copy'
-    alias hf='hub fork'
-    alias hp='hub pull-request --copy'
-    alias hb='hub browse'
-    alias hh='hub help'
-    alias hi='hub issue'
-fi
-
 #### Tmux
 
 if (( $+commands[tmux] )); then
@@ -783,7 +760,6 @@ if (( $+commands[tmux] )); then
     function ts {
         tmux new-session -s ${1:-tmux}
     }
-    alias tl='tmux list-sessions'
 fi
 
 #### Trash
