@@ -65,16 +65,14 @@ if [[ -n $radian_zinit ]]; then
     # in dimmed color after the cursor, and allow completing it.
     zinit light zsh-users/zsh-autosuggestions
 
-    # Pressing <up> and <down> when you've already typed in part of a
-    # command will only show you history entries matching that text.
-    zinit light zsh-users/zsh-history-substring-search
-
     # Configure tab-completions for many external commands.
     #
     # Not sure exactly what the blockf does here, but it's used in the
     # docs for zinit so...
     zinit ice blockf
     zinit light zsh-users/zsh-completions
+
+    zinit light marlonrichert/zsh-autocomplete
 
     if typeset -f radian_zinit_hook > /dev/null; then
         radian_zinit_hook
@@ -181,24 +179,6 @@ setopt rc_quotes
 # freeze and unfreeze command output, respectively).
 unsetopt flow_control
 
-#### Completion
-
-# For ambiguous completions, use an interactive menu (which can be
-# escaped with C-g) instead of overwriting the current command.
-zstyle ':completion:*' menu select
-
-# Allow usage of shift-tab (backtab) to go backward in the completion
-# menu. See <https://stackoverflow.com/a/842370/3538165>.
-bindkey '^[[Z' reverse-menu-complete
-
-# Substring completions. Not fuzzy. Sometimes they have weird
-# behavior. This is the best I can manage for now, since I've been
-# working on completions literally all day. See [1]. (Why is zsh so
-# hard? Sigh.)
-#
-# [1]: http://unix.stackexchange.com/q/330481/176805
-zstyle ':completion:*' matcher-list 'l:|=* r:|=* m:{a-z\-}={A-Z\_}'
-
 #### Globbing
 
 # This makes globs case-insensitive.
@@ -250,17 +230,6 @@ setopt hist_reduce_blanks
 # instead of executing the command immediately. This currently has no
 # effect since history expansion is disabled.
 setopt hist_verify
-
-# Recommended setup for zsh-history-substring-search, see
-# <https://github.com/zsh-users/zsh-history-substring-search#usage>.
-
-if whence history-substring-search-up >/dev/null; then
-    bindkey '^[[A' history-substring-search-up
-fi
-
-if whence history-substring-search-down >/dev/null; then
-    bindkey '^[[B' history-substring-search-down
-fi
 
 ### Filesystem navigation
 

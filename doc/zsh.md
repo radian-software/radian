@@ -34,9 +34,9 @@ as Git is available.
 The following plugins are installed by default:
 
 * [radian-software/wdx](https://github.com/radian-software/wdx)
+* [marlonrichert/zsh-autocomplete](https://github.com/marlonrichert/zsh-autocomplete)
 * [zsh-users/zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions)
 * [zsh-users/zsh-completions](https://github.com/zsh-users/zsh-completions)
-* [zsh-users/zsh-history-substring-search](https://github.com/zsh-users/zsh-history-substring-search)
 
 If you want to add further plugins, you can define a
 `radian_zinit_hook` function in your `~/.zshrc.local` and include
@@ -68,8 +68,8 @@ plugins.
   completions also use substring matching
 * Globs (`*`) are case-insensitive, match dotfiles by default, and
   sort numerically instead of lexicographically
-* History expansion (`!`) is disabled, use `ctrl+r` native history
-  search or zsh-history-substring-search instead
+* History expansion (`!`) is disabled, use `ctrl+r` provided by
+  zsh-autocomplete
 
 ### Behavior changes - command history
 
