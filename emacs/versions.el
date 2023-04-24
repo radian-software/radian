@@ -93,7 +93,7 @@
  ("vimrc-mode" . "13bc150a870d5d4a95f1111e4740e2b22813c30e")
  ("visual-regexp-steroids.el" . "a6420b25ec0fbba43bf57875827092e1196d8a9e")
  ("visual-regexp.el" . "48457d42a5e0fe10fa3a9c15854f1f127ade09b5")
- ("web-mode" . "7b5459f58c381f31eed257480b000a9a46209094")
+ ("web-mode" . "57856ba64b9382811b35df0d9ab0a24aede0c1f0")
  ("with-editor" . "cfcbc2731e402b9169c0dc03e89b5b57aa988502")
  ("yaml-mode" . "535273d5a1eb76999d20afbcf4d9f056d8ffd2da")
  ("yaml.el" . "a19fbf948a945571300e5a20ff1dbfa6ecfa0d16")
