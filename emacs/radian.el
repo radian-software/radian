@@ -1892,11 +1892,15 @@ loaded since the file was changed outside of Emacs."
 ;; `forward-word' and `backward-word' commands to stop at
 ;; capitalization changes within a word, so that you can step through
 ;; the components of CamelCase symbols one at a time.
-(use-feature subword
+(use-package syntax-subword
   :demand t
   :config
 
-  (global-subword-mode +1)
+  ;; More compatible with default behavior.
+  (setq syntax-subword-skip-spaces t)
+
+  ;; Turn on everywhere.
+  (global-syntax-subword-mode +1)
 
   :blackout t)
 

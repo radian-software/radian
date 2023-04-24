@@ -82,6 +82,7 @@
  ("ssh-config-mode-el" . "d560a0876a93ad4130baf33dae1b9405ad37a405")
  ("straight.el" . "039e5c9a9b5c00749602afb41341e9e77ba09429")
  ("swift-mode" . "cdd194cbadcee724a9813da386f0a612082b1ab1")
+ ("syntax-subword" . "9aa9b3f846bfe2474370642458a693ac4760d9fe")
  ("terraform-mode" . "e560caaa9d9a11b0868adf6d9dcae5ebb5055730")
  ("toml-mode.el" . "f6c61817b00f9c4a3cab1bae9c309e0fc45cdd06")
  ("transient" . "0ae0de43590b5b6984a83f9e044e7c426455ac6e")
