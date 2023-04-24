@@ -3615,7 +3615,24 @@ enough for the moment."
     ;; `comment-normalize-vars' will key off the syntax and think
     ;; that a single "/" starts a comment, which completely borks
     ;; auto-fill.
-    (setq-local comment-start-skip "// *")))
+    (setq-local comment-start-skip "// *"))
+
+  (defun radian--web-mode-fill-paragraph-correctly (&optional _justify)
+    "Correct implementation of `fill-paragraph' for web-mode.
+Workaround for <https://github.com/fxbois/web-mode/issues/1263>."
+    (cl-block nil
+      ;; Check if point is within comment (don't ask)
+      (when (nth 4 (syntax-ppss))
+        ;; Delegate to usual implementation
+        (cl-return nil))
+      ;; Do nothing
+      t))
+
+  (radian-defhook radian--web-mode-fix-fill-paragraph ()
+    web-mode-hook
+    "Override `fill-paragraph-function' to correct value."
+    (setq-local fill-paragraph-function
+                #'radian--web-mode-fill-paragraph-correctly)))
 
 ;;; Configuration file formats
 
