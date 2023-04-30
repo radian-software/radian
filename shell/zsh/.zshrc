@@ -72,7 +72,15 @@ if [[ -n $radian_zinit ]]; then
     zinit ice blockf
     zinit light zsh-users/zsh-completions
 
+    # Better tab-completion framework and history search.
     zinit light marlonrichert/zsh-autocomplete
+
+    # Syntax highlighting for the line editor. Main advantage of this
+    # is mitigating
+    # <https://github.com/marlonrichert/zsh-autocomplete/issues/576>
+    # by making it more obvious which part of the completion is real
+    # and which is the ghost artifact that shouldn't be there.
+    zinit light zdharma/fast-syntax-highlighting
 
     if typeset -f radian_zinit_hook > /dev/null; then
         radian_zinit_hook
