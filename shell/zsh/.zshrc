@@ -66,9 +66,6 @@ if [[ -n $radian_zinit ]]; then
     zinit light zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
-    #
-    # Not sure exactly what the blockf does here, but it's used in the
-    # docs for zinit so...
     zinit ice blockf
     zinit light zsh-users/zsh-completions
 
