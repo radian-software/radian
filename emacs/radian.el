@@ -1896,8 +1896,9 @@ loaded since the file was changed outside of Emacs."
   :demand t
   :config
 
-  ;; More compatible with default behavior.
-  (setq syntax-subword-skip-spaces t)
+  ;; Otherwise deleting words backwards is weird. This is the default
+  ;; behavior of syntax-subword.
+  (setq syntax-subword-skip-spaces nil)
 
   ;; Turn on everywhere.
   (global-syntax-subword-mode +1)
