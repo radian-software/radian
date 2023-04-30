@@ -179,6 +179,30 @@ setopt rc_quotes
 # freeze and unfreeze command output, respectively).
 unsetopt flow_control
 
+#### Completion
+
+# Use TAB and Shift-TAB for their (more) default behavior of cycling
+# through completion options in the popup menu. This is like the menu
+# select completion style available by default.
+bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
+bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
+
+# If there is only one candidate just insert it.
+zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
+
+# https://github.com/marlonrichert/zsh-autocomplete#reset--and-
+() {
+   local -a prefix=( '\e'{\[,O} )
+   local -a up=( ${^prefix}A ) down=( ${^prefix}B )
+   local key=
+   for key in $up[@]; do
+      bindkey "$key" up-line-or-history
+   done
+   for key in $down[@]; do
+      bindkey "$key" down-line-or-history
+   done
+}
+
 #### Globbing
 
 # This makes globs case-insensitive.
@@ -230,6 +254,10 @@ setopt hist_reduce_blanks
 # instead of executing the command immediately. This currently has no
 # effect since history expansion is disabled.
 setopt hist_verify
+
+# Deduplicate history entries. Helps with retrieving previous
+# commands.
+setopt hist_ignore_all_dups
 
 ### Filesystem navigation
 

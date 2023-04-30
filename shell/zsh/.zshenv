@@ -5,3 +5,6 @@ if [ -z "$RADIAN_SKIP_PROFILE" ]; then
 else
     RADIAN_SKIP_PROFILE=
 fi
+
+# https://github.com/marlonrichert/zsh-autocomplete#additional-step-for-ubuntu
+skip_global_compinit=1
