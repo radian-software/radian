@@ -190,7 +190,8 @@ unsetopt flow_control
 # through completion options in the popup menu. This is like the menu
 # select completion style available by default.
 bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
-bindkey -M menuselect '\t' menu-complete "$terminfo[kcbt]" reverse-menu-complete
+bindkey -M menuselect '\t' menu-complete \
+        "$terminfo[kcbt]" reverse-menu-complete
 
 # If there is only one candidate just insert it.
 zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
