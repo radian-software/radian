@@ -4447,8 +4447,10 @@ the problematic case.)"
   :config
 
   ;; Prevent annoying "Omitted N lines" messages when auto-reverting.
-  (setq dired-omit-verbose nil)
+  (setq dired-omit-verbose nil))
 
+(use-feature dired-aux
+  :config
   (radian-with-operating-system macOS
     (radian-defadvice radian--advice-dired-guess-open-on-macos
         (&rest _)
