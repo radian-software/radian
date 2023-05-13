@@ -4,9 +4,11 @@ set -e
 set -o pipefail
 
 (emacs --batch \
-       --eval "(setq straight-safe-mode t)"                  \
-       --eval "(setq radian-compiling t)"                    \
-       --load "$HOME/.emacs.d/init.el"                       \
+       --eval "(progn                                        \
+                (setq straight-safe-mode t                   \
+                      radian-compiling t)                    \
+                (load (expand-file-name \"init.el\"          \
+                      user-emacs-directory) nil t))"         \
        --funcall radian-batch-byte-compile 2>&1              \
      | (grep -v "In toplevel form"                  || true) \
      | (grep -v "In end of data"                    || true) \

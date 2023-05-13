@@ -51,7 +51,8 @@ loading the init-file twice if it were not for this variable.")
                        "but you are running Emacs %s")
                radian-minimum-emacs-version emacs-version)
 
-      (let* ((this-file (or user-init-file "~/.emacs.d/init.el"))
+      (let* ((this-file (or user-init-file
+                            (expand-file-name "init.el" user-emacs-directory)))
              (link-target
               ;; This function returns the target of the link. If the
               ;; init-file is not a symlink, then we abort.
