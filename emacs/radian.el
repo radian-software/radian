@@ -1908,7 +1908,9 @@ loaded since the file was changed outside of Emacs."
   :demand t
   :config
 
-  (global-subword-mode +1))
+  (global-subword-mode +1)
+
+  :blackout t)
 
 ;; Package `syntax-subword' provides a minor mode to change the
 ;; behavior of word movement commands to be even more fine-grained
