@@ -433,6 +433,21 @@ unexpected ways."
          (radian-protect-macros
            ,@body)))))
 
+(defvar radian--no-local nil
+  "Non-nil means to not load local init-file.")
+
+;; Allow to disable local customizations with a
+;; command-line argument.
+(if (member "--no-local" command-line-args)
+    ;; Make sure to delete --no-local from the list, because
+    ;; otherwise Emacs will issue a warning about the unknown
+    ;; argument.
+    (setq command-line-args (delete "--no-local" command-line-args)
+          radian--no-local t)
+
+  ;; Load local customizations.
+  (radian--load-local-init-file))
+
 (defmacro radian--run-hook (name)
   "Run the given local init HOOK.
 The hook to be used is `radian-NAME-hook', with NAME an unquoted
@@ -441,23 +456,12 @@ gnarly hacks to allow Radian to embed the entire contents of the
 hook directly into the init-file during byte-compilation."
   (declare (indent 0))
   (let ((hook (intern (format "radian-%S-hook" name))))
-    `(let ((straight-current-profile 'radian-local))
-       (radian--with-local-load-history
-         ,(if byte-compile-current-file
-              `(progn ,@(alist-get hook radian--hook-contents))
-            `(run-hooks ',hook))))))
-
-;; Allow to disable local customizations with a
-;; command-line argument.
-(if (member "--no-local" command-line-args)
-    ;; Make sure to delete --no-local from the list, because
-    ;; otherwise Emacs will issue a warning about the unknown
-    ;; argument.
-    (setq command-line-args
-          (delete "--no-local" command-line-args))
-
-  ;; Load local customizations.
-  (radian--load-local-init-file))
+    `(unless radian--no-local
+       (let ((straight-current-profile 'radian-local))
+         (radian--with-local-load-history
+           ,(if byte-compile-current-file
+                `(progn ,@(alist-get hook radian--hook-contents))
+              `(run-hooks ',hook)))))))
 
 ;;; Startup optimizations
 
