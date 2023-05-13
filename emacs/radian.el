@@ -1904,18 +1904,20 @@ loaded since the file was changed outside of Emacs."
 ;; `forward-word' and `backward-word' commands to stop at
 ;; capitalization changes within a word, so that you can step through
 ;; the components of CamelCase symbols one at a time.
-(use-package syntax-subword
+(use-feature subword
   :demand t
   :config
 
-  ;; Otherwise deleting words backwards is weird. This is the default
-  ;; behavior of syntax-subword.
-  (setq syntax-subword-skip-spaces nil)
+  (global-subword-mode +1))
 
-  ;; Turn on everywhere.
-  (global-syntax-subword-mode +1)
-
-  :blackout t)
+;; Package `syntax-subword' provides a minor mode to change the
+;; behavior of word movement commands to be even more fine-grained
+;; than `subword-mode'. It doesn't work well for general usage, but we
+;; use it to construct dedicated commands for fine-grained movement
+;; when needed.
+(use-package syntax-subword
+  :bind (("M-A" . #'syntax-subword-backward)
+         ("M-E" . #'syntax-subword-forward)))
 
 (radian-defadvice radian--advice-allow-unpopping-mark
     (set-mark-command &optional arg)
