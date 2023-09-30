@@ -209,6 +209,12 @@ zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
    done
 }
 
+# https://github.com/marlonrichert/zsh-autocomplete#reset-ctrlr-and-ctrls
+zle -A {.,}history-incremental-search-backward
+zle -A {.,}vi-history-search-backward
+bindkey -M emacs '^S' history-incremental-search-forward
+bindkey -M vicmd '/' vi-history-search-forward
+
 #### Globbing
 
 # This makes globs case-insensitive.
