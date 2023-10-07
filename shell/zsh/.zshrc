@@ -16,75 +16,34 @@ fi
 
 ## Set up plugin manager
 
-if [[ ! -f ~/.local/share/zinit/zinit.git/zinit.zsh ]] \
-       && (( $+commands[git] )); then
-    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} "\
-          "Initiative Plugin Manager "\
-          "(%F{33}zdharma-continuum/zinit%F{220})…%f"
-    mkdir -p "$HOME/.local/share/zinit" && \
-        command chmod g-rwX ~/.local/share/zinit
-    git clone https://github.com/zdharma-continuum/zinit \
-        ~/.local/share/zinit/zinit.git && \
-        print -P "%F{33} %F{34}Installation successful.%f%b" || \
-            print -P "%F{160} The clone has failed.%f%b"
+if [[ -f ~/.local/share/znap/znap/znap.zsh ]]; then
+    . ~/.local/share/znap/znap/znap.zsh
+elif (( $+commands[git] )); then
+    mkdir -p ~/.local/share/znap
+    git clone https://github.com/marlonrichert/zsh-snap.git ~/.local/share/znap/znap
+    . ~/.local/share/znap/znap/znap.zsh
 fi
 
-source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+### znap
 
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
-
-### zinit
-
-radian_zinit=
-
-if [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
-    radian_zinit="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-fi
-
-if [[ -n $radian_zinit ]]; then
-    # zinit will happily keep adding the same entry to PATH every
-    # time you run it. Get rid of stale PATH entries. Thanks to
-    # <https://stackoverflow.com/a/41876600/3538165>.
-    path=(${path:#*/.local/share/zinit/plugins/*})
-
-    . $radian_zinit
-
+if typeset -f znap >/dev/null; then
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
-    zinit light radian-software/wdx
+    znap source radian-software/wdx
 
     # If a previous command starts with what you have typed, show it
     # in dimmed color after the cursor, and allow completing it.
-    zinit light zsh-users/zsh-autosuggestions
+    znap source zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
-    zinit ice blockf
-    zinit light zsh-users/zsh-completions
+    znap install zsh-users/zsh-completions
 
     # Better tab-completion framework and history search.
-    zinit light marlonrichert/zsh-autocomplete
+    znap source marlonrichert/zsh-autocomplete
 
-    # Syntax highlighting for the line editor. Main advantage of this
-    # is mitigating
-    # <https://github.com/marlonrichert/zsh-autocomplete/issues/576>
-    # by making it more obvious which part of the completion is real
-    # and which is the ghost artifact that shouldn't be there.
-    zinit light zdharma/fast-syntax-highlighting
-
-    if typeset -f radian_zinit_hook > /dev/null; then
-        radian_zinit_hook
+    if typeset -f radian_znap_hook > /dev/null; then
+        radian_znap_hook
     fi
-
-    autoload -Uz compinit
-    compinit
 fi
 
 ## Shell configuration
