@@ -32,7 +32,7 @@
  ("forge" . "361a65529965196b523a1d5fed44dc37a5c2b60e")
  ("fringe-helper.el" . "ef4a9c023bae18ec1ddd7265f1f2d6d2e775efdd")
  ("ghub" . "6a5de97649ff3eca9aa20b79f3526b4b3ab86b13")
- ("git-gutter" . "315e7924a2683f75bcdd5e1ed032fbf01ac218e5")
+ ("git-gutter" . "4c9e2f22b35918ce1cd9e64bce06a3ceda54095f")
  ("git-gutter-fringe" . "648cb5b57faec55711803cdc9434e55a733c3eba")
  ("git-link" . "fe2e8aa92dd8f1a9fb3f471658701487ff21f22b")
  ("git-modes" . "eca3bb42ea8abed9ef8549b2ac91bbea445c5bb5")
