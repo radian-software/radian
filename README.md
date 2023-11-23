@@ -88,15 +88,15 @@ stability.
   * Tested on GitHub Actions with [Docker] configuration included for
     all supported Emacs versions
 * [Zsh]
-  * Extremely fast and flexible package manager, [zinit]
+  * Extremely fast and flexible package manager, [znap]
   * No-nonsense prompt showing username, hostname, working
     directory, and Git status, colored by exit code
   * Substring completion everywhere
   * GUI-like file/directory copy/paste functions on the command line
   * Extensive library of clean and consistent [Git] aliases
   * Colored man pages
-  * Configured plugins: [wdx], [zsh-autosuggestions],
-    [zsh-history-substring-search], [zsh-completions]
+  * Configured plugins: [wdx], [zsh-autocomplete],
+    [zsh-autosuggestions], [zsh-completions]
 * [Tmux]
   * Keybindings for inserting new windows and shifting them left and
     right
@@ -290,7 +290,6 @@ commented.
 [prs]: https://github.com/radian-software/radian/pulls
 [python]: https://www.python.org/
 [pyvenv]: https://github.com/jorgenschaefer/pyvenv
-[racket]: https://racket-lang.org/
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
 [rg.el]: https://github.com/dajva/rg.el
@@ -311,8 +310,8 @@ commented.
 [which-key]: https://github.com/justbur/emacs-which-key
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
-[zinit]: https://github.com/zdharma-continuum/zinit
+[znap]: https://github.com/marlonrichert/zsh-snap
+[zsh-autocomplete]: https://github.com/marlonrichert/zsh-autocomplete
 [zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
 [zsh-completions]: https://github.com/zsh-users/zsh-completions
-[zsh-history-substring-search]: https://github.com/zsh-users/zsh-history-substring-search
 [zsh]: http://zsh.sourceforge.net/

@@ -16,82 +16,34 @@ fi
 
 ## Set up plugin manager
 
-if [[ ! -f ~/.local/share/zinit/zinit.git/zinit.zsh ]] \
-       && (( $+commands[git] )); then
-    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} "\
-          "Initiative Plugin Manager "\
-          "(%F{33}zdharma-continuum/zinit%F{220})…%f"
-    mkdir -p "$HOME/.local/share/zinit" && \
-        command chmod g-rwX ~/.local/share/zinit
-    git clone https://github.com/zdharma-continuum/zinit \
-        ~/.local/share/zinit/zinit.git && \
-        print -P "%F{33} %F{34}Installation successful.%f%b" || \
-            print -P "%F{160} The clone has failed.%f%b"
+if [[ -f ~/.local/share/znap/znap/znap.zsh ]]; then
+    . ~/.local/share/znap/znap/znap.zsh
+elif (( $+commands[git] )); then
+    mkdir -p ~/.local/share/znap
+    git clone https://github.com/marlonrichert/zsh-snap.git ~/.local/share/znap/znap
+    . ~/.local/share/znap/znap/znap.zsh
 fi
 
-source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+### znap
 
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
-
-### zplugin
-
-radian_zinit=
-
-if [[ -f ~/.local/share/zinit/zinit.git/zinit.zsh ]]; then
-    radian_zinit="$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-fi
-
-# backwards compatibility
-radian_zplugin="${radian_zinit}"
-
-if [[ -n $radian_zinit ]]; then
-    # zplugin will happily keep adding the same entry to PATH every
-    # time you run it. Get rid of stale PATH entries. Thanks to
-    # <https://stackoverflow.com/a/41876600/3538165>.
-    path=(${path:#*/.zplugin/*})
-
-    # https://github.com/zdharma/zplugin/blob/259ed171ba2b2ba013d61a2451a1c53fdd6291d4/doc/install.sh#L37-L39
-    . $radian_zinit
-    autoload -Uz _zplugin
-    (( ${+_comps} )) && _comps[zplugin]=_zplugin
-
-    # Allow sourcing this file more than once without producing
-    # warnings about the plugins being re-loaded.
-    ZINIT[MUTE_WARNINGS]=1
-
+if typeset -f znap >/dev/null; then
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
-    zplugin light radian-software/wdx
+    znap source radian-software/wdx
 
     # If a previous command starts with what you have typed, show it
     # in dimmed color after the cursor, and allow completing it.
-    zplugin light zsh-users/zsh-autosuggestions
-
-    # Pressing <up> and <down> when you've already typed in part of a
-    # command will only show you history entries matching that text.
-    zplugin light zsh-users/zsh-history-substring-search
+    znap source zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
-    #
-    # Not sure exactly what the blockf does here, but it's used in the
-    # docs for zplugin so...
-    zplugin ice blockf
-    zplugin light zsh-users/zsh-completions
+    znap install zsh-users/zsh-completions
 
-    if typeset -f radian_zinit_hook > /dev/null; then
-        radian_zinit_hook
+    # Better tab-completion framework and history search.
+    znap source marlonrichert/zsh-autocomplete
+
+    if typeset -f radian_znap_hook > /dev/null; then
+        radian_znap_hook
     fi
-
-    autoload -Uz compinit
-    compinit
 fi
 
 ## Shell configuration
@@ -193,21 +145,34 @@ unsetopt flow_control
 
 #### Completion
 
-# For ambiguous completions, use an interactive menu (which can be
-# escaped with C-g) instead of overwriting the current command.
-zstyle ':completion:*' menu select
+# Use TAB and Shift-TAB for their (more) default behavior of cycling
+# through completion options in the popup menu. This is like the menu
+# select completion style available by default.
+bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
+bindkey -M menuselect '\t' menu-complete \
+        "$terminfo[kcbt]" reverse-menu-complete
 
-# Allow usage of shift-tab (backtab) to go backward in the completion
-# menu. See <https://stackoverflow.com/a/842370/3538165>.
-bindkey '^[[Z' reverse-menu-complete
+# If there is only one candidate just insert it.
+zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
 
-# Substring completions. Not fuzzy. Sometimes they have weird
-# behavior. This is the best I can manage for now, since I've been
-# working on completions literally all day. See [1]. (Why is zsh so
-# hard? Sigh.)
-#
-# [1]: http://unix.stackexchange.com/q/330481/176805
-zstyle ':completion:*' matcher-list 'l:|=* r:|=* m:{a-z\-}={A-Z\_}'
+# https://github.com/marlonrichert/zsh-autocomplete#reset--and-
+() {
+   local -a prefix=( '\e'{\[,O} )
+   local -a up=( ${^prefix}A ) down=( ${^prefix}B )
+   local key=
+   for key in $up[@]; do
+      bindkey "$key" up-line-or-history
+   done
+   for key in $down[@]; do
+      bindkey "$key" down-line-or-history
+   done
+}
+
+# https://github.com/marlonrichert/zsh-autocomplete#reset-ctrlr-and-ctrls
+zle -A {.,}history-incremental-search-backward
+zle -A {.,}vi-history-search-backward
+bindkey -M emacs '^S' history-incremental-search-forward
+bindkey -M vicmd '/' vi-history-search-forward
 
 #### Globbing
 
@@ -261,16 +226,9 @@ setopt hist_reduce_blanks
 # effect since history expansion is disabled.
 setopt hist_verify
 
-# Recommended setup for zsh-history-substring-search, see
-# <https://github.com/zsh-users/zsh-history-substring-search#usage>.
-
-if whence history-substring-search-up >/dev/null; then
-    bindkey '^[[A' history-substring-search-up
-fi
-
-if whence history-substring-search-down >/dev/null; then
-    bindkey '^[[B' history-substring-search-down
-fi
+# Deduplicate history entries. Helps with retrieving previous
+# commands.
+setopt hist_ignore_all_dups
 
 ### Filesystem navigation
 
@@ -467,6 +425,32 @@ function delink {
             echo >&2 "Not a symlink: $link"
         fi
     done
+}
+
+# Usage: transpose <path1> <path2>
+#
+# Swap the files or directories at the two provided paths. Not atomic.
+# Both paths must exist.
+function transpose {
+    emulate -LR zsh
+    if (( $# != 2 )); then
+        echo >&2 "usage: transpose <path1> <path2>"
+        return 1
+    fi
+    for arg in $1 $2; do
+        if [[ ! -e $arg && ! -L $arg ]]; then
+            echo >&2 "no such file or directory: $arg"
+            return 1
+        fi
+        if [[ -e $path.tmp || -L $path.tmp ]]; then
+            echo >&2 "already exists: $path.tmp"
+            return 1
+        fi
+    done
+    mv $1 $1.tmp
+    mv $2 $2.tmp
+    mv $1.tmp $2
+    mv $2.tmp $1
 }
 
 #### mkdir
@@ -737,19 +721,6 @@ if (( $+commands[git] )); then
     alias gpt='git push --tags'
 fi
 
-#### Hub
-
-if (( $+commands[hub] )); then
-    alias hcl='hub clone --recursive'
-    alias hc='hub create --copy'
-    alias hcp='hub create -p --copy'
-    alias hf='hub fork'
-    alias hp='hub pull-request --copy'
-    alias hb='hub browse'
-    alias hh='hub help'
-    alias hi='hub issue'
-fi
-
 #### Tmux
 
 if (( $+commands[tmux] )); then
@@ -757,7 +728,6 @@ if (( $+commands[tmux] )); then
     function ts {
         tmux new-session -s ${1:-tmux}
     }
-    alias tl='tmux list-sessions'
 fi
 
 #### Trash

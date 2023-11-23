@@ -49,26 +49,6 @@
 
 ;;; Define utility functions and variables
 
-(defcustom radian-org-enable-contrib nil
-  "Non-nil means to make Org contrib modules available.
-This has to be set at the beginning of init, i.e. in the top
-level of init.local.el."
-  :type 'boolean)
-
-(defcustom radian-color-theme-enable t
-  "Non-nil means to load the default Radian color theme.
-Set this to nil if you wish to load a different color theme in
-your local configuration."
-  :type 'boolean)
-
-(make-obsolete-variable 'radian-org-enable-contrib
-                        'radian-disabled-packages
-                        "2021-11-28")
-
-(make-obsolete-variable 'radian-color-theme-enable
-                        'radian-disabled-packages
-                        "2021-11-28")
-
 (defvar radian-disabled-packages nil
   "List of packages that Radian should not load.
 
@@ -79,13 +59,10 @@ this list.")
 (defvar radian-compiling nil
   "Non-nil when Radian's make is being called.")
 
-(unless radian-org-enable-contrib
-  (add-to-list 'radian-disabled-packages
-               'org-contrib))
-
-(unless radian-color-theme-enable
-  (add-to-list 'radian-disabled-packages
-               'zerodark-theme))
+(defvar radian-prune-straight-cache
+  (not (or radian-compiling
+           (member "--no-local" command-line-args)))
+  "Non-nil when Radian should prune straight's cache.")
 
 (defvar radian-directory (file-name-directory
                           (directory-file-name
@@ -384,6 +361,16 @@ without breaking macro-expansion.")
 ;; loaded.
 (defvar straight-current-profile)
 
+(defmacro radian--with-local-load-history (&rest body)
+  "Evaluate BODY as part of `radian-local-init-file'.
+This ensures that defined functions and variables show up as
+being defined there, instead of whatever file they are being
+loaded from."
+  (declare (indent 0))
+  `(let ((current-load-list nil))
+     ,@body
+     (push (cons ',radian-local-init-file current-load-list) load-history)))
+
 (defmacro radian--load-local-init-file ()
   "Load local init-file, with crazy hacks for byte-compilation.
 In particular, if we are byte-compiling, actually macroexpand to
@@ -421,7 +408,7 @@ usual."
         (dolist (link radian--hook-contents)
           (setf (cdr link)
                 (nreverse (cdr link))))
-        `(progn ,@forms))
+        `(radian--with-local-load-history ,@forms))
     `(load radian-local-init-file 'noerror 'nomessage)))
 
 (defmacro radian-local-on-hook (name &rest body)
@@ -446,6 +433,21 @@ unexpected ways."
          (radian-protect-macros
            ,@body)))))
 
+(defvar radian--no-local nil
+  "Non-nil means to not load local init-file.")
+
+;; Allow to disable local customizations with a
+;; command-line argument.
+(if (member "--no-local" command-line-args)
+    ;; Make sure to delete --no-local from the list, because
+    ;; otherwise Emacs will issue a warning about the unknown
+    ;; argument.
+    (setq command-line-args (delete "--no-local" command-line-args)
+          radian--no-local t)
+
+  ;; Load local customizations.
+  (radian--load-local-init-file))
+
 (defmacro radian--run-hook (name)
   "Run the given local init HOOK.
 The hook to be used is `radian-NAME-hook', with NAME an unquoted
@@ -454,23 +456,12 @@ gnarly hacks to allow Radian to embed the entire contents of the
 hook directly into the init-file during byte-compilation."
   (declare (indent 0))
   (let ((hook (intern (format "radian-%S-hook" name))))
-    `(let ((straight-current-profile 'radian-local))
-       (run-hooks ',hook)
-       ,@(when byte-compile-current-file
-           (alist-get hook radian--hook-contents)))))
-
-;; Allow to disable local customizations with a
-;; command-line argument.
-(if (member "--no-local" command-line-args)
-
-    ;; Make sure to delete --no-local from the list, because
-    ;; otherwise Emacs will issue a warning about the unknown
-    ;; argument.
-    (setq command-line-args
-          (delete "--no-local" command-line-args))
-
-  ;; Load local customizations.
-  (radian--load-local-init-file))
+    `(unless radian--no-local
+       (let ((straight-current-profile 'radian-local))
+         (radian--with-local-load-history
+           ,(if byte-compile-current-file
+                `(progn ,@(alist-get hook radian--hook-contents))
+              `(run-hooks ',hook)))))))
 
 ;;; Startup optimizations
 
@@ -610,11 +601,10 @@ NAME and ARGS are as in `use-package'."
          (package (cond
                    (straight (car straight))
                    (straight-use-package-by-default name))))
-    `(if (radian-enabled-p ',name)
-         (radian-protect-macros-maybe ,name
-           (use-package ,name ,@args))
-       ,@(when package
-           (list `(straight-register-package ',package))))))
+    (if (radian-enabled-p name)
+        `(use-package ,name ,@args)
+      (when package
+        `(straight-register-package ',package)))))
 
 (defmacro use-feature (name &rest args)
   "Like `radian-use-package', but without straight.el integration.
@@ -669,6 +659,10 @@ nice.)"
   :commands (straight-x-fetch-all))
 
 ;;; Configure ~/.emacs.d paths
+
+;;  Package `compat' contains useful functions that are implemented in
+;; future emacsen.
+(radian-use-package compat)
 
 ;; Package `no-littering' changes the default paths for lots of
 ;; different packages, with the net result that the ~/.emacs.d folder
@@ -739,11 +733,6 @@ This keymap is bound under \\[radian-keymap].")
 
 (bind-key* "M-P" radian-keymap)
 
-(defmacro radian-bind-key (key-name command &optional predicate)
-  "Bind a key in `radian-keymap'.
-KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
-  `(bind-key ,key-name ,command radian-keymap ,predicate))
-
 (defun radian-join-keys (&rest keys)
   "Join key sequences KEYS. Empty strings and nils are discarded.
 \(radian--join-keys \"\\[radian-keymap] e\" \"e i\")
@@ -782,6 +771,16 @@ KEY-NAME, COMMAND, and PREDICATE are as in `bind-key'."
 ;;; Environment
 ;;;; Environment variables
 
+(defcustom radian-env-setup t
+  "Non-nil means ~/.profile is sourced after startup.
+Environment variables will be copied into the current Emacs
+process. This works around issues caused by desktop environments
+not providing the proper env vars to graphical applications.
+
+You may want to disable this if your ~/.profile is not safe to
+run multiple times."
+  :type 'boolean)
+
 (defvar radian--env-setup-p nil
   "Non-nil if `radian-env-setup' has completed at least once.")
 
@@ -791,7 +790,8 @@ Only do this once, unless AGAIN is non-nil."
   (interactive (list 'again))
   ;; No need to worry about race conditions because Elisp isn't
   ;; concurrent (yet).
-  (unless (and radian--env-setup-p (not again))
+  (unless (or (not radian-env-setup)
+              (and radian--env-setup-p (not again)))
     (let (;; Current directory may not exist in certain horrifying
           ;; circumstances (yes, this has happened in practice).
           (default-directory "/")
@@ -994,19 +994,10 @@ ourselves."
 ;; the default Emacs interface for candidate selection.
 (radian-use-package vertico
   :straight (:host github :repo "minad/vertico"
-             :files (:defaults "extensions/*")
-             :includes (vertico-buffer
-                        vertico-directory
-                        vertico-flat
-                        vertico-indexed
-                        vertico-mouse
-                        vertico-quick
-                        vertico-repeat
-                        vertico-reverse))
+             :files (:defaults "extensions/*"))
   :demand t
   :bind (:map vertico-map
               ("RET" . #'vertico-directory-enter)
-              ("DEL" . #'vertico-directory-delete-char)
               ("M-DEL" . #'vertico-directory-delete-word))
   :config
 
@@ -1014,19 +1005,25 @@ ourselves."
 
   (add-hook 'rfn-eshadow-update-overlay-hook #'vertico-directory-tidy)
 
-  (radian-defadvice radian--advice-vertico-select-first-candidate (&rest _)
-    :after #'vertico--update-candidates
-    "Select first candidate rather than prompt by default.
-Suggestion from https://github.com/minad/vertico/issues/272 about
-how to recover previous Selectrum behavior, so that repeated TAB
-navigates down a directory tree. Submit the prompt using M-TAB or
-<up> RET."
-    (when (> vertico--total 0)
-      (setq vertico--index 0)))
+  ;; Select first candidate rather than prompt by default.
+  ;;
+  ;; https://github.com/minad/vertico/issues/272
+  ;; https://github.com/minad/vertico/issues/306
+  (setq vertico-preselect 'first)
 
   ;; Ignore case... otherwise the behavior is really weird and
   ;; confusing.
-  (setq completion-ignore-case t))
+  (setq read-file-name-completion-ignore-case t
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t)
+
+  ;; Enable mouse support for clicking on candidates.
+  (vertico-mouse-mode +1)
+
+  ;; Don't re-sort buffer candidates. The recency order is correct.
+  (vertico-multiform-mode +1)
+  (setq vertico-multiform-categories
+        '((buffer (vertico-sort-function . copy-sequence)))))
 
 ;; Package `prescient' is a library for intelligent sorting and
 ;; filtering in various contexts.
@@ -1169,6 +1166,30 @@ active minibuffer, even if the minibuffer is not selected."
       (cl-letf (((symbol-function #'pp) #'prin1))
         (apply func args)))))
 
+;; Feature `recentf' is for keeping a list of recent files. We don't
+;; enable it by default but we do silence its operation in case
+;; something else does.
+(use-feature recentf
+  :config
+
+  (radian-defadvice radian-local--recentf-silence-load (func &rest args)
+    :around #'recentf-load-list
+    "Silence loading of the recentf save file."
+    (radian--with-silent-load
+      (apply func args)))
+
+  (radian-defadvice radian-local--recentf-silence-cleanup (func &rest args)
+    :around #'recentf-cleanup
+    "Silence recentf file list cleanup."
+    (radian--with-silent-message "recentf"
+      (apply func args)))
+
+  (radian-defadvice radian-local--recentf-silence-save (func &rest args)
+    :around #'recentf-save-list
+    "Silence saving of the recentf save file."
+    (radian--with-silent-write
+      (apply func args))))
+
 ;; Package `projectile' keeps track of a "project" list, which is
 ;; automatically added to as you visit Git repositories, Node.js
 ;; projects, etc. It then provides commands for quickly navigating
@@ -1225,94 +1246,90 @@ the file being visited, if necessary. It also sets a buffer-local
 variable so that the user will be prompted to delete the newly
 created directories if they kill the buffer without saving it.
 
-This advice has no effect for remote files.
-
 This is an `:around' advice for `find-file' and similar
 functions.
 
 FIND-FILE is the original `find-file'; FILENAME and ARGS are its
 arguments."
-  (if (file-remote-p filename)
-      (apply find-file filename args)
-    (let ((orig-filename filename)
-          ;; For relative paths where none of the named parent
-          ;; directories exist, we might get a nil from
-          ;; `file-name-directory' below, which would be bad. Thus we
-          ;; expand the path fully.
-          (filename (expand-file-name filename))
-          ;; The variable `dirs-to-delete' is a list of the
-          ;; directories that will be automatically created by
-          ;; `make-directory'. We will want to offer to delete these
-          ;; directories if the user kills the buffer without saving
-          ;; it.
-          (dirs-to-delete ()))
-      ;; If the file already exists, we don't need to worry about
-      ;; creating any directories.
-      (unless (file-exists-p filename)
-        ;; It's easy to figure out how to invoke `make-directory',
-        ;; because it will automatically create all parent
-        ;; directories. We just need to ask for the directory
-        ;; immediately containing the file to be created.
-        (let* ((dir-to-create (file-name-directory filename))
-               ;; However, to find the exact set of directories that
-               ;; might need to be deleted afterward, we need to
-               ;; iterate upward through the directory tree until we
-               ;; find a directory that already exists, starting at
-               ;; the directory containing the new file.
-               (current-dir dir-to-create))
-          ;; If the directory containing the new file already exists,
-          ;; nothing needs to be created, and therefore nothing needs
-          ;; to be destroyed, either.
-          (while (not (file-exists-p current-dir))
-            ;; Otherwise, we'll add that directory onto the list of
-            ;; directories that are going to be created.
-            (push current-dir dirs-to-delete)
-            ;; Now we iterate upwards one directory. The
-            ;; `directory-file-name' function removes the trailing
-            ;; slash of the current directory, so that it is viewed as
-            ;; a file, and then the `file-name-directory' function
-            ;; returns the directory component in that path (which
-            ;; means the parent directory).
-            (setq current-dir (file-name-directory
-                               (directory-file-name current-dir))))
-          ;; Only bother trying to create a directory if one does not
-          ;; already exist.
-          (unless (file-exists-p dir-to-create)
-            ;; Make the necessary directory and its parents.
-            (make-directory dir-to-create 'parents))))
-      ;; Call the original `find-file', now that the directory
-      ;; containing the file to found exists. We make sure to preserve
-      ;; the return value, so as not to mess up any commands relying
-      ;; on it.
-      (prog1 (apply find-file orig-filename args)
-        ;; If there are directories we want to offer to delete later,
-        ;; we have more to do.
-        (when dirs-to-delete
-          ;; Since we already called `find-file', we're now in the
-          ;; buffer for the new file. That means we can transfer the
-          ;; list of directories to possibly delete later into a
-          ;; buffer-local variable. But we pushed new entries onto the
-          ;; beginning of `dirs-to-delete', so now we have to reverse
-          ;; it (in order to later offer to delete directories from
-          ;; innermost to outermost).
-          (setq-local radian--dirs-to-delete (reverse dirs-to-delete))
-          ;; Now we add a buffer-local hook to offer to delete those
-          ;; directories when the buffer is killed, but only if it's
-          ;; appropriate to do so (for instance, only if the
-          ;; directories still exist and the file still doesn't
-          ;; exist).
-          (add-hook 'kill-buffer-hook
-                    #'radian--kill-buffer-delete-directory-if-appropriate
-                    'append 'local)
-          ;; The above hook removes itself when it is run, but that
-          ;; will only happen when the buffer is killed (which might
-          ;; never happen). Just for cleanliness, we automatically
-          ;; remove it when the buffer is saved. This hook also
-          ;; removes itself when run, in addition to removing the
-          ;; above hook.
-          (add-hook 'after-save-hook
-                    #'radian--remove-kill-buffer-delete-directory-hook
-                    'append 'local))))))
+  (let ((orig-filename filename)
+        ;; For relative paths where none of the named parent
+        ;; directories exist, we might get a nil from
+        ;; `file-name-directory' below, which would be bad. Thus we
+        ;; expand the path fully.
+        (filename (expand-file-name filename))
+        ;; The variable `dirs-to-delete' is a list of the
+        ;; directories that will be automatically created by
+        ;; `make-directory'. We will want to offer to delete these
+        ;; directories if the user kills the buffer without saving
+        ;; it.
+        (dirs-to-delete ()))
+    ;; If the file already exists, we don't need to worry about
+    ;; creating any directories.
+    (unless (file-exists-p filename)
+      ;; It's easy to figure out how to invoke `make-directory',
+      ;; because it will automatically create all parent
+      ;; directories. We just need to ask for the directory
+      ;; immediately containing the file to be created.
+      (let* ((dir-to-create (file-name-directory filename))
+             ;; However, to find the exact set of directories that
+             ;; might need to be deleted afterward, we need to
+             ;; iterate upward through the directory tree until we
+             ;; find a directory that already exists, starting at
+             ;; the directory containing the new file.
+             (current-dir dir-to-create))
+        ;; If the directory containing the new file already exists,
+        ;; nothing needs to be created, and therefore nothing needs
+        ;; to be destroyed, either.
+        (while (not (file-exists-p current-dir))
+          ;; Otherwise, we'll add that directory onto the list of
+          ;; directories that are going to be created.
+          (push current-dir dirs-to-delete)
+          ;; Now we iterate upwards one directory. The
+          ;; `directory-file-name' function removes the trailing
+          ;; slash of the current directory, so that it is viewed as
+          ;; a file, and then the `file-name-directory' function
+          ;; returns the directory component in that path (which
+          ;; means the parent directory).
+          (setq current-dir (file-name-directory
+                             (directory-file-name current-dir))))
+        ;; Only bother trying to create a directory if one does not
+        ;; already exist.
+        (unless (file-exists-p dir-to-create)
+          ;; Make the necessary directory and its parents.
+          (make-directory dir-to-create 'parents))))
+    ;; Call the original `find-file', now that the directory
+    ;; containing the file to found exists. We make sure to preserve
+    ;; the return value, so as not to mess up any commands relying
+    ;; on it.
+    (prog1 (apply find-file orig-filename args)
+      ;; If there are directories we want to offer to delete later,
+      ;; we have more to do.
+      (when dirs-to-delete
+        ;; Since we already called `find-file', we're now in the
+        ;; buffer for the new file. That means we can transfer the
+        ;; list of directories to possibly delete later into a
+        ;; buffer-local variable. But we pushed new entries onto the
+        ;; beginning of `dirs-to-delete', so now we have to reverse
+        ;; it (in order to later offer to delete directories from
+        ;; innermost to outermost).
+        (setq-local radian--dirs-to-delete (reverse dirs-to-delete))
+        ;; Now we add a buffer-local hook to offer to delete those
+        ;; directories when the buffer is killed, but only if it's
+        ;; appropriate to do so (for instance, only if the
+        ;; directories still exist and the file still doesn't
+        ;; exist).
+        (add-hook 'kill-buffer-hook
+                  #'radian--kill-buffer-delete-directory-if-appropriate
+                  'append 'local)
+        ;; The above hook removes itself when it is run, but that
+        ;; will only happen when the buffer is killed (which might
+        ;; never happen). Just for cleanliness, we automatically
+        ;; remove it when the buffer is saved. This hook also
+        ;; removes itself when run, in addition to removing the
+        ;; above hook.
+        (add-hook 'after-save-hook
+                  #'radian--remove-kill-buffer-delete-directory-hook
+                  'append 'local)))))
 
 (defun radian--kill-buffer-delete-directory-if-appropriate ()
   "Delete parent directories if appropriate.
@@ -1376,6 +1393,7 @@ This is a function for `after-save-hook'. Remove
 (dolist (fun '(find-file           ; C-x C-f
                find-alternate-file ; C-x C-v
                write-file          ; C-x C-w
+               find-file-noselect  ; open from cmdline argument
                ))
   (advice-add fun :around #'radian--advice-find-file-create-directories))
 
@@ -1459,11 +1477,11 @@ unquote it using a comma."
        ,defun-form
        ,defun-other-window-form
        ,@(when full-keybinding
-           `((radian-bind-key ,full-keybinding #',defun-name)))
+           `((bind-key ,full-keybinding #',defun-name radian-keymap)))
        ,@(when full-other-window-keybinding
-           `((radian-bind-key
-              ,full-other-window-keybinding
-              #',defun-other-window-name)))
+           `((bind-key ,full-other-window-keybinding
+                       #',defun-other-window-name
+                       radian-keymap)))
        ;; Return the symbols for the two functions defined.
        (list ',defun-name ',defun-other-window-name))))
 
@@ -1703,6 +1721,14 @@ Apparently, such modes are derived from `text-mode', even though
 they are definitely programming-oriented."
   (setq-local adaptive-fill-mode nil))
 
+(defun radian-fix-whitespace-maybe ()
+  "Fix whitespace in buffer if appropriate for the current buffer.
+Don't do anything for binary coded buffers."
+  (if (eq buffer-file-coding-system 'binary)
+      (setq require-final-newline nil)
+    (setq require-final-newline t)
+    (delete-trailing-whitespace)))
+
 (define-minor-mode radian-fix-whitespace-mode
   "Minor mode to automatically fix whitespace on save.
 If enabled, then saving the buffer deletes all trailing
@@ -1711,10 +1737,8 @@ newline."
   :after-hook
   (if radian-fix-whitespace-mode
       (progn
-        (setq require-final-newline t)
-        (add-hook 'before-save-hook #'delete-trailing-whitespace nil 'local))
-    (setq require-final-newline nil)
-    (remove-hook 'before-save-hook #'delete-trailing-whitespace 'local)))
+        (add-hook 'before-save-hook #'radian-fix-whitespace-maybe nil 'local))
+    (remove-hook 'before-save-hook #'radian-fix-whitespace-maybe 'local)))
 
 (define-globalized-minor-mode radian-fix-whitespace-global-mode
   radian-fix-whitespace-mode radian-fix-whitespace-mode)
@@ -1888,6 +1912,15 @@ loaded since the file was changed outside of Emacs."
 
   :blackout t)
 
+;; Package `syntax-subword' provides a minor mode to change the
+;; behavior of word movement commands to be even more fine-grained
+;; than `subword-mode'. It doesn't work well for general usage, but we
+;; use it to construct dedicated commands for fine-grained movement
+;; when needed.
+(use-package syntax-subword
+  :bind (("M-A" . #'syntax-subword-backward)
+         ("M-E" . #'syntax-subword-forward)))
+
 (radian-defadvice radian--advice-allow-unpopping-mark
     (set-mark-command &optional arg)
   :around #'set-mark-command
@@ -1956,7 +1989,7 @@ the reverse direction from \\[pop-global-mark]."
 
 ;;;; Find and replace
 
-(radian-bind-key "c" #'toggle-case-fold-search)
+(bind-key "c" #'toggle-case-fold-search radian-keymap)
 
 ;; Package `ctrlf' provides a replacement for `isearch' that is more
 ;; similar to the tried-and-true text search interfaces in web
@@ -2313,16 +2346,6 @@ currently active.")
   :blackout yas-minor-mode)
 
 ;;; IDE features
-;;;; Virtual environments
-;;;;; Python
-
-;; Package `pyvenv' provides functions for activating and deactivating
-;; Python virtualenvs within Emacs. It's mostly not needed anymore now
-;; that `lsp-python-ms' is configured to discover the appropriate
-;; Pipenv or Poetry virtualenv, but maybe it will come in handy
-;; someday.
-(radian-use-package pyvenv)
-
 ;;;; Language servers
 
 ;; Package `lsp-mode' is an Emacs client for the Language Server
@@ -2447,7 +2470,7 @@ killed (which happens during Emacs shutdown)."
   (radian-defadvice radian--lsp-multi-root-fix (&rest _)
     :before #'lsp
     "Fix multi-root servers for `lsp-mode'."
-    (setf (lsp-session-server-id->folders (lsp-session)) (ht)))
+    (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht))))
 
   :blackout " LSP")
 
@@ -2776,8 +2799,8 @@ was printed, and only have ElDoc display if one wasn't."
   :config
 
   ;; For use with `lsp-ui'.
-  (radian-bind-key "p" #'flycheck-previous-error)
-  (radian-bind-key "n" #'flycheck-next-error)
+  (bind-key "p" #'flycheck-previous-error radian-keymap)
+  (bind-key "n" #'flycheck-next-error radian-keymap)
 
   :blackout t)
 
@@ -2835,13 +2858,6 @@ was printed, and only have ElDoc display if one wasn't."
 
   (add-to-list 'safe-local-variable-values
                '(lisp-indent-function . common-lisp-indent-function)))
-
-;;;; AppleScript
-;; https://developer.apple.com/library/content/documentation/AppleScript/Conceptual/AppleScriptLangGuide/introduction/ASLR_intro.html
-
-;; Package `apples-mode' provides a major mode for AppleScript.
-(radian-use-package apples-mode
-  :mode "\\.\\(applescri\\|sc\\)pt\\'")
 
 ;;;; C, C++, Objective-C, Java
 ;; https://en.wikipedia.org/wiki/C_(programming_language)
@@ -3293,16 +3309,6 @@ Return either a string or nil."
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
 
-;; Package `robe' provides a language server for Ruby which draws
-;; information for autocompletions and source code navigation from a
-;; live REPL in the project context. Start it with `robe-start'.
-(radian-use-package robe
-  :init
-
-  (add-hook 'ruby-mode-hook #'robe-mode)
-
-  :blackout t)
-
 ;; Package `ruby-electric' allows you to have Emacs insert a paired
 ;; "end" when you type "do", and analogously for other paired
 ;; keywords.
@@ -3366,13 +3372,6 @@ Return either a string or nil."
 
 ;; Package `rust-mode' provides a major mode for Rust.
 (radian-use-package rust-mode)
-
-;;;; Scheme
-;; http://www.schemers.org/
-
-;; Package `geiser' provides REPL integration for several
-;; implementations of Scheme.
-(radian-use-package geiser)
 
 ;;;; Shell
 ;; http://pubs.opengroup.org/onlinepubs/9699919799/utilities/sh.html
@@ -3500,7 +3499,7 @@ environment with point at the end of a non-empty line of text."
     (let ((needs-fixup (save-excursion
                          (beginning-of-line)
                          (re-search-forward
-                          "[^[:space:]]" (point-at-eol) 'noerror))))
+                          "[^[:space:]]" (compat-call pos-eol) 'noerror))))
       (prog1 (apply func args)
         (when needs-fixup
           (save-excursion
@@ -3637,7 +3636,24 @@ enough for the moment."
     ;; `comment-normalize-vars' will key off the syntax and think
     ;; that a single "/" starts a comment, which completely borks
     ;; auto-fill.
-    (setq-local comment-start-skip "// *")))
+    (setq-local comment-start-skip "// *"))
+
+  (defun radian--web-mode-fill-paragraph-correctly (&optional _justify)
+    "Correct implementation of `fill-paragraph' for web-mode.
+Workaround for <https://github.com/fxbois/web-mode/issues/1263>."
+    (cl-block nil
+      ;; Check if point is within comment (don't ask)
+      (when (nth 4 (syntax-ppss))
+        ;; Delegate to usual implementation
+        (cl-return nil))
+      ;; Do nothing
+      t))
+
+  (radian-defhook radian--web-mode-fix-fill-paragraph ()
+    web-mode-hook
+    "Override `fill-paragraph-function' to correct value."
+    (setq-local fill-paragraph-function
+                #'radian--web-mode-fill-paragraph-correctly)))
 
 ;;; Configuration file formats
 
@@ -3783,7 +3799,9 @@ keymaps."
     "Make xref look up Elisp symbols in help buffers.
 Otherwise, it will try to find a TAGS file using etags, which is
 unhelpful."
-    (add-hook 'xref-backend-functions #'elisp--xref-backend nil 'local)))
+    (add-hook 'xref-backend-functions #'elisp--xref-backend nil 'local))
+
+  (setq help-enable-symbol-autoload t))
 
 ;; Package `helpful' provides a complete replacement for the built-in
 ;; Emacs help facility which provides much more contextual information
@@ -3913,7 +3931,7 @@ bizarre reason."
   (load user-init-file nil 'nomessage)
   (message "Reloading init-file...done"))
 
-(radian-bind-key "r" #'radian-reload-init)
+(bind-key "r" #'radian-reload-init radian-keymap)
 
 (defun radian-eval-buffer-or-region (&optional start end)
   "Evaluate the current region, or the whole buffer if no region is active.
@@ -4028,6 +4046,9 @@ SYMBOL is as in `xref-find-definitions'."
   ;; warning gets triggered basically all the time for everything.
   (setq byte-compile-warnings '(not make-local noruntime))
 
+  (defvar radian-byte-compile--process nil
+    "Last `radian-byte-compile' process object.")
+
   (defun radian-batch-byte-compile ()
     "Byte-compile radian.el. For usage in batch mode."
     (byte-compile-file radian-lib-file))
@@ -4046,37 +4067,43 @@ messages."
         (cl-return))
       (when report-progress
         (message "Byte-compiling updated configuration..."))
+      (when (process-live-p radian-byte-compile--process)
+        (kill-process radian-byte-compile--process))
       (ignore-errors
         (kill-buffer " *radian-byte-compile*"))
       (let ((default-directory radian-directory))
         (radian-env-setup)
-        (make-process
-         :name "radian-byte-compile"
-         :buffer " *radian-byte-compile*"
-         :command '("make" "compile")
-         :noquery t
-         :sentinel
-         (lambda (proc _event)
-           (unless (process-live-p proc)
-             (with-current-buffer (process-buffer proc)
-               (if (= 0 (process-exit-status proc))
-                   (progn
-                     (insert "Byte-compilation completed successfully!\n")
-                     (message
-                      (if report-progress
-                          "Byte-compiling updated configuration...done"
-                        "Byte-compiled updated configuration")))
-                 (save-match-data
-                   (save-excursion
-                     (goto-char (point-min))
-                     (when (looking-at "In toplevel form:")
-                       (forward-line))
-                     (when (looking-at "radian\\.el:[0-9]+:[0-9]+:Warning: ")
-                       (goto-char (match-end 0)))
-                     (message "Failed to byte-compile%s"
-                              (if (looking-at ".+")
-                                  (format ": %s" (match-string 0))
-                                " (no output)"))))))))))))
+        (setq
+         radian-byte-compile--process
+         (make-process
+          :name "radian-byte-compile"
+          :buffer " *radian-byte-compile*"
+          :command '("make" "compile")
+          :noquery t
+          :sentinel
+          (lambda (proc _event)
+            (unless (process-live-p proc)
+              (when (buffer-live-p (process-buffer proc))
+                (with-current-buffer (process-buffer proc)
+                  (if (= 0 (process-exit-status proc))
+                      (progn
+                        (insert "Byte-compilation completed successfully!\n")
+                        (message
+                         (if report-progress
+                             "Byte-compiling updated configuration...done"
+                           "Byte-compiled updated configuration")))
+                    (save-match-data
+                      (save-excursion
+                        (goto-char (point-min))
+                        (when (looking-at "In toplevel form:")
+                          (forward-line))
+                        (when (looking-at
+                               "radian\\.el:[0-9]+:[0-9]+:Warning: ")
+                          (goto-char (match-end 0)))
+                        (message "Failed to byte-compile%s"
+                                 (if (looking-at ".+")
+                                     (format ": %s" (match-string 0))
+                                   " (no output)"))))))))))))))
 
   :blackout (emacs-lisp-compilation-mode . "Byte-Compile"))
 
@@ -4416,7 +4443,10 @@ the problematic case.)"
   ;; message. (A message is shown if insta-revert is either disabled
   ;; or determined dynamically by setting this variable to a
   ;; function.)
-  (setq dired-auto-revert-buffer t))
+  (setq dired-auto-revert-buffer t)
+
+  ;; Showing free space is a sigificant performance hit.
+  (setq dired-free-space nil))
 
 (use-feature dired-x
   :bind (;; Bindings for jumping to the current directory in Dired.
@@ -4425,8 +4455,10 @@ the problematic case.)"
   :config
 
   ;; Prevent annoying "Omitted N lines" messages when auto-reverting.
-  (setq dired-omit-verbose nil)
+  (setq dired-omit-verbose nil))
 
+(use-feature dired-aux
+  :config
   (radian-with-operating-system macOS
     (radian-defadvice radian--advice-dired-guess-open-on-macos
         (&rest _)
@@ -4675,7 +4707,8 @@ This prevents having EmacSQL try to build its binary (which may
 be annoying, inconvenient, or impossible depending on the
 situation) just because you tried to do literally anything with
 Magit."
-    (file-executable-p emacsql-sqlite-executable))
+    (and (featurep 'emacsql-sqlite)
+         (file-executable-p emacsql-sqlite-executable)))
 
   (radian-defadvice radian--forge-build-binary-lazily (&rest _)
     :before #'forge-dispatch
@@ -4684,6 +4717,7 @@ Normally, the binary gets built as soon as Forge is loaded, which
 is terrible UX. We disable that above, so we now have to manually
 make sure it does get built when we actually issue a Forge
 command."
+    (require 'emacsql-sqlite)
     (unless (file-executable-p emacsql-sqlite-executable)
       (emacsql-sqlite-compile 2))))
 
@@ -4699,11 +4733,11 @@ command."
              git-gutter:revert-hunk)
   :init
 
-  (radian-bind-key "v p" #'git-gutter:previous-hunk)
-  (radian-bind-key "v n" #'git-gutter:next-hunk)
-  (radian-bind-key "v a" #'radian-git-gutter:beginning-of-hunk)
-  (radian-bind-key "v e" #'git-gutter:end-of-hunk)
-  (radian-bind-key "v k" #'git-gutter:revert-hunk)
+  (bind-key "v p" #'git-gutter:previous-hunk radian-keymap)
+  (bind-key "v n" #'git-gutter:next-hunk radian-keymap)
+  (bind-key "v a" #'radian-git-gutter:beginning-of-hunk radian-keymap)
+  (bind-key "v e" #'git-gutter:end-of-hunk radian-keymap)
+  (bind-key "v k" #'git-gutter:revert-hunk radian-keymap)
 
   ;; Disable in Org mode, as per
   ;; <https://github.com/syl20bnr/spacemacs/issues/10555> and
@@ -4852,7 +4886,7 @@ Instead, display simply a flat colored region in the fringe."
 (use-feature compile
   :init
 
-  (radian-bind-key "m" #'compile)
+  (bind-key "m" #'compile radian-keymap)
 
   :config
 
@@ -4982,12 +5016,6 @@ Also run `radian-atomic-chrome-setup-hook'."
 
   ;; Listen for requests from the Chrome/Firefox extension.
   (atomic-chrome-start-server))
-
-;; Package `sx' allows you to browse Stack Overflow from within Emacs.
-;; First, run `sx-authenticate' in order to provide your username and
-;; password. After that, you can use any of the autoloaded entry
-;; points. Navigation is keyboard-centric.
-(radian-use-package sx)
 
 ;;;; Emacs profiling
 
@@ -5348,19 +5376,19 @@ spaces."
   :no-require t)
 
 ;;; Closing
-
 (radian--run-hook after-init)
 
-;; Prune the build cache for straight.el; this will prevent it from
-;; growing too large. Do this after the final hook to prevent packages
-;; installed there from being pruned.
-(straight-prune-build-cache)
+(when radian-prune-straight-cache
+  ;; Prune the build cache for straight.el; this will prevent it from
+  ;; growing too large. Do this after the final hook to prevent packages
+  ;; installed there from being pruned.
+  (straight-prune-build-cache)
 
-;; Occasionally prune the build directory as well. For similar reasons
-;; as above, we need to do this after local configuration.
-(unless (bound-and-true-p radian--currently-profiling-p)
-  (when (= 0 (random 100))
-    (straight-prune-build-directory)))
+  ;; Occasionally prune the build directory as well. For similar reasons
+  ;; as above, we need to do this after local configuration.
+  (unless (bound-and-true-p radian--currently-profiling-p)
+    (when (= 0 (random 100))
+      (straight-prune-build-directory))))
 
 ;; We should only get here if init was successful. If we do,
 ;; byte-compile this file asynchronously in a subprocess using the
