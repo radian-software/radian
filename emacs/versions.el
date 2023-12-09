@@ -38,7 +38,7 @@
  ("git-modes" . "eca3bb42ea8abed9ef8549b2ac91bbea445c5bb5")
  ("gnu-elpa-mirror" . "a4f2d4b0e1d3dd8bde2d768458a402d63ad06722")
  ("go-mode.el" . "08aa90d52f0e7d2ad02f961b554e13329672d7cb")
- ("haskell-mode" . "5a9f8072c7b9168f0a8409adf9d62a3e4ad4ea3d")
+ ("haskell-mode" . "8d0f44bfe2a9ab6b0969c9bafb75089f315ff5ae")
  ("hcl-mode" . "751b79247f326ab52e00032e805775c37ad9f080")
  ("helpful" . "94a07d49a80f66f8ebc54a49a4b4f6899a65fbe3")
  ("ht.el" . "c4c1be487d6ecb353d07881526db05d7fc90ea87")
