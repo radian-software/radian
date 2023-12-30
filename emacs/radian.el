@@ -4940,8 +4940,12 @@ argument, search only in files matching current type."
     "Return non-nil if \\[browse-url-at-point] should be rebound."
     ;; All of these major modes provide more featureful bindings for
     ;; C-c C-o than `browse-url-at-point'.
-    (not (derived-mode-p
-          #'markdown-mode #'org-mode #'org-agenda-mode #'magit-mode)))
+    ;;
+    ;; However, `magit-process-mode' doesn't, although it is derived
+    ;; from `magit-mode', so add another exception for that.
+    (or (not (derived-mode-p
+              #'markdown-mode #'org-mode #'org-agenda-mode #'magit-mode))
+        (derived-mode-p #'magit-process-mode)))
 
   :bind* (:filter (radian--browse-url-predicate)
                   ("C-c C-o" . #'browse-url-at-point)))
