@@ -994,7 +994,7 @@ ourselves."
 ;; the default Emacs interface for candidate selection.
 (radian-use-package vertico
   :straight (:host github :repo "minad/vertico"
-             :files (:defaults "extensions/*"))
+                   :files (:defaults "extensions/*"))
   :demand t
   :bind (:map vertico-map
               ("RET" . #'vertico-directory-enter)
@@ -2524,70 +2524,70 @@ backends will still be included.")
 
   :bind (:filter company-mode
 
-         ;; Remap the standard Emacs keybindings for invoking
-         ;; completion to instead use Company. You might think this
-         ;; could be put in the `:bind*' declaration below, but it
-         ;; seems that `bind-key*' does not work with remappings.
-         ([remap completion-at-point] . #'company-manual-begin)
-         ([remap complete-symbol] . #'company-manual-begin)
+                 ;; Remap the standard Emacs keybindings for invoking
+                 ;; completion to instead use Company. You might think this
+                 ;; could be put in the `:bind*' declaration below, but it
+                 ;; seems that `bind-key*' does not work with remappings.
+                 ([remap completion-at-point] . #'company-manual-begin)
+                 ([remap complete-symbol] . #'company-manual-begin)
 
-         ;; The following are keybindings that take effect whenever
-         ;; the completions menu is visible, even if the user has not
-         ;; explicitly interacted with Company.
+                 ;; The following are keybindings that take effect whenever
+                 ;; the completions menu is visible, even if the user has not
+                 ;; explicitly interacted with Company.
 
-         :map company-active-map
+                 :map company-active-map
 
-         ;; Make TAB always complete the current selection, instead of
-         ;; only completing a common prefix.
-         ("<tab>" . #'company-complete-selection)
-         ("TAB" . #'company-complete-selection)
+                 ;; Make TAB always complete the current selection, instead of
+                 ;; only completing a common prefix.
+                 ("<tab>" . #'company-complete-selection)
+                 ("TAB" . #'company-complete-selection)
 
-         ;; When was the last time you used the C-s binding for
-         ;; searching candidates? It conflicts with buffer search,
-         ;; anyway. Same for the scroll commands.
-         ("C-s" . nil)
-         ([remap scroll-down-command] . nil)
-         ([remap scroll-up-command] . nil)
+                 ;; When was the last time you used the C-s binding for
+                 ;; searching candidates? It conflicts with buffer search,
+                 ;; anyway. Same for the scroll commands.
+                 ("C-s" . nil)
+                 ([remap scroll-down-command] . nil)
+                 ([remap scroll-up-command] . nil)
 
-         ;; The following are keybindings that only take effect if the
-         ;; user has explicitly interacted with Company. Note that
-         ;; `:map' from above is "sticky", and applies also below: see
-         ;; https://github.com/jwiegley/use-package/issues/334#issuecomment-349473819.
+                 ;; The following are keybindings that only take effect if the
+                 ;; user has explicitly interacted with Company. Note that
+                 ;; `:map' from above is "sticky", and applies also below: see
+                 ;; https://github.com/jwiegley/use-package/issues/334#issuecomment-349473819.
 
-         :filter (company-explicit-action-p)
+                 :filter (company-explicit-action-p)
 
-         ;; Make RET trigger a completion if and only if the user has
-         ;; explicitly interacted with Company, instead of always
-         ;; doing so.
-         ("<return>" . #'company-complete-selection)
-         ("RET" . #'company-complete-selection)
+                 ;; Make RET trigger a completion if and only if the user has
+                 ;; explicitly interacted with Company, instead of always
+                 ;; doing so.
+                 ("<return>" . #'company-complete-selection)
+                 ("RET" . #'company-complete-selection)
 
-         ;; We then make <up> and <down> abort the completions menu
-         ;; unless the user has interacted explicitly. Note that we
-         ;; use `company-select-previous' instead of
-         ;; `company-select-previous-or-abort'. I think the former
-         ;; makes more sense since the general idea of this `company'
-         ;; configuration is to decide whether or not to steal
-         ;; keypresses based on whether the user has explicitly
-         ;; interacted with `company', not based on the number of
-         ;; candidates.
-         ;;
-         ;; Note that M-p and M-n work regardless of whether explicit
-         ;; interaction has happened yet, and note also that M-TAB
-         ;; when the completions menu is open counts as an
-         ;; interaction.
-         ("<up>" . #'company-select-previous)
-         ("<down>" . #'company-select-next))
+                 ;; We then make <up> and <down> abort the completions menu
+                 ;; unless the user has interacted explicitly. Note that we
+                 ;; use `company-select-previous' instead of
+                 ;; `company-select-previous-or-abort'. I think the former
+                 ;; makes more sense since the general idea of this `company'
+                 ;; configuration is to decide whether or not to steal
+                 ;; keypresses based on whether the user has explicitly
+                 ;; interacted with `company', not based on the number of
+                 ;; candidates.
+                 ;;
+                 ;; Note that M-p and M-n work regardless of whether explicit
+                 ;; interaction has happened yet, and note also that M-TAB
+                 ;; when the completions menu is open counts as an
+                 ;; interaction.
+                 ("<up>" . #'company-select-previous)
+                 ("<down>" . #'company-select-next))
 
   :bind* (:filter company-mode
 
-          ;; The default keybinding for `completion-at-point' and
-          ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
-          ;; already remapped those bindings to `company-manual-begin'
-          ;; above. Here we make sure that they definitely invoke
-          ;; `company-manual-begin' even if a minor mode binds M-TAB
-          ;; directly.
-          ("M-TAB" . #'company-manual-begin))
+                  ;; The default keybinding for `completion-at-point' and
+                  ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
+                  ;; already remapped those bindings to `company-manual-begin'
+                  ;; above. Here we make sure that they definitely invoke
+                  ;; `company-manual-begin' even if a minor mode binds M-TAB
+                  ;; directly.
+                  ("M-TAB" . #'company-manual-begin))
 
   :config
 
@@ -2701,14 +2701,14 @@ order."
       (setq-local company-prescient-sort-length-enable
                   (cl-dolist (w lsp--buffer-workspaces)
                     (when (thread-first w
-                            (lsp--workspace-client)
-                            (lsp--client-server-id)
-                            (memq '(jsts-ls
-                                    bash-ls
-                                    texlab
-                                    ts-ls
-                                    svelte-ls))
-                            (not))
+                                        (lsp--workspace-client)
+                                        (lsp--client-server-id)
+                                        (memq '(jsts-ls
+                                                bash-ls
+                                                texlab
+                                                ts-ls
+                                                svelte-ls))
+                                        (not))
                       (cl-return t)))))))
 
 ;;;; Definition location
