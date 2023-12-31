@@ -39,7 +39,6 @@ longlines: ## Check for long lines
 checkindent: ## Ensure that indentation is correct
 	@tmpdir="$$(mktemp -d)"; for file in $(for_checkindent); do \
 	    emacs -Q --batch \
-		-l scripts/radian-indent.el \
 	        --eval "(setq inhibit-message t)" \
                 --eval "(progn \
                          (setq straight-safe-mode t) \

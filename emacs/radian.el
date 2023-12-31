@@ -28,6 +28,18 @@
 (require 'map)
 (require 'subr-x)
 
+;;; Fix indentation issues
+
+;; The indentation of `define-key' has for some reason changed in
+;; Emacs 29 when it was deprecated in favor of `keymap-set'. Maybe
+;; that is a bug and they will change it, but for now, force the
+;; indentation to the backwards-compatible version.
+(put #'define-key 'lisp-indent-function 'defun)
+
+;; The indentation of `thread-first' changed from (indent 1) to
+;; (indent 0) in Emacs 28. Use the later version.
+(put #'thread-first 'lisp-indent-function 0)
+
 ;;; Set early configuration
 
 ;; Disable byte-compilation warnings from native-compiled packages
@@ -1197,6 +1209,14 @@ active minibuffer, even if the minibuffer is not selected."
 (radian-use-package projectile
   :defer 1
   :bind-keymap* (("C-c p" . projectile-command-map))
+  :init
+
+  ;; This macro does not define a proper indentation spec. In older
+  ;; versions of Emacs all macros starting with "def" were
+  ;; automatically indented like defuns, however that appears to no
+  ;; longer be the case, exposing the issue.
+  (put #'def-projectile-commander-method 'lisp-indent-function 'defun)
+
   :config
 
   ;; Use Vertico (via `completing-read') for Projectile instead of
@@ -1427,63 +1447,68 @@ unquote it using a comma."
     (setq filename (eval (cadr filename))))
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (full-filename (expand-file-name filename "~"))
-         (defun-name (intern
-                      (replace-regexp-in-string
-                       "-+"
-                       "-"
-                       (concat
-                        "radian-find-"
-                        (or pretty-filename
-                            (replace-regexp-in-string
-                             "[^a-z0-9]" "-"
-                             (downcase
-                              bare-filename)))))))
-         (defun-other-window-name
-           (intern
-            (concat (symbol-name defun-name)
-                    "-other-window")))
+         ;; Avoid using variable names that start with "def" because
+         ;; of unexpected indentation behavior in Emacs 28 and
+         ;; earlier where they are interpreted as macro invocations
+         ;; and specially indented, even when appearing within a let
+         ;; form.
+         (the-defun-name (intern
+                          (replace-regexp-in-string
+                           "-+"
+                           "-"
+                           (concat
+                            "radian-find-"
+                            (or pretty-filename
+                                (replace-regexp-in-string
+                                 "[^a-z0-9]" "-"
+                                 (downcase
+                                  bare-filename)))))))
+         (the-defun-other-window-name
+          (intern
+           (concat (symbol-name the-defun-name)
+                   "-other-window")))
          (docstring (format "Edit file %s."
                             bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
                   bare-filename))
-         (defun-form `(defun ,defun-name ()
-                        ,docstring
-                        (interactive)
-                        (when (or (file-exists-p ,full-filename)
-                                  (yes-or-no-p
-                                   ,(format
-                                     "Does not exist, really visit %s? "
-                                     (file-name-nondirectory
-                                      full-filename))))
-                          (find-file ,full-filename))))
-         (defun-other-window-form
-           `(defun ,defun-other-window-name ()
-              ,docstring-other-window
-              (interactive)
-              (when (or (file-exists-p ,full-filename)
-                        (yes-or-no-p
-                         ,(format
-                           "Does not exist, really visit %s? "
-                           (file-name-nondirectory
-                            full-filename))))
-                (find-file-other-window ,full-filename))))
+         (the-defun-form `(defun ,the-defun-name ()
+                            ,docstring
+                            (interactive)
+                            (when (or (file-exists-p ,full-filename)
+                                      (yes-or-no-p
+                                       ,(format
+                                         "Does not exist, really visit %s? "
+                                         (file-name-nondirectory
+                                          full-filename))))
+                              (find-file ,full-filename))))
+         (the-defun-other-window-form
+          `(defun ,the-defun-other-window-name ()
+             ,docstring-other-window
+             (interactive)
+             (when (or (file-exists-p ,full-filename)
+                       (yes-or-no-p
+                        ,(format
+                          "Does not exist, really visit %s? "
+                          (file-name-nondirectory
+                           full-filename))))
+               (find-file-other-window ,full-filename))))
          (full-keybinding
           (when keybinding
             (radian-join-keys "e" keybinding)))
          (full-other-window-keybinding
           (radian-join-keys "o" keybinding)))
     `(progn
-       ,defun-form
-       ,defun-other-window-form
+       ,the-defun-form
+       ,the-defun-other-window-form
        ,@(when full-keybinding
-           `((bind-key ,full-keybinding #',defun-name radian-keymap)))
+           `((bind-key ,full-keybinding #',the-defun-name radian-keymap)))
        ,@(when full-other-window-keybinding
            `((bind-key ,full-other-window-keybinding
-                       #',defun-other-window-name
+                       #',the-defun-other-window-name
                        radian-keymap)))
        ;; Return the symbols for the two functions defined.
-       (list ',defun-name ',defun-other-window-name))))
+       (list ',the-defun-name ',the-defun-other-window-name))))
 
 ;; Now we register shortcuts to files relevant to Radian.
 
