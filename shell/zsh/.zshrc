@@ -169,10 +169,9 @@ zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
 }
 
 # https://github.com/marlonrichert/zsh-autocomplete#reset-ctrlr-and-ctrls
-zle -A {.,}history-incremental-search-backward
-zle -A {.,}vi-history-search-backward
-bindkey -M emacs '^S' history-incremental-search-forward
-bindkey -M vicmd '/' vi-history-search-forward
+# https://github.com/marlonrichert/zsh-autocomplete/issues/651
+bindkey '^R' .history-incremental-search-backward
+bindkey '^S' .history-incremental-search-forward
 
 #### Globbing
 

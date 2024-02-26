@@ -1,7 +1,10 @@
+SHELL := bash
+
 VERSION ?=
 CMD ?=
 
 longlines_files := $(shell find . -name .git -prune -o -print)
+for_checkindent := $(shell find . -name .git -prune -o -name '*.el' -print)
 
 .PHONY: help
 help: ## Show this message
@@ -32,12 +35,31 @@ checkdoc: ## Check docstring style in radian.el
 longlines: ## Check for long lines
 	@scripts/check-line-length.bash
 
+.PHONY: checkindent
+checkindent: ## Ensure that indentation is correct
+	@tmpdir="$$(mktemp -d)"; for file in $(for_checkindent); do \
+	    emacs -Q --batch \
+	        --eval "(setq inhibit-message t)" \
+                --eval "(progn \
+                         (setq straight-safe-mode t) \
+                         (load (expand-file-name \"init.el\" \
+                               user-emacs-directory) nil t))" \
+	        --eval "(find-file \"$$file\")" \
+	        --eval "(indent-region (point-min) (point-max))" \
+	        --eval "(write-file \"$$tmpdir/indented.el\")"; \
+	    (diff <(cat          "$$file" | nl -v1 -ba | \
+                           sed "s/\t/: /" | sed "s|^ *|$$file:|") \
+	          <(cat "$$tmpdir/indented.el" | nl -v1 -ba | \
+                           sed "s/\t/: /" | sed "s|^ *|$$file:|") ) \
+	        | grep -F ">" | grep -o "[a-z].*" | grep . && exit 1 || true; \
+	done
+
 .PHONY: validate
 validate: ## Validate el-patches
 	@scripts/validate-patches.bash
 
 .PHONY: lint
-lint: build compile validate checkdoc longlines ## Run all linters
+lint: build compile validate checkdoc longlines checkindent ## Run all linters
 
 .PHONY: clean
 clean: ## Remove build artifacts

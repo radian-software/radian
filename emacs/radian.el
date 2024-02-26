@@ -28,6 +28,18 @@
 (require 'map)
 (require 'subr-x)
 
+;;; Fix indentation issues
+
+;; The indentation of `define-key' has for some reason changed in
+;; Emacs 29 when it was deprecated in favor of `keymap-set'. Maybe
+;; that is a bug and they will change it, but for now, force the
+;; indentation to the backwards-compatible version.
+(put #'define-key 'lisp-indent-function 'defun)
+
+;; The indentation of `thread-first' changed from (indent 1) to
+;; (indent 0) in Emacs 28. Use the later version.
+(put #'thread-first 'lisp-indent-function 0)
+
 ;;; Set early configuration
 
 ;; Disable byte-compilation warnings from native-compiled packages
@@ -994,7 +1006,7 @@ ourselves."
 ;; the default Emacs interface for candidate selection.
 (radian-use-package vertico
   :straight (:host github :repo "minad/vertico"
-             :files (:defaults "extensions/*"))
+                   :files (:defaults "extensions/*"))
   :demand t
   :bind (:map vertico-map
               ("RET" . #'vertico-directory-enter)
@@ -1197,6 +1209,14 @@ active minibuffer, even if the minibuffer is not selected."
 (radian-use-package projectile
   :defer 1
   :bind-keymap* (("C-c p" . projectile-command-map))
+  :init
+
+  ;; This macro does not define a proper indentation spec. In older
+  ;; versions of Emacs all macros starting with "def" were
+  ;; automatically indented like defuns, however that appears to no
+  ;; longer be the case, exposing the issue.
+  (put #'def-projectile-commander-method 'lisp-indent-function 'defun)
+
   :config
 
   ;; Use Vertico (via `completing-read') for Projectile instead of
@@ -1427,63 +1447,68 @@ unquote it using a comma."
     (setq filename (eval (cadr filename))))
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (full-filename (expand-file-name filename "~"))
-         (defun-name (intern
-                      (replace-regexp-in-string
-                       "-+"
-                       "-"
-                       (concat
-                        "radian-find-"
-                        (or pretty-filename
-                            (replace-regexp-in-string
-                             "[^a-z0-9]" "-"
-                             (downcase
-                              bare-filename)))))))
-         (defun-other-window-name
-           (intern
-            (concat (symbol-name defun-name)
-                    "-other-window")))
+         ;; Avoid using variable names that start with "def" because
+         ;; of unexpected indentation behavior in Emacs 28 and
+         ;; earlier where they are interpreted as macro invocations
+         ;; and specially indented, even when appearing within a let
+         ;; form.
+         (the-defun-name (intern
+                          (replace-regexp-in-string
+                           "-+"
+                           "-"
+                           (concat
+                            "radian-find-"
+                            (or pretty-filename
+                                (replace-regexp-in-string
+                                 "[^a-z0-9]" "-"
+                                 (downcase
+                                  bare-filename)))))))
+         (the-defun-other-window-name
+          (intern
+           (concat (symbol-name the-defun-name)
+                   "-other-window")))
          (docstring (format "Edit file %s."
                             bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
                   bare-filename))
-         (defun-form `(defun ,defun-name ()
-                        ,docstring
-                        (interactive)
-                        (when (or (file-exists-p ,full-filename)
-                                  (yes-or-no-p
-                                   ,(format
-                                     "Does not exist, really visit %s? "
-                                     (file-name-nondirectory
-                                      full-filename))))
-                          (find-file ,full-filename))))
-         (defun-other-window-form
-           `(defun ,defun-other-window-name ()
-              ,docstring-other-window
-              (interactive)
-              (when (or (file-exists-p ,full-filename)
-                        (yes-or-no-p
-                         ,(format
-                           "Does not exist, really visit %s? "
-                           (file-name-nondirectory
-                            full-filename))))
-                (find-file-other-window ,full-filename))))
+         (the-defun-form `(defun ,the-defun-name ()
+                            ,docstring
+                            (interactive)
+                            (when (or (file-exists-p ,full-filename)
+                                      (yes-or-no-p
+                                       ,(format
+                                         "Does not exist, really visit %s? "
+                                         (file-name-nondirectory
+                                          full-filename))))
+                              (find-file ,full-filename))))
+         (the-defun-other-window-form
+          `(defun ,the-defun-other-window-name ()
+             ,docstring-other-window
+             (interactive)
+             (when (or (file-exists-p ,full-filename)
+                       (yes-or-no-p
+                        ,(format
+                          "Does not exist, really visit %s? "
+                          (file-name-nondirectory
+                           full-filename))))
+               (find-file-other-window ,full-filename))))
          (full-keybinding
           (when keybinding
             (radian-join-keys "e" keybinding)))
          (full-other-window-keybinding
           (radian-join-keys "o" keybinding)))
     `(progn
-       ,defun-form
-       ,defun-other-window-form
+       ,the-defun-form
+       ,the-defun-other-window-form
        ,@(when full-keybinding
-           `((bind-key ,full-keybinding #',defun-name radian-keymap)))
+           `((bind-key ,full-keybinding #',the-defun-name radian-keymap)))
        ,@(when full-other-window-keybinding
            `((bind-key ,full-other-window-keybinding
-                       #',defun-other-window-name
+                       #',the-defun-other-window-name
                        radian-keymap)))
        ;; Return the symbols for the two functions defined.
-       (list ',defun-name ',defun-other-window-name))))
+       (list ',the-defun-name ',the-defun-other-window-name))))
 
 ;; Now we register shortcuts to files relevant to Radian.
 
@@ -2524,70 +2549,70 @@ backends will still be included.")
 
   :bind (:filter company-mode
 
-         ;; Remap the standard Emacs keybindings for invoking
-         ;; completion to instead use Company. You might think this
-         ;; could be put in the `:bind*' declaration below, but it
-         ;; seems that `bind-key*' does not work with remappings.
-         ([remap completion-at-point] . #'company-manual-begin)
-         ([remap complete-symbol] . #'company-manual-begin)
+                 ;; Remap the standard Emacs keybindings for invoking
+                 ;; completion to instead use Company. You might think this
+                 ;; could be put in the `:bind*' declaration below, but it
+                 ;; seems that `bind-key*' does not work with remappings.
+                 ([remap completion-at-point] . #'company-manual-begin)
+                 ([remap complete-symbol] . #'company-manual-begin)
 
-         ;; The following are keybindings that take effect whenever
-         ;; the completions menu is visible, even if the user has not
-         ;; explicitly interacted with Company.
+                 ;; The following are keybindings that take effect whenever
+                 ;; the completions menu is visible, even if the user has not
+                 ;; explicitly interacted with Company.
 
-         :map company-active-map
+                 :map company-active-map
 
-         ;; Make TAB always complete the current selection, instead of
-         ;; only completing a common prefix.
-         ("<tab>" . #'company-complete-selection)
-         ("TAB" . #'company-complete-selection)
+                 ;; Make TAB always complete the current selection, instead of
+                 ;; only completing a common prefix.
+                 ("<tab>" . #'company-complete-selection)
+                 ("TAB" . #'company-complete-selection)
 
-         ;; When was the last time you used the C-s binding for
-         ;; searching candidates? It conflicts with buffer search,
-         ;; anyway. Same for the scroll commands.
-         ("C-s" . nil)
-         ([remap scroll-down-command] . nil)
-         ([remap scroll-up-command] . nil)
+                 ;; When was the last time you used the C-s binding for
+                 ;; searching candidates? It conflicts with buffer search,
+                 ;; anyway. Same for the scroll commands.
+                 ("C-s" . nil)
+                 ([remap scroll-down-command] . nil)
+                 ([remap scroll-up-command] . nil)
 
-         ;; The following are keybindings that only take effect if the
-         ;; user has explicitly interacted with Company. Note that
-         ;; `:map' from above is "sticky", and applies also below: see
-         ;; https://github.com/jwiegley/use-package/issues/334#issuecomment-349473819.
+                 ;; The following are keybindings that only take effect if the
+                 ;; user has explicitly interacted with Company. Note that
+                 ;; `:map' from above is "sticky", and applies also below: see
+                 ;; https://github.com/jwiegley/use-package/issues/334#issuecomment-349473819.
 
-         :filter (company-explicit-action-p)
+                 :filter (company-explicit-action-p)
 
-         ;; Make RET trigger a completion if and only if the user has
-         ;; explicitly interacted with Company, instead of always
-         ;; doing so.
-         ("<return>" . #'company-complete-selection)
-         ("RET" . #'company-complete-selection)
+                 ;; Make RET trigger a completion if and only if the user has
+                 ;; explicitly interacted with Company, instead of always
+                 ;; doing so.
+                 ("<return>" . #'company-complete-selection)
+                 ("RET" . #'company-complete-selection)
 
-         ;; We then make <up> and <down> abort the completions menu
-         ;; unless the user has interacted explicitly. Note that we
-         ;; use `company-select-previous' instead of
-         ;; `company-select-previous-or-abort'. I think the former
-         ;; makes more sense since the general idea of this `company'
-         ;; configuration is to decide whether or not to steal
-         ;; keypresses based on whether the user has explicitly
-         ;; interacted with `company', not based on the number of
-         ;; candidates.
-         ;;
-         ;; Note that M-p and M-n work regardless of whether explicit
-         ;; interaction has happened yet, and note also that M-TAB
-         ;; when the completions menu is open counts as an
-         ;; interaction.
-         ("<up>" . #'company-select-previous)
-         ("<down>" . #'company-select-next))
+                 ;; We then make <up> and <down> abort the completions menu
+                 ;; unless the user has interacted explicitly. Note that we
+                 ;; use `company-select-previous' instead of
+                 ;; `company-select-previous-or-abort'. I think the former
+                 ;; makes more sense since the general idea of this `company'
+                 ;; configuration is to decide whether or not to steal
+                 ;; keypresses based on whether the user has explicitly
+                 ;; interacted with `company', not based on the number of
+                 ;; candidates.
+                 ;;
+                 ;; Note that M-p and M-n work regardless of whether explicit
+                 ;; interaction has happened yet, and note also that M-TAB
+                 ;; when the completions menu is open counts as an
+                 ;; interaction.
+                 ("<up>" . #'company-select-previous)
+                 ("<down>" . #'company-select-next))
 
   :bind* (:filter company-mode
 
-          ;; The default keybinding for `completion-at-point' and
-          ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
-          ;; already remapped those bindings to `company-manual-begin'
-          ;; above. Here we make sure that they definitely invoke
-          ;; `company-manual-begin' even if a minor mode binds M-TAB
-          ;; directly.
-          ("M-TAB" . #'company-manual-begin))
+                  ;; The default keybinding for `completion-at-point' and
+                  ;; `complete-symbol' is M-TAB or equivalently C-M-i. We
+                  ;; already remapped those bindings to `company-manual-begin'
+                  ;; above. Here we make sure that they definitely invoke
+                  ;; `company-manual-begin' even if a minor mode binds M-TAB
+                  ;; directly.
+                  ("M-TAB" . #'company-manual-begin))
 
   :config
 
@@ -2701,14 +2726,14 @@ order."
       (setq-local company-prescient-sort-length-enable
                   (cl-dolist (w lsp--buffer-workspaces)
                     (when (thread-first w
-                            (lsp--workspace-client)
-                            (lsp--client-server-id)
-                            (memq '(jsts-ls
-                                    bash-ls
-                                    texlab
-                                    ts-ls
-                                    svelte-ls))
-                            (not))
+                                        (lsp--workspace-client)
+                                        (lsp--client-server-id)
+                                        (memq '(jsts-ls
+                                                bash-ls
+                                                texlab
+                                                ts-ls
+                                                svelte-ls))
+                                        (not))
                       (cl-return t)))))))
 
 ;;;; Definition location
@@ -4940,8 +4965,12 @@ argument, search only in files matching current type."
     "Return non-nil if \\[browse-url-at-point] should be rebound."
     ;; All of these major modes provide more featureful bindings for
     ;; C-c C-o than `browse-url-at-point'.
-    (not (derived-mode-p
-          #'markdown-mode #'org-mode #'org-agenda-mode #'magit-mode)))
+    ;;
+    ;; However, `magit-process-mode' doesn't, although it is derived
+    ;; from `magit-mode', so add another exception for that.
+    (or (not (derived-mode-p
+              #'markdown-mode #'org-mode #'org-agenda-mode #'magit-mode))
+        (derived-mode-p #'magit-process-mode)))
 
   :bind* (:filter (radian--browse-url-predicate)
                   ("C-c C-o" . #'browse-url-at-point)))
