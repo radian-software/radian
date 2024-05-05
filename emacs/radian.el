@@ -3722,12 +3722,14 @@ Return the new `auto-mode-alist' entry"
       (add-to-list 'auto-mode-alist new-entry)
       new-entry))
 
-  (defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
+  (defcustom json-mode-auto-mode-list '(".babelrc"
+                                        ".bowerrc"
+                                        "composer.lock")
     "List of filenames for the JSON entry of `auto-mode-alist'.
 
 Note however that custom `json-mode' entries in `auto-mode-alist'
 won’t be affected."
-    :group 'json-mode
+    :group 'json
     :type '(repeat string)
     :set (lambda (symbol value)
            "Update SYMBOL with a new regexp made from VALUE.
@@ -4057,6 +4059,7 @@ SYMBOL is as in `xref-find-definitions'."
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (radian-use-package macrostep
+  :straight (:fork "raxod502" :branch "fork/1")
   :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
@@ -4308,7 +4311,7 @@ This makes the behavior of `find-file' more reasonable."
   ;; Don't set bookmarks when using `org-capture', since
   ;; `bookmark-face' may be set to a distracting color by the color
   ;; theme, which makes everything look really ugly.
-  (setq org-capture-bookmark nil))
+  (setq org-bookmark-names-plist nil))
 
 ;; Feature `org-clock' from package `org' provides the task clocking
 ;; functionality.
@@ -4548,7 +4551,18 @@ are probably not going to be installed."
         (server-start))
       ;; Tell $EDITOR to use the Emacsclient.
       (push (concat with-editor--envvar "="
-                    (shell-quote-argument with-editor-emacsclient-executable)
+                    ;; Quoting is the right thing to do.  Applications that
+                    ;; fail because of that, are the ones that need fixing,
+                    ;; e.g., by using 'eval "$EDITOR" file'.  See #121.
+                    (shell-quote-argument
+                     ;; If users set the executable manually, they might
+                     ;; begin the path with "~", which would get quoted.
+                     (if (string-prefix-p
+                          "~" with-editor-emacsclient-executable)
+                         (concat (expand-file-name "~")
+                                 (substring
+                                  with-editor-emacsclient-executable 1))
+                       with-editor-emacsclient-executable))
                     ;; Tell the process where the server file is.
                     (and (not server-use-tcp)
                          (concat " --socket-name="
@@ -5272,6 +5286,10 @@ This is passed to `set-frame-font'."
 
 ;; Don't suggest shorter ways to type commands in M-x, since they
 ;; don't apply when using Vertico.
+(setq extended-command-suggest-shorter nil)
+
+;; Don't show an extra message about keybindings for M-x commands as
+;; thoes are already shown in the completion menu.
 (setq suggest-key-bindings 0)
 
 ;; Don't blink the cursor on the opening paren when you insert a
