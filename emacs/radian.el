@@ -2378,6 +2378,7 @@ currently active.")
 ;; information for completions, definition location, documentation,
 ;; and so on.
 (radian-use-package lsp-mode
+  :straight (:fork "raxod502" :branch "fork/1")
   :init
 
   (defcustom radian-lsp-disable nil
