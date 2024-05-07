@@ -294,11 +294,17 @@ alias ds='dirs -v | head -10'
 
 #### ls, exa
 
-if (( $+commands[exa] )); then
+if (( $+commands[eza] )) || (( $+commands[exa] )); then
+
+    if ! (( $+commands[exa] )); then
+        function exa {
+            eza $@
+        }
+    fi
 
     function l {
         emulate -LR zsh
-        exa --all --header --long --color-scale $@
+        exa --all --header --long --color-scale=all $@
     }
 
     function lg {
