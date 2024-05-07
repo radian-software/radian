@@ -3303,7 +3303,8 @@ Return either a string or nil."
        radian--python-venv
        (cl-block nil
          (when (and (executable-find "poetry")
-                    (locate-dominating-file default-directory "pyproject.toml"))
+                    (locate-dominating-file
+                     default-directory "pyproject.toml"))
            (with-temp-buffer
              ;; May create virtualenv, but whatever.
              (when (= 0 (call-process
