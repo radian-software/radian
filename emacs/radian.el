@@ -3290,30 +3290,38 @@ See https://emacs.stackexchange.com/a/3338/12534."
   ;; spew so many messages.
   (setq python-indent-guess-indent-offset-verbose nil)
 
+  (defvar-local radian--python-venv 'unknown
+    "Cached path to virtualenv directory for current buffer.
+Nil for no virtualenv, symbol `unknown' for not checked yet.")
+
   (defun radian--python-find-virtualenv ()
     "Find a virtualenv corresponding to the current buffer.
 Return either a string or nil."
-    (cl-block nil
-      (when (and (executable-find "poetry")
-                 (locate-dominating-file default-directory "pyproject.toml"))
-        (with-temp-buffer
-          ;; May create virtualenv, but whatever.
-          (when (= 0 (call-process
-                      "poetry" nil '(t nil) nil "run" "which" "python"))
-            (goto-char (point-min))
-            (when (looking-at "\\(.+\\)/bin/python\n")
-              (let ((venv (match-string 1)))
-                (when (file-directory-p venv)
-                  (cl-return venv)))))))
-      (when (and (executable-find "pipenv")
-                 (locate-dominating-file default-directory "Pipfile"))
-        (with-temp-buffer
-          ;; May create virtualenv, but whatever.
-          (when (= 0 (call-process "pipenv" nil '(t nil) nil "--venv"))
-            (goto-char (point-min))
-            (let ((venv (string-trim (buffer-string))))
-              (when (file-directory-p venv)
-                (cl-return venv)))))))))
+    (if (not (eq radian--python-venv 'unknown))
+        radian--python-venv
+      (setq-local
+       radian--python-venv
+       (cl-block nil
+         (when (and (executable-find "poetry")
+                    (locate-dominating-file default-directory "pyproject.toml"))
+           (with-temp-buffer
+             ;; May create virtualenv, but whatever.
+             (when (= 0 (call-process
+                         "poetry" nil '(t nil) nil "run" "which" "python"))
+               (goto-char (point-min))
+               (when (looking-at "\\(.+\\)/bin/python\n")
+                 (let ((venv (match-string 1)))
+                   (when (file-directory-p venv)
+                     (cl-return venv)))))))
+         (when (and (executable-find "pipenv")
+                    (locate-dominating-file default-directory "Pipfile"))
+           (with-temp-buffer
+             ;; May create virtualenv, but whatever.
+             (when (= 0 (call-process "pipenv" nil '(t nil) nil "--venv"))
+               (goto-char (point-min))
+               (let ((venv (string-trim (buffer-string))))
+                 (when (file-directory-p venv)
+                   (cl-return venv)))))))))))
 
 ;; Package `lsp-pyright' downloads Microsoft's LSP server for Python.
 ;; We hate Microsoft and think they are going to try to kill off
@@ -3326,11 +3334,24 @@ Return either a string or nil."
   :after (:all lsp-mode python)
   :config
 
-  (radian-defadvice radian--lsp-pyright-discover-virtualenvs
-      (&rest _)
-    :before-until #'lsp-pyright-locate-venv
+  (defun radian--lsp-pyright-discover-virtualenvs ()
     "Automatically discover Pipenv and Poetry virtualenvs."
-    (radian--python-find-virtualenv)))
+    (let ((venv (radian--python-find-virtualenv)))
+      (when venv
+        (expand-file-name "bin/python" venv))))
+
+  (add-to-list 'lsp-pyright-python-search-functions
+               #'radian--lsp-pyright-discover-virtualenvs)
+
+  (defvar radian-lsp-pyright-disable-tagged-hints t
+    "Disable tagged hints in Pyright.
+<https://github.com/microsoft/pyright/issues/7843> for context.")
+
+  ;; https://github.com/microsoft/pyright/issues/7843
+  (lsp-register-custom-settings
+   '(("pyright.disableTaggedHints"
+      radian-lsp-pyright-disable-tagged-hints
+      t))))
 
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
