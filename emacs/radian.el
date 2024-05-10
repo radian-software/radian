@@ -2488,6 +2488,10 @@ killed (which happens during Emacs shutdown)."
   ;; for that instead.
   (setq lsp-enable-on-type-formatting nil)
 
+  ;; Super super slow to have LSP on remote files because TRAMP is not
+  ;; async.
+  (setq lsp-auto-register-remote-clients nil)
+
   ;; Multi-root LSP servers are broken by default, the docs suggest
   ;; adding this advice, although I am not sure why it is not just the
   ;; default behavior.
