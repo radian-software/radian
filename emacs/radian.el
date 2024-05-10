@@ -5169,6 +5169,12 @@ spam. This advice, however, inhibits the message for everyone.")
   (let ((kill-emacs-hook nil))
     (kill-emacs)))
 
+;; Get rid of `restart-emacs' builtin because until we no longer
+;; support Emacs 27 it is easier to have a single implementation
+;; rather than one that has a different calling convention depending
+;; on Emacs version.
+(fmakunbound 'restart-emacs)
+
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
 ;; inside of Emacs, both in the terminal and in windowed mode.
 (radian-use-package restart-emacs
