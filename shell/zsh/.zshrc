@@ -38,9 +38,6 @@ if typeset -f znap >/dev/null; then
     # Configure tab-completions for many external commands.
     znap install zsh-users/zsh-completions
 
-    # Better tab-completion framework and history search.
-    znap source marlonrichert/zsh-autocomplete
-
     if typeset -f radian_znap_hook > /dev/null; then
         radian_znap_hook
     fi
@@ -145,33 +142,15 @@ unsetopt flow_control
 
 #### Completion
 
-# Use TAB and Shift-TAB for their (more) default behavior of cycling
-# through completion options in the popup menu. This is like the menu
-# select completion style available by default.
-bindkey '\t' menu-select "$terminfo[kcbt]" menu-select
-bindkey -M menuselect '\t' menu-complete \
-        "$terminfo[kcbt]" reverse-menu-complete
+# For a modern primer on zsh completion system configuration:
+# https://thevaluable.dev/zsh-completion-guide-examples/
+
+# Display a list of the available candidates instead of just cycling
+# through them blindly.
+zstyle ':completion:*' menu select
 
 # If there is only one candidate just insert it.
 zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
-
-# https://github.com/marlonrichert/zsh-autocomplete#reset--and-
-() {
-   local -a prefix=( '\e'{\[,O} )
-   local -a up=( ${^prefix}A ) down=( ${^prefix}B )
-   local key=
-   for key in $up[@]; do
-      bindkey "$key" up-line-or-history
-   done
-   for key in $down[@]; do
-      bindkey "$key" down-line-or-history
-   done
-}
-
-# https://github.com/marlonrichert/zsh-autocomplete#reset-ctrlr-and-ctrls
-# https://github.com/marlonrichert/zsh-autocomplete/issues/651
-bindkey '^R' .history-incremental-search-backward
-bindkey '^S' .history-incremental-search-forward
 
 #### Globbing
 
