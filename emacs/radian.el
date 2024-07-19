@@ -2504,6 +2504,27 @@ killed (which happens during Emacs shutdown)."
 
   :blackout " LSP")
 
+;; Feature `lsp-sql' wraps
+;; https://github.com/joe-re/sql-language-server.
+(use-feature lsp-sql
+  :config
+
+  ;; It's completely broken:
+  ;; https://github.com/joe-re/sql-language-server/issues/186#issuecomment-2205033951
+  (add-to-list 'lsp-disabled-clients 'sql-ls))
+
+;; Feature `lsp-sqls' wraps https://github.com/sqls-server/sqls.
+(use-feature lsp-sqls
+  :config
+
+  ;; It doesn't seem to work very well, and crashes for me.
+  ;; Additionally although it's supposed to work without a database
+  ;; connection, that seems to have broken at some point. I haven't
+  ;; bothered to report back again.
+  ;;
+  ;; https://github.com/sqls-server/sqls/issues/39
+  (add-to-list 'lsp-disabled-clients 'sqls))
+
 ;;;; Indentation
 
 ;; Don't use tabs for indentation. Use only spaces. Otherwise,
