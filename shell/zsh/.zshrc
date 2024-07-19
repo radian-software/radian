@@ -152,6 +152,10 @@ zstyle ':completion:*' menu select
 # If there is only one candidate just insert it.
 zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
 
+# Allow usage of shift-tab (backtab) to go backward in the completion
+# menu. See <https://stackoverflow.com/a/842370/3538165>.
+bindkey '^[[Z' reverse-menu-complete
+
 #### Globbing
 
 # This makes globs case-insensitive.
