@@ -19,6 +19,9 @@
 	# of the screen if the pager doesn't get invoked for each one.
 	# See <https://stackoverflow.com/a/12352224/3538165>.
 	pager = less -+F
+	# https://github.blog/2022-06-29-improve-git-monorepo-performance-with-a-file-system-monitor/
+	fsmonitor = true
+	untrackedcache = true
 [credential]
 	helper =
 	helper = cache --timeout 86400

@@ -292,13 +292,13 @@ alias -- -9='cd -9'
 # jump to those directories.
 alias ds='dirs -v | head -10'
 
-#### ls, exa
+#### ls, eza
 
-if (( $+commands[exa] )); then
+if (( $+commands[eza] )); then
 
     function l {
         emulate -LR zsh
-        exa --all --header --long --color-scale $@
+        eza --all --header --long --color-scale=all $@
     }
 
     function lg {

@@ -253,7 +253,7 @@ commented.
 [eldoc]: https://www.emacswiki.org/emacs/ElDoc
 [emacs]: https://www.gnu.org/software/emacs/
 [esup]: https://github.com/jschaf/esup
-[exa]: https://the.exa.website/
+[eza]: https://eza.rocks/
 [firefox]: https://www.mozilla.org/en-US/firefox/
 [flow]: https://flow.org/
 [flow]: https://flow.org/

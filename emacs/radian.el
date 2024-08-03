@@ -2378,6 +2378,7 @@ currently active.")
 ;; information for completions, definition location, documentation,
 ;; and so on.
 (radian-use-package lsp-mode
+  :straight (:fork "raxod502" :branch "fork/1")
   :init
 
   (defcustom radian-lsp-disable nil
@@ -2486,6 +2487,10 @@ killed (which happens during Emacs shutdown)."
   ;; Disable LSP reformatting your code as you type. We use Apheleia
   ;; for that instead.
   (setq lsp-enable-on-type-formatting nil)
+
+  ;; Super super slow to have LSP on remote files because TRAMP is not
+  ;; async.
+  (setq lsp-auto-register-remote-clients nil)
 
   ;; Multi-root LSP servers are broken by default, the docs suggest
   ;; adding this advice, although I am not sure why it is not just the
@@ -3289,30 +3294,39 @@ See https://emacs.stackexchange.com/a/3338/12534."
   ;; spew so many messages.
   (setq python-indent-guess-indent-offset-verbose nil)
 
+  (defvar-local radian--python-venv 'unknown
+    "Cached path to virtualenv directory for current buffer.
+Nil for no virtualenv, symbol `unknown' for not checked yet.")
+
   (defun radian--python-find-virtualenv ()
     "Find a virtualenv corresponding to the current buffer.
 Return either a string or nil."
-    (cl-block nil
-      (when (and (executable-find "poetry")
-                 (locate-dominating-file default-directory "pyproject.toml"))
-        (with-temp-buffer
-          ;; May create virtualenv, but whatever.
-          (when (= 0 (call-process
-                      "poetry" nil '(t nil) nil "run" "which" "python"))
-            (goto-char (point-min))
-            (when (looking-at "\\(.+\\)/bin/python\n")
-              (let ((venv (match-string 1)))
-                (when (file-directory-p venv)
-                  (cl-return venv)))))))
-      (when (and (executable-find "pipenv")
-                 (locate-dominating-file default-directory "Pipfile"))
-        (with-temp-buffer
-          ;; May create virtualenv, but whatever.
-          (when (= 0 (call-process "pipenv" nil '(t nil) nil "--venv"))
-            (goto-char (point-min))
-            (let ((venv (string-trim (buffer-string))))
-              (when (file-directory-p venv)
-                (cl-return venv)))))))))
+    (if (not (eq radian--python-venv 'unknown))
+        radian--python-venv
+      (setq-local
+       radian--python-venv
+       (cl-block nil
+         (when (and (executable-find "poetry")
+                    (locate-dominating-file
+                     default-directory "pyproject.toml"))
+           (with-temp-buffer
+             ;; May create virtualenv, but whatever.
+             (when (= 0 (call-process
+                         "poetry" nil '(t nil) nil "run" "which" "python"))
+               (goto-char (point-min))
+               (when (looking-at "\\(.+\\)/bin/python\n")
+                 (let ((venv (match-string 1)))
+                   (when (file-directory-p venv)
+                     (cl-return venv)))))))
+         (when (and (executable-find "pipenv")
+                    (locate-dominating-file default-directory "Pipfile"))
+           (with-temp-buffer
+             ;; May create virtualenv, but whatever.
+             (when (= 0 (call-process "pipenv" nil '(t nil) nil "--venv"))
+               (goto-char (point-min))
+               (let ((venv (string-trim (buffer-string))))
+                 (when (file-directory-p venv)
+                   (cl-return venv)))))))))))
 
 ;; Package `lsp-pyright' downloads Microsoft's LSP server for Python.
 ;; We hate Microsoft and think they are going to try to kill off
@@ -3325,11 +3339,24 @@ Return either a string or nil."
   :after (:all lsp-mode python)
   :config
 
-  (radian-defadvice radian--lsp-pyright-discover-virtualenvs
-      (&rest _)
-    :before-until #'lsp-pyright-locate-venv
+  (defun radian--lsp-pyright-discover-virtualenvs ()
     "Automatically discover Pipenv and Poetry virtualenvs."
-    (radian--python-find-virtualenv)))
+    (let ((venv (radian--python-find-virtualenv)))
+      (when venv
+        (expand-file-name "bin/python" venv))))
+
+  (add-to-list 'lsp-pyright-python-search-functions
+               #'radian--lsp-pyright-discover-virtualenvs)
+
+  (defvar radian-lsp-pyright-disable-tagged-hints t
+    "Disable tagged hints in Pyright.
+<https://github.com/microsoft/pyright/issues/7843> for context.")
+
+  ;; https://github.com/microsoft/pyright/issues/7843
+  (lsp-register-custom-settings
+   '(("pyright.disableTaggedHints"
+      radian-lsp-pyright-disable-tagged-hints
+      t))))
 
 ;;;; Ruby
 ;; https://www.ruby-lang.org/
@@ -3722,12 +3749,14 @@ Return the new `auto-mode-alist' entry"
       (add-to-list 'auto-mode-alist new-entry)
       new-entry))
 
-  (defcustom json-mode-auto-mode-list '(".babelrc" ".bowerrc" "composer.lock")
+  (defcustom json-mode-auto-mode-list '(".babelrc"
+                                        ".bowerrc"
+                                        "composer.lock")
     "List of filenames for the JSON entry of `auto-mode-alist'.
 
 Note however that custom `json-mode' entries in `auto-mode-alist'
 won’t be affected."
-    :group 'json-mode
+    :group 'json
     :type '(repeat string)
     :set (lambda (symbol value)
            "Update SYMBOL with a new regexp made from VALUE.
@@ -4057,6 +4086,7 @@ SYMBOL is as in `xref-find-definitions'."
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (radian-use-package macrostep
+  :straight (:fork "raxod502" :branch "fork/1")
   :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
@@ -4308,7 +4338,7 @@ This makes the behavior of `find-file' more reasonable."
   ;; Don't set bookmarks when using `org-capture', since
   ;; `bookmark-face' may be set to a distracting color by the color
   ;; theme, which makes everything look really ugly.
-  (setq org-capture-bookmark nil))
+  (setq org-bookmark-names-plist nil))
 
 ;; Feature `org-clock' from package `org' provides the task clocking
 ;; functionality.
@@ -4548,7 +4578,18 @@ are probably not going to be installed."
         (server-start))
       ;; Tell $EDITOR to use the Emacsclient.
       (push (concat with-editor--envvar "="
-                    (shell-quote-argument with-editor-emacsclient-executable)
+                    ;; Quoting is the right thing to do.  Applications that
+                    ;; fail because of that, are the ones that need fixing,
+                    ;; e.g., by using 'eval "$EDITOR" file'.  See #121.
+                    (shell-quote-argument
+                     ;; If users set the executable manually, they might
+                     ;; begin the path with "~", which would get quoted.
+                     (if (string-prefix-p
+                          "~" with-editor-emacsclient-executable)
+                         (concat (expand-file-name "~")
+                                 (substring
+                                  with-editor-emacsclient-executable 1))
+                       with-editor-emacsclient-executable))
                     ;; Tell the process where the server file is.
                     (and (not server-use-tcp)
                          (concat " --socket-name="
@@ -5132,6 +5173,12 @@ spam. This advice, however, inhibits the message for everyone.")
   (let ((kill-emacs-hook nil))
     (kill-emacs)))
 
+;; Get rid of `restart-emacs' builtin because until we no longer
+;; support Emacs 27 it is easier to have a single implementation
+;; rather than one that has a different calling convention depending
+;; on Emacs version.
+(fmakunbound 'restart-emacs)
+
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
 ;; inside of Emacs, both in the terminal and in windowed mode.
 (radian-use-package restart-emacs
@@ -5272,6 +5319,10 @@ This is passed to `set-frame-font'."
 
 ;; Don't suggest shorter ways to type commands in M-x, since they
 ;; don't apply when using Vertico.
+(setq extended-command-suggest-shorter nil)
+
+;; Don't show an extra message about keybindings for M-x commands as
+;; thoes are already shown in the completion menu.
 (setq suggest-key-bindings 0)
 
 ;; Don't blink the cursor on the opening paren when you insert a

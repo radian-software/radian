@@ -21,7 +21,7 @@ Radian's `.zshrc`.
 
 * zsh (obviously)
 * git (to clone zinit)
-* exa (optional - colorized ls aliases)
+* eza (optional - colorized ls aliases)
 
 ### Plugin management
 
@@ -104,7 +104,7 @@ plugins.
 * Use `help` as a replacement for `man` that can also look up shell
   functions and specific subsections of certain man pages. Man pages
   are colored by default
-* ls aliases: `l` for `ls -lAhF` and `lt` for `tree -a`, but using exa
+* ls aliases: `l` for `ls -lAhF` and `lt` for `tree -a`, but using eza
   or gnu ls if installed. `lt <n>` for only recursing to the nth
   level (ignore `.git`, `.svn`, `node_modules` by default), and `lti
   <glob>` for ignoring more patterns. Use `ltli <n> <glob>` to combine
