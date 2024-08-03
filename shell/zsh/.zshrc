@@ -148,6 +148,7 @@ unsetopt flow_control
 # Display a list of the available candidates instead of just cycling
 # through them blindly.
 zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 
 # If there is only one candidate just insert it.
 zstyle ':autocomplete:*complete*:*' insert-unambiguous yes
