@@ -91,12 +91,12 @@ stability.
   * Extremely fast and flexible package manager, [znap]
   * No-nonsense prompt showing username, hostname, working
     directory, and Git status, colored by exit code
-  * Substring completion everywhere
+  * Less bad default tab-completions
   * GUI-like file/directory copy/paste functions on the command line
   * Extensive library of clean and consistent [Git] aliases
   * Colored man pages
-  * Configured plugins: [wdx], [zsh-autocomplete],
-    [zsh-autosuggestions], [zsh-completions]
+  * Configured plugins: [wdx], [zsh-autosuggestions],
+    [zsh-completions]
 * [Tmux]
   * Keybindings for inserting new windows and shifting them left and
     right
@@ -311,7 +311,6 @@ commented.
 [yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [znap]: https://github.com/marlonrichert/zsh-snap
-[zsh-autocomplete]: https://github.com/marlonrichert/zsh-autocomplete
 [zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
 [zsh-completions]: https://github.com/zsh-users/zsh-completions
 [zsh]: http://zsh.sourceforge.net/
