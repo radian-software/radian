@@ -3963,10 +3963,17 @@ bizarre reason."
         (func &rest args)
       :around #'elisp--company-doc-buffer
       "Cause `company' to use Helpful to show Elisp documentation."
-      (cl-letf (((symbol-function #'describe-function) #'helpful-function)
-                ((symbol-function #'describe-variable) #'helpful-variable)
-                ((symbol-function #'help-buffer) #'current-buffer))
-        (apply func args))))
+      (cl-letf* ((helpful-buffer nil)
+                 ((symbol-function #'describe-function)
+                  (lambda (&rest args)
+                    (apply 'helpful-function args)
+                    (setq helpful-buffer (current-buffer))))
+                 ((symbol-function #'describe-variable)
+                  (lambda (&rest args)
+                    (apply 'helpful-variable args)
+                    (setq helpful-buffer (current-buffer))))
+                 (buf (apply func args)))
+        (or helpful-buffer buf))))
 
   (radian-defadvice radian--advice-fill-elisp-docstrings-correctly (&rest _)
     :before-until #'fill-context-prefix
