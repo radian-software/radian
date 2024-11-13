@@ -2504,6 +2504,27 @@ killed (which happens during Emacs shutdown)."
 
   :blackout " LSP")
 
+;; Feature `lsp-sql' wraps
+;; https://github.com/joe-re/sql-language-server.
+(use-feature lsp-sql
+  :config
+
+  ;; It's completely broken:
+  ;; https://github.com/joe-re/sql-language-server/issues/186#issuecomment-2205033951
+  (add-to-list 'lsp-disabled-clients 'sql-ls))
+
+;; Feature `lsp-sqls' wraps https://github.com/sqls-server/sqls.
+(use-feature lsp-sqls
+  :config
+
+  ;; It doesn't seem to work very well, and crashes for me.
+  ;; Additionally although it's supposed to work without a database
+  ;; connection, that seems to have broken at some point. I haven't
+  ;; bothered to report back again.
+  ;;
+  ;; https://github.com/sqls-server/sqls/issues/39
+  (add-to-list 'lsp-disabled-clients 'sqls))
+
 ;;;; Indentation
 
 ;; Don't use tabs for indentation. Use only spaces. Otherwise,
@@ -3942,10 +3963,17 @@ bizarre reason."
         (func &rest args)
       :around #'elisp--company-doc-buffer
       "Cause `company' to use Helpful to show Elisp documentation."
-      (cl-letf (((symbol-function #'describe-function) #'helpful-function)
-                ((symbol-function #'describe-variable) #'helpful-variable)
-                ((symbol-function #'help-buffer) #'current-buffer))
-        (apply func args))))
+      (cl-letf* ((helpful-buffer nil)
+                 ((symbol-function #'describe-function)
+                  (lambda (&rest args)
+                    (apply 'helpful-function args)
+                    (setq helpful-buffer (current-buffer))))
+                 ((symbol-function #'describe-variable)
+                  (lambda (&rest args)
+                    (apply 'helpful-variable args)
+                    (setq helpful-buffer (current-buffer))))
+                 (buf (apply func args)))
+        (or helpful-buffer buf))))
 
   (radian-defadvice radian--advice-fill-elisp-docstrings-correctly (&rest _)
     :before-until #'fill-context-prefix
