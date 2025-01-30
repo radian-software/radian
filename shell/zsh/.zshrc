@@ -698,10 +698,12 @@ if (( $+commands[git] )); then
     alias gf='git fetch'
     alias gfa='git fetch --all'
     alias gfu='git fetch --unshallow'
+    alias gfp='git fetch --prune'
 
     alias gu='git pull'
     alias gur='git pull --rebase --autostash'
     alias gum='git pull --no-rebase'
+    alias gup='git pull --prune'
 
     alias gp='git push'
     alias gpa='git push --all'
