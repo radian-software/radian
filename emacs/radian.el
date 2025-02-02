@@ -2862,6 +2862,9 @@ was printed, and only have ElDoc display if one wasn't."
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
+  ;; https://github.com/emacs-lsp/lsp-ui/issues/150#issuecomment-821761972
+  (setq lsp-ui-sideline-diagnostic-max-lines 20)
+
   (radian-defadvice radian--advice-lsp-ui-apply-single-fix
       (orig-fun &rest args)
     :around #'lsp-ui-sideline-apply-code-actions

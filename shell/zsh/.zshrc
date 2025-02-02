@@ -454,6 +454,8 @@ function mcd {
     cd ${@[$#]}
 }
 
+compdef _mkdir mcd
+
 #### rmdir
 
 alias rd='rmdir'
