@@ -43,6 +43,14 @@ if typeset -f znap >/dev/null; then
     fi
 fi
 
+# Disable automatically enabling git-maintenance by znap, because it
+# will write it into the Radian .gitconfig and include hardcoded paths
+# there. You can enable git-maintenance if you want but it needs to be
+# done in the .zshrc.local.
+#
+# https://github.com/marlonrichert/zsh-snap?tab=readme-ov-file#automatic-git-maintenance
+zstyle ':znap:*:*' git-maintenance off
+
 ## Shell configuration
 ### Prompt
 
