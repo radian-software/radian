@@ -5540,12 +5540,12 @@ spaces."
      `(prescient-secondary-highlight ((,class (:foreground ,green))))
      `(completions-common-part nil))
 
+    (enable-theme 'zerodark)
+
     (dolist (face '(outline-1
                     outline-2
                     outline-3))
-      (set-face-attribute face nil :height 1.0))
-
-    (enable-theme 'zerodark)))
+      (set-face-attribute face nil :height 1.0))))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/radian-software/radian/issues/456>.
