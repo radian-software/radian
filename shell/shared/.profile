@@ -65,3 +65,6 @@ if command -v ssh-agent >/dev/null 2>&1; then
     fi
 
 fi
+
+export NPM_CONFIG_UPDATE_NOTIFIER=false
+export PIP_DISABLE_PIP_VERSION_CHECK=1

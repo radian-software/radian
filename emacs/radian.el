@@ -2862,6 +2862,9 @@ was printed, and only have ElDoc display if one wasn't."
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
+  ;; https://github.com/emacs-lsp/lsp-ui/issues/150#issuecomment-821761972
+  (setq lsp-ui-sideline-diagnostic-max-lines 20)
+
   (radian-defadvice radian--advice-lsp-ui-apply-single-fix
       (orig-fun &rest args)
     :around #'lsp-ui-sideline-apply-code-actions
@@ -4529,7 +4532,10 @@ the problematic case.)"
   (setq dired-auto-revert-buffer t)
 
   ;; Showing free space is a sigificant performance hit.
-  (setq dired-free-space nil))
+  (setq dired-free-space nil)
+
+  ;; Do not display . and ..; show sizes human-readable.
+  (setq dired-listing-switches "-Alh"))
 
 (use-feature dired-x
   :bind (;; Bindings for jumping to the current directory in Dired.
@@ -5534,12 +5540,12 @@ spaces."
      `(prescient-secondary-highlight ((,class (:foreground ,green))))
      `(completions-common-part nil))
 
+    (enable-theme 'zerodark)
+
     (dolist (face '(outline-1
                     outline-2
                     outline-3))
-      (set-face-attribute face nil :height 1.0))
-
-    (enable-theme 'zerodark)))
+      (set-face-attribute face nil :height 1.0))))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/radian-software/radian/issues/456>.
