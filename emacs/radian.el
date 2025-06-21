@@ -5474,12 +5474,12 @@ spaces."
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
 (setq-default mode-line-format
-              '(:eval (replace-regexp-in-string
-                       "%" "%%"
-                       (radian--mode-line-align
-                        (format-mode-line radian-mode-line-left)
-                        (format-mode-line radian-mode-line-right))
-                       'fixedcase 'literal)))
+              '((:eval (replace-regexp-in-string
+                        "%" "%%"
+                        (radian--mode-line-align
+                         (format-mode-line radian-mode-line-left)
+                         (format-mode-line radian-mode-line-right))
+                        'fixedcase 'literal))))
 
 ;;;; Color theme
 
