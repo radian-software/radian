@@ -2084,14 +2084,15 @@ buffer."
 ;; unsaved changes).
 (use-feature autorevert
   :defer 2
-  :functions (radian-autorevert-inhibit-p radian--autorevert-silence)
-  :init
-
-  (defun radian--autorevert-silence ()
-    "Silence messages from `auto-revert-mode' in the current buffer."
-    (setq-local auto-revert-verbose nil))
-
   :config
+
+  (radian-defadvice radian--autorevert-quietly (func &rest args)
+    :around #'auto-revert-handler
+    "Silence buffer reverts in most cases."
+    (let ((auto-revert-verbose
+           (and (equal (current-buffer) (car (buffer-list)))
+                (not (derived-mode-p 'dired-mode)))))
+      (apply func args)))
 
   ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
   ;; We have to do this before turning on `auto-revert-mode' for the
@@ -2112,27 +2113,22 @@ buffer."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
-  (defun radian-autorevert-inhibit-p (buffer)
-    "Return non-nil if autorevert should be inhibited for BUFFER."
-    (or (null (get-buffer-window))
-        (with-current-buffer buffer
-          (or (null buffer-file-name)
-              (file-remote-p buffer-file-name)))))
+  ;; The revert-only-visible code actually only takes effect when
+  ;; autorevert needs to use polling. That is fine, actually, since
+  ;; having additional watches is largely fine from a performance
+  ;; point of view, as long as you have sufficient file descriptors.
 
-  (radian-if-compiletime (version< emacs-version "27")
-      (radian-defadvice radian--autorevert-only-visible
-          (auto-revert-buffers &rest args)
-        :around #'auto-revert-buffers
-        "Inhibit `autorevert' for buffers not displayed in any window."
-        (radian-flet ((defun buffer-list (&rest args)
-                        (cl-remove-if
-                         #'radian-autorevert-inhibit-p
-                         (apply buffer-list args))))
-          (apply auto-revert-buffers args)))
-    (radian-defadvice radian--autorevert-only-visible (bufs)
-      :filter-return #'auto-revert--polled-buffers
-      "Inhibit `autorevert' for buffers not displayed in any window."
-      (cl-remove-if #'radian-autorevert-inhibit-p bufs)))
+  (defun radian-autorevert-inhibit-polling-p (buffer)
+    "Return non-nil if autorevert should be inhibited for BUFFER."
+    (with-current-buffer buffer
+      (or (null (get-buffer-window))
+          (null buffer-file-name)
+          (file-remote-p buffer-file-name))))
+
+  (radian-defadvice radian--autorevert-poll-only-visible (bufs)
+    :filter-return #'auto-revert--polled-buffers
+    "Inhibit `autorevert' for buffers not displayed in any window."
+    (cl-remove-if #'radian-autorevert-inhibit-polling-p bufs))
 
   :blackout auto-revert-mode)
 
@@ -4515,8 +4511,6 @@ the problematic case.)"
       (setq dired-use-ls-dired
             (eq 0 (call-process insert-directory-program
                                 nil nil nil "--dired")))))
-
-  (add-hook 'dired-mode-hook #'radian--autorevert-silence)
 
   ;; Disable the prompt about whether I want to kill the Dired buffer
   ;; for a deleted directory. Of course I do! It's just a Dired
