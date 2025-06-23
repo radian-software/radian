@@ -22,6 +22,7 @@
  ("elisp-refs" . "541a064c3ce27867872cf708354a65d83baf2a6d")
  ("elisp-ruby-electric" . "decf39c0d66a3fa171e16f4559d3deac89d8386d")
  ("elpa" . "9f03484eee87d0b311fbf06de4ce6a96cde160cc")
+ ("emacs-sqlite3-api" . "a601c9965e4d0178705a64b7d4f88709ca9aea66")
  ("emacs-websocket" . "40c208eaab99999d7c1e4bea883648da24c03be3")
  ("emacs-which-key" . "1e89fa000e9ba9549f15ef57abccd118d5f2fe1a")
  ("emacsmirror-mirror" . "4a348ac4c895dd8b013d7313ff079d0214bcf6ec")

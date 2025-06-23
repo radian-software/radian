@@ -4793,6 +4793,12 @@ anything significant at package load time) since it breaks CI."
 ;; within Magit.
 (radian-use-package forge)
 
+;; Package `sqlite3' provides the recommended (by Jonas) sqlite3
+;; integration that Forge can use. If you want to use it, install
+;; libsqlite3 from the system package manager.
+(radian-use-package sqlite3
+  :no-require t)
+
 ;; Feature `forge-core' from package `forge' implements the core
 ;; functionality.
 (use-feature forge-core
