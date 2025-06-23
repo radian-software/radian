@@ -18,7 +18,7 @@
  ("dockerfile-mode" . "39a012a27fcf6fb629c447d13b6974baf906714c")
  ("dumb-jump" . "ede6a04187e79a29ef31d14760ac0d8d4c5f4cc5")
  ("el-get" . "f8f651b448f0b5ba478a92bf1c361ff17b10e8d2")
- ("el-patch" . "654deaba847a761496f9baeb6f95031c187c019f")
+ ("el-patch" . "e10392847cb4d9d32d614a5678007aac4c2cca92")
  ("elisp-refs" . "541a064c3ce27867872cf708354a65d83baf2a6d")
  ("elisp-ruby-electric" . "decf39c0d66a3fa171e16f4559d3deac89d8386d")
  ("elpa" . "9f03484eee87d0b311fbf06de4ce6a96cde160cc")
