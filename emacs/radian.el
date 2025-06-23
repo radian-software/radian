@@ -2335,19 +2335,20 @@ into what `lookup-key' and `define-key' want."
              ;; `:filter' option, which allows us to dynamically
              ;; decide which command we want to run when a key is
              ;; pressed.
-             (define-key keymap event
-                         `(menu-item
-                           nil ,company-cmd :filter
-                           (lambda (cmd)
-                             ;; There doesn't seem to be any obvious
-                             ;; function from Company to tell whether or not
-                             ;; a completion is in progress (à la
-                             ;; `company-explicit-action-p'), so I just
-                             ;; check whether or not `company-my-keymap' is
-                             ;; defined, which seems to be good enough.
-                             (if company-my-keymap
-                                 ',company-cmd
-                               ',yas-cmd))))))
+             (straight--define-key
+              keymap event
+              `(menu-item
+                nil ,company-cmd :filter
+                (lambda (cmd)
+                  ;; There doesn't seem to be any obvious
+                  ;; function from Company to tell whether or not
+                  ;; a completion is in progress (à la
+                  ;; `company-explicit-action-p'), so I just
+                  ;; check whether or not `company-my-keymap' is
+                  ;; defined, which seems to be good enough.
+                  (if company-my-keymap
+                      ',company-cmd
+                    ',yas-cmd))))))
          company-active-map)
         keymap)
       "Keymap which delegates to both `company-active-map' and `yas-keymap'.
