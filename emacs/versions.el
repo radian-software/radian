@@ -3,7 +3,7 @@
  ("apache-mode" . "00595893920ce755014d793839086bf15ac90075")
  ("apheleia" . "82cbb665bc6a62de59e00aa76dcef29ef3a6c3a2")
  ("atomic-chrome" . "072a137a19d7e6a300ca3e87c0e142a7f4ccb5fb")
- ("auctex" . "d78fc3fa0358dc74eca354985b234310624d5502")
+ ("auctex" . "ee58d625501af073bde569718db02d1236162283")
  ("blackout" . "7707211370f03f03a2f74df15f42ac24a1e99300")
  ("buffer-move" . "e7800b3ab1bd76ee475ef35507ec51ecd5a3f065")
  ("cider" . "1cd6ab7b7cb4a7e079a273600c4d28307c3aba40")
