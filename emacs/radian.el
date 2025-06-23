@@ -3408,14 +3408,17 @@ Return either a string or nil."
   (defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
-      (define-key
+      ;; Use `el-patch-literal' as a workaround to the indentation of
+      ;; `define-key' being inconsistent between supported Emacs
+      ;; versions.
+      ((el-patch-literal define-key)
        map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
       (define-key map [remap newline] 'ruby-electric-space/return)
       (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
-      (define-key
+      ((el-patch-literal define-key)
        map [remap electric-newline-and-maybe-indent]
        'ruby-electric-space/return)
-      (define-key
+      ((el-patch-literal define-key)
        map [remap reindent-then-newline-and-indent]
        'ruby-electric-space/return)
       (el-patch-remove
@@ -3427,7 +3430,7 @@ Return either a string or nil."
                  (closing (plist-get plist :closing)))
             (define-key map (char-to-string delim) func)
             (if closing
-                (define-key
+                ((el-patch-literal define-key)
                  map (char-to-string closing) 'ruby-electric-closing-char)))))
       map)
     (el-patch-concat
