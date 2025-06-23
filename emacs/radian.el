@@ -2335,19 +2335,20 @@ into what `lookup-key' and `define-key' want."
              ;; `:filter' option, which allows us to dynamically
              ;; decide which command we want to run when a key is
              ;; pressed.
-             (define-key keymap event
-                         `(menu-item
-                           nil ,company-cmd :filter
-                           (lambda (cmd)
-                             ;; There doesn't seem to be any obvious
-                             ;; function from Company to tell whether or not
-                             ;; a completion is in progress (à la
-                             ;; `company-explicit-action-p'), so I just
-                             ;; check whether or not `company-my-keymap' is
-                             ;; defined, which seems to be good enough.
-                             (if company-my-keymap
-                                 ',company-cmd
-                               ',yas-cmd))))))
+             (straight--define-key
+              keymap event
+              `(menu-item
+                nil ,company-cmd :filter
+                (lambda (cmd)
+                  ;; There doesn't seem to be any obvious
+                  ;; function from Company to tell whether or not
+                  ;; a completion is in progress (à la
+                  ;; `company-explicit-action-p'), so I just
+                  ;; check whether or not `company-my-keymap' is
+                  ;; defined, which seems to be good enough.
+                  (if company-my-keymap
+                      ',company-cmd
+                    ',yas-cmd))))))
          company-active-map)
         keymap)
       "Keymap which delegates to both `company-active-map' and `yas-keymap'.
@@ -3407,14 +3408,17 @@ Return either a string or nil."
   (defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
-      (define-key
+      ;; Use `el-patch-literal' as a workaround to the indentation of
+      ;; `define-key' being inconsistent between supported Emacs
+      ;; versions.
+      ((el-patch-literal define-key)
        map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
       (define-key map [remap newline] 'ruby-electric-space/return)
       (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
-      (define-key
+      ((el-patch-literal define-key)
        map [remap electric-newline-and-maybe-indent]
        'ruby-electric-space/return)
-      (define-key
+      ((el-patch-literal define-key)
        map [remap reindent-then-newline-and-indent]
        'ruby-electric-space/return)
       (el-patch-remove
@@ -3426,7 +3430,7 @@ Return either a string or nil."
                  (closing (plist-get plist :closing)))
             (define-key map (char-to-string delim) func)
             (if closing
-                (define-key
+                ((el-patch-literal define-key)
                  map (char-to-string closing) 'ruby-electric-closing-char)))))
       map)
     (el-patch-concat
@@ -4788,6 +4792,12 @@ anything significant at package load time) since it breaks CI."
 ;; Package `forge' provides a GitHub/GitLab/etc. interface directly
 ;; within Magit.
 (radian-use-package forge)
+
+;; Package `sqlite3' provides the recommended (by Jonas) sqlite3
+;; integration that Forge can use. If you want to use it, install
+;; libsqlite3 from the system package manager.
+(radian-use-package sqlite3
+  :no-require t)
 
 ;; Feature `forge-core' from package `forge' implements the core
 ;; functionality.
