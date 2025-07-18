@@ -36,7 +36,8 @@ if typeset -f znap >/dev/null; then
     znap source zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
-    znap install zsh-users/zsh-completions
+    znap clone zsh-users/zsh-completions
+    fpath+=(~[zsh-users/zsh-completions]/src)
 
     if typeset -f radian_znap_hook > /dev/null; then
         radian_znap_hook
