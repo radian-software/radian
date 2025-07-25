@@ -5402,7 +5402,8 @@ turn it off again after creating the first frame."
 
   ;; Set the default font size.
   (when radian-font-size
-    (set-face-attribute 'default nil :height radian-font-size))
+    (custom-theme-set-faces
+     'user '(default ((t (:height radian-font-size))) t)))
 
   ;; Set the default font. No, I have no idea why we have to do it
   ;; this way. Using `set-face-attribute' does not have an effect,
@@ -5412,7 +5413,8 @@ turn it off again after creating the first frame."
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
-  (set-face-attribute 'fixed-pitch nil :family 'unspecified)
+  (custom-theme-set-faces
+   'user '(fixed-pitch ((t (:family unspecified))) t))
 
   ;; On macOS, set the title bar to match the frame background.
   (radian-with-operating-system macOS
@@ -5549,7 +5551,7 @@ spaces."
     (dolist (face '(outline-1
                     outline-2
                     outline-3))
-      (set-face-attribute face nil :height 1.0))))
+      (custom-theme-set-faces 'user `(,face ((t (:height 1.0))) t)))))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/radian-software/radian/issues/456>.
