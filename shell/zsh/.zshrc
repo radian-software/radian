@@ -36,7 +36,8 @@ if typeset -f znap >/dev/null; then
     znap source zsh-users/zsh-autosuggestions
 
     # Configure tab-completions for many external commands.
-    znap install zsh-users/zsh-completions
+    znap clone zsh-users/zsh-completions
+    fpath+=(~[zsh-users/zsh-completions]/src)
 
     if typeset -f radian_znap_hook > /dev/null; then
         radian_znap_hook
@@ -721,7 +722,7 @@ fi
 if (( $+commands[tmux] )); then
     alias ta='tmux attach'
     function ts {
-        tmux new-session -s ${1:-tmux}
+        tmux attach -s ${1:-tmux} 2>/dev/null || tmux new-session -s ${1:-tmux}
     }
 fi
 

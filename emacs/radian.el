@@ -30,12 +30,6 @@
 
 ;;; Fix indentation issues
 
-;; The indentation of `define-key' has for some reason changed in
-;; Emacs 29 when it was deprecated in favor of `keymap-set'. Maybe
-;; that is a bug and they will change it, but for now, force the
-;; indentation to the backwards-compatible version.
-(put #'define-key 'lisp-indent-function 'defun)
-
 ;; The indentation of `thread-first' changed from (indent 1) to
 ;; (indent 0) in Emacs 28. Use the later version.
 (put #'thread-first 'lisp-indent-function 0)
@@ -564,6 +558,13 @@ binding the variable dynamically over the entire init-file."
 
 ;; Clear out recipe overrides (in case of re-init).
 (setq straight-recipe-overrides nil)
+
+;; Test out being able to answer authentication prompts during Git
+;; clones.
+(setq straight-display-subprocess-prompts t)
+
+;; Test out being able to contribute directly to GNU ELPA upstream.
+(setq straight-recipes-gnu-elpa-use-mirror nil)
 
 (radian--run-hook before-straight)
 
@@ -2083,14 +2084,15 @@ buffer."
 ;; unsaved changes).
 (use-feature autorevert
   :defer 2
-  :functions (radian-autorevert-inhibit-p radian--autorevert-silence)
-  :init
-
-  (defun radian--autorevert-silence ()
-    "Silence messages from `auto-revert-mode' in the current buffer."
-    (setq-local auto-revert-verbose nil))
-
   :config
+
+  (radian-defadvice radian--autorevert-quietly (func &rest args)
+    :around #'auto-revert-handler
+    "Silence buffer reverts in most cases."
+    (let ((auto-revert-verbose
+           (and (equal (current-buffer) (car (buffer-list)))
+                (not (derived-mode-p 'dired-mode)))))
+      (apply func args)))
 
   ;; Turn the delay on auto-reloading from 5 seconds down to 1 second.
   ;; We have to do this before turning on `auto-revert-mode' for the
@@ -2111,27 +2113,22 @@ buffer."
   ;; want to do it when they find a file. This disables that prompt.
   (setq revert-without-query '(".*"))
 
-  (defun radian-autorevert-inhibit-p (buffer)
-    "Return non-nil if autorevert should be inhibited for BUFFER."
-    (or (null (get-buffer-window))
-        (with-current-buffer buffer
-          (or (null buffer-file-name)
-              (file-remote-p buffer-file-name)))))
+  ;; The revert-only-visible code actually only takes effect when
+  ;; autorevert needs to use polling. That is fine, actually, since
+  ;; having additional watches is largely fine from a performance
+  ;; point of view, as long as you have sufficient file descriptors.
 
-  (radian-if-compiletime (version< emacs-version "27")
-      (radian-defadvice radian--autorevert-only-visible
-          (auto-revert-buffers &rest args)
-        :around #'auto-revert-buffers
-        "Inhibit `autorevert' for buffers not displayed in any window."
-        (radian-flet ((defun buffer-list (&rest args)
-                        (cl-remove-if
-                         #'radian-autorevert-inhibit-p
-                         (apply buffer-list args))))
-          (apply auto-revert-buffers args)))
-    (radian-defadvice radian--autorevert-only-visible (bufs)
-      :filter-return #'auto-revert--polled-buffers
-      "Inhibit `autorevert' for buffers not displayed in any window."
-      (cl-remove-if #'radian-autorevert-inhibit-p bufs)))
+  (defun radian-autorevert-inhibit-polling-p (buffer)
+    "Return non-nil if autorevert should be inhibited for BUFFER."
+    (with-current-buffer buffer
+      (or (null (get-buffer-window))
+          (null buffer-file-name)
+          (file-remote-p buffer-file-name))))
+
+  (radian-defadvice radian--autorevert-poll-only-visible (bufs)
+    :filter-return #'auto-revert--polled-buffers
+    "Inhibit `autorevert' for buffers not displayed in any window."
+    (cl-remove-if #'radian-autorevert-inhibit-polling-p bufs))
 
   :blackout auto-revert-mode)
 
@@ -2338,19 +2335,20 @@ into what `lookup-key' and `define-key' want."
              ;; `:filter' option, which allows us to dynamically
              ;; decide which command we want to run when a key is
              ;; pressed.
-             (define-key keymap event
-               `(menu-item
-                 nil ,company-cmd :filter
-                 (lambda (cmd)
-                   ;; There doesn't seem to be any obvious
-                   ;; function from Company to tell whether or not
-                   ;; a completion is in progress (à la
-                   ;; `company-explicit-action-p'), so I just
-                   ;; check whether or not `company-my-keymap' is
-                   ;; defined, which seems to be good enough.
-                   (if company-my-keymap
-                       ',company-cmd
-                     ',yas-cmd))))))
+             (straight--define-key
+              keymap event
+              `(menu-item
+                nil ,company-cmd :filter
+                (lambda (cmd)
+                  ;; There doesn't seem to be any obvious
+                  ;; function from Company to tell whether or not
+                  ;; a completion is in progress (à la
+                  ;; `company-explicit-action-p'), so I just
+                  ;; check whether or not `company-my-keymap' is
+                  ;; defined, which seems to be good enough.
+                  (if company-my-keymap
+                      ',company-cmd
+                    ',yas-cmd))))))
          company-active-map)
         keymap)
       "Keymap which delegates to both `company-active-map' and `yas-keymap'.
@@ -2378,7 +2376,6 @@ currently active.")
 ;; information for completions, definition location, documentation,
 ;; and so on.
 (radian-use-package lsp-mode
-  :straight (:fork "raxod502" :branch "fork/1")
   :init
 
   (defcustom radian-lsp-disable nil
@@ -3411,16 +3408,19 @@ Return either a string or nil."
   (defvar ruby-electric-mode-map
     (let ((map (make-sparse-keymap)))
       (define-key map " " 'ruby-electric-space/return)
-      (define-key
-        map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
+      ;; Use `el-patch-literal' as a workaround to the indentation of
+      ;; `define-key' being inconsistent between supported Emacs
+      ;; versions.
+      ((el-patch-literal define-key)
+       map [remap delete-backward-char] 'ruby-electric-delete-backward-char)
       (define-key map [remap newline] 'ruby-electric-space/return)
       (define-key map [remap newline-and-indent] 'ruby-electric-space/return)
-      (define-key
-        map [remap electric-newline-and-maybe-indent]
-        'ruby-electric-space/return)
-      (define-key
-        map [remap reindent-then-newline-and-indent]
-        'ruby-electric-space/return)
+      ((el-patch-literal define-key)
+       map [remap electric-newline-and-maybe-indent]
+       'ruby-electric-space/return)
+      ((el-patch-literal define-key)
+       map [remap reindent-then-newline-and-indent]
+       'ruby-electric-space/return)
       (el-patch-remove
         (dolist (x ruby-electric-delimiters-alist)
           (let* ((delim   (car x))
@@ -3430,8 +3430,8 @@ Return either a string or nil."
                  (closing (plist-get plist :closing)))
             (define-key map (char-to-string delim) func)
             (if closing
-                (define-key
-                  map (char-to-string closing) 'ruby-electric-closing-char)))))
+                ((el-patch-literal define-key)
+                 map (char-to-string closing) 'ruby-electric-closing-char)))))
       map)
     (el-patch-concat
       "Keymap used in ruby-electric-mode"
@@ -4516,8 +4516,6 @@ the problematic case.)"
             (eq 0 (call-process insert-directory-program
                                 nil nil nil "--dired")))))
 
-  (add-hook 'dired-mode-hook #'radian--autorevert-silence)
-
   ;; Disable the prompt about whether I want to kill the Dired buffer
   ;; for a deleted directory. Of course I do! It's just a Dired
   ;; buffer, after all. Note that this variable, for reasons unknown
@@ -4794,6 +4792,12 @@ anything significant at package load time) since it breaks CI."
 ;; Package `forge' provides a GitHub/GitLab/etc. interface directly
 ;; within Magit.
 (radian-use-package forge)
+
+;; Package `sqlite3' provides the recommended (by Jonas) sqlite3
+;; integration that Forge can use. If you want to use it, install
+;; libsqlite3 from the system package manager.
+(radian-use-package sqlite3
+  :no-require t)
 
 ;; Feature `forge-core' from package `forge' implements the core
 ;; functionality.
@@ -5398,7 +5402,8 @@ turn it off again after creating the first frame."
 
   ;; Set the default font size.
   (when radian-font-size
-    (set-face-attribute 'default nil :height radian-font-size))
+    (custom-theme-set-faces
+     'user '(default ((t (:height radian-font-size))) t)))
 
   ;; Set the default font. No, I have no idea why we have to do it
   ;; this way. Using `set-face-attribute' does not have an effect,
@@ -5408,7 +5413,8 @@ turn it off again after creating the first frame."
 
   ;; Use the same font for fixed-pitch text as the rest of Emacs (you
   ;; *are* using a monospace font, right?).
-  (set-face-attribute 'fixed-pitch nil :family 'unspecified)
+  (custom-theme-set-faces
+   'user '(fixed-pitch ((t (:family unspecified))) t))
 
   ;; On macOS, set the title bar to match the frame background.
   (radian-with-operating-system macOS
@@ -5474,12 +5480,12 @@ spaces."
 ;; Actually reset the mode line format to show all the things we just
 ;; defined.
 (setq-default mode-line-format
-              '(:eval (replace-regexp-in-string
-                       "%" "%%"
-                       (radian--mode-line-align
-                        (format-mode-line radian-mode-line-left)
-                        (format-mode-line radian-mode-line-right))
-                       'fixedcase 'literal)))
+              '((:eval (replace-regexp-in-string
+                        "%" "%%"
+                        (radian--mode-line-align
+                         (format-mode-line radian-mode-line-left)
+                         (format-mode-line radian-mode-line-right))
+                        'fixedcase 'literal))))
 
 ;;;; Color theme
 
@@ -5545,7 +5551,7 @@ spaces."
     (dolist (face '(outline-1
                     outline-2
                     outline-3))
-      (set-face-attribute face nil :height 1.0))))
+      (custom-theme-set-faces 'user `(,face ((t (:height 1.0))) t)))))
 
 ;; Make adjustments to color theme that was selected by Radian or
 ;; user. See <https://github.com/radian-software/radian/issues/456>.
