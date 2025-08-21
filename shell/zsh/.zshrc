@@ -722,7 +722,7 @@ fi
 if (( $+commands[tmux] )); then
     alias ta='tmux attach'
     function ts {
-        tmux attach -s ${1:-tmux} 2>/dev/null || tmux new-session -s ${1:-tmux}
+        tmux attach -t ${1:-tmux} 2>/dev/null || tmux new-session -s ${1:-tmux}
     }
 fi
 
