@@ -136,6 +136,7 @@ configuration, and optionally installing local configuration.
   time) `apt install watchexec-cli`
   * For LSP servers, refer to [`lsp-mode`
     documentation](https://emacs-lsp.github.io/lsp-mode/page/languages/)
+  * For Magit forge integration, `apt install libsqlite3-dev`
 * Zsh: `apt install zsh`
 * Tmux: `apt install tmux`
 * Git: `apt install git`
