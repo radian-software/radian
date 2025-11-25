@@ -4156,7 +4156,10 @@ messages."
       (when (process-live-p radian-byte-compile--process)
         (kill-process radian-byte-compile--process))
       (ignore-errors
-        (kill-buffer " *radian-byte-compile*"))
+        (with-current-buffer (get-buffer " *radian-byte-compile*")
+          (kill-all-local-variables)
+          (delete-all-overlays)
+          (erase-buffer)))
       (let ((default-directory radian-directory))
         (radian-env-setup)
         (setq
