@@ -6,6 +6,7 @@ set -o pipefail
 find=(
     find .
     -name .git -prune -o
+    -name .gitconfig -o
     -name "*.elc" -o
     -type f -print
 )
