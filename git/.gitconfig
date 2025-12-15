@@ -1,5 +1,6 @@
 [advice]
 	detachedHead = false
+	diverging = false
 	pushNonFastForward = false
 	statusHints = false
 [alias]
