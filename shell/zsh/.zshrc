@@ -30,6 +30,7 @@ if typeset -f znap >/dev/null; then
     # Provides the 'wdx' function to set warp points to directories
     # and quickly jump to them.
     znap source radian-software/wdx
+    fpath+=(~[radian-software/wdx]/completions)
 
     # If a previous command starts with what you have typed, show it
     # in dimmed color after the cursor, and allow completing it.
