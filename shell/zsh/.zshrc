@@ -653,6 +653,7 @@ if (( $+commands[git] )); then
     alias gbusu='git branch --unset-upstream'
     alias gbd='git branch --delete'
     alias gbdd='git branch --delete --force'
+    alias gbm='git branch --move'
 
     alias gco='git checkout'
     alias gcot='git checkout --track'
