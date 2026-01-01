@@ -2836,6 +2836,16 @@ was printed, and only have ElDoc display if one wasn't."
 
 ;;;; Syntax checking and code linting
 
+;; Package `flymake' provides a framework that is like `flycheck' but
+;; different. We don't use it.
+(use-feature flymake
+  :config
+
+  (radian-defadvice radian--flymake-inhibit (func &optional _)
+    :around #'flymake-mode
+    "Prevent Flymake mode from being activated."
+    (funcall func 0)))
+
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting. We kind of don't use it because we use
 ;; `lsp-ui' instead, but internally `lsp-ui' actually hacks Flycheck
@@ -3811,7 +3821,16 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; Package `pkgbuild-mode' provides a major mode for PKGBUILD files
 ;; used by Arch Linux and derivatives.
-(radian-use-package pkgbuild-mode)
+(radian-use-package pkgbuild-mode
+  :config
+
+  (radian-defhook radian--pkgbuild-disable-hooks ()
+    pkgbuild-mode-hook
+    "Remove slow hooks installed by `pkgbuild-mode'.
+Correct other problems."
+    (remove-hook 'write-file-functions
+                 'pkgbuild-update-sums-line-hook t)
+    (setq-local sh-basic-offset 4)))
 
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
 (radian-use-package ssh-config-mode
