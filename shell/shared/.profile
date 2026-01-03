@@ -43,7 +43,7 @@ if command -v ssh-agent >/dev/null 2>&1; then
     }
 
     ssh_connected() {
-        ps -p "$SSH_AGENT_PID" 2>&1 | grep -qF ssh-agent
+        [[ -S "$SSH_AUTH_SOCK" ]]
     }
 
     ssh_forget() {
@@ -59,9 +59,11 @@ if command -v ssh-agent >/dev/null 2>&1; then
         fi
     }
 
-    ssh_connect
     if ! ssh_connected; then
-        ssh_restart
+        ssh_connect
+        if ! ssh_connected; then
+            ssh_restart
+        fi
     fi
 
 fi
