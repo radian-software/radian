@@ -1586,8 +1586,9 @@ password that the user has decided not to save.")
       (if (member key blacklist)
           ?n
         (radian-flet ((defun auth-source-read-char-choice (prompt choices)
-                        (let ((choice (funcall orig-auth-source-read-char-choice
-                                               prompt choices)))
+                        (let ((choice (funcall
+                                       orig-auth-source-read-char-choice
+                                       prompt choices)))
                           (when (= choice ?N)
                             (push key blacklist)
                             (make-directory
