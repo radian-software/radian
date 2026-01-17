@@ -4881,6 +4881,14 @@ anything significant at package load time) since it breaks CI."
   ;; Don't prompt when reverting hunk.
   (setq git-gutter:ask-p nil)
 
+  (radian-defadvice radian--advice-git-gutter-no-remote (func &rest args)
+    :around #'git-gutter--turn-on
+    "Inhibit `git-gutter' in TRAMP buffers to improve performance."
+    (radian-flet ((defun git-gutter-mode (&rest args)
+                    (unless (file-remote-p buffer-file-name)
+                      (apply git-gutter-mode args))))
+      (apply func args)))
+
   (global-git-gutter-mode +1)
 
   (defun radian-git-gutter:beginning-of-hunk ()
