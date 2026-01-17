@@ -116,10 +116,17 @@ In either case, eagerly load FEATURE during byte-compilation."
 
 (defmacro radian-flet (bindings &rest body)
   "Temporarily override function definitions using `cl-letf*'.
-BINDINGS are composed of `defun'-ish forms. NAME is the function
-to override. It has access to the original function as a
-lexically bound variable by the same name, for use with
+BINDINGS are composed of `defun'-ish forms. NAME is the function to
+override. It has access to the original function as a lexically bound
+variable by the original name prefixed with `orig-', for use with
 `funcall'. ARGLIST and BODY are as in `defun'.
+
+In the case that NAME is already defined as a dynamically bound
+variable, it cannot be bound lexically again, and attempting the binding
+will cause strange things to happen in case of re-entrant calls. Since
+it is not uncommon for a symbol to have both a function and variable
+binding (this will happen for any mode function, for example), the
+`orig-' prefixing helps to avoid conflicts.
 
 \(fn ((defun NAME ARGLIST &rest BODY) ...) BODY...)"
   (declare (indent defun))
@@ -129,7 +136,8 @@ lexically bound variable by the same name, for use with
                      (setq binding (cdr binding)))
                    (cl-destructuring-bind (name arglist &rest body) binding
                      (list
-                      `(,name (symbol-function #',name))
+                      `(,(intern (format "orig-%S" name))
+                        (symbol-function #',name))
                       `((symbol-function #',name)
                         (lambda ,arglist
                           ,@body)))))
@@ -260,7 +268,7 @@ This means that FILENAME is a symlink whose target is inside
   "Execute BODY, with the function `load' made silent."
   (declare (indent 0))
   `(radian-flet ((defun load (file &optional noerror _nomessage &rest args)
-                   (apply load file noerror 'nomessage args)))
+                   (apply orig-load file noerror 'nomessage args)))
      ,@body))
 
 (defmacro radian--with-silent-write (&rest body)
@@ -269,7 +277,7 @@ This means that FILENAME is a symlink whose target is inside
   `(radian-flet ((defun write-region
                      (start end filename &optional append visit lockname
                             mustbenew)
-                   (funcall write-region start end filename append 0
+                   (funcall orig-write-region start end filename append 0
                             lockname mustbenew)
                    (when (or (stringp visit) (eq visit t))
                      (setq buffer-file-name
@@ -306,7 +314,7 @@ also be a single string."
                              (when (or (null regexp)
                                        (string-match-p regexp str))
                                (cl-return-from done)))
-                           (funcall message "%s" str)))))
+                           (funcall orig-message "%s" str)))))
          ,@body))))
 
 (defun radian--advice-silence-messages (func &rest args)
@@ -761,7 +769,7 @@ This keymap is bound under \\[radian-keymap].")
                   (dolist (arg args)
                     (when (equal arg ?\C-g)
                       (signal 'quit nil)))
-                  (apply insert-and-inherit args)))
+                  (apply orig-insert-and-inherit args)))
     (apply quoted-insert args)))
 
 ;; Package `which-key' displays the key bindings and associated
@@ -1578,7 +1586,7 @@ password that the user has decided not to save.")
       (if (member key blacklist)
           ?n
         (radian-flet ((defun auth-source-read-char-choice (prompt choices)
-                        (let ((choice (funcall auth-source-read-char-choice
+                        (let ((choice (funcall orig-auth-source-read-char-choice
                                                prompt choices)))
                           (when (= choice ?N)
                             (push key blacklist)
@@ -2041,7 +2049,7 @@ multiple files will miss any match that occurs earlier in a
 visited file than point happens to be currently in that
 buffer."
       (radian-flet ((defun perform-replace (&rest args)
-                      (apply perform-replace
+                      (apply orig-perform-replace
                              (append args (list (point-min) (point-max))))))
         (apply func args)))))
 
@@ -2803,11 +2811,11 @@ order."
       "Prevent `eldoc' from trampling on existing messages."
       (radian-flet ((defun eldoc-message (&optional string)
                       (if string
-                          (funcall eldoc-message string)
+                          (funcall orig-eldoc-message string)
                         (setq eldoc-last-message nil)))
                     (defun eldoc--message (&optional string)
                       (if string
-                          (funcall eldoc--message string)
+                          (funcall orig-eldoc--message string)
                         (setq eldoc-last-message nil))))
         (apply func args))))
 
@@ -2879,7 +2887,7 @@ was printed, and only have ElDoc display if one wasn't."
     (radian-flet ((defun completing-read (prompt collection &rest args)
                     (if (= (safe-length collection) 1)
                         (car collection)
-                      (apply completing-read prompt collection args))))
+                      (apply orig-completing-read prompt collection args))))
       (apply orig-fun args)))
 
   (use-feature lsp-mode
@@ -2905,7 +2913,7 @@ was printed, and only have ElDoc display if one wasn't."
                       (regexp rep string &rest args)
                     (if (equal regexp "`\\([\n]+\\)")
                         string
-                      (apply replace-regexp-in-string
+                      (apply orig-replace-regexp-in-string
                              regexp rep string args))))
       (apply func args))))
 
@@ -3533,7 +3541,7 @@ Return either a string or nil."
                                     noerror _nomessage
                                     nosuffix must-suffix)
                     (funcall
-                     load file noerror 'nomessage nosuffix must-suffix)))
+                     orig-load file noerror 'nomessage nosuffix must-suffix)))
       (funcall TeX-load-style-file file)))
 
   (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
@@ -4886,7 +4894,7 @@ anything significant at package load time) since it breaks CI."
     "Inhibit `git-gutter' in TRAMP buffers to improve performance."
     (radian-flet ((defun git-gutter-mode (&rest args)
                     (unless (file-remote-p buffer-file-name)
-                      (apply git-gutter-mode args))))
+                      (apply orig-git-gutter-mode args))))
       (apply func args)))
 
   (global-git-gutter-mode +1)
@@ -5003,7 +5011,7 @@ changes, which means that `git-gutter' needs to be re-run.")
 Instead, display simply a flat colored region in the fringe."
       (radian-flet ((defun fringe-helper-insert-region
                         (beg end _bitmap &rest args)
-                      (apply fringe-helper-insert-region
+                      (apply orig-fringe-helper-insert-region
                              beg end 'radian--git-gutter-blank args)))
         (apply func args)))))
 
