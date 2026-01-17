@@ -2217,13 +2217,15 @@ buffer."
   ;; inserting a pair, add an extra newline and indent. See
   ;; <https://github.com/Fuco1/smartparens/issues/80#issuecomment-18910312>.
 
-  (defun radian--smartparens-pair-setup (mode delim)
-    "In major mode MODE, set up DELIM with newline-and-indent."
-    (sp-local-pair mode delim nil :post-handlers
+  (defun radian--smartparens-pair-setup (mode open &optional close)
+    "In major mode MODE, set up delimiter with newline-and-indent.
+OPEN is the opening delimiter, CLOSE is the closing delimiter which
+defaults to OPEN."
+    (sp-local-pair mode open close :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (delim '("(" "[" "{"))
+  (dolist (pair '(("(" ")") ("[" "]") ("{" "}")))
     (dolist (mode '(
                     fundamental-mode
                     javascript-mode
@@ -2231,7 +2233,7 @@ buffer."
                     prog-mode
                     text-mode
                     ))
-      (radian--smartparens-pair-setup mode delim)))
+      (apply #'radian--smartparens-pair-setup mode pair)))
 
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'markdown-mode "```")
