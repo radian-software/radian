@@ -3366,7 +3366,13 @@ Return either a string or nil."
                (goto-char (point-min))
                (let ((venv (string-trim (buffer-string))))
                  (when (file-directory-p venv)
-                   (cl-return venv)))))))))))
+                   (cl-return venv))))))))))
+
+  (radian-defadvice radian--advice-python-eldoc-tramp-disable (&rest _)
+    :before-until #'python-eldoc-function
+    "Disable Python ElDoc in remote buffers.
+It hangs the editor because it wants to make remote process calls."
+    (and buffer-file-name (file-remote-p buffer-file-name))))
 
 ;; Package `lsp-pyright' downloads Microsoft's LSP server for Python.
 ;; We hate Microsoft and think they are going to try to kill off
