@@ -1630,6 +1630,28 @@ permission."
 
 (bind-key* "s-x" #'radian-set-executable-permission)
 
+;;; Remote files
+
+;; Feature `tramp' provides the facility for editing remote files from
+;; within Emacs.
+(use-feature tramp
+  :config
+
+  (defalias 'radian--advice-tramp-locking-inhibit #'ignore
+    "Inhibit file locking for TRAMP.
+We already disable `create-lockfiles' globally, but `lock-file' and
+`unlock-file' (invoked directly by the edit loop) also check for file
+modifications, to warn the user if the file was changed since it was
+loaded. We want to inhibit that for remote files, because otherwise it
+causes an arbitrarily long synchronous hang before your keystrokes show
+up.")
+
+  (advice-add #'tramp-handle-lock-file :override
+              #'radian--advice-tramp-locking-inhibit)
+
+  (advice-add #'tramp-handle-unlock-file :override
+              #'radian--advice-tramp-locking-inhibit))
+
 ;;; Editing
 ;;;; Text formatting
 
