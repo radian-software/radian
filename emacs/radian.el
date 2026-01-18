@@ -2754,6 +2754,17 @@ menu to disappear and then come back after `company-idle-delay'."
 
   :blackout t)
 
+;; Feature `company-etags' is a built-in completion backend that reads
+;; TAGS files. We don't use it.
+(use-feature company-etags
+  :config
+
+  (radian-defadvice radian--advice-company-etags-tramp-disable (&rest _)
+    :before-until #'company-etags
+    "Disable Company etags in remote buffers.
+It hangs the editor because it wants to make remote process calls."
+    (and buffer-file-name (file-remote-p buffer-file-name))))
+
 ;; Package `company-prescient' provides intelligent sorting and
 ;; filtering for candidates in Company completions.
 (radian-use-package company-prescient
