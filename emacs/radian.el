@@ -3398,7 +3398,7 @@ Return either a string or nil."
 It hangs the editor because it wants to make remote process calls."
     (and buffer-file-name (file-remote-p buffer-file-name)))
 
-  (radian-defadvice radian--advice-python-capf-tramp-disable (&rest _)
+  (radian-defadvice radian--advice-python-capf-tramp-disable ()
     :before-until #'python-completion-at-point
     "Disable Python completion-at-point in remote buffers.
 It hangs the editor because it wants to make remote process calls."
