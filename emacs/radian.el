@@ -4715,12 +4715,14 @@ as argument."
                 (memq magit-credential-cache-daemon-process
                       (list-system-processes)))
       (setq magit-credential-cache-daemon-process
-            (or (--first (let* ((attr (process-attributes it))
-                                (comm (cdr (assq 'comm attr)))
-                                (user (cdr (assq 'user attr))))
-                           (and (string= comm "git-credential-cache--daemon")
-                                (string= user user-login-name)))
-                         (list-system-processes))
+            (or (seq-find
+                 (lambda (process)
+                   (let* ((attr (process-attributes process))
+                          (comm (cdr (assq 'comm attr)))
+                          (user (cdr (assq 'user attr))))
+                     (and (string= comm "git-credential-cache--daemon")
+                          (string= user user-login-name))))
+                 (list-system-processes))
                 (condition-case nil
                     (el-patch-wrap 2
                       (with-current-buffer
