@@ -587,6 +587,17 @@ binding the variable dynamically over the entire init-file."
 
 ;;;; use-package
 
+;; By default `use-package' declares a dependency on `bind-key', a
+;; package which no longer exists in the default recipe repositories,
+;; because "it's built in now". Well no, no it isn't, not on all the
+;; Emacs versions we support. Make sure we are using a recipe that
+;; will compute in all situations.
+(straight-register-package
+ '(bind-key
+   :host github
+   :repo "jwiegley/use-package"
+   :files ("use-package.el")))
+
 ;; Package `use-package' provides a handy macro by the same name which
 ;; is essentially a wrapper around `with-eval-after-load' with a lot
 ;; of handy syntactic sugar and useful features.
