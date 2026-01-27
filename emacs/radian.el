@@ -30,9 +30,7 @@
 
 ;;; Fix indentation issues
 
-;; The indentation of `thread-first' changed from (indent 1) to
-;; (indent 0) in Emacs 28. Use the later version.
-(put #'thread-first 'lisp-indent-function 0)
+;; ... none currently! ^_^
 
 ;;; Set early configuration
 
@@ -938,11 +936,10 @@ convert\" UTF8_STRING)'. Disable that."
 
 ;;;; Mouse integration
 
-;; Scrolling is way too fast on macOS with Emacs 27 and on Linux in
-;; general. Decreasing the number of lines we scroll per mouse event
-;; improves the situation. Normally, holding shift allows this slower
-;; scrolling; instead, we make it so that holding shift accelerates
-;; the scrolling.
+;; Scrolling is way too fast on Linux in general. Decreasing the
+;; number of lines we scroll per mouse event improves the situation.
+;; Normally, holding shift allows this slower scrolling; instead, we
+;; make it so that holding shift accelerates the scrolling.
 (setq mouse-wheel-scroll-amount
       '(1 ((shift) . 5) ((control))))
 
@@ -1085,12 +1082,8 @@ active minibuffer, even if the minibuffer is not selected."
             (eval-when-compile
               (require 'delsel))
             (minibuffer-keyboard-quit)))
-         ;; Emacs 28 and later
-         ((fboundp 'abort-minibuffers)
-          (abort-minibuffers))
-         ;; Emacs 27 and earlier
          (t
-          (abort-recursive-edit))))
+          (abort-minibuffers))))
     (funcall keyboard-quit)))
 
 (radian-defadvice radian--advice-kill-buffer-maybe-kill-window
@@ -1448,43 +1441,38 @@ unquote it using a comma."
     (setq filename (eval (cadr filename))))
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (full-filename (expand-file-name filename "~"))
-         ;; Avoid using variable names that start with "def" because
-         ;; of unexpected indentation behavior in Emacs 28 and
-         ;; earlier where they are interpreted as macro invocations
-         ;; and specially indented, even when appearing within a let
-         ;; form.
-         (the-defun-name (intern
-                          (replace-regexp-in-string
-                           "-+"
-                           "-"
-                           (concat
-                            "radian-find-"
-                            (or pretty-filename
-                                (replace-regexp-in-string
-                                 "[^a-z0-9]" "-"
-                                 (downcase
-                                  bare-filename)))))))
-         (the-defun-other-window-name
+         (defun-name (intern
+                      (replace-regexp-in-string
+                       "-+"
+                       "-"
+                       (concat
+                        "radian-find-"
+                        (or pretty-filename
+                            (replace-regexp-in-string
+                             "[^a-z0-9]" "-"
+                             (downcase
+                              bare-filename)))))))
+         (defun-other-window-name
           (intern
-           (concat (symbol-name the-defun-name)
+           (concat (symbol-name defun-name)
                    "-other-window")))
          (docstring (format "Edit file %s."
                             bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
                   bare-filename))
-         (the-defun-form `(defun ,the-defun-name ()
-                            ,docstring
-                            (interactive)
-                            (when (or (file-exists-p ,full-filename)
-                                      (yes-or-no-p
-                                       ,(format
-                                         "Does not exist, really visit %s? "
-                                         (file-name-nondirectory
-                                          full-filename))))
-                              (find-file ,full-filename))))
-         (the-defun-other-window-form
-          `(defun ,the-defun-other-window-name ()
+         (defun-form `(defun ,defun-name ()
+                        ,docstring
+                        (interactive)
+                        (when (or (file-exists-p ,full-filename)
+                                  (yes-or-no-p
+                                   ,(format
+                                     "Does not exist, really visit %s? "
+                                     (file-name-nondirectory
+                                      full-filename))))
+                          (find-file ,full-filename))))
+         (defun-other-window-form
+          `(defun ,defun-other-window-name ()
              ,docstring-other-window
              (interactive)
              (when (or (file-exists-p ,full-filename)
@@ -1500,16 +1488,16 @@ unquote it using a comma."
          (full-other-window-keybinding
           (radian-join-keys "o" keybinding)))
     `(progn
-       ,the-defun-form
-       ,the-defun-other-window-form
+       ,defun-form
+       ,defun-other-window-form
        ,@(when full-keybinding
-           `((bind-key ,full-keybinding #',the-defun-name radian-keymap)))
+           `((bind-key ,full-keybinding #',defun-name radian-keymap)))
        ,@(when full-other-window-keybinding
            `((bind-key ,full-other-window-keybinding
-                       #',the-defun-other-window-name
+                       #',defun-other-window-name
                        radian-keymap)))
        ;; Return the symbols for the two functions defined.
-       (list ',the-defun-name ',the-defun-other-window-name))))
+       (list ',defun-name ',defun-other-window-name))))
 
 ;; Now we register shortcuts to files relevant to Radian.
 
@@ -2795,21 +2783,14 @@ order."
   :demand t
   :config
 
-  ;; For Emacs 26 and below, `eldoc--message' is not defined. For
-  ;; Emacs 27 and above, `eldoc-message' is obsolete.
-  (with-no-warnings
-    (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
-      :around #'eldoc-print-current-symbol-info
-      "Prevent `eldoc' from trampling on existing messages."
-      (radian-flet ((defun eldoc-message (&optional string)
-                      (if string
-                          (funcall eldoc-message string)
-                        (setq eldoc-last-message nil)))
-                    (defun eldoc--message (&optional string)
-                      (if string
-                          (funcall eldoc--message string)
-                        (setq eldoc-last-message nil))))
-        (apply func args))))
+  (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
+    :around #'eldoc-print-current-symbol-info
+    "Prevent `eldoc' from trampling on existing messages."
+    (radian-flet ((defun eldoc--message (&optional string)
+                    (if string
+                        (funcall eldoc--message string)
+                      (setq eldoc-last-message nil))))
+      (apply func args)))
 
   ;; Always truncate ElDoc messages to one line. This prevents the
   ;; echo area from resizing itself unexpectedly when point is on a
@@ -5228,10 +5209,8 @@ spam. This advice, however, inhibits the message for everyone.")
   (let ((kill-emacs-hook nil))
     (kill-emacs)))
 
-;; Get rid of `restart-emacs' builtin because until we no longer
-;; support Emacs 27 it is easier to have a single implementation
-;; rather than one that has a different calling convention depending
-;; on Emacs version.
+;; TODO: migrate to the `restart-emacs' builtin, when we have some
+;; time to refactor `radian-new-emacs' to work based on it.
 (fmakunbound 'restart-emacs)
 
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
