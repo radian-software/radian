@@ -27,6 +27,7 @@
 (require 'cl-lib)
 (require 'map)
 (require 'subr-x)
+(require 'bytecomp)
 
 ;;; Fix indentation issues
 
