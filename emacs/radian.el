@@ -24,6 +24,7 @@
 
 ;;; Load built-in utility libraries
 
+(require 'bytecomp)
 (require 'cl-lib)
 (require 'map)
 (require 'subr-x)
