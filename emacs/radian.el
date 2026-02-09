@@ -1086,9 +1086,10 @@ Normally, \\[keyboard-quit] will just act in the current buffer.
 This advice modifies the behavior so that it will instead exit an
 active minibuffer, even if the minibuffer is not selected."
   (if-let* ((minibuffer (active-minibuffer-window)))
-      (progn
-        (switch-to-buffer (window-buffer minibuffer))
+      (with-current-buffer (window-buffer minibuffer)
         (cond
+         ((not (minibuffer-innermost-command-loop-p))
+          (abort-recursive-edit))
          ((featurep 'delsel)
           (progn
             (eval-when-compile
