@@ -1637,28 +1637,6 @@ permission."
 (use-feature tramp
   :config
 
-  ;; Some suggestions taken from
-  ;; https://coredumped.dev/2025/06/18/making-tramp-go-brrrr./
-
-  ;; Make more aggressive use of inline copying until getting to truly
-  ;; large files.
-  (setq tramp-copy-size-limit (* 1024 1024))
-
-  ;; Use "direct async processes", which are apparently faster.
-
-  (connection-local-set-profile-variables
-   'remote-direct-async-process
-   '((tramp-direct-async-process . t)))
-
-  (connection-local-set-profiles
-   '(:application tramp :protocol "scp")
-   'remote-direct-async-process)
-
-  (use-feature magit
-    :config
-
-    (setq magit-tramp-pipe-stty-settings 'pty))
-
   (defalias 'radian--advice-tramp-locking-inhibit #'ignore
     "Inhibit file locking for TRAMP.
 We already disable `create-lockfiles' globally, but `lock-file' and
