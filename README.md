@@ -75,6 +75,7 @@ stability.
     newline after inserting a pair of delimiters
   * Global auto-fill configured to activate only in comments,
     docstrings, and text
+  * Reasonable-ish TRAMP performance with some sanity improvements
   * Configured packages: [Atomic Chrome][atomic-chrome] (with
     [Firefox] support), [Autorevert], [buffer-move], [Company],
     [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
