@@ -289,7 +289,7 @@ element of REGEXPS, nothing happens. The REGEXPS need not match
 the entire message; include ^ and $ if necessary. REGEXPS may
 also be a single string."
   (declare (indent 1))
-  (let ((regexps-sym (cl-gensym "regexps")))
+  (let ((regexps-sym (gensym "regexps")))
     `(let ((,regexps-sym ,regexps))
        (when (stringp ,regexps-sym)
          (setq ,regexps-sym (list ,regexps-sym)))
@@ -1076,7 +1076,7 @@ ourselves."
 Normally, \\[keyboard-quit] will just act in the current buffer.
 This advice modifies the behavior so that it will instead exit an
 active minibuffer, even if the minibuffer is not selected."
-  (if-let ((minibuffer (active-minibuffer-window)))
+  (if-let* ((minibuffer (active-minibuffer-window)))
       (progn
         (switch-to-buffer (window-buffer minibuffer))
         (cond
@@ -1677,14 +1677,14 @@ Interactively, reverse the characters in the current region."
       (apply func args)
       (cl-return))
     ;; Inspired by <https://emacs.stackexchange.com/a/14716/12534>.
-    (when-let ((faces (save-excursion
-                        ;; In `web-mode', the end of the line isn't
-                        ;; fontified, so we have to step backwards
-                        ;; by one character before checking the
-                        ;; properties.
-                        (ignore-errors
-                          (backward-char))
-                        (get-text-property (point) 'face))))
+    (when-let* ((faces (save-excursion
+                         ;; In `web-mode', the end of the line isn't
+                         ;; fontified, so we have to step backwards
+                         ;; by one character before checking the
+                         ;; properties.
+                         (ignore-errors
+                           (backward-char))
+                         (get-text-property (point) 'face))))
       (unless (listp faces)
         (setq faces (list faces)))
       (when (cl-some
@@ -2451,11 +2451,11 @@ functions."
     "Find LSP executables inside node_modules/.bin if present."
     (cl-block nil
       (prog1 command
-        (when-let ((project-dir
-                    (locate-dominating-file default-directory "node_modules"))
-                   (binary
-                    (radian--path-join
-                     project-dir "node_modules" ".bin" (car command))))
+        (when-let* ((project-dir
+                     (locate-dominating-file default-directory "node_modules"))
+                    (binary
+                     (radian--path-join
+                      project-dir "node_modules" ".bin" (car command))))
           (when (file-executable-p binary)
             (cl-return (cons binary (cdr command))))))))
 
@@ -2836,6 +2836,16 @@ was printed, and only have ElDoc display if one wasn't."
 
 ;;;; Syntax checking and code linting
 
+;; Package `flymake' provides a framework that is like `flycheck' but
+;; different. We don't use it.
+(use-feature flymake
+  :config
+
+  (radian-defadvice radian--flymake-inhibit (func &optional _)
+    :around #'flymake-mode
+    "Prevent Flymake mode from being activated."
+    (funcall func 0)))
+
 ;; Package `flycheck' provides a framework for in-buffer error and
 ;; warning highlighting. We kind of don't use it because we use
 ;; `lsp-ui' instead, but internally `lsp-ui' actually hacks Flycheck
@@ -3147,7 +3157,7 @@ This works around an upstream bug; see
     (if (derived-mode-p 'literate-haskell-mode)
         (progn
           (beginning-of-line 1)
-          (when-let ((c (char-after)))
+          (when-let* ((c (char-after)))
             (when (= c ? )
               (forward-char)))
           (skip-syntax-forward " " (line-end-position))
@@ -3811,7 +3821,16 @@ This function calls `json-mode--update-auto-mode' to change the
 
 ;; Package `pkgbuild-mode' provides a major mode for PKGBUILD files
 ;; used by Arch Linux and derivatives.
-(radian-use-package pkgbuild-mode)
+(radian-use-package pkgbuild-mode
+  :config
+
+  (radian-defhook radian--pkgbuild-disable-hooks ()
+    pkgbuild-mode-hook
+    "Remove slow hooks installed by `pkgbuild-mode'.
+Correct other problems."
+    (remove-hook 'write-file-functions
+                 'pkgbuild-update-sums-line-hook t)
+    (setq-local sh-basic-offset 4)))
 
 ;; Package `ssh-config-mode' provides major modes for files in ~/.ssh.
 (radian-use-package ssh-config-mode
@@ -4156,7 +4175,10 @@ messages."
       (when (process-live-p radian-byte-compile--process)
         (kill-process radian-byte-compile--process))
       (ignore-errors
-        (kill-buffer " *radian-byte-compile*"))
+        (with-current-buffer (get-buffer " *radian-byte-compile*")
+          (kill-all-local-variables)
+          (delete-all-overlays)
+          (erase-buffer)))
       (let ((default-directory radian-directory))
         (radian-env-setup)
         (setq
@@ -5009,7 +5031,7 @@ Instead, display simply a flat colored region in the fringe."
     :filter-return #'compilation-start
     "Pop to compilation buffer on \\[compile]."
     (prog1 buf
-      (when-let ((win (get-buffer-window buf)))
+      (when-let* ((win (get-buffer-window buf)))
         (select-window win)))))
 
 ;; Package `rg' just provides an interactive command `rg' to run the
@@ -5097,18 +5119,18 @@ Also run `radian-atomic-chrome-setup-hook'."
   (radian-defhook radian--atomic-chrome-switch-back ()
     atomic-chrome-edit-done-hook
     "Switch back to the browser after finishing with `atomic-chrome'."
-    (when-let ((conn (websocket-server-conn
-                      (atomic-chrome-get-websocket (current-buffer))))
-               (browser
-                (cond
-                 ((eq conn atomic-chrome-server-ghost-text)
-                  "Firefox")
-                 ((eq conn atomic-chrome-server-atomic-chrome)
-                  "Chromium")))
-               (opener
-                (if (radian-operating-system-p macOS)
-                    "open"
-                  "wmctrl")))
+    (when-let* ((conn (websocket-server-conn
+                       (atomic-chrome-get-websocket (current-buffer))))
+                (browser
+                 (cond
+                  ((eq conn atomic-chrome-server-ghost-text)
+                   "Firefox")
+                  ((eq conn atomic-chrome-server-atomic-chrome)
+                   "Chromium")))
+                (opener
+                 (if (radian-operating-system-p macOS)
+                     "open"
+                   "wmctrl")))
       (when (executable-find opener)
         (let ((alt-browser
                (when (eq conn atomic-chrome-server-atomic-chrome)
