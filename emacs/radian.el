@@ -4847,7 +4847,10 @@ disable itself. Sad."
 
   ;; Max length for commit message summary is 50 characters as per
   ;; https://chris.beams.io/posts/git-commit/.
-  (setq git-commit-summary-max-length 50))
+  (setq git-commit-summary-max-length 50)
+
+  ;; https://github.com/magit/magit/issues/5559
+  (remove-hook 'git-commit-setup-hook #'git-commit-setup-capf))
 
 ;; Feature `emacsql-sqlite-common' from package `emacsql' is a
 ;; dependency of Forge that provides logic for choosing amongst the
