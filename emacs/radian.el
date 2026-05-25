@@ -24,15 +24,14 @@
 
 ;;; Load built-in utility libraries
 
+(require 'bytecomp)
 (require 'cl-lib)
 (require 'map)
 (require 'subr-x)
 
 ;;; Fix indentation issues
 
-;; The indentation of `thread-first' changed from (indent 1) to
-;; (indent 0) in Emacs 28. Use the later version.
-(put #'thread-first 'lisp-indent-function 0)
+;; ... none currently! ^_^
 
 ;;; Set early configuration
 
@@ -116,10 +115,17 @@ In either case, eagerly load FEATURE during byte-compilation."
 
 (defmacro radian-flet (bindings &rest body)
   "Temporarily override function definitions using `cl-letf*'.
-BINDINGS are composed of `defun'-ish forms. NAME is the function
-to override. It has access to the original function as a
-lexically bound variable by the same name, for use with
+BINDINGS are composed of `defun'-ish forms. NAME is the function to
+override. It has access to the original function as a lexically bound
+variable by the original name prefixed with `orig-', for use with
 `funcall'. ARGLIST and BODY are as in `defun'.
+
+In the case that NAME is already defined as a dynamically bound
+variable, it cannot be bound lexically again, and attempting the binding
+will cause strange things to happen in case of re-entrant calls. Since
+it is not uncommon for a symbol to have both a function and variable
+binding (this will happen for any mode function, for example), the
+`orig-' prefixing helps to avoid conflicts.
 
 \(fn ((defun NAME ARGLIST &rest BODY) ...) BODY...)"
   (declare (indent defun))
@@ -129,7 +135,8 @@ lexically bound variable by the same name, for use with
                      (setq binding (cdr binding)))
                    (cl-destructuring-bind (name arglist &rest body) binding
                      (list
-                      `(,name (symbol-function #',name))
+                      `(,(intern (format "orig-%S" name))
+                        (symbol-function #',name))
                       `((symbol-function #',name)
                         (lambda ,arglist
                           ,@body)))))
@@ -260,7 +267,7 @@ This means that FILENAME is a symlink whose target is inside
   "Execute BODY, with the function `load' made silent."
   (declare (indent 0))
   `(radian-flet ((defun load (file &optional noerror _nomessage &rest args)
-                   (apply load file noerror 'nomessage args)))
+                   (apply orig-load file noerror 'nomessage args)))
      ,@body))
 
 (defmacro radian--with-silent-write (&rest body)
@@ -269,7 +276,7 @@ This means that FILENAME is a symlink whose target is inside
   `(radian-flet ((defun write-region
                      (start end filename &optional append visit lockname
                             mustbenew)
-                   (funcall write-region start end filename append 0
+                   (funcall orig-write-region start end filename append 0
                             lockname mustbenew)
                    (when (or (stringp visit) (eq visit t))
                      (setq buffer-file-name
@@ -306,7 +313,7 @@ also be a single string."
                              (when (or (null regexp)
                                        (string-match-p regexp str))
                                (cl-return-from done)))
-                           (funcall message "%s" str)))))
+                           (funcall orig-message "%s" str)))))
          ,@body))))
 
 (defun radian--advice-silence-messages (func &rest args)
@@ -587,6 +594,17 @@ binding the variable dynamically over the entire init-file."
 
 ;;;; use-package
 
+;; By default `use-package' declares a dependency on `bind-key', a
+;; package which no longer exists in the default recipe repositories,
+;; because "it's built in now". Well no, no it isn't, not on all the
+;; Emacs versions we support. Make sure we are using a recipe that
+;; will compute in all situations.
+(straight-register-package
+ '(bind-key
+   :host github
+   :repo "jwiegley/use-package"
+   :files ("use-package.el")))
+
 ;; Package `use-package' provides a handy macro by the same name which
 ;; is essentially a wrapper around `with-eval-after-load' with a lot
 ;; of handy syntactic sugar and useful features.
@@ -761,7 +779,7 @@ This keymap is bound under \\[radian-keymap].")
                   (dolist (arg args)
                     (when (equal arg ?\C-g)
                       (signal 'quit nil)))
-                  (apply insert-and-inherit args)))
+                  (apply orig-insert-and-inherit args)))
     (apply quoted-insert args)))
 
 ;; Package `which-key' displays the key bindings and associated
@@ -783,6 +801,21 @@ This keymap is bound under \\[radian-keymap].")
 
 ;;; Environment
 ;;;; Environment variables
+
+(defvar radian-env-setup-hook nil)
+
+(defmacro radian-after-env-setup (&rest forms)
+  "Execute FORMS after environment setup.
+
+If the environment is already setup or is not expected to be setup, just
+executes the forms now."
+  `(let ((fn (lambda () ,@forms)))
+     (if radian-env-setup
+         (progn
+           (add-hook 'radian-env-setup-hook fn)
+           (when radian--env-setup-p
+             (funcall fn)))
+       (funcall fn))))
 
 (defcustom radian-env-setup t
   "Non-nil means ~/.profile is sourced after startup.
@@ -840,7 +873,8 @@ Only do this once, unless AGAIN is non-nil."
                                    (setq exec-path (append
                                                     (parse-colon-path value)
                                                     (list exec-directory)))))
-                        (setq radian--env-setup-p t))
+                        (setq radian--env-setup-p t)
+                        (run-hooks 'radian-env-setup-hook))
                     (message
                      "Loading %s produced malformed result; see buffer %S"
                      profile-file
@@ -938,11 +972,10 @@ convert\" UTF8_STRING)'. Disable that."
 
 ;;;; Mouse integration
 
-;; Scrolling is way too fast on macOS with Emacs 27 and on Linux in
-;; general. Decreasing the number of lines we scroll per mouse event
-;; improves the situation. Normally, holding shift allows this slower
-;; scrolling; instead, we make it so that holding shift accelerates
-;; the scrolling.
+;; Scrolling is way too fast on Linux in general. Decreasing the
+;; number of lines we scroll per mouse event improves the situation.
+;; Normally, holding shift allows this slower scrolling; instead, we
+;; make it so that holding shift accelerates the scrolling.
 (setq mouse-wheel-scroll-amount
       '(1 ((shift) . 5) ((control))))
 
@@ -1077,20 +1110,17 @@ Normally, \\[keyboard-quit] will just act in the current buffer.
 This advice modifies the behavior so that it will instead exit an
 active minibuffer, even if the minibuffer is not selected."
   (if-let* ((minibuffer (active-minibuffer-window)))
-      (progn
-        (switch-to-buffer (window-buffer minibuffer))
+      (with-current-buffer (window-buffer minibuffer)
         (cond
+         ((not (minibuffer-innermost-command-loop-p))
+          (abort-recursive-edit))
          ((featurep 'delsel)
           (progn
             (eval-when-compile
               (require 'delsel))
             (minibuffer-keyboard-quit)))
-         ;; Emacs 28 and later
-         ((fboundp 'abort-minibuffers)
-          (abort-minibuffers))
-         ;; Emacs 27 and earlier
          (t
-          (abort-recursive-edit))))
+          (abort-minibuffers))))
     (funcall keyboard-quit)))
 
 (radian-defadvice radian--advice-kill-buffer-maybe-kill-window
@@ -1448,43 +1478,38 @@ unquote it using a comma."
     (setq filename (eval (cadr filename))))
   (let* ((bare-filename (replace-regexp-in-string ".*/" "" filename))
          (full-filename (expand-file-name filename "~"))
-         ;; Avoid using variable names that start with "def" because
-         ;; of unexpected indentation behavior in Emacs 28 and
-         ;; earlier where they are interpreted as macro invocations
-         ;; and specially indented, even when appearing within a let
-         ;; form.
-         (the-defun-name (intern
-                          (replace-regexp-in-string
-                           "-+"
-                           "-"
-                           (concat
-                            "radian-find-"
-                            (or pretty-filename
-                                (replace-regexp-in-string
-                                 "[^a-z0-9]" "-"
-                                 (downcase
-                                  bare-filename)))))))
-         (the-defun-other-window-name
+         (defun-name (intern
+                      (replace-regexp-in-string
+                       "-+"
+                       "-"
+                       (concat
+                        "radian-find-"
+                        (or pretty-filename
+                            (replace-regexp-in-string
+                             "[^a-z0-9]" "-"
+                             (downcase
+                              bare-filename)))))))
+         (defun-other-window-name
           (intern
-           (concat (symbol-name the-defun-name)
+           (concat (symbol-name defun-name)
                    "-other-window")))
          (docstring (format "Edit file %s."
                             bare-filename))
          (docstring-other-window
           (format "Edit file %s, in another window."
                   bare-filename))
-         (the-defun-form `(defun ,the-defun-name ()
-                            ,docstring
-                            (interactive)
-                            (when (or (file-exists-p ,full-filename)
-                                      (yes-or-no-p
-                                       ,(format
-                                         "Does not exist, really visit %s? "
-                                         (file-name-nondirectory
-                                          full-filename))))
-                              (find-file ,full-filename))))
-         (the-defun-other-window-form
-          `(defun ,the-defun-other-window-name ()
+         (defun-form `(defun ,defun-name ()
+                        ,docstring
+                        (interactive)
+                        (when (or (file-exists-p ,full-filename)
+                                  (yes-or-no-p
+                                   ,(format
+                                     "Does not exist, really visit %s? "
+                                     (file-name-nondirectory
+                                      full-filename))))
+                          (find-file ,full-filename))))
+         (defun-other-window-form
+          `(defun ,defun-other-window-name ()
              ,docstring-other-window
              (interactive)
              (when (or (file-exists-p ,full-filename)
@@ -1500,16 +1525,16 @@ unquote it using a comma."
          (full-other-window-keybinding
           (radian-join-keys "o" keybinding)))
     `(progn
-       ,the-defun-form
-       ,the-defun-other-window-form
+       ,defun-form
+       ,defun-other-window-form
        ,@(when full-keybinding
-           `((bind-key ,full-keybinding #',the-defun-name radian-keymap)))
+           `((bind-key ,full-keybinding #',defun-name radian-keymap)))
        ,@(when full-other-window-keybinding
            `((bind-key ,full-other-window-keybinding
-                       #',the-defun-other-window-name
+                       #',defun-other-window-name
                        radian-keymap)))
        ;; Return the symbols for the two functions defined.
-       (list ',the-defun-name ',the-defun-other-window-name))))
+       (list ',defun-name ',defun-other-window-name))))
 
 ;; Now we register shortcuts to files relevant to Radian.
 
@@ -1578,8 +1603,9 @@ password that the user has decided not to save.")
       (if (member key blacklist)
           ?n
         (radian-flet ((defun auth-source-read-char-choice (prompt choices)
-                        (let ((choice (funcall auth-source-read-char-choice
-                                               prompt choices)))
+                        (let ((choice (funcall
+                                       orig-auth-source-read-char-choice
+                                       prompt choices)))
                           (when (= choice ?N)
                             (push key blacklist)
                             (make-directory
@@ -1620,6 +1646,28 @@ permission."
              (if allowed "enabled" "disabled"))))
 
 (bind-key* "s-x" #'radian-set-executable-permission)
+
+;;; Remote files
+
+;; Feature `tramp' provides the facility for editing remote files from
+;; within Emacs.
+(use-feature tramp
+  :config
+
+  (defalias 'radian--advice-tramp-locking-inhibit #'ignore
+    "Inhibit file locking for TRAMP.
+We already disable `create-lockfiles' globally, but `lock-file' and
+`unlock-file' (invoked directly by the edit loop) also check for file
+modifications, to warn the user if the file was changed since it was
+loaded. We want to inhibit that for remote files, because otherwise it
+causes an arbitrarily long synchronous hang before your keystrokes show
+up.")
+
+  (advice-add #'tramp-handle-lock-file :override
+              #'radian--advice-tramp-locking-inhibit)
+
+  (advice-add #'tramp-handle-unlock-file :override
+              #'radian--advice-tramp-locking-inhibit))
 
 ;;; Editing
 ;;;; Text formatting
@@ -2041,7 +2089,7 @@ multiple files will miss any match that occurs earlier in a
 visited file than point happens to be currently in that
 buffer."
       (radian-flet ((defun perform-replace (&rest args)
-                      (apply perform-replace
+                      (apply orig-perform-replace
                              (append args (list (point-min) (point-max))))))
         (apply func args)))))
 
@@ -2208,13 +2256,15 @@ buffer."
   ;; inserting a pair, add an extra newline and indent. See
   ;; <https://github.com/Fuco1/smartparens/issues/80#issuecomment-18910312>.
 
-  (defun radian--smartparens-pair-setup (mode delim)
-    "In major mode MODE, set up DELIM with newline-and-indent."
-    (sp-local-pair mode delim nil :post-handlers
+  (defun radian--smartparens-pair-setup (mode open &optional close)
+    "In major mode MODE, set up delimiter with newline-and-indent.
+OPEN is the opening delimiter, CLOSE is the closing delimiter which
+defaults to OPEN."
+    (sp-local-pair mode open close :post-handlers
                    '((radian--smartparens-indent-new-pair "RET")
                      (radian--smartparens-indent-new-pair "<return>"))))
 
-  (dolist (delim '("(" "[" "{"))
+  (dolist (pair '(("(" ")") ("[" "]") ("{" "}")))
     (dolist (mode '(
                     fundamental-mode
                     javascript-mode
@@ -2222,7 +2272,7 @@ buffer."
                     prog-mode
                     text-mode
                     ))
-      (radian--smartparens-pair-setup mode delim)))
+      (apply #'radian--smartparens-pair-setup mode pair)))
 
   (radian--smartparens-pair-setup #'python-mode "\"\"\"")
   (radian--smartparens-pair-setup #'markdown-mode "```")
@@ -2717,6 +2767,11 @@ menu to disappear and then come back after `company-idle-delay'."
     (setq radian--company-buffer-modified-counter
           (buffer-chars-modified-tick)))
 
+  (radian-defadvice radian--advice-company-no-remote ()
+    :before-until #'company-mode-on
+    "Inhibit Company in remote buffers to avoid hangs."
+    (and buffer-file-name (file-remote-p buffer-file-name)))
+
   (global-company-mode +1)
 
   :blackout t)
@@ -2795,21 +2850,14 @@ order."
   :demand t
   :config
 
-  ;; For Emacs 26 and below, `eldoc--message' is not defined. For
-  ;; Emacs 27 and above, `eldoc-message' is obsolete.
-  (with-no-warnings
-    (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
-      :around #'eldoc-print-current-symbol-info
-      "Prevent `eldoc' from trampling on existing messages."
-      (radian-flet ((defun eldoc-message (&optional string)
-                      (if string
-                          (funcall eldoc-message string)
-                        (setq eldoc-last-message nil)))
-                    (defun eldoc--message (&optional string)
-                      (if string
-                          (funcall eldoc--message string)
-                        (setq eldoc-last-message nil))))
-        (apply func args))))
+  (radian-defadvice radian--advice-eldoc-no-trample (func &rest args)
+    :around #'eldoc-print-current-symbol-info
+    "Prevent `eldoc' from trampling on existing messages."
+    (radian-flet ((defun eldoc--message (&optional string)
+                    (if string
+                        (funcall orig-eldoc--message string)
+                      (setq eldoc-last-message nil))))
+      (apply func args)))
 
   ;; Always truncate ElDoc messages to one line. This prevents the
   ;; echo area from resizing itself unexpectedly when point is on a
@@ -2866,6 +2914,7 @@ was printed, and only have ElDoc display if one wasn't."
 ;; messages from LSP in the buffer using overlays. It's configured
 ;; automatically by `lsp-mode'.
 (radian-use-package lsp-ui
+  :straight (:fork "radian-software" :branch "fork/1")
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
@@ -2879,7 +2928,7 @@ was printed, and only have ElDoc display if one wasn't."
     (radian-flet ((defun completing-read (prompt collection &rest args)
                     (if (= (safe-length collection) 1)
                         (car collection)
-                      (apply completing-read prompt collection args))))
+                      (apply orig-completing-read prompt collection args))))
       (apply orig-fun args)))
 
   (use-feature lsp-mode
@@ -2905,7 +2954,7 @@ was printed, and only have ElDoc display if one wasn't."
                       (regexp rep string &rest args)
                     (if (equal regexp "`\\([\n]+\\)")
                         string
-                      (apply replace-regexp-in-string
+                      (apply orig-replace-regexp-in-string
                              regexp rep string args))))
       (apply func args))))
 
@@ -3357,7 +3406,19 @@ Return either a string or nil."
                (goto-char (point-min))
                (let ((venv (string-trim (buffer-string))))
                  (when (file-directory-p venv)
-                   (cl-return venv)))))))))))
+                   (cl-return venv))))))))))
+
+  (radian-defadvice radian--advice-python-eldoc-tramp-disable (&rest _)
+    :before-until #'python-eldoc-function
+    "Disable Python ElDoc in remote buffers.
+It hangs the editor because it wants to make remote process calls."
+    (and buffer-file-name (file-remote-p buffer-file-name)))
+
+  (radian-defadvice radian--advice-python-capf-tramp-disable ()
+    :before-until #'python-completion-at-point
+    "Disable Python completion-at-point in remote buffers.
+It hangs the editor because it wants to make remote process calls."
+    (and buffer-file-name (file-remote-p buffer-file-name))))
 
 ;; Package `lsp-pyright' downloads Microsoft's LSP server for Python.
 ;; We hate Microsoft and think they are going to try to kill off
@@ -3533,7 +3594,7 @@ Return either a string or nil."
                                     noerror _nomessage
                                     nosuffix must-suffix)
                     (funcall
-                     load file noerror 'nomessage nosuffix must-suffix)))
+                     orig-load file noerror 'nomessage nosuffix must-suffix)))
       (funcall TeX-load-style-file file)))
 
   (radian-defadvice radian--advice-inhibit-tex-removing-duplicates-message
@@ -4136,7 +4197,7 @@ SYMBOL is as in `xref-find-definitions'."
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (radian-use-package macrostep
-  :straight (:fork "raxod502" :branch "fork/1")
+  :straight (:fork "radian-software" :branch "fork/1")
   :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
@@ -4704,12 +4765,14 @@ as argument."
                 (memq magit-credential-cache-daemon-process
                       (list-system-processes)))
       (setq magit-credential-cache-daemon-process
-            (or (--first (let* ((attr (process-attributes it))
-                                (comm (cdr (assq 'comm attr)))
-                                (user (cdr (assq 'user attr))))
-                           (and (string= comm "git-credential-cache--daemon")
-                                (string= user user-login-name)))
-                         (list-system-processes))
+            (or (seq-find
+                 (lambda (process)
+                   (let* ((attr (process-attributes process))
+                          (comm (cdr (assq 'comm attr)))
+                          (user (cdr (assq 'user attr))))
+                     (and (string= comm "git-credential-cache--daemon")
+                          (string= user user-login-name))))
+                 (list-system-processes))
                 (condition-case nil
                     (el-patch-wrap 2
                       (with-current-buffer
@@ -4785,7 +4848,10 @@ disable itself. Sad."
 
   ;; Max length for commit message summary is 50 characters as per
   ;; https://chris.beams.io/posts/git-commit/.
-  (setq git-commit-summary-max-length 50))
+  (setq git-commit-summary-max-length 50)
+
+  ;; https://github.com/magit/magit/issues/5559
+  (remove-hook 'git-commit-setup-hook #'git-commit-setup-capf))
 
 ;; Feature `emacsql-sqlite-common' from package `emacsql' is a
 ;; dependency of Forge that provides logic for choosing amongst the
@@ -4880,6 +4946,14 @@ anything significant at package load time) since it breaks CI."
 
   ;; Don't prompt when reverting hunk.
   (setq git-gutter:ask-p nil)
+
+  (radian-defadvice radian--advice-git-gutter-no-remote (func &rest args)
+    :around #'git-gutter--turn-on
+    "Inhibit `git-gutter' in TRAMP buffers to improve performance."
+    (radian-flet ((defun git-gutter-mode (&rest args)
+                    (unless (file-remote-p buffer-file-name)
+                      (apply orig-git-gutter-mode args))))
+      (apply func args)))
 
   (global-git-gutter-mode +1)
 
@@ -4995,7 +5069,7 @@ changes, which means that `git-gutter' needs to be re-run.")
 Instead, display simply a flat colored region in the fringe."
       (radian-flet ((defun fringe-helper-insert-region
                         (beg end _bitmap &rest args)
-                      (apply fringe-helper-insert-region
+                      (apply orig-fringe-helper-insert-region
                              beg end 'radian--git-gutter-blank args)))
         (apply func args)))))
 
@@ -5228,10 +5302,8 @@ spam. This advice, however, inhibits the message for everyone.")
   (let ((kill-emacs-hook nil))
     (kill-emacs)))
 
-;; Get rid of `restart-emacs' builtin because until we no longer
-;; support Emacs 27 it is easier to have a single implementation
-;; rather than one that has a different calling convention depending
-;; on Emacs version.
+;; TODO: migrate to the `restart-emacs' builtin, when we have some
+;; time to refactor `radian-new-emacs' to work based on it.
 (fmakunbound 'restart-emacs)
 
 ;; Package `restart-emacs' provides an easy way to restart Emacs from
@@ -5420,7 +5492,7 @@ turn it off again after creating the first frame."
   ;; Set the default font size.
   (when radian-font-size
     (custom-theme-set-faces
-     'user '(default ((t (:height radian-font-size))) t)))
+     'user `(default ((t (:height ,radian-font-size))) t)))
 
   ;; Set the default font. No, I have no idea why we have to do it
   ;; this way. Using `set-face-attribute' does not have an effect,
