@@ -2914,7 +2914,6 @@ was printed, and only have ElDoc display if one wasn't."
 ;; messages from LSP in the buffer using overlays. It's configured
 ;; automatically by `lsp-mode'.
 (radian-use-package lsp-ui
-  :straight (:fork "radian-software" :branch "fork/1")
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
@@ -4197,7 +4196,6 @@ SYMBOL is as in `xref-find-definitions'."
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (radian-use-package macrostep
-  :straight (:fork "radian-software" :branch "fork/1")
   :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
