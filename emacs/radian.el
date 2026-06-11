@@ -4772,7 +4772,25 @@ as argument."
     '("-a" "Autostash" "--autostash"))
 
   (transient-append-suffix 'magit-fetch "-t"
-    '("-u" "Unshallow" "--unshallow")))
+    '("-u" "Unshallow" "--unshallow"))
+
+  (radian-defadvice radian--magit-version-from-snapshot (&rest _)
+    :before #'magit-version
+    "Allow `magit-version' to work even from straight.el snapshot."
+    (when-let ((lisp-filename (let ((load-suffixes (reverse load-suffixes)))
+                                (locate-library "magit"))))
+      (setq lisp-filename (magit--chase-links lisp-filename))
+      (let ((commit-filename
+             (expand-file-name
+              ".straight-commit"
+              (file-name-directory
+               (directory-file-name
+                (file-name-directory
+                 lisp-filename))))))
+        (when (file-exists-p commit-filename)
+          (with-temp-buffer
+            (insert-file-contents commit-filename)
+            (setq magit-version (string-trim (buffer-string)))))))))
 
 ;; Feature `magit-diff' from package `magit' handles all the stuff
 ;; related to interactive Git diffs.
