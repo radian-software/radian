@@ -573,6 +573,9 @@ binding the variable dynamically over the entire init-file."
 ;; Test out being able to contribute directly to GNU ELPA upstream.
 (setq straight-recipes-gnu-elpa-use-mirror nil)
 
+;; Improve performance considerably during initial installation.
+(setq straight-vc-use-snapshot-installation t)
+
 (radian--run-hook before-straight)
 
 ;; Bootstrap the package manager, straight.el.
@@ -681,6 +684,16 @@ nice.)"
   :demand t)
 
 ;;;; straight.el configuration
+
+(use-feature straight
+  :config
+
+  ;; Tell Emacs it is okay to execute code that we installed from the
+  ;; package manager, because we are going to be doing that anyway.
+  ;;
+  ;; This affects things like Company completions for macroexpansion.
+  (add-to-list 'trusted-content
+               (abbreviate-file-name (file-truename (straight--repos-dir)))))
 
 ;; Feature `straight-x' from package `straight' provides
 ;; experimental/unstable extensions to straight.el which are not yet
@@ -2321,6 +2334,13 @@ defaults to OPEN."
   ;; definition is evaluated twice.
   (blackout 'apheleia-mode " Aph")
 
+  :config
+
+  ;; Configure Svelte formatting, since we aren't using the
+  ;; `svelte-mode' that already has an entry in `apheleia-mode-alist'.
+  (setf (alist-get "\\.svelte\\'" apheleia-mode-alist nil nil #'equal)
+        'prettier-svelte)
+
   :blackout " Aph")
 
 ;;;; Snippet expansion
@@ -2549,10 +2569,28 @@ killed (which happens during Emacs shutdown)."
     "Fix multi-root servers for `lsp-mode'."
     (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht))))
 
+  ;; Prefer managing language servers using the default package
+  ;; managers, otherwise they tend to just never get upgraded.
+  (setq lsp-enable-suggest-server-download nil)
+
+  ;; Obviously not having a supported language server is a normal
+  ;; situation, don't notify about it. The fact that LSP didn't turn
+  ;; on is indication enough, if the user cares.
+  (setq lsp-warn-no-matched-clients nil)
+
   :blackout " LSP")
 
-;; Feature `lsp-sql' wraps
-;; https://github.com/joe-re/sql-language-server.
+;; Feature `lsp-kotlin' wraps https://github.com/fwcd/KotlinLanguageServer.
+(use-feature lsp-kotlin
+  :config
+
+  ;; We don't use YASnippet.
+  (setq lsp-kotlin-completion-snippets-enabled nil)
+
+  ;; Set a more modern default.
+  (setq lsp-kotlin-compiler-jvm-target "25"))
+
+;; Feature `lsp-sql' wraps https://github.com/joe-re/sql-language-server.
 (use-feature lsp-sql
   :config
 
@@ -2611,14 +2649,14 @@ killed (which happens during Emacs shutdown)."
   :defer 0.5
   :init
 
-  (defvar radian--company-backends-global
-    '(company-capf
-      company-files
-      (company-dabbrev-code company-keywords)
-      company-dabbrev)
-    "Values for `company-backends' used everywhere.
-If `company-backends' is overridden by Radian, then these
-backends will still be included.")
+  ;; Set `company-backends' to a more fine-tuned value that does not
+  ;; include random legacy backends that might jump out and surprise
+  ;; you unexpectedly.
+  (setq-default company-backends
+                '(company-capf
+                  company-files
+                  (company-dabbrev-code company-keywords)
+                  company-dabbrev))
 
   :bind (:filter company-mode
 
@@ -2829,7 +2867,11 @@ order."
          (boundp 'xref-show-definitions-function)
          (fboundp 'xref-show-definitions-completing-read))
     (setq xref-show-definitions-function
-          #'xref-show-definitions-completing-read)))
+          #'xref-show-definitions-completing-read))
+
+  ;; If there's only one, jump to it automatically rather than
+  ;; presenting a list with one choice to the user.
+  (setq xref-auto-jump-to-first-xref t))
 
 ;; Package `dumb-jump' provides a mechanism to jump to the definitions
 ;; of functions, variables, etc. in a variety of programming
@@ -2907,6 +2949,9 @@ was printed, and only have ElDoc display if one wasn't."
   ;; For use with `lsp-ui'.
   (bind-key "p" #'flycheck-previous-error radian-keymap)
   (bind-key "n" #'flycheck-next-error radian-keymap)
+
+  ;; Bump up the maximum number of errors that can be shown.
+  (setq flycheck-checker-error-threshold 10000)
 
   :blackout t)
 
@@ -3096,6 +3141,12 @@ normally set it (since that code will run during early init,
 which is a problem)."
     (setq cider-docview-code-background-color (cider-scale-background-color))))
 
+;;;; Crystal
+;; https://crystal-lang.org/
+
+;; Package `crystal-mode' provides a major mode for Crystal.
+(use-package crystal-mode)
+
 ;;;; Go
 ;; https://golang.org/
 
@@ -3183,6 +3234,18 @@ thing as far as I can tell)."
           (apply func actions-to-render args))
         (setq lsp-ui-sideline--code-actions actions-to-keep)))))
 
+;;;; GraphQL
+;; https://graphql.org/
+
+;; Package `graphql-mode' provides a major mode for GraphQL.
+(use-package graphql-mode)
+
+;;;; Groovy
+;; https://groovy-lang.org/
+
+;; Package `groovy-mode' provides a major mode for Groovy.
+(use-package groovy-mode)
+
 ;;;; Haskell
 ;; https://www.haskell.org/
 
@@ -3238,6 +3301,19 @@ This works around an upstream bug; see
 (radian-use-package lsp-haskell
   :demand t
   :after (:all lsp-mode haskell-mode))
+
+;;;; Kotlin
+;; https://kotlinlang.org/
+
+;; Package `kotlin-mode' provides a major mode for Kotlin.
+(use-package kotlin-mode)
+
+;;;; Lark
+;; https://github.com/lark-parser/lark
+
+;; Package `lark-mode' provides a major mode for Lark.
+(use-package lark-mode
+  :blackout "Lark")
 
 ;;;; Lua
 ;; <http://www.lua.org/>
@@ -3722,7 +3798,8 @@ environment with point at the end of a non-empty line of text."
          ("\\.[cm]?jsx?\\'" . web-mode)
          ("\\.tsx?\\'" . web-mode)
          ("\\.css\\'" . web-mode)
-         ("\\.hbs\\'" . web-mode))
+         ("\\.hbs\\'" . web-mode)
+         ("\\.svelte\\'" . web-mode))
   ;; Use `web-mode' rather than `js-mode' for scripts.
   :interpreter (("js" . web-mode)
                 ("node" . web-mode))
@@ -5091,7 +5168,13 @@ argument, search only in files matching current type."
     (interactive "P")
     (rg-run (rg-read-pattern nil)
             (if only-current-type (car (rg-default-alias)) "*")
-            (rg-project-root buffer-file-name))))
+            (rg-project-root buffer-file-name)))
+
+  ;; Set some nicer default flags. Output paths in a stable order,
+  ;; avoid warnings polluting the output, and avoid dumpstering Emacs
+  ;; with super long lines.
+  (setq rg-command-line-flags
+        '("--sort=path" "--no-messages" "--max-columns=320")))
 
 ;;;; Internet applications
 
