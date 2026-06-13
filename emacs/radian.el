@@ -696,7 +696,8 @@ nice.)"
   ;; Note that `trusted-content' doesn't exist before Emacs 30.
   (when (boundp 'trusted-content)
     (add-to-list 'trusted-content
-                 (abbreviate-file-name (file-truename (straight--repos-dir))))))
+                 (abbreviate-file-name
+                  (file-truename (straight--repos-dir))))))
 
 ;; Feature `straight-x' from package `straight' provides
 ;; experimental/unstable extensions to straight.el which are not yet
