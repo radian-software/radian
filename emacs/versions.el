@@ -84,7 +84,7 @@
  ("sesman" . "7bca68dbbab0af26a6a23be1ff5fa97f9a18e022")
  ("smartparens" . "82d2cf084a19b0c2c3812e0550721f8a61996056")
  ("spinner" . "d4647ae87fb0cd24bc9081a3d287c860ff061c21")
- ("ssh-config-mode-el" . "f21726d6f44a0e769a15f0a94620078a326774f7")
+ ("ssh-config-mode-el" . "a171e48c3cef777556961323d4dd6172a94be0f1")
  ("straight.el" . "e40a5b7f8b0c1bb2cde0e7e477b5f81303e34b95")
  ("swift-mode" . "a4c54629ba946cf009631e25a11618e886e7b25d")
  ("syntax-subword" . "9aa9b3f846bfe2474370642458a693ac4760d9fe")
