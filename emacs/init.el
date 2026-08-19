@@ -40,10 +40,6 @@ loading the init-file twice if it were not for this variable.")
     ;; Prevent package.el from modifying this file.
     (setq package-enable-at-startup nil)
 
-    ;; Prevent Custom from modifying this file.
-    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-    (load custom-file 'noerror 'nomessage)
-
     ;; Make sure we are running a modern enough Emacs, otherwise abort
     ;; init.
     (if (version< emacs-version radian-minimum-emacs-version)
@@ -82,6 +78,10 @@ init-file is loaded, not just once.")
         (defvar radian-original-file-name-handler-alist nil
           "The value of `file-name-handler-alist' during load time.
 `file-name-handler-alist' is set to nil while Radian is loading.")
+
+        ;; Prevent Custom from modifying this file.
+        (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+        (load custom-file 'noerror 'nomessage)
 
         (unwind-protect
             ;; Load the main Radian configuration code. Disable
