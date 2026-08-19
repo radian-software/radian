@@ -1333,7 +1333,10 @@ arguments."
         (dirs-to-delete ()))
     ;; If the file already exists, we don't need to worry about
     ;; creating any directories.
-    (unless (file-exists-p filename)
+    (unless (or (file-exists-p filename)
+                ;; If the buffer is already open, we should not create a
+                ;; directory.
+                (get-file-buffer filename))
       ;; It's easy to figure out how to invoke `make-directory',
       ;; because it will automatically create all parent
       ;; directories. We just need to ask for the directory
