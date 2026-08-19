@@ -4270,7 +4270,7 @@ messages."
       (when report-progress
         (message "Byte-compiling updated configuration..."))
       (when (process-live-p radian-byte-compile--process)
-        (kill-process radian-byte-compile--process))
+        (delete-process radian-byte-compile--process))
       (ignore-errors
         (with-current-buffer (get-buffer " *radian-byte-compile*")
           (kill-all-local-variables)
