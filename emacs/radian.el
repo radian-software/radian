@@ -4861,8 +4861,8 @@ as argument."
   (radian-defadvice radian--magit-version-from-snapshot (&rest _)
     :before #'magit-version
     "Allow `magit-version' to work even from straight.el snapshot."
-    (when-let ((lisp-filename (let ((load-suffixes (reverse load-suffixes)))
-                                (locate-library "magit"))))
+    (when-let* ((lisp-filename (let ((load-suffixes (reverse load-suffixes)))
+                                 (locate-library "magit"))))
       (setq lisp-filename (magit--chase-links lisp-filename))
       (let ((commit-filename
              (expand-file-name
