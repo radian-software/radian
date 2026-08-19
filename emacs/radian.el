@@ -1333,7 +1333,10 @@ arguments."
         (dirs-to-delete ()))
     ;; If the file already exists, we don't need to worry about
     ;; creating any directories.
-    (unless (file-exists-p filename)
+    (unless (or (file-exists-p filename)
+                ;; If the buffer is already open, we should not create a
+                ;; directory.
+                (get-file-buffer filename))
       ;; It's easy to figure out how to invoke `make-directory',
       ;; because it will automatically create all parent
       ;; directories. We just need to ask for the directory
@@ -4267,7 +4270,7 @@ messages."
       (when report-progress
         (message "Byte-compiling updated configuration..."))
       (when (process-live-p radian-byte-compile--process)
-        (kill-process radian-byte-compile--process))
+        (delete-process radian-byte-compile--process))
       (ignore-errors
         (with-current-buffer (get-buffer " *radian-byte-compile*")
           (kill-all-local-variables)
@@ -4858,8 +4861,8 @@ as argument."
   (radian-defadvice radian--magit-version-from-snapshot (&rest _)
     :before #'magit-version
     "Allow `magit-version' to work even from straight.el snapshot."
-    (when-let ((lisp-filename (let ((load-suffixes (reverse load-suffixes)))
-                                (locate-library "magit"))))
+    (when-let* ((lisp-filename (let ((load-suffixes (reverse load-suffixes)))
+                                 (locate-library "magit"))))
       (setq lisp-filename (magit--chase-links lisp-filename))
       (let ((commit-filename
              (expand-file-name
