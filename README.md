@@ -36,12 +36,11 @@ stability.
   * Sorting by [frecency] and usage on all commands using
     [`prescient.el`][prescient.el]
   * IDE features for expanding library of programming languages with
-    [LSP] via [`lsp-mode`][lsp-mode] (Bash, C, C++, CSS, [Flow], [Go],
-    [Haskell], HTML, [JavaScript], [TypeScript], [JSX]/[TSX], [Flow],
-    [LaTeX], [Python] with [Poetry] and [Pipenv] virtualenvs
-    autodetected)
+    [LSP] via [`lsp-mode`][lsp-mode] (some languages tweaked to
+    perform better, e.g. [Python] having [Poetry] and [Pipenv]
+    virtualenvs autodetected)
   * Automatic asynchronous code reformatting without moving point
-    using [Black], [Brittany], [Gofmt], and [Prettier] via [Apheleia]
+    using a variety of available code formatters via [Apheleia]
   * Informative but minimal mode-line showing file modification
     status, buffer name, point position, and active modes (with
     optional right-alignment support)
@@ -81,7 +80,7 @@ stability.
     [delete-selection-mode], [Dired], [dumb-jump], [ElDoc], [ESUP],
     [Forge], [`git-gutter-fringe.el`][git-gutter-fringe.el],
     [git-link], [Helpful], [Macrostep], [Magit], [no-littering],
-    [Org], [Projectile], [pyvenv], [`rg.el`][rg.el], [Smartparens],
+    [Org], [Projectile], [`rg.el`][rg.el], [Smartparens],
     [transpose-frame], [undo-tree], [use-package], [visual-regexp],
     [`which-key`][which-key], and more
   * Major modes for editing many languages and configuration file
@@ -236,11 +235,8 @@ commented.
 [apheleia]: https://github.com/radian-software/apheleia
 [atomic-chrome]: https://github.com/alpha22jp/atomic-chrome
 [autorevert]: https://www.emacswiki.org/emacs/AutoRevertMode
-[black]: https://github.com/python/black
 [blackout]: https://github.com/radian-software/blackout
-[brittany]: https://hackage.haskell.org/package/brittany
 [buffer-move]: https://github.com/lukhas/buffer-move
-[company-statistics]: https://github.com/company-mode/company-statistics
 [company]: http://company-mode.github.io/
 [counsel]: https://github.com/abo-abo/swiper#counsel
 [ctrlf]: https://github.com/radian-software/ctrlf
@@ -248,34 +244,24 @@ commented.
 [dired]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Dired.html
 [docker]: https://www.docker.com/
 [docs]: doc
-[dotman]: https://github.com/raxod502/dotman
 [dumb-jump]: https://github.com/jacktasia/dumb-jump
-[easypg]: https://www.gnu.org/software/emacs/manual/epa.html
 [el-patch]: https://github.com/radian-software/el-patch
 [eldoc]: https://www.emacswiki.org/emacs/ElDoc
 [emacs]: https://www.gnu.org/software/emacs/
 [esup]: https://github.com/jschaf/esup
 [eza]: https://eza.rocks/
 [firefox]: https://www.mozilla.org/en-US/firefox/
-[flow]: https://flow.org/
-[flow]: https://flow.org/
-[flx]: https://github.com/lewang/flx
 [forge]: https://github.com/magit/forge
 [frecency]: https://en.wikipedia.org/wiki/Frecency
 [git-gutter-fringe.el]: https://github.com/syohex/emacs-git-gutter-fringe
 [git-link]: https://github.com/sshaw/git-link
 [git]: https://git-scm.com/
 [go]: https://golang.org/
-[gofmt]: https://golang.org/cmd/gofmt/
-[haskell]: https://www.haskell.org/
 [helm]: https://github.com/emacs-helm/helm
 [helpful]: https://github.com/Wilfred/helpful
-[historian]: https://github.com/PythonNut/historian.el
 [isearch]: https://www.gnu.org/software/emacs/manual/html_node/emacs/Incremental-Search.html
 [issues]: https://github.com/radian-software/radian/issues
 [ivy]: https://github.com/abo-abo/swiper#ivy
-[javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
-[jsx]: https://reactjs.org/docs/introducing-jsx.html
 [latex]: https://www.latex-project.org/
 [lsp-mode]: https://github.com/emacs-lsp/lsp-mode
 [lsp]: https://langserver.org/
@@ -291,18 +277,15 @@ commented.
 [projectile]: http://batsov.com/projectile/
 [prs]: https://github.com/radian-software/radian/pulls
 [python]: https://www.python.org/
-[pyvenv]: https://github.com/jorgenschaefer/pyvenv
 [reattach-to-user-namespace]: https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 [restart-emacs]: https://github.com/iqbalansari/restart-emacs
 [rg.el]: https://github.com/dajva/rg.el
 [selectrum]: https://github.com/raxod502/selectrum
 [smartparens]: https://github.com/Fuco1/smartparens
-[smex]: https://github.com/nonsequitur/smex
 [straight.el]: https://github.com/raxod502/straight.el
 [swiper]: https://github.com/abo-abo/swiper#swiper
 [tmux]: https://tmux.github.io/
 [transpose-frame]: https://www.emacswiki.org/emacs/TransposeFrame
-[tsx]: https://www.typescriptlang.org/docs/handbook/jsx.html
 [typescript]: https://www.typescriptlang.org/
 [undo-tree]: http://www.dr-qubit.org/undo-tree.html
 [use-package]: https://github.com/jwiegley/use-package
@@ -310,7 +293,6 @@ commented.
 [visual-regexp]: https://github.com/benma/visual-regexp.el
 [wdx]: https://github.com/radian-software/wdx
 [which-key]: https://github.com/justbur/emacs-which-key
-[yasnippet]: https://github.com/joaotavora/yasnippet
 [zerodark]: https://github.com/NicolasPetton/zerodark-theme
 [znap]: https://github.com/marlonrichert/zsh-snap
 [zsh-autosuggestions]: https://github.com/zsh-users/zsh-autosuggestions
