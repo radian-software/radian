@@ -573,6 +573,9 @@ binding the variable dynamically over the entire init-file."
 ;; Test out being able to contribute directly to GNU ELPA upstream.
 (setq straight-recipes-gnu-elpa-use-mirror nil)
 
+;; Improve performance considerably during initial installation.
+(setq straight-vc-use-snapshot-installation t)
+
 (radian--run-hook before-straight)
 
 ;; Bootstrap the package manager, straight.el.
@@ -681,6 +684,20 @@ nice.)"
   :demand t)
 
 ;;;; straight.el configuration
+
+(use-feature straight
+  :config
+
+  ;; Tell Emacs it is okay to execute code that we installed from the
+  ;; package manager, because we are going to be doing that anyway.
+  ;;
+  ;; This affects things like Company completions for macroexpansion.
+  ;;
+  ;; Note that `trusted-content' doesn't exist before Emacs 30.
+  (when (boundp 'trusted-content)
+    (add-to-list 'trusted-content
+                 (abbreviate-file-name
+                  (file-truename (straight--repos-dir))))))
 
 ;; Feature `straight-x' from package `straight' provides
 ;; experimental/unstable extensions to straight.el which are not yet
@@ -1316,7 +1333,10 @@ arguments."
         (dirs-to-delete ()))
     ;; If the file already exists, we don't need to worry about
     ;; creating any directories.
-    (unless (file-exists-p filename)
+    (unless (or (file-exists-p filename)
+                ;; If the buffer is already open, we should not create a
+                ;; directory.
+                (get-file-buffer filename))
       ;; It's easy to figure out how to invoke `make-directory',
       ;; because it will automatically create all parent
       ;; directories. We just need to ask for the directory
@@ -2321,6 +2341,13 @@ defaults to OPEN."
   ;; definition is evaluated twice.
   (blackout 'apheleia-mode " Aph")
 
+  :config
+
+  ;; Configure Svelte formatting, since we aren't using the
+  ;; `svelte-mode' that already has an entry in `apheleia-mode-alist'.
+  (setf (alist-get "\\.svelte\\'" apheleia-mode-alist nil nil #'equal)
+        'prettier-svelte)
+
   :blackout " Aph")
 
 ;;;; Snippet expansion
@@ -2549,10 +2576,28 @@ killed (which happens during Emacs shutdown)."
     "Fix multi-root servers for `lsp-mode'."
     (eval '(setf (lsp-session-server-id->folders (lsp-session)) (ht))))
 
+  ;; Prefer managing language servers using the default package
+  ;; managers, otherwise they tend to just never get upgraded.
+  (setq lsp-enable-suggest-server-download nil)
+
+  ;; Obviously not having a supported language server is a normal
+  ;; situation, don't notify about it. The fact that LSP didn't turn
+  ;; on is indication enough, if the user cares.
+  (setq lsp-warn-no-matched-clients nil)
+
   :blackout " LSP")
 
-;; Feature `lsp-sql' wraps
-;; https://github.com/joe-re/sql-language-server.
+;; Feature `lsp-kotlin' wraps https://github.com/fwcd/KotlinLanguageServer.
+(use-feature lsp-kotlin
+  :config
+
+  ;; We don't use YASnippet.
+  (setq lsp-kotlin-completion-snippets-enabled nil)
+
+  ;; Set a more modern default.
+  (setq lsp-kotlin-compiler-jvm-target "25"))
+
+;; Feature `lsp-sql' wraps https://github.com/joe-re/sql-language-server.
 (use-feature lsp-sql
   :config
 
@@ -2611,14 +2656,14 @@ killed (which happens during Emacs shutdown)."
   :defer 0.5
   :init
 
-  (defvar radian--company-backends-global
-    '(company-capf
-      company-files
-      (company-dabbrev-code company-keywords)
-      company-dabbrev)
-    "Values for `company-backends' used everywhere.
-If `company-backends' is overridden by Radian, then these
-backends will still be included.")
+  ;; Set `company-backends' to a more fine-tuned value that does not
+  ;; include random legacy backends that might jump out and surprise
+  ;; you unexpectedly.
+  (setq-default company-backends
+                '(company-capf
+                  company-files
+                  (company-dabbrev-code company-keywords)
+                  company-dabbrev))
 
   :bind (:filter company-mode
 
@@ -2829,7 +2874,11 @@ order."
          (boundp 'xref-show-definitions-function)
          (fboundp 'xref-show-definitions-completing-read))
     (setq xref-show-definitions-function
-          #'xref-show-definitions-completing-read)))
+          #'xref-show-definitions-completing-read))
+
+  ;; If there's only one, jump to it automatically rather than
+  ;; presenting a list with one choice to the user.
+  (setq xref-auto-jump-to-first-xref t))
 
 ;; Package `dumb-jump' provides a mechanism to jump to the definitions
 ;; of functions, variables, etc. in a variety of programming
@@ -2908,13 +2957,15 @@ was printed, and only have ElDoc display if one wasn't."
   (bind-key "p" #'flycheck-previous-error radian-keymap)
   (bind-key "n" #'flycheck-next-error radian-keymap)
 
+  ;; Bump up the maximum number of errors that can be shown.
+  (setq flycheck-checker-error-threshold 10000)
+
   :blackout t)
 
 ;; Package `lsp-ui' provides a pretty UI for showing diagnostic
 ;; messages from LSP in the buffer using overlays. It's configured
 ;; automatically by `lsp-mode'.
 (radian-use-package lsp-ui
-  :straight (:fork "radian-software" :branch "fork/1")
   :bind (("C-c f" . #'lsp-ui-sideline-apply-code-actions))
   :config
 
@@ -3097,6 +3148,12 @@ normally set it (since that code will run during early init,
 which is a problem)."
     (setq cider-docview-code-background-color (cider-scale-background-color))))
 
+;;;; Crystal
+;; https://crystal-lang.org/
+
+;; Package `crystal-mode' provides a major mode for Crystal.
+(use-package crystal-mode)
+
 ;;;; Go
 ;; https://golang.org/
 
@@ -3184,6 +3241,18 @@ thing as far as I can tell)."
           (apply func actions-to-render args))
         (setq lsp-ui-sideline--code-actions actions-to-keep)))))
 
+;;;; GraphQL
+;; https://graphql.org/
+
+;; Package `graphql-mode' provides a major mode for GraphQL.
+(use-package graphql-mode)
+
+;;;; Groovy
+;; https://groovy-lang.org/
+
+;; Package `groovy-mode' provides a major mode for Groovy.
+(use-package groovy-mode)
+
 ;;;; Haskell
 ;; https://www.haskell.org/
 
@@ -3239,6 +3308,19 @@ This works around an upstream bug; see
 (radian-use-package lsp-haskell
   :demand t
   :after (:all lsp-mode haskell-mode))
+
+;;;; Kotlin
+;; https://kotlinlang.org/
+
+;; Package `kotlin-mode' provides a major mode for Kotlin.
+(use-package kotlin-mode)
+
+;;;; Lark
+;; https://github.com/lark-parser/lark
+
+;; Package `lark-mode' provides a major mode for Lark.
+(use-package lark-mode
+  :blackout "Lark")
 
 ;;;; Lua
 ;; <http://www.lua.org/>
@@ -3505,8 +3587,8 @@ It hangs the editor because it wants to make remote process calls."
                  map (char-to-string closing) 'ruby-electric-closing-char)))))
       map)
     (el-patch-concat
-      "Keymap used in ruby-electric-mode"
-      (el-patch-add ".\n\nThe single-character bindings have been removed.")))
+      "Keymap used in ruby-electric-mode."
+      (el-patch-add "\n\nThe single-character bindings have been removed.")))
 
   :init
 
@@ -3723,7 +3805,8 @@ environment with point at the end of a non-empty line of text."
          ("\\.[cm]?jsx?\\'" . web-mode)
          ("\\.tsx?\\'" . web-mode)
          ("\\.css\\'" . web-mode)
-         ("\\.hbs\\'" . web-mode))
+         ("\\.hbs\\'" . web-mode)
+         ("\\.svelte\\'" . web-mode))
   ;; Use `web-mode' rather than `js-mode' for scripts.
   :interpreter (("js" . web-mode)
                 ("node" . web-mode))
@@ -3820,52 +3903,6 @@ Workaround for <https://github.com/fxbois/web-mode/issues/1263>."
 
 ;; Package `json-mode' provides a major mode for JSON.
 (radian-use-package json-mode
-  :init/el-patch
-
-  (defconst json-mode-standard-file-ext '(".json" ".jsonld")
-    "List of JSON file extensions.")
-
-  (defsubst json-mode--update-auto-mode (filenames)
-    "Update the `json-mode' entry of `auto-mode-alist'.
-
-FILENAMES should be a list of file as string.
-Return the new `auto-mode-alist' entry"
-    (let* ((new-regexp
-            (rx-to-string
-             `(seq (eval
-                    (cons 'or
-                          (append json-mode-standard-file-ext
-                                  ',filenames)))
-                   eot)))
-           (new-entry (cons new-regexp 'json-mode))
-           (old-entry (when (boundp 'json-mode--auto-mode-entry)
-                        json-mode--auto-mode-entry)))
-      (setq auto-mode-alist (delete old-entry auto-mode-alist))
-      (add-to-list 'auto-mode-alist new-entry)
-      new-entry))
-
-  (defcustom json-mode-auto-mode-list '(".babelrc"
-                                        ".bowerrc"
-                                        "composer.lock")
-    "List of filenames for the JSON entry of `auto-mode-alist'.
-
-Note however that custom `json-mode' entries in `auto-mode-alist'
-won’t be affected."
-    :group 'json
-    :type '(repeat string)
-    :set (lambda (symbol value)
-           "Update SYMBOL with a new regexp made from VALUE.
-
-This function calls `json-mode--update-auto-mode' to change the
-`json-mode--auto-mode-entry' entry in `auto-mode-alist'."
-           (set-default symbol value)
-           (setq json-mode--auto-mode-entry
-                 (json-mode--update-auto-mode value))))
-
-  (defvar json-mode--auto-mode-entry
-    (json-mode--update-auto-mode json-mode-auto-mode-list)
-    "Regexp generated from the `json-mode-auto-mode-list'.")
-
   :config
 
   (radian-defhook radian--fix-json-indentation ()
@@ -4197,7 +4234,6 @@ SYMBOL is as in `xref-find-definitions'."
 ;; Package `macrostep' provides a facility for interactively expanding
 ;; Elisp macros.
 (radian-use-package macrostep
-  :straight (:fork "radian-software" :branch "fork/1")
   :bind (("C-c e" . #'macrostep-expand)))
 
 ;;;;; Emacs Lisp byte-compilation
@@ -4234,7 +4270,7 @@ messages."
       (when report-progress
         (message "Byte-compiling updated configuration..."))
       (when (process-live-p radian-byte-compile--process)
-        (kill-process radian-byte-compile--process))
+        (delete-process radian-byte-compile--process))
       (ignore-errors
         (with-current-buffer (get-buffer " *radian-byte-compile*")
           (kill-all-local-variables)
@@ -4820,7 +4856,25 @@ as argument."
     '("-a" "Autostash" "--autostash"))
 
   (transient-append-suffix 'magit-fetch "-t"
-    '("-u" "Unshallow" "--unshallow")))
+    '("-u" "Unshallow" "--unshallow"))
+
+  (radian-defadvice radian--magit-version-from-snapshot (&rest _)
+    :before #'magit-version
+    "Allow `magit-version' to work even from straight.el snapshot."
+    (when-let* ((lisp-filename (let ((load-suffixes (reverse load-suffixes)))
+                                 (locate-library "magit"))))
+      (setq lisp-filename (magit--chase-links lisp-filename))
+      (let ((commit-filename
+             (expand-file-name
+              ".straight-commit"
+              (file-name-directory
+               (directory-file-name
+                (file-name-directory
+                 lisp-filename))))))
+        (when (file-exists-p commit-filename)
+          (with-temp-buffer
+            (insert-file-contents commit-filename)
+            (setq magit-version (string-trim (buffer-string)))))))))
 
 ;; Feature `magit-diff' from package `magit' handles all the stuff
 ;; related to interactive Git diffs.
@@ -5121,7 +5175,13 @@ argument, search only in files matching current type."
     (interactive "P")
     (rg-run (rg-read-pattern nil)
             (if only-current-type (car (rg-default-alias)) "*")
-            (rg-project-root buffer-file-name))))
+            (rg-project-root buffer-file-name)))
+
+  ;; Set some nicer default flags. Output paths in a stable order,
+  ;; avoid warnings polluting the output, and avoid dumpstering Emacs
+  ;; with super long lines.
+  (setq rg-command-line-flags
+        '("--sort=path" "--no-messages" "--max-columns=320")))
 
 ;;;; Internet applications
 

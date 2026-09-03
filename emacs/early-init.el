@@ -1,6 +1,8 @@
 ;; -*- lexical-binding: t -*-
 
 ;; Disable any distro-provided init scripts that could interfere.
+;; Note: this doesn't have any effect on Emacs 30 and above, because
+;; the site scripts are executed before the early init-file.
 (setq site-run-file nil)
 
 ;; This file is loaded before package.el is initialized, and before
