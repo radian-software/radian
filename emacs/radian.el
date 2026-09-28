@@ -1255,43 +1255,27 @@ active minibuffer, even if the minibuffer is not selected."
 ;; projects, etc. It then provides commands for quickly navigating
 ;; between and within these projects.
 (radian-use-package projectile
-  :defer 1
   :bind-keymap* (("C-c p" . projectile-command-map))
-  :init
-
-  ;; This macro does not define a proper indentation spec. In older
-  ;; versions of Emacs all macros starting with "def" were
-  ;; automatically indented like defuns, however that appears to no
-  ;; longer be the case, exposing the issue.
-  (put #'def-projectile-commander-method 'lisp-indent-function 'defun)
-
   :config
-
-  ;; Use Vertico (via `completing-read') for Projectile instead of
-  ;; IDO.
-  (setq projectile-completion-system 'default)
 
   ;; When switching projects, give the option to choose what to do.
   ;; This is a way better interface than having to remember ahead of
   ;; time to use a prefix argument on `projectile-switch-project'
   ;; (because, and please be honest here, when was the last time you
   ;; actually remembered to do that?).
-  (setq projectile-switch-project-action 'projectile-commander)
+  (setq projectile-switch-project-action #'projectile-dispatch)
 
-  (def-projectile-commander-method ?\C-m
-    "Find file in project."
-    (call-interactively #'find-file))
+  ;; Actually define the transient, once Projectile has been loaded.
+  ;; Otherwise we can't add things to it.
+  (require 'transient)
+  (projectile--dispatch-define)
+
+  (transient-insert-suffix 'projectile-dispatch "f"
+    '("RET" "manually" find-file))
 
   ;; Enable the mode again now that we have all the supporting hooks
   ;; and stuff defined.
   (projectile-mode +1)
-
-  (defun radian--projectile-indexing-method-p (method)
-    "Non-nil if METHOD is a safe value for `projectile-indexing-method'."
-    (memq method '(native alien)))
-
-  (put 'projectile-indexing-method 'safe-local-variable
-       #'radian--projectile-indexing-method-p)
 
   ;; Can't bind M-r because some genius bound ESC. *Never* bind ESC!
   (dolist (key '("C-r" "R"))
@@ -4754,7 +4738,10 @@ are probably not going to be installed."
               process-environment))
       ;; As last resort fallback to the sleeping editor.
       (push (concat "ALTERNATE_EDITOR=" with-editor-sleeping-editor)
-            process-environment))))
+            process-environment)
+      ;; Work around bug in server.el of Emacs < 31.1.  #139
+      (when (member (getenv "TERM") '(nil ""))
+        (setenv "TERM" "dumb")))))
 
 ;; Package `transient' is the interface used by Magit to display
 ;; popups.
