@@ -73,7 +73,7 @@
  ("pkgbuild-mode" . "aadf3d1d19c5eb9b52c15c5b73b1a46faac5b7d5")
  ("posframe" . "bdabcec96f127b2daa2f8bf988a71ec146e301d5")
  ("prescient.el" . "ae52777d6b6b856b54c85441c7a713949f1720de")
- ("projectile" . "f902073c1d10bb125875470c9dcbdcd7c9a1eefb")
+ ("projectile" . "4d2be8680fe445c4ca88177f0ed838051cadfe58")
  ("protobuf" . "ef232ea6bb07676ffcd960d6f3a0a5697cdf1fa0")
  ("queue" . "f986fb68e75bdae951efb9e11a3012ab6bd408ee")
  ("restart-emacs" . "1607da2bc657fe05ae01f7fdf26f716eafead02c")
