@@ -2994,6 +2994,22 @@ was printed, and only have ElDoc display if one wasn't."
       (apply func args))))
 
 ;;; Language support
+;;;; Tree sitter
+
+;; Package `treesit-langs' provides grammars for a large number of
+;; programming languages, which can be used by major modes that are
+;; based on tree-sitter.
+(radian-use-package treesit-langs
+  :straight (:host github :repo "emacs-tree-sitter/treesit-langs")
+  :demand t
+  :init
+
+  ;; We have to ensure that certain messages are suppressed while
+  ;; loading the library, hence doing it manually here, in advance of
+  ;; the `:demand t' from `use-package'.
+  (radian--with-silent-message "already installed; skipped"
+    (require 'treesit-langs)))
+
 ;;;; Lisp languages
 
 ;; Feature `lisp-mode' provides a base major mode for Lisp languages,
@@ -3141,61 +3157,10 @@ which is a problem)."
 ;;;; Go
 ;; https://golang.org/
 
-;; Package `go-mode' provides a major mode for Go.
-(radian-use-package go-mode
+;; Feature `go-ts-mode' provides a major mode for Go.
+(use-feature go-ts-mode
+  :mode "\\.go\\'"
   :config
-
-  (defvar radian--go-defun-regexp
-    "^\\(const\\|func\\|import\\|interface\\|package\\|type\\|var\\)"
-    "Regexp matching top-level declarations in Go.")
-
-  (defun radian--go-beginning-of-defun (&optional arg)
-    "Move to beginning of current or previous top-level declaration."
-    (cond
-     ((null arg)
-      (cl-block nil
-        (while t
-          (re-search-backward radian--go-defun-regexp nil 'noerror)
-          (when (or (bobp)
-                    (eq (get-text-property (point) 'face)
-                        'font-lock-keyword-face))
-            (cl-return)))))
-     ((> arg 0)
-      (dotimes (_ arg)
-        (radian--go-beginning-of-defun)))
-     ((< arg 0)
-      ;; Yuck -- but we need to implement this, otherwise
-      ;; `end-of-defun' just does the wrong thing :/
-      (dotimes (_ (- arg))
-        (radian--go-beginning-of-defun)
-        (radian--go-end-of-defun)
-        (radian--go-end-of-defun))
-      (radian--go-beginning-of-defun))))
-
-  (defun radian--go-end-of-defun ()
-    "Move to end of current or previous top-level declaration.
-Only works if `radian--go-beginning-of-defun' was just called
-previously."
-    (dotimes (_ 2)
-      (cl-block nil
-        (while t
-          (re-search-forward radian--go-defun-regexp nil 'noerror)
-          (when (or (eobp)
-                    (save-excursion
-                      (beginning-of-line)
-                      (eq (get-text-property (point) 'face)
-                          'font-lock-keyword-face)))
-            (cl-return)))))
-    (beginning-of-line)
-    (go--backward-irrelevant 'stop-at-string)
-    (forward-line))
-
-  (radian-defhook radian--go-defun-setup ()
-    go-mode-hook
-    "Set up \\[beginning-of-defun] and \\[end-of-defun] correctly.
-See <https://github.com/dominikh/go-mode.el/issues/232>."
-    (setq-local beginning-of-defun-function #'radian--go-beginning-of-defun)
-    (setq-local end-of-defun-function #'radian--go-end-of-defun))
 
   (use-feature lsp-ui
     :config
