@@ -13,4 +13,4 @@ WORKDIR /home/docker/radian
 # container filesystem with root ownership :/
 RUN mkdir -p "$HOME/.emacs.d/straight/repos"
 
-CMD bash
+CMD ["bash"]
