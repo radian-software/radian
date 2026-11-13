@@ -84,7 +84,7 @@
  ("smartparens" . "82d2cf084a19b0c2c3812e0550721f8a61996056")
  ("spinner" . "d4647ae87fb0cd24bc9081a3d287c860ff061c21")
  ("ssh-config-mode-el" . "da45cc5496dad6160d318c9a815cb5d7f620ed99")
- ("straight.el" . "5cf995c383381d0051d370e01fed1a8a032a999e")
+ ("straight.el" . "111ad8a552671ffee87292d75adfe7ea368a62d5")
  ("swift-mode" . "a81a6e5edc3077ea34ded55a6179f5d6166a3008")
  ("syntax-subword" . "9aa9b3f846bfe2474370642458a693ac4760d9fe")
  ("terraform-mode" . "01635df3625c0cec2bb4613a6f920b8569d41009")
