@@ -11,7 +11,7 @@ jobs:
         emacs_version: [29, 30, 31]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
       - name: CI
         env:
           VERSION: ${{ matrix.emacs_version }}
