@@ -3146,12 +3146,12 @@ which is a problem)."
   :mode "\\.go\\'"
   :init
 
-  ;; In Emacs 29 there's an annoying behavior where just loading
+  ;; In Emacs 29-30 there's an annoying behavior where just loading
   ;; `go-ts-mode' will invoke `treesit-ready-p', which emits a warning
   ;; unless the grammar is already downloaded. So byte-compiling
   ;; generates that warning. Suppress it with a sledgehammer. There is
   ;; surely a better way to do this but this will work for now.
-  (radian-when-compiletime (version< emacs-version "30")
+  (radian-when-compiletime (version< emacs-version "31")
     (eval-when-compile
       (ignore
        (require 'warnings)
