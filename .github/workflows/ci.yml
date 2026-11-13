@@ -5,7 +5,7 @@ on:
   pull_request: {}
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         emacs_version: [29, 30, 31]
