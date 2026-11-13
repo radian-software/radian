@@ -2994,22 +2994,6 @@ was printed, and only have ElDoc display if one wasn't."
       (apply func args))))
 
 ;;; Language support
-;;;; Tree sitter
-
-;; Package `treesit-langs' provides grammars for a large number of
-;; programming languages, which can be used by major modes that are
-;; based on tree-sitter.
-(radian-use-package treesit-langs
-  :straight (:host github :repo "emacs-tree-sitter/treesit-langs")
-  :demand t
-  :init
-
-  ;; We have to ensure that certain messages are suppressed while
-  ;; loading the library, hence doing it manually here, in advance of
-  ;; the `:demand t' from `use-package'.
-  (radian--with-silent-message "already installed; skipped"
-    (require 'treesit-langs)))
-
 ;;;; Lisp languages
 
 ;; Feature `lisp-mode' provides a base major mode for Lisp languages,
