@@ -3144,6 +3144,21 @@ which is a problem)."
 ;; Feature `go-ts-mode' provides a major mode for Go.
 (use-feature go-ts-mode
   :mode "\\.go\\'"
+  :init
+
+  ;; In Emacs 29 there's an annoying behavior where just loading
+  ;; `go-ts-mode' will invoke `treesit-ready-p', which emits a warning
+  ;; unless the grammar is already downloaded. So byte-compiling
+  ;; generates that warning. Suppress it with a sledgehammer. There is
+  ;; surely a better way to do this but this will work for now.
+  (radian-when-compiletime (version< emacs-version "30")
+    (eval-when-compile
+      (ignore
+       (require 'warnings)
+       (add-to-list
+        'warning-suppress-log-types
+        '(treesit)))))
+
   :config
 
   (use-feature lsp-ui
